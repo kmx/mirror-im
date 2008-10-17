@@ -1,0 +1,10 @@
+im_capture.wlib
+so_locations
+*.dep
+*.wdep
+*.loh
+.plan
+.project
+*.err
+*.make
+umake_uname.bat

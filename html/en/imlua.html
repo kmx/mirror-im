@@ -1,0 +1,124 @@
+﻿<html>
+
+<head>
+<meta name="GENERATOR" content="Microsoft FrontPage 12.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Language" content="en-us">
+<title>Lua Binding</title>
+<link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+
+<body>
+
+<h1>Lua Binding Guide</h1>
+<h3><a name="Overview">Overview</a></h3>
+
+  <p><strong>I</strong><span lang="en-us"><strong>m</strong></span><strong>Lua</strong> was developed to make all functionalities of the 
+  <strong>IM</strong> library available to Lua programmers. To use the <strong>I</strong><span lang="en-us"><strong>m</strong></span><strong>Lua</strong> 
+  bindings, your executable must be linked with the &quot;imlua&quot; library, and you must call the initialization function
+  <strong><font face="Courier New">imlua_open</font></strong> declared in the header file <strong>
+  <font face="Courier New">imlua</font><font size="2" face="Courier New">.</font><font face="Courier New">h</font></strong>, 
+  as seen in the example below:</p>
+  
+    <div align="center">
+      <center>
+      <table cellpadding="10" cellspacing="0" style="border-width: 0; border-collapse: collapse" bordercolor="#111111" id="AutoNumber1">
+        <tr>
+          <th>
+          <p align="center">in Lua<span lang="en-us"> </span>5</th>
+        </tr>
+        <tr>
+          <td>
+          <pre>#include &lt;lua.h&gt;
+#include &lt;lualib.h&gt;
+#include &lt;lauxlib.h&gt;
+<b><font color="#FF0000">#include &lt;imlua.h&gt;</font></b></pre>
+          <pre>void main(void)
+{
+  lua_State *L = lua_open();
+
+  luaopen_string(L);
+  luaopen_math(L);
+  luaopen_io(L);  
+
+<b>  <font color="#FF0000">imlua_open(L);</font>
+</b>
+  lua_dofile(&quot;myprog.lua&quot;);
+  
+  lua_close(L);
+}</pre>
+          </td>
+        </tr>
+      </table>
+      </center>
+    </div>
+  
+  <p>The <strong>imlua_open</strong> function registers all <strong>IM</strong> functions and constants 
+  your Lua program will need. The use of the <strong>I</strong><span lang="en-us"><strong>m</strong></span><strong>Lua</strong> functions in Lua is generally identical to their equivalents in C. 
+  Nevertheless, there are several exceptions due to differences between the two languages. Notice that, as opposed to C, 
+  in which the flags are<i> </i>combined with the bitwise operator OR, in Lua the flags are added arithmetically. </p>
+  <p>The other secondary libraries also have their initialization functions declared in 
+  <strong>imlua.h</strong> 
+  and each one have a separate library to be linked with the application. See <a href="doxygen/group__imlua.html">IM Lua 
+  5 Binding</a> reference.</p>
+  <p>The I<span lang="en-us">m</span>Lua dynamic libraries are also compatible with the Lua 5 &quot;loadlib&quot; function.<span lang="en-us">
+  </span>Here is an example on how to dynamically load I<span lang="en-us">M</span> 
+  in Lua 5<span lang="en-us">.1</span>:</p>
+<pre>local i<span lang="en-us">m</span>lua_open = package.loadlib(&quot;i<span lang="en-us">m</span>lua51.dll&quot;, &quot;i<span lang="en-us">m</span>lua_open&quot;)
+i<span lang="en-us">m</span>lua_open()</pre>
+<p><strong>Lua</strong> 5.1 &quot;require&quot; can be used for all the <strong>
+ImLua</strong> 
+libraries. You can use <b>require</b>&quot;<strong>im</strong><b>lua</b>&quot; and so on, but the LUA_CPATH 
+must also contains the following: </p>
+
+<pre>"./lib?51.so;"    [in UNIX]
+
+".\\?51.dll;"     [in Windows]</pre>
+<p>The LuaBinaries distribution already includes these modifications on the 
+default search path.</p>
+<p>The simplest form <b>require</b>&quot;<b>i<span lang="en-us">m</span></b>&quot; 
+and so on, can not be used because there are IM dynamic libraries with names 
+that will conflict with the names used by <b>require</b> during search.</p>
+<h3><a name="New Functions">Function Names and Definitions</a></h3>
+
+  <p>In Lua, because of the name space &quot;im&quot; all the functions and definitions have their names prefix changed. The 
+  general rule is quite simple:</p>
+  
+    <pre>imXxx  -&gt; im.Xxx
+IM_XXX -&gt; im.XXX
+imFileXXX(ifile,... -&gt; ifile:XXX(...
+imImageXXX(image,... -&gt; image:XXX(...</pre>
+  
+
+<h3>Modifications to the API</h3>
+
+  <p>New functions (without equivalents in C) were implemented to create and 
+  destroy objects that do not exist in C. For instance functions were developed 
+  to create and destroy images, files, viceo capture and palette. All the 
+  metatables have the &quot;tostring&quot; method implemented to help debuging.</p>
+
+  <p>Some functions were modified to receive those objects as parameters.</p>
+  <p>Also the functions which receive values by reference in C were  modified. Generally, the values of 
+  parameters that would have their values modified are now returned by the function in the same order.</p>
+<p>In C there is no parameter checking in the processing functions, but in Lua 
+all parameters are checked and a Lua error is emitted when check fails.</p>
+  
+
+<h3>Garbage Collection</h3>
+
+  <p>All the objects are garbage collected by the Lua garbage collector.</p>
+
+<h3><a name="Integration with IMLua">Integration with CDLua</a></h3>
+
+  <p>In <b>CDLua</b> there is an additional library providing simple functions to map the 
+  <strong>imImage</strong> 
+  structure to the <strong>cdBitmap</strong> structure. And some facilities to 
+	draw an image in a CD canvas. See also the <a target="_blank" href="http://www.tecgraf.puc-rio.br/cd">CD documentation</a> and
+	the <a href="doxygen/group__imlua.html">IM Lua 5 Binding</a> reference.</p>
+  <p>Color values and palettes can be created and used transparently in both libraries. Palettes and color values are 
+  100% compatible between CD and IM.</p>
+
+
+</body>
+
+</html>
