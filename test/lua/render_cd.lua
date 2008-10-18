@@ -1,6 +1,6 @@
 require"imlua"
 require"cdlua"
-require"imlua_cd"
+require"cdluaim"
 
 local image = im.ImageCreate(500, 500, im.RGB, im.BYTE)
 local canvas = image:cdCreateCanvas()  -- Creates a CD_IMAGERGB canvas

@@ -1,6 +1,6 @@
 require"imlua"
 require"cdlua"
-require"imlua_cd"
+require"cdluaim"
 
 local canvas = cd.CreateCanvas(cd.NATIVEWINDOW, nil)
 canvas:Activate()

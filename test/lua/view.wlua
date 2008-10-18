@@ -1,8 +1,8 @@
 require"imlua"
-require"iuplua"
 require"cdlua"
-require"cdluaiup"
-require"imlua_cd"
+require"cdluaim"
+require"iuplua"
+require"iupluacd"
 
 function PrintError(func, error)
   local msg = {}
