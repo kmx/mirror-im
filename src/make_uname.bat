@@ -10,7 +10,7 @@ call tecmake %1 "MF=im_jp2" %2 %3 %4 %5 %6 %7 %8
 call tecmake %1 "MF=im_avi" %2 %3 %4 %5 %6 %7 %8
 call tecmake %1 "MF=im_fftw" %2 %3 %4 %5 %6 %7 %8
 
-call tecmake %1 "MF=imlua3" %2 %3 %4 %5 %6 %7 %8
+REM call tecmake %1 "MF=imlua3" %2 %3 %4 %5 %6 %7 %8
 
 call tecmake %1 "MF=imlua5" %2 %3 %4 %5 %6 %7 %8
 call tecmake %1 "MF=imlua_process5" %2 %3 %4 %5 %6 %7 %8

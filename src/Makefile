@@ -1,6 +1,7 @@
 
 .PHONY: do_all im im_jp2 im_process im_fftw imlua3 imlua5 imlua_jp2 imlua_process5 imlua_fftw5
-do_all: im im_jp2 im_process im_fftw imlua3 imlua5 imlua_jp2 imlua_process5 imlua_fftw5
+#do_all: im im_jp2 im_process im_fftw imlua3 imlua5 imlua_jp2 imlua_process5 imlua_fftw5
+do_all: im im_jp2 im_process im_fftw imlua5 imlua_jp2 imlua_process5 imlua_fftw5
 
 im:
 	$(MAKE) --no-print-directory -f tecmake_compact.mak
