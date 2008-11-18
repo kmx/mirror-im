@@ -314,6 +314,9 @@ int iDemoteReal2Int(int count, const float *src_map, DSTT *dst_map, float gamma,
     else
       value = (*src_map++ - min)/range; 
 
+    if (i==3603)
+      i=i;
+
     // Now 0 <= value <= 1 (if min-max are correct)
 
     if (value >= 1)
@@ -323,9 +326,10 @@ int iDemoteReal2Int(int count, const float *src_map, DSTT *dst_map, float gamma,
     else
     {
       value = iGammaFunc(factor, (float)dst_min, gamma, value);
-      if (value >= dst_max)
+      int ivalue = imRound(value);
+      if (ivalue >= dst_max)
         *dst_map++ = dst_max;
-      else if (value <= dst_min)
+      else if (ivalue <= dst_min)
         *dst_map++ = dst_min;
       else
         *dst_map++ = (DSTT)imRound(value - 0.5f);
