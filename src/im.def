@@ -166,7 +166,6 @@ EXPORTS
   imBinFileSeekOffset
   imBinFileSeekTo
   imColorHSI_ImaxS
-  imColorHSI_Smax
   imColorHSI2RGB
   imColorHSI2RGBbyte
   imColorRGB2HSI

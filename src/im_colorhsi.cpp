@@ -18,12 +18,25 @@ static const float rad240 = 4.1887902f;
 static const float rad300 = 5.2359877f;
 static const float rad360 = 6.2831853f;
 static const float sqrt3 = 1.7320508f;
+static const float rad2deg = 57.2957795131f;
+
+
+static double iColorNormHue(double H)
+{
+  while (H < 0.0) 
+    H += rad360;
+
+  if (H > rad360)  
+    H = fmod(H, (double)rad360);
+
+  return H;
+}
 
 /**********************************/               
 /*         HSI MAX S              */
 /**********************************/               
                
-static void iSmax01(float h, float hr, float hb, float hg, float *h0, float *h1)
+static void iColorSmax01(float h, float hr, float hb, float hg, float *h0, float *h1)
 {
   if (h < rad60)
   {
@@ -57,22 +70,24 @@ static void iSmax01(float h, float hr, float hb, float hg, float *h0, float *h1)
   }
 }
 
-float imColorHSI_Smax(float h, double cosh, double sinh, float i)
+static float iColorHSI_Smax(float h, double cosH, double sinH, float i)
 {
   float hr, hb, hg, imax, h0, h1;
 
+  /* i here is normalized between 0-1 */
+  
   if (i == 0 || i == 1)
     return 0.0f;
 
-  if (i == 1.0f/3.0f || i == 2.0f/3.0f)
-    return 1.0f;
+  /* Making r=0, g=0, b=0, r=1, g=1 or b=1 in the parametric equations and 
+     writting s in function of H and I. */
 
-  hr = (float)(cosh / 1.5);
-  hg = (float)((-cosh + sinh*sqrt3)/ 3.0);
-  hb = (float)((-cosh - sinh*sqrt3)/ 3.0);
+  hr = (float)(cosH / 1.5);
+  hg = (float)((-cosH + sinH*sqrt3)/ 3.0);
+  hb = (float)((-cosH - sinH*sqrt3)/ 3.0);
 
   /* at bottom */
-  if (i < 1.0f/3.0f)
+  if (i <= 1.0f/3.0f)
   {
     /* face B=0 */
     if (h < rad120)
@@ -87,7 +102,7 @@ float imColorHSI_Smax(float h, double cosh, double sinh, float i)
   }
 
   /* at top */
-  if (i > 2.0f/3.0f)
+  if (i >= 2.0f/3.0f)
   {
     /* face R=1 */
     if (h < rad60 || h > rad300)
@@ -103,7 +118,7 @@ float imColorHSI_Smax(float h, double cosh, double sinh, float i)
 
   /* in the middle */
 
-  iSmax01(h, hr, hb, hg, &h0, &h1);
+  iColorSmax01(h, hr, hb, hg, &h0, &h1);
 
   if (h == 0 || h == rad120 || h == rad240)
     imax = 1.0f/3.0f;
@@ -118,7 +133,7 @@ float imColorHSI_Smax(float h, double cosh, double sinh, float i)
     return (1-i)/h1;
 }
 
-float imColorHSI_ImaxS(float h, double cosh, double sinh)
+float imColorHSI_ImaxS(float h, double cosH, double sinH)
 {
   float i, h0, h1;
   float hr, hb, hg;
@@ -129,11 +144,11 @@ float imColorHSI_ImaxS(float h, double cosh, double sinh)
   if (h == rad60 || h == rad180 || h == rad300)
     return 2.0f/3.0f;
 
-  hr = (float)(cosh / 1.5f);
-  hg = (float)((-cosh + sinh*sqrt3)/ 3.0);
-  hb = (float)((-cosh - sinh*sqrt3)/ 3.0);
+  hr = (float)(cosH / 1.5f);
+  hg = (float)((-cosH + sinH*sqrt3)/ 3.0);
+  hb = (float)((-cosH - sinH*sqrt3)/ 3.0);
 
-  iSmax01(h, hr, hb, hg, &h0, &h1);
+  iColorSmax01(h, hr, hb, hg, &h0, &h1);
 
   i = h0 / (h0 - h1);
 
@@ -149,19 +164,31 @@ void imColorRGB2HSI(float r, float g, float b, float *h, float *s, float *i)
   float v, u;
   double H;
 
+  /* Parametric equations */
   v = r - (g + b)/2;
   u = (g - b) * (sqrt3/2);
 
-  *i = (r + g + b)/3;
-  *s = (float)sqrt(v*v + u*u);
+  *i = (r + g + b)/3;   /* already normalized to 0-1 */
+  *s = (float)sqrt(v*v + u*u);  /* s is between 0-1, it is linear in the cube and it is in u,v space. */
   
   if (*s == 0)
     *h = 360.0f;  /* by definition */
   else
   {
     H = atan2(u, v);
-    if (H < 0.0f) H += rad360;
-    *h = (float)(H * 57.2957795131);
+    H = iColorNormHue(H);
+    *h = (float)(H * rad2deg);
+
+    /* must scale S from 0-Smax to 0-1 */
+    float Smax = iColorHSI_Smax((float)H, cos(H), sin(H), *i);
+    if (Smax == 0.0f)
+      *s = 0.0f;
+    else
+    {
+      if (*s > Smax) /* because of round problems when calculating s and Smax */
+        *s = Smax;
+      *s /= Smax;
+    }
   }
 }
 
@@ -180,15 +207,13 @@ void imColorRGB2HSIbyte(unsigned char r, unsigned char g, unsigned char b, float
 
 void imColorHSI2RGB(float h, float s, float i, float *r, float *g, float *b)
 {
-  static int first = 1;
-  static double _sqrt3;
-  double cosh, sinh, H, v, u;
+  double cosH, sinH, H, v, u;
 
-  if (first)
-  {
-    _sqrt3 = sqrt(3.0);
-    first = 0;
-  }
+  if (i < 0) i = 0;
+  else if (i > 1) i = 1;
+  
+  if (s < 0) s = 0;
+  else if (s > 1) s = 1;
 
   if (s == 0.0f || i == 1.0f || i == 0.0f || (int)h == 360)
   {
@@ -198,33 +223,30 @@ void imColorHSI2RGB(float h, float s, float i, float *r, float *g, float *b)
     return;
   }
 
-  if (i < 0) i = 0;
-  if (i > 1) i = 1;
+  H = h/rad2deg;
+  H = iColorNormHue(H);
 
-  if (h > 360)  h = (float)fmod(h, 360);
-  if (h < 0.0f) h += 360;
-
-  H = h / 57.2957795131;
-
-  cosh = cos(H);
-  sinh = sin(H);
+  cosH = cos(H);
+  sinH = sin(H);
     
-  {
-    float smax = imColorHSI_Smax((float)H, cosh, sinh, i);
-    if (s < 0) s = 0;
-    if (s > smax) s = smax;
-  }
+  /* must scale S from 0-1 to 0-Smax */
+  float Smax = iColorHSI_Smax((float)H, cosH, sinH, i);
+  s *= Smax;
+  if (s > 1.0f) /* because of round problems when calculating s and Smax */
+    s = 1.0f;
 
-  v = s * cosh;
-  u = s * sinh * _sqrt3;
+  v = s * cosH;
+  u = s * sinH;
 
+  /* Inverse of the Parametric equations, using i normalized to 0-1 */
   *r = (float)(i + v/1.5);
-  *g = (float)(i - (v - u)/3.0);
-  *b = (float)(i - (v + u)/3.0);
+  *g = (float)(i - (v - u*sqrt3)/3.0);
+  *b = (float)(i - (v + u*sqrt3)/3.0);
 
-  if (*r < 0) *r = -*r;
-  if (*g < 0) *g = -*g;
-  if (*b < 0) *b = -*b;
+  /* fix round errors */
+  if (*r < 0) *r = 0;
+  if (*g < 0) *g = 0;
+  if (*b < 0) *b = 0;
 
   if (*r > 1) *r = 1.0f;
   if (*g > 1) *g = 1.0f;

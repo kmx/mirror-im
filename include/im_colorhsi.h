@@ -19,19 +19,14 @@ extern "C" {
  * \par
  * "I" is defined along the cube diagonal. It ranges from 0 (black) to 1 (white). \n
  * HS are the polar coordinates of a plane normal to "I". \n
- * "S" is the normal distance from the diagonal of the RGB cube. It ranges from 0 to Smax. \n
+ * "S" is the normal distance from the diagonal of the RGB cube. It ranges from 0 to 1. \n
  * "H" is the angle starting from the red vector, given in degrees.
  * \par
  * This is not a new color space, this is exactly the same gammut as RGB. \n
- * Since it is still a cube, Smax depends on H. 
  * \par
  * See \ref im_colorhsi.h
  * \ingroup color */
 
-
-/** Returns the maximum S for H (here in radians) and I.
- * \ingroup hsi */
-float imColorHSI_Smax(float h, double cosh, double sinh, float i);
 
 /** Returns I where S is maximum given H (here in radians).
  * \ingroup hsi */
