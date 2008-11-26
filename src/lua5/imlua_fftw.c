@@ -133,19 +133,19 @@ int imlua_open_fftw (lua_State *L)
   luaL_register(L, "im", imfftw_lib);  /* leave "im" table at the top of the stack */
 #ifdef TEC_BIGENDIAN
 #ifdef TEC_64
-#include "im_fftw_be64.loh"
+#include "loh/im_fftw_be64.loh"
 #else
-#include "im_fftw_be32.loh"
+#include "loh/im_fftw_be32.loh"
 #endif  
 #else
 #ifdef TEC_64
 #ifdef WIN64
-#include "im_fftw_le64w.loh"
+#include "loh/im_fftw_le64w.loh"
 #else
-#include "im_fftw_le64.loh"
+#include "loh/im_fftw_le64.loh"
 #endif  
 #else
-#include "im_fftw.loh"
+#include "loh/im_fftw.loh"
 #endif  
 #endif  
   return 1;

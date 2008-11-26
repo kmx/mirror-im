@@ -4,6 +4,7 @@ DEF_FILE = imlua_process.def
 
 OPT = YES
 
+LOHDIR = lua5/loh
 SRC = lua5/imlua_process.c lua5/imlua_kernel.c
 DEF_FILE = lua5/imlua_process.def
 

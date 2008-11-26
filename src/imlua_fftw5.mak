@@ -4,6 +4,7 @@ DEF_FILE = imlua_fftw.def
 
 OPT = YES
 
+LOHDIR = lua5/loh
 SRC = lua5/imlua_fftw.c
 DEF_FILE = lua5/imlua_fftw.def
 
