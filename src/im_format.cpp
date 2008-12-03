@@ -163,7 +163,7 @@ static char* utlFileGetExt(const char *file_name)
   return file_ext;
 }
 
-imFormat* imFormatOpen(const char* file_name, int *error)
+imFileFormatBase* imFileFormatBaseOpen(const char* file_name, int *error)
 {
   int i;
 
@@ -191,18 +191,20 @@ imFormat* imFormatOpen(const char* file_name, int *error)
       {
         ext_mark[i] = 1; // Mark this format to avoid testing it again in the next phase
 
-        *error = iformat->Open(file_name);                                               
+        imFileFormatBase* ifileformat = iformat->Create();
+        *error = ifileformat->Open(file_name);                                               
         if (*error != IM_ERR_NONE && *error != IM_ERR_FORMAT)  // Error situation that must abort
         {                                                      // Only IM_ERR_FORMAT is a valid error here
           free(extension);
           delete [] ext_mark;
+          delete ifileformat;
           return NULL;
         }
         else if (*error == IM_ERR_NONE) // Sucessfully oppened the file
         {
           free(extension);
           delete [] ext_mark;
-          return iformat;
+          return ifileformat;
         }
       }
     }
@@ -218,17 +220,18 @@ imFormat* imFormatOpen(const char* file_name, int *error)
     if (!ext_mark[i])
     {
       imFormat* iformat = iFormatList[i];
-
-      *error = iformat->Open(file_name);
+      imFileFormatBase* ifileformat = iformat->Create();
+      *error = ifileformat->Open(file_name);
       if (*error != IM_ERR_NONE && *error != IM_ERR_FORMAT)  // Error situation that must abort
       {                                                      // Only IM_ERR_FORMAT is a valid error here
         delete [] ext_mark;
+        delete ifileformat;
         return NULL;
       }
       else if (*error == IM_ERR_NONE) // Sucessfully oppened the file
       {
         delete [] ext_mark;
-        return iformat;
+        return ifileformat;
       }
     }
   }
@@ -238,7 +241,7 @@ imFormat* imFormatOpen(const char* file_name, int *error)
   return NULL;
 }
 
-imFormat* imFormatOpenAs(const char* file_name, const char* format, int *error)
+imFileFormatBase* imFileFormatBaseOpenAs(const char* file_name, const char* format, int *error)
 {
   assert(file_name);
   assert(format);
@@ -257,17 +260,21 @@ imFormat* imFormatOpenAs(const char* file_name, const char* format, int *error)
     return NULL;
   }
 
-  *error = iformat->Open(file_name);
+  imFileFormatBase* ifileformat = iformat->Create();
+  *error = ifileformat->Open(file_name);
   if (*error != IM_ERR_NONE && *error != IM_ERR_FORMAT)  // Error situation that must abort
+  {
+    delete ifileformat;
     return NULL;
+  }
   else if (*error == IM_ERR_NONE) // Sucessfully oppened the file
-    return iformat;
+    return ifileformat;
 
   *error = IM_ERR_FORMAT;
   return NULL;
 }
 
-imFormat* imFormatNew(const char* file_name, const char* format, int *error)
+imFileFormatBase* imFileFormatBaseNew(const char* file_name, const char* format, int *error)
 {
   assert(file_name);
   assert(format);
@@ -280,10 +287,13 @@ imFormat* imFormatNew(const char* file_name, const char* format, int *error)
     return NULL;
   }
 
-  *error = iformat->New(file_name);
+  imFileFormatBase* ifileformat = iformat->Create();
+  *error = ifileformat->New(file_name);
   if (*error)
+  {
+    delete ifileformat;
     return NULL;
+  }
 
-  return iformat;
+  return ifileformat;
 }
-

@@ -283,7 +283,7 @@ static const char* iBMPCompTable[2] =
   "RLE"
 };
 
-class imFormatBMP: public imFormat
+class imFileFormatBMP: public imFileFormatBase
 {
   imBinFile* handle;          /* the binary file handle */
   unsigned short bpp;         /* number of bits per pixel */
@@ -299,6 +299,22 @@ class imFormatBMP: public imFormat
   void FixRGBOrder();
 
 public:
+  imFileFormatBMP(const imFormat* _iformat): imFileFormatBase(_iformat) {}
+  ~imFileFormatBMP() {}
+
+  int Open(const char* file_name);
+  int New(const char* file_name);
+  void Close();
+  void* Handle(int index);
+  int ReadImageInfo(int index);
+  int ReadImageData(void* data);
+  int WriteImageInfo();
+  int WriteImageData(void* data);
+};
+
+class imFormatBMP: public imFormat
+{
+public:
   imFormatBMP()
     :imFormat("BMP", 
               "Windows Device Independent Bitmap", 
@@ -309,23 +325,17 @@ public:
     {}
   ~imFormatBMP() {}
 
-  int Open(const char* file_name);
-  int New(const char* file_name);
-  void Close();
-  void* Handle(int index);
-  int ReadImageInfo(int index);
-  int ReadImageData(void* data);
-  int WriteImageInfo();
-  int WriteImageData(void* data);
+  imFileFormatBase* Create(void) const { return new imFileFormatBMP(this); }
   int CanWrite(const char* compression, int color_mode, int data_type) const;
 };
+
 
 void imFormatRegisterBMP(void)
 {
   imFormatRegister(new imFormatBMP());
 }
 
-int imFormatBMP::Open(const char* file_name)
+int imFileFormatBMP::Open(const char* file_name)
 {
   unsigned short id;
   unsigned int dword;
@@ -404,7 +414,7 @@ int imFormatBMP::Open(const char* file_name)
   return IM_ERR_NONE;
 }
 
-int imFormatBMP::New(const char* file_name)
+int imFileFormatBMP::New(const char* file_name)
 {
   /* opens the binary file for writing with intel byte order */
   handle = imBinFileNew(file_name);
@@ -418,12 +428,12 @@ int imFormatBMP::New(const char* file_name)
   return IM_ERR_NONE;
 }
 
-void imFormatBMP::Close()
+void imFileFormatBMP::Close()
 {
   imBinFileClose(handle);
 }
 
-void* imFormatBMP::Handle(int index)
+void* imFileFormatBMP::Handle(int index)
 {
   if (index == 0)
     return (void*)this->handle;
@@ -431,7 +441,7 @@ void* imFormatBMP::Handle(int index)
     return NULL;
 }
 
-int imFormatBMP::ReadImageInfo(int index)
+int imFileFormatBMP::ReadImageInfo(int index)
 {
   (void)index;
   unsigned int dword;
@@ -614,7 +624,7 @@ int imFormatBMP::ReadImageInfo(int index)
   return IM_ERR_NONE;
 }
 
-int imFormatBMP::WriteImageInfo()
+int imFileFormatBMP::WriteImageInfo()
 {
   // force bottom up orientation
   this->file_data_type = IM_BYTE;
@@ -735,7 +745,7 @@ int imFormatBMP::WriteImageInfo()
   return IM_ERR_NONE;
 }
 
-int imFormatBMP::ReadPalette()
+int imFileFormatBMP::ReadPalette()
 {
   int nc;
   if (this->is_os2)
@@ -762,7 +772,7 @@ int imFormatBMP::ReadPalette()
   return IM_ERR_NONE;
 }
 
-int imFormatBMP::WritePalette()
+int imFileFormatBMP::WritePalette()
 {
   unsigned char bmp_colors[256 * 4];
 
@@ -783,7 +793,7 @@ int imFormatBMP::WritePalette()
   return IM_ERR_NONE;
 }
 
-void imFormatBMP::FixRGBOrder()
+void imFileFormatBMP::FixRGBOrder()
 {
   int x;
 
@@ -844,7 +854,7 @@ void imFormatBMP::FixRGBOrder()
   }
 }
 
-int imFormatBMP::ReadImageData(void* data)
+int imFileFormatBMP::ReadImageData(void* data)
 {
   imCounterTotal(this->counter, this->height, "Reading BMP...");
 
@@ -879,7 +889,7 @@ int imFormatBMP::ReadImageData(void* data)
   return IM_ERR_NONE;
 }
 
-int imFormatBMP::WriteImageData(void* data)
+int imFileFormatBMP::WriteImageData(void* data)
 {
   imCounterTotal(this->counter, this->height, "Writing BMP...");
 

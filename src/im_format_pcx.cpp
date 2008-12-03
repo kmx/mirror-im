@@ -145,7 +145,7 @@ static const char* iPCXCompTable[2] =
   "RLE"
 };
 
-class imFormatPCX: public imFormat
+class imFileFormatPCX: public imFileFormatBase
 {
   imBinFile* handle;           /* the binary file handle */
   int bpp;                     /* number of bits per pixel */
@@ -160,6 +160,22 @@ class imFormatPCX: public imFormat
   void Unpack24bpp();
 
 public:
+  imFileFormatPCX(const imFormat* _iformat): imFileFormatBase(_iformat) {}
+  ~imFileFormatPCX() {}
+
+  int Open(const char* file_name);
+  int New(const char* file_name);
+  void Close();
+  void* Handle(int index);
+  int ReadImageInfo(int index);
+  int ReadImageData(void* data);
+  int WriteImageInfo();
+  int WriteImageData(void* data);
+};
+
+class imFormatPCX: public imFormat
+{
+public:
   imFormatPCX()
     :imFormat("PCX", 
               "ZSoft Picture", 
@@ -170,23 +186,17 @@ public:
     {}
   ~imFormatPCX() {}
 
-  int Open(const char* file_name);
-  int New(const char* file_name);
-  void Close();
-  void* Handle(int index);
-  int ReadImageInfo(int index);
-  int ReadImageData(void* data);
-  int WriteImageInfo();
-  int WriteImageData(void* data);
+  imFileFormatBase* Create(void) const { return new imFileFormatPCX(this); }
   int CanWrite(const char* compression, int color_mode, int data_type) const;
 };
+
 
 void imFormatRegisterPCX(void)
 {
   imFormatRegister(new imFormatPCX());
 }
 
-int imFormatPCX::Open(const char* file_name)
+int imFileFormatPCX::Open(const char* file_name)
 {
   unsigned char id;
 
@@ -226,7 +236,7 @@ int imFormatPCX::Open(const char* file_name)
   return IM_ERR_NONE;
 }
 
-int imFormatPCX::New(const char* file_name)
+int imFileFormatPCX::New(const char* file_name)
 {
   /* opens the binary file for writing with intel byte order */
   handle = imBinFileNew(file_name);
@@ -238,12 +248,12 @@ int imFormatPCX::New(const char* file_name)
   return IM_ERR_NONE;
 }
 
-void imFormatPCX::Close()
+void imFileFormatPCX::Close()
 {
   imBinFileClose(handle);
 }
 
-void* imFormatPCX::Handle(int index)
+void* imFileFormatPCX::Handle(int index)
 {
   if (index == 0)
     return (void*)this->handle;
@@ -251,7 +261,7 @@ void* imFormatPCX::Handle(int index)
     return NULL;
 }
 
-int imFormatPCX::ReadImageInfo(int index)
+int imFileFormatPCX::ReadImageInfo(int index)
 {
   unsigned char bppp, planes;
   unsigned short xmin, xmax, ymax, ymin, word, bplp;
@@ -339,7 +349,7 @@ int imFormatPCX::ReadImageInfo(int index)
   return IM_ERR_NONE;
 }
 
-int imFormatPCX::WriteImageInfo()
+int imFileFormatPCX::WriteImageInfo()
 {
   unsigned short word_value, bplp;
   unsigned char byte_value, filler[54+3*2];
@@ -447,7 +457,7 @@ int imFormatPCX::WriteImageInfo()
   return IM_ERR_NONE;
 }
 
-int imFormatPCX::ReadPalette()
+int imFileFormatPCX::ReadPalette()
 {
   unsigned char pcx_colors[256 * 3];
 
@@ -498,7 +508,7 @@ int imFormatPCX::ReadPalette()
   return IM_ERR_NONE;
 }
 
-int imFormatPCX::WritePalette()
+int imFileFormatPCX::WritePalette()
 {
   unsigned char ExtPal = (unsigned char)12;
   unsigned char pcx_colors[256 * 3];
@@ -522,7 +532,7 @@ int imFormatPCX::WritePalette()
   return IM_ERR_NONE;
 }
 
-void imFormatPCX::Expand4bpp()
+void imFileFormatPCX::Expand4bpp()
 {
   int num_bits = 8, WidthDiv8 = (this->width + 7) / 8;
 
@@ -559,7 +569,7 @@ void imFormatPCX::Expand4bpp()
   memcpy(this->line_buffer, in_data + this->line_buffer_size+2, this->width);
 }
 
-void imFormatPCX::Pack24bpp()
+void imFileFormatPCX::Pack24bpp()
 {
   imbyte *in_data = (unsigned char*)this->line_buffer;
   imbyte *out_data = in_data + this->line_buffer_size+2;
@@ -580,7 +590,7 @@ void imFormatPCX::Pack24bpp()
   memcpy(in_data, in_data + this->line_buffer_size+2, this->line_raw_size);
 }
 
-void imFormatPCX::Unpack24bpp()
+void imFileFormatPCX::Unpack24bpp()
 {
   imbyte *in_data = (unsigned char*)this->line_buffer;
   imbyte *out_data = in_data + this->line_buffer_size+2;
@@ -601,7 +611,7 @@ void imFormatPCX::Unpack24bpp()
   memcpy(out_data - (this->line_buffer_size+2), out_data, this->line_raw_size);
 }
 
-int imFormatPCX::ReadImageData(void* data)
+int imFileFormatPCX::ReadImageData(void* data)
 {
   imCounterTotal(this->counter, this->height, "Reading PCX...");
 
@@ -637,7 +647,7 @@ int imFormatPCX::ReadImageData(void* data)
   return IM_ERR_NONE;
 }
 
-int imFormatPCX::WriteImageData(void* data)
+int imFileFormatPCX::WriteImageData(void* data)
 {
   imCounterTotal(this->counter, this->height, "Writing PCX...");
 

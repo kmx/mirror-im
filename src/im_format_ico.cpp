@@ -49,7 +49,7 @@ static const char* iICOCompTable[1] =
   "NONE"
 };
 
-class imFormatICO: public imFormat
+class imFileFormatICO: public imFileFormatBase
 {
   imBinFile* handle;          /* the binary file handle */
   unsigned short bpp;         /* number of bits per pixel */
@@ -62,6 +62,22 @@ class imFormatICO: public imFormat
   void FixRGBOrder();
 
 public:
+  imFileFormatICO(const imFormat* _iformat): imFileFormatBase(_iformat) {}
+  ~imFileFormatICO() {}
+
+  int Open(const char* file_name);
+  int New(const char* file_name);
+  void Close();
+  void* Handle(int index);
+  int ReadImageInfo(int index);
+  int ReadImageData(void* data);
+  int WriteImageInfo();
+  int WriteImageData(void* data);
+};
+
+class imFormatICO: public imFormat
+{
+public:
   imFormatICO()
     :imFormat("ICO", 
               "Windows Icon", 
@@ -72,23 +88,17 @@ public:
     {}
   ~imFormatICO() {}
 
-  int Open(const char* file_name);
-  int New(const char* file_name);
-  void Close();
-  void* Handle(int index);
-  int ReadImageInfo(int index);
-  int ReadImageData(void* data);
-  int WriteImageInfo();
-  int WriteImageData(void* data);
+  imFileFormatBase* Create(void) const { return new imFileFormatICO(this); }
   int CanWrite(const char* compression, int color_mode, int data_type) const;
 };
+
 
 void imFormatRegisterICO(void)
 {
   imFormatRegister(new imFormatICO());
 }
 
-int imFormatICO::Open(const char* file_name)
+int imFileFormatICO::Open(const char* file_name)
 {
   unsigned short word;
 
@@ -145,7 +155,7 @@ int imFormatICO::Open(const char* file_name)
   return IM_ERR_NONE;
 }
 
-int imFormatICO::New(const char* file_name)
+int imFileFormatICO::New(const char* file_name)
 {
   /* opens the binary file for writing with intel byte order */
   handle = imBinFileNew(file_name);
@@ -165,7 +175,7 @@ int imFormatICO::New(const char* file_name)
   return IM_ERR_NONE;
 }
 
-void imFormatICO::Close()
+void imFileFormatICO::Close()
 {
   if (this->is_new)
   {
@@ -180,7 +190,7 @@ void imFormatICO::Close()
   imBinFileClose(handle);
 }
 
-void* imFormatICO::Handle(int index)
+void* imFileFormatICO::Handle(int index)
 {
   if (index == 0)
     return (void*)this->handle;
@@ -188,7 +198,7 @@ void* imFormatICO::Handle(int index)
     return NULL;
 }
 
-int imFormatICO::ReadImageInfo(int index)
+int imFileFormatICO::ReadImageInfo(int index)
 {
   this->file_data_type = IM_BYTE;
   unsigned int dword_value;
@@ -270,7 +280,7 @@ int imFormatICO::ReadImageInfo(int index)
   return IM_ERR_NONE;
 }
 
-int imFormatICO::WriteImageInfo()
+int imFileFormatICO::WriteImageInfo()
 {
   this->file_data_type = IM_BYTE;
   this->file_color_mode = imColorModeSpace(this->user_color_mode);
@@ -368,7 +378,7 @@ int imFormatICO::WriteImageInfo()
   return IM_ERR_NONE;
 }
 
-int imFormatICO::ReadPalette()
+int imFileFormatICO::ReadPalette()
 {
   /* reads the color palette */
   unsigned char bmp_colors[256 * 4];
@@ -389,7 +399,7 @@ int imFormatICO::ReadPalette()
   return IM_ERR_NONE;
 }
 
-int imFormatICO::WritePalette()
+int imFileFormatICO::WritePalette()
 {
   unsigned char bmp_colors[256 * 4];
 
@@ -410,7 +420,7 @@ int imFormatICO::WritePalette()
   return IM_ERR_NONE;
 }
 
-void imFormatICO::FixRGBOrder()
+void imFileFormatICO::FixRGBOrder()
 {
   if (this->bpp == 24)
   {
@@ -455,7 +465,7 @@ static inline int PixelOffset(int is_top_down, int is_packed, int width, int hei
     return plane*width*height + row*width + col;
 }
 
-int imFormatICO::ReadImageData(void* data)
+int imFileFormatICO::ReadImageData(void* data)
 {
   imCounterTotal(this->counter, this->height, "Reading ICO...");
 
@@ -542,7 +552,7 @@ int imFormatICO::ReadImageData(void* data)
   return IM_ERR_NONE;
 }
 
-int imFormatICO::WriteImageData(void* data)
+int imFileFormatICO::WriteImageData(void* data)
 {
   imCounterTotal(this->counter, this->height, "Writing ICO...");
 

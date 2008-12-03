@@ -81,7 +81,7 @@ static const char* iLEDCompTable[1] =
   "NONE"
 };
 
-class imFormatLED: public imFormat
+class imFileFormatLED: public imFileFormatBase
 {
   imBinFile* handle;          /* the binary file handle */
   int pal_count;
@@ -89,6 +89,22 @@ class imFormatLED: public imFormat
   int ReadPalette();
   int WritePalette();
 
+public:
+  imFileFormatLED(const imFormat* _iformat): imFileFormatBase(_iformat) {}
+  ~imFileFormatLED() {}
+
+  int Open(const char* file_name);
+  int New(const char* file_name);
+  void Close();
+  void* Handle(int index);
+  int ReadImageInfo(int index);
+  int ReadImageData(void* data);
+  int WriteImageInfo();
+  int WriteImageData(void* data);
+};
+
+class imFormatLED: public imFormat
+{
 public:
   imFormatLED()
     :imFormat("LED", 
@@ -100,23 +116,17 @@ public:
     {}
   ~imFormatLED() {}
 
-  int Open(const char* file_name);
-  int New(const char* file_name);
-  void Close();
-  void* Handle(int index);
-  int ReadImageInfo(int index);
-  int ReadImageData(void* data);
-  int WriteImageInfo();
-  int WriteImageData(void* data);
+  imFileFormatBase* Create(void) const { return new imFileFormatLED(this); }
   int CanWrite(const char* compression, int color_mode, int data_type) const;
 };
+
 
 void imFormatRegisterLED(void)
 {
   imFormatRegister(new imFormatLED());
 }
 
-int imFormatLED::Open(const char* file_name)
+int imFileFormatLED::Open(const char* file_name)
 {
   char sig[4];
   unsigned char byte_value;
@@ -171,7 +181,7 @@ int imFormatLED::Open(const char* file_name)
   return IM_ERR_NONE;
 }
 
-int imFormatLED::New(const char* file_name)
+int imFileFormatLED::New(const char* file_name)
 {
   /* opens the binary file for writing */
   handle = imBinFileNew(file_name);
@@ -190,12 +200,12 @@ int imFormatLED::New(const char* file_name)
   return IM_ERR_NONE;
 }
 
-void imFormatLED::Close()
+void imFileFormatLED::Close()
 {
   imBinFileClose(handle);
 }
 
-void* imFormatLED::Handle(int index)
+void* imFileFormatLED::Handle(int index)
 {
   if (index == 0)
     return (void*)this->handle;
@@ -203,7 +213,7 @@ void* imFormatLED::Handle(int index)
     return NULL;
 }
 
-int imFormatLED::ReadImageInfo(int index)
+int imFileFormatLED::ReadImageInfo(int index)
 {
   (void)index;
 
@@ -225,7 +235,7 @@ int imFormatLED::ReadImageInfo(int index)
   return IM_ERR_NONE;
 }
 
-int imFormatLED::WriteImageInfo()
+int imFileFormatLED::WriteImageInfo()
 {
   this->file_data_type = IM_BYTE;
   this->file_color_mode = imColorModeSpace(this->user_color_mode);
@@ -239,7 +249,7 @@ int imFormatLED::WriteImageInfo()
   return IM_ERR_NONE;
 }
 
-int imFormatLED::ReadPalette()
+int imFileFormatLED::ReadPalette()
 {
   int c, r, g, b, i;
 
@@ -260,7 +270,7 @@ int imFormatLED::ReadPalette()
   return IM_ERR_NONE;
 }
 
-int imFormatLED::WritePalette()
+int imFileFormatLED::WritePalette()
 {
   int c;
   unsigned char r, g, b;
@@ -285,7 +295,7 @@ int imFormatLED::WritePalette()
   return IM_ERR_NONE;
 }
 
-int imFormatLED::ReadImageData(void* data)
+int imFileFormatLED::ReadImageData(void* data)
 {
   int value;
 
@@ -310,7 +320,7 @@ int imFormatLED::ReadImageData(void* data)
   return IM_ERR_NONE;
 }
 
-int imFormatLED::WriteImageData(void* data)
+int imFileFormatLED::WriteImageData(void* data)
 {
   imCounterTotal(this->counter, this->height, "Writing LED...");
 

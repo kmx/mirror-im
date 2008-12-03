@@ -49,66 +49,66 @@ imFile* imFileOpen(const char* file_name, int *error)
 {
   assert(file_name);
 
-  imFormat* iformat = imFormatOpen(file_name, error);
-  if (!iformat) 
+  imFileFormatBase* ifileformat = imFileFormatBaseOpen(file_name, error);
+  if (!ifileformat) 
     return NULL;
 
-  imFileClear(iformat);
+  imFileClear(ifileformat);
 
-  iformat->attrib_table = new imAttribTable(599);
+  ifileformat->attrib_table = new imAttribTable(599);
 
-  iformat->counter = imCounterBegin(file_name);
+  ifileformat->counter = imCounterBegin(file_name);
 
-  return iformat;
+  return ifileformat;
 }
 
 imFile* imFileOpenAs(const char* file_name, const char* format, int *error)
 {
   assert(file_name);
 
-  imFormat* iformat = imFormatOpenAs(file_name, format, error);
-  if (!iformat) 
+  imFileFormatBase* ifileformat = imFileFormatBaseOpenAs(file_name, format, error);
+  if (!ifileformat) 
     return NULL;
 
-  imFileClear(iformat);
+  imFileClear(ifileformat);
 
-  iformat->attrib_table = new imAttribTable(599);
+  ifileformat->attrib_table = new imAttribTable(599);
 
-  iformat->counter = imCounterBegin(file_name);
+  ifileformat->counter = imCounterBegin(file_name);
 
-  return iformat;
+  return ifileformat;
 }
 
 imFile* imFileNew(const char* file_name, const char* format, int *error)
 {
   assert(file_name);
 
-  imFormat* iformat = imFormatNew(file_name, format, error);
-  if (!iformat) 
+  imFileFormatBase* ifileformat = imFileFormatBaseNew(file_name, format, error);
+  if (!ifileformat) 
     return NULL;
 
-  imFileClear(iformat);
+  imFileClear(ifileformat);
 
-  iformat->is_new = 1;
-  iformat->image_count = 0;
-  iformat->compression[0] = 0;
+  ifileformat->is_new = 1;
+  ifileformat->image_count = 0;
+  ifileformat->compression[0] = 0;
 
-  iformat->attrib_table = new imAttribTable(101);
+  ifileformat->attrib_table = new imAttribTable(101);
 
-  iformat->counter = imCounterBegin(file_name);
+  ifileformat->counter = imCounterBegin(file_name);
 
-  return iformat;
+  return ifileformat;
 }
 
 void imFileClose(imFile* ifile)
 {
   assert(ifile);
-  imFormat* iformat = (imFormat*)ifile;
+  imFileFormatBase* ifileformat = (imFileFormatBase*)ifile;
   imAttribTable* attrib_table = (imAttribTable*)ifile->attrib_table;
 
   imCounterEnd(ifile->counter);
 
-  iformat->Close();
+  ifileformat->Close();
 
   if (ifile->line_buffer) free(ifile->line_buffer);
   
@@ -118,16 +118,16 @@ void imFileClose(imFile* ifile)
 void* imFileHandle(imFile* ifile, int index)
 {
   assert(ifile);
-  imFormat* iformat = (imFormat*)ifile;
-  return iformat->Handle(index);
+  imFileFormatBase* ifileformat = (imFileFormatBase*)ifile;
+  return ifileformat->Handle(index);
 }
 
 void imFileSetAttribute(imFile* ifile, const char* attrib, int data_type, int count, const void* data)
 {
   assert(ifile);
   assert(attrib);
-  imFormat* iformat = (imFormat*)ifile;
-  imAttribTable* atable = (imAttribTable*)iformat->attrib_table;
+  imFileFormatBase* ifileformat = (imFileFormatBase*)ifile;
+  imAttribTable* atable = (imAttribTable*)ifileformat->attrib_table;
   if (data)
     atable->Set(attrib, data_type, count, data);
   else
@@ -138,8 +138,8 @@ const void* imFileGetAttribute(imFile* ifile, const char* attrib, int *data_type
 {
   assert(ifile);
   assert(attrib);
-  imFormat* iformat = (imFormat*)ifile;
-  imAttribTable* attrib_table = (imAttribTable*)iformat->attrib_table;
+  imFileFormatBase* ifileformat = (imFileFormatBase*)ifile;
+  imAttribTable* attrib_table = (imAttribTable*)ifileformat->attrib_table;
   return attrib_table->Get(attrib, data_type, count);
 }
 
@@ -167,10 +167,10 @@ void imFileGetAttributeList(imFile* ifile, char** attrib, int *attrib_count)
 void imFileGetInfo(imFile* ifile, char* format, char* compression, int *image_count)
 {
   assert(ifile);
-  imFormat* iformat = (imFormat*)ifile;
+  imFileFormatBase* ifileformat = (imFileFormatBase*)ifile;
 
   if(compression) strcpy(compression, ifile->compression);
-  if(format) strcpy(format, iformat->format);
+  if(format) strcpy(format, ifileformat->iformat->format);
   if (image_count) *image_count = ifile->image_count;
 }
 
@@ -214,7 +214,7 @@ int imFileReadImageInfo(imFile* ifile, int index, int *width, int *height, int *
 {
   assert(ifile);
   assert(!ifile->is_new);
-  imFormat* iformat = (imFormat*)ifile;
+  imFileFormatBase* ifileformat = (imFileFormatBase*)ifile;
 
   if (index >= ifile->image_count)
     return IM_ERR_DATA;
@@ -233,7 +233,7 @@ int imFileReadImageInfo(imFile* ifile, int index, int *width, int *height, int *
   ifile->convert_bpp = 0;
   ifile->switch_type = 0;
 
-  int error = iformat->ReadImageInfo(index);
+  int error = ifileformat->ReadImageInfo(index);
   if (error) return error;
 
   if (!imImageCheckFormat(ifile->file_color_mode, ifile->file_data_type))
@@ -322,7 +322,7 @@ int imFileReadImageData(imFile* ifile, void* data, int convert2bitmap, int color
 {
   assert(ifile);
   assert(!ifile->is_new);
-  imFormat* iformat = (imFormat*)ifile;
+  imFileFormatBase* ifileformat = (imFileFormatBase*)ifile;
 
   if (ifile->image_index == -1)
     return IM_ERR_DATA;
@@ -350,7 +350,7 @@ int imFileReadImageData(imFile* ifile, void* data, int convert2bitmap, int color
 
   imFileLineBufferInit(ifile);
 
-  int ret = iformat->ReadImageData(data);
+  int ret = ifileformat->ReadImageData(data);
 
   // here we can NOT change the file_color_mode we already returned to the user
   // so just check for gray and binary consistency
@@ -389,12 +389,12 @@ int imFileWriteImageInfo(imFile* ifile, int width, int height, int user_color_mo
 {
   assert(ifile);
   assert(ifile->is_new);
-  imFormat* iformat = (imFormat*)ifile;
+  imFileFormatBase* ifileformat = (imFileFormatBase*)ifile;
 
   if (!imImageCheckFormat(user_color_mode, user_data_type))
     return IM_ERR_DATA;
 
-  int error = iformat->CanWrite(ifile->compression, user_color_mode, user_data_type);
+  int error = ifileformat->iformat->CanWrite(ifile->compression, user_color_mode, user_data_type);
   if (error) return error;
 
   ifile->width = width;
@@ -409,7 +409,7 @@ int imFileWriteImageInfo(imFile* ifile, int width, int height, int user_color_mo
     ifile->palette[1] = imColorEncode(255, 255, 255);
   }
 
-  return iformat->WriteImageInfo();
+  return ifileformat->WriteImageInfo();
 }
 
 int imFileWriteImageData(imFile* ifile, void* data)
@@ -417,12 +417,12 @@ int imFileWriteImageData(imFile* ifile, void* data)
   assert(ifile);
   assert(ifile->is_new);
   assert(data);
-  imFormat* iformat = (imFormat*)ifile;
+  imFileFormatBase* ifileformat = (imFileFormatBase*)ifile;
 
   if (!imFileCheckConversion(ifile))
     return IM_ERR_DATA;
 
   imFileLineBufferInit(ifile);
 
-  return iformat->WriteImageData(data);
+  return ifileformat->WriteImageData(data);
 }

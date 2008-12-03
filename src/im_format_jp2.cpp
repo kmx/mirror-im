@@ -103,6 +103,26 @@ static const char* iJP2CompTable[1] =
   "JPEG-2000",
 };
 
+class imFileFormatJP2: public imFileFormatBase
+{
+  int fmtid;
+  jas_stream_t *stream;
+  jas_image_t *image;
+
+public:
+  imFileFormatJP2(const imFormat* _iformat): imFileFormatBase(_iformat), image(0) {}
+  ~imFileFormatJP2() {}
+
+  int Open(const char* file_name);
+  int New(const char* file_name);
+  void Close();
+  void* Handle(int index);
+  int ReadImageInfo(int index);
+  int ReadImageData(void* data);
+  int WriteImageInfo();
+  int WriteImageData(void* data);
+};
+
 class imFormatJP2: public imFormat
 {
   int fmtid;
@@ -118,18 +138,10 @@ public:
               1, 
               0)
     {
-      image = 0;
     }
   ~imFormatJP2() {}
 
-  int Open(const char* file_name);
-  int New(const char* file_name);
-  void Close();
-  void* Handle(int index);
-  int ReadImageInfo(int index);
-  int ReadImageData(void* data);
-  int WriteImageInfo();
-  int WriteImageData(void* data);
+  imFileFormatBase* Create(void) const { return new imFileFormatJP2(this); }
   int CanWrite(const char* compression, int color_mode, int data_type) const;
 };
 
@@ -166,7 +178,7 @@ void imFormatRegisterJP2(void)
   imFormatRegister(new imFormatJP2());
 }
 
-int imFormatJP2::Open(const char* file_name)
+int imFileFormatJP2::Open(const char* file_name)
 {
   this->stream = jas_binfile_open(file_name, 0);
   if (this->stream == NULL)
@@ -185,7 +197,7 @@ int imFormatJP2::Open(const char* file_name)
   return IM_ERR_NONE;
 }
 
-int imFormatJP2::New(const char* file_name)
+int imFileFormatJP2::New(const char* file_name)
 {
   this->stream = jas_binfile_open(file_name, 1);
   if (this->stream == NULL)
@@ -197,7 +209,7 @@ int imFormatJP2::New(const char* file_name)
   return IM_ERR_NONE;
 }
 
-void imFormatJP2::Close()
+void imFileFormatJP2::Close()
 {
   if (this->image)
     jas_image_destroy(this->image);
@@ -205,7 +217,7 @@ void imFormatJP2::Close()
   jas_stream_close(this->stream);
 }
 
-void* imFormatJP2::Handle(int index)
+void* imFileFormatJP2::Handle(int index)
 {
   if (index == 0)
     return (void*)this->stream->obj_;
@@ -217,7 +229,7 @@ void* imFormatJP2::Handle(int index)
     return NULL;
 }
 
-int imFormatJP2::ReadImageInfo(int index)
+int imFileFormatJP2::ReadImageInfo(int index)
 {
   (void)index;
 
@@ -290,7 +302,7 @@ int imFormatJP2::ReadImageInfo(int index)
   return IM_ERR_NONE;
 }
 
-int imFormatJP2::WriteImageInfo()
+int imFileFormatJP2::WriteImageInfo()
 {
   this->file_data_type = this->user_data_type;
   this->file_color_mode = imColorModeSpace(this->user_color_mode);
@@ -377,7 +389,7 @@ int imFormatJP2::WriteImageInfo()
   return IM_ERR_NONE;
 }
 
-int imFormatJP2::ReadImageData(void* data)
+int imFileFormatJP2::ReadImageData(void* data)
 {
   int count = imFileLineBufferCount(this);
 
@@ -419,7 +431,7 @@ int imFormatJP2::ReadImageData(void* data)
   return IM_ERR_NONE;
 }
 
-int imFormatJP2::WriteImageData(void* data)
+int imFileFormatJP2::WriteImageData(void* data)
 {
   int count = imFileLineBufferCount(this);
   imCounterTotal(this->counter, count, "Writing JP2...");  /* first time count */

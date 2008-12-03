@@ -54,7 +54,7 @@ extern "C" {
       StartOffset, SwitchType, ByteOrder, Padding  IM_INT (1)
 \endverbatim
  * \ingroup format */
-imFormat* imFormatInitRAW(void);
+imFileFormatBase* imFormatInitRAW(void);
 
 
 #if defined(__cplusplus)

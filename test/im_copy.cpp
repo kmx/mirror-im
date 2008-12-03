@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
   }
 
   imFormatRegisterAVI();
-  imFormatRegisterWMV();
+//  imFormatRegisterWMV();
 
   void* data = NULL;
   imFile* ifile = NULL;

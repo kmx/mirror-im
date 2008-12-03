@@ -11,27 +11,20 @@
 #define __IM_FORMAT_H
 
 
-/** \brief Image File Format Driver (SDK Use Only) 
+class imFormat;
+
+/** \brief Image File Format Virtual Class (SDK Use Only) 
  * 
  * \par
  * Virtual Base class for file formats. All file formats inherit from this class.
  * \ingroup filesdk */
-class imFormat: public _imFile
+class imFileFormatBase: public _imFile
 {
 public:
-  const char* format; 
-  const char* desc;
-  const char* ext;
-  const char** comp;
-  int comp_count, 
-      can_sequence;
+  const imFormat* iformat;
 
-  imFormat(const char* _format, const char* _desc, const char* _ext, 
-           const char** _comp, int _comp_count, int _can_sequence)
-    :format(_format), desc(_desc), ext(_ext), comp(_comp), 
-     comp_count(_comp_count), can_sequence(_can_sequence)
-    {} 
-  virtual ~imFormat() {}
+  imFileFormatBase(const imFormat* _iformat): iformat(_iformat) {}
+  virtual ~imFileFormatBase() {}
 
   imAttribTable* AttribTable() {return (imAttribTable*)this->attrib_table;}
 
@@ -45,7 +38,32 @@ public:
   virtual int ReadImageData(void* data) = 0;
   virtual int WriteImageInfo() = 0;            // Should update compression
   virtual int WriteImageData(void* data) = 0;  // Must update image_count
+};
+
+/** \brief Image File Format Descriptor (SDK Use Only) 
+ * 
+ * \par
+ * All file formats must define these informations. They are stored by \ref imFormatRegister.
+ * \ingroup filesdk */
+class imFormat
+{
+public:
+  const char* format; 
+  const char* desc;
+  const char* ext;
+  const char** comp;
+  int comp_count, 
+      can_sequence;
+
+  virtual imFileFormatBase* Create() const = 0;
   virtual int CanWrite(const char* compression, int color_mode, int data_type) const = 0;
+
+  imFormat(const char* _format, const char* _desc, const char* _ext, 
+           const char** _comp, int _comp_count, int _can_sequence)
+    :format(_format), desc(_desc), ext(_ext), comp(_comp), 
+     comp_count(_comp_count), can_sequence(_can_sequence)
+    {} 
+  virtual ~imFormat() {}
 };
 
 extern "C"
@@ -56,15 +74,15 @@ extern "C"
 /* Opens a file with the respective format driver 
  * Uses the file extension to speed up the search for the format driver.
  * Used by "im_file.cpp" only. */
-imFormat* imFormatOpen(const char* file_name, int *error);
+imFileFormatBase* imFileFormatBaseOpen(const char* file_name, int *error);
 
 /* Opens a file with the given format
  * Used by "im_file.cpp" only. */
-imFormat* imFormatOpenAs(const char* file_name, const char* format, int *error);
+imFileFormatBase* imFileFormatBaseOpenAs(const char* file_name, const char* format, int *error);
 
 /* Creates a file using the given format driver.
  * Used by "im_file.cpp" only. */
-imFormat* imFormatNew(const char* file_name, const char* format, int *error);
+imFileFormatBase* imFileFormatBaseNew(const char* file_name, const char* format, int *error);
 
 
 /* File Format SDK */

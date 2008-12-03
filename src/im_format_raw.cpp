@@ -20,13 +20,29 @@ static const char* iRAWCompTable[1] =
   "NONE"
 };
 
-class imFormatRAW: public imFormat
+class imFileFormatRAW: public imFileFormatBase
 {
   imBinFile* handle;
   int padding;
 
   int iRawUpdateParam(int index);
 
+public:
+  imFileFormatRAW(const imFormat* _iformat): imFileFormatBase(_iformat) {}
+  ~imFileFormatRAW() {}
+
+  int Open(const char* file_name);
+  int New(const char* file_name);
+  void Close();
+  void* Handle(int index);
+  int ReadImageInfo(int index);
+  int ReadImageData(void* data);
+  int WriteImageInfo();
+  int WriteImageData(void* data);
+};
+
+class imFormatRAW: public imFormat
+{
 public:
   imFormatRAW()
     :imFormat("RAW", 
@@ -38,23 +54,18 @@ public:
     {}
   ~imFormatRAW() {}
 
-  int Open(const char* file_name);
-  int New(const char* file_name);
-  void Close();
-  void* Handle(int index);
-  int ReadImageInfo(int index);
-  int ReadImageData(void* data);
-  int WriteImageInfo();
-  int WriteImageData(void* data);
+  imFileFormatBase* Create(void) const { return new imFileFormatRAW(this); }
   int CanWrite(const char* compression, int color_mode, int data_type) const;
 };
 
-imFormat* imFormatInitRAW(void)
+
+imFileFormatBase* imFormatInitRAW(void)
 {
-  return new imFormatRAW();
+  imFormatRAW iformat;
+  return iformat.Create();
 }
 
-int imFormatRAW::Open(const char* file_name)
+int imFileFormatRAW::Open(const char* file_name)
 {
   this->handle = imBinFileOpen(file_name);
   if (this->handle == NULL)
@@ -68,7 +79,7 @@ int imFormatRAW::Open(const char* file_name)
   return IM_ERR_NONE;
 }
 
-int imFormatRAW::New(const char* file_name)
+int imFileFormatRAW::New(const char* file_name)
 {
   this->handle = imBinFileNew(file_name);
   if (this->handle == NULL)
@@ -79,12 +90,12 @@ int imFormatRAW::New(const char* file_name)
   return IM_ERR_NONE;
 }
 
-void imFormatRAW::Close()
+void imFileFormatRAW::Close()
 {
   imBinFileClose(this->handle);
 }
 
-void* imFormatRAW::Handle(int index)
+void* imFileFormatRAW::Handle(int index)
 {
   if (index == 0)
     return (void*)this->handle;
@@ -106,7 +117,7 @@ static int iCalcPad(int padding, int line_size)
   }
 }
 
-int imFormatRAW::iRawUpdateParam(int index)
+int imFileFormatRAW::iRawUpdateParam(int index)
 {
   (void)index;
 
@@ -156,12 +167,12 @@ int imFormatRAW::iRawUpdateParam(int index)
   return IM_ERR_NONE;
 }
 
-int imFormatRAW::ReadImageInfo(int index)
+int imFileFormatRAW::ReadImageInfo(int index)
 {
   return iRawUpdateParam(index);
 }
 
-int imFormatRAW::WriteImageInfo()
+int imFileFormatRAW::WriteImageInfo()
 {
   this->file_color_mode = this->user_color_mode;
   this->file_data_type = this->user_data_type;
@@ -177,7 +188,7 @@ static int iFileDataTypeSize(int file_data_type, int switch_type)
   return type_size;
 }
 
-int imFormatRAW::ReadImageData(void* data)
+int imFileFormatRAW::ReadImageData(void* data)
 {
   int count = imFileLineBufferCount(this);
   int line_count = imImageLineCount(this->width, this->file_color_mode);
@@ -214,7 +225,7 @@ int imFormatRAW::ReadImageData(void* data)
   return IM_ERR_NONE;
 }
 
-int imFormatRAW::WriteImageData(void* data)
+int imFileFormatRAW::WriteImageData(void* data)
 {
   int count = imFileLineBufferCount(this);
   int line_count = imImageLineCount(this->width, this->file_color_mode);
@@ -267,4 +278,3 @@ int imFormatRAW::CanWrite(const char* compression, int color_mode, int data_type
 
   return IM_ERR_NONE;
 }
-

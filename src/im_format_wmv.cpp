@@ -494,7 +494,7 @@ static GUID iWMFCompFindSubType(const char* compression)
   return WMMEDIASUBTYPE_Base;
 }
 
-class imFormatWMV: public imFormat
+class imFileFormatWMV: public imFileFormatBase
 {
   IWMSyncReader* Reader;        // When reading
   WM_MEDIA_TYPE* MediaType;
@@ -526,6 +526,22 @@ class imFormatWMV: public imFormat
   int SetProfile();
 
 public:
+  imFileFormatWMV(const imFormat* _iformat): imFileFormatBase(_iformat) {}
+  ~imFileFormatWMV() {}
+
+  int Open(const char* file_name);
+  int New(const char* file_name);
+  void Close();
+  void* Handle(int index);
+  int ReadImageInfo(int index);
+  int ReadImageData(void* data);
+  int WriteImageInfo();
+  int WriteImageData(void* data);
+};
+
+class imFormatWMV: public imFormat
+{
+public:
   imFormatWMV()
     :imFormat("WMV", 
               "Windows Media Video Format", 
@@ -536,14 +552,7 @@ public:
     {}
   ~imFormatWMV() {}
 
-  int Open(const char* file_name);
-  int New(const char* file_name);
-  void Close();
-  void* Handle(int index);
-  int ReadImageInfo(int index);
-  int ReadImageData(void* data);
-  int WriteImageInfo();
-  int WriteImageData(void* data);
+  imFileFormatBase* Create(void) const { return new imFileFormatWMV(this); }
   int CanWrite(const char* compression, int color_mode, int data_type) const;
 };
 
@@ -552,7 +561,7 @@ void imFormatRegisterWMV(void)
   imFormatRegister(new imFormatWMV());
 }
 
-int imFormatWMV::Open(const char* file_name)
+int imFileFormatWMV::Open(const char* file_name)
 {
   /* initializes COM */
   CoInitialize(NULL);
@@ -675,7 +684,7 @@ int imFormatWMV::Open(const char* file_name)
   return IM_ERR_NONE;
 }
 
-int imFormatWMV::New(const char* file_name)
+int imFileFormatWMV::New(const char* file_name)
 {
   /* initializes COM */
   CoInitialize(NULL);
@@ -698,7 +707,7 @@ int imFormatWMV::New(const char* file_name)
   return IM_ERR_NONE;
 }
 
-void imFormatWMV::Close()
+void imFileFormatWMV::Close()
 {
   HeaderInfo->Release();
 
@@ -720,7 +729,7 @@ void imFormatWMV::Close()
   CoUninitialize();
 }
 
-void* imFormatWMV::Handle(int index)
+void* imFileFormatWMV::Handle(int index)
 {
   if (index == 1)
   {
@@ -733,7 +742,7 @@ void* imFormatWMV::Handle(int index)
     return NULL;
 }
 
-void imFormatWMV::iReadAttrib(imAttribTable* attrib_table)
+void imFileFormatWMV::iReadAttrib(imAttribTable* attrib_table)
 {
   WORD StreamNumber = 0;
   WORD attrib_list_count = 0;
@@ -916,12 +925,12 @@ static int iAttribSet(void* user_data, int index, const char* name, int data_typ
   return 1;
 }
 
-void imFormatWMV::iWriteAttrib(imAttribTable* attrib_table)
+void imFileFormatWMV::iWriteAttrib(imAttribTable* attrib_table)
 {
   attrib_table->ForEach((void*)HeaderInfo, iAttribSet);
 }
 
-void imFormatWMV::CalcFPS()
+void imFileFormatWMV::CalcFPS()
 {
  	LONGLONG AvgTimePerFrame = 0;
 
@@ -970,7 +979,7 @@ void imFormatWMV::CalcFPS()
   }
 }
 
-void imFormatWMV::SetOutputProps()
+void imFileFormatWMV::SetOutputProps()
 {
   DWORD output_number;
   Reader->GetOutputNumberForStream(stream_number, &output_number);
@@ -1002,7 +1011,7 @@ void imFormatWMV::SetOutputProps()
   }
 }
 
-int imFormatWMV::SetInputProps()
+int imFileFormatWMV::SetInputProps()
 {
   DWORD input_count;
   Writer->GetInputCount(&input_count);
@@ -1078,7 +1087,7 @@ int imFormatWMV::SetInputProps()
   return 1;
 }
 
-int imFormatWMV::SetProfile()
+int imFileFormatWMV::SetProfile()
 {
   HRESULT hr;
 
@@ -1144,7 +1153,7 @@ int imFormatWMV::SetProfile()
   return 1;
 }
 
-int imFormatWMV::ReadImageInfo(int index)
+int imFileFormatWMV::ReadImageInfo(int index)
 {
   if (this->seekable && this->current_frame != index)
   {
@@ -1268,7 +1277,7 @@ int imFormatWMV::ReadImageInfo(int index)
   return IM_ERR_NONE;
 }
 
-int imFormatWMV::WriteImageInfo()
+int imFileFormatWMV::WriteImageInfo()
 {
   if (this->bmiHeader)
   {
@@ -1357,7 +1366,7 @@ int imFormatWMV::WriteImageInfo()
   return IM_ERR_NONE;
 }
 
-void imFormatWMV::ReadPalette(unsigned char* bmp_colors)
+void imFileFormatWMV::ReadPalette(unsigned char* bmp_colors)
 {
   /* convert the color map to the IM format */
   for (int c = 0; c < this->palette_count; c++)
@@ -1369,7 +1378,7 @@ void imFormatWMV::ReadPalette(unsigned char* bmp_colors)
   }
 }
 
-void imFormatWMV::WritePalette(unsigned char* bmp_colors)
+void imFileFormatWMV::WritePalette(unsigned char* bmp_colors)
 {
   /* convert the color map to the IM format */
   for (int c = 0; c < this->palette_count; c++)
@@ -1380,7 +1389,7 @@ void imFormatWMV::WritePalette(unsigned char* bmp_colors)
   }
 }
 
-void imFormatWMV::InitMasks(imDib* dib)
+void imFileFormatWMV::InitMasks(imDib* dib)
 {
   if (dib->bmih->biCompression == BI_BITFIELDS)
   {
@@ -1429,7 +1438,7 @@ void imFormatWMV::InitMasks(imDib* dib)
   }
 }
 
-void imFormatWMV::FixRGB(int bpp)
+void imFileFormatWMV::FixRGB(int bpp)
 {
   int x;
 
@@ -1486,7 +1495,7 @@ void imFormatWMV::FixRGB(int bpp)
   }
 }
 
-int imFormatWMV::ReadImageData(void* data)
+int imFileFormatWMV::ReadImageData(void* data)
 {
   imCounterTotal(this->counter, this->height, "Reading WMV Frame...");
 
@@ -1552,7 +1561,7 @@ int imFormatWMV::ReadImageData(void* data)
   return IM_ERR_NONE;
 }
 
-int imFormatWMV::WriteImageData(void* data)
+int imFileFormatWMV::WriteImageData(void* data)
 {
   imCounterTotal(this->counter, this->height, "Writing WMV Frame...");
 

@@ -42,7 +42,7 @@ static const char* iPNGCompTable[1] =
   "DEFLATE"
 };
 
-class imFormatPNG: public imFormat
+class imFileFormatPNG: public imFileFormatBase
 {
   png_structp png_ptr;
   png_infop info_ptr;
@@ -54,6 +54,22 @@ class imFormatPNG: public imFormat
   void iWriteAttrib(imAttribTable* attrib_table);
 
 public:
+  imFileFormatPNG(const imFormat* _iformat): imFileFormatBase(_iformat) {}
+  ~imFileFormatPNG() {}
+
+  int Open(const char* file_name);
+  int New(const char* file_name);
+  void Close();
+  void* Handle(int index);
+  int ReadImageInfo(int index);
+  int ReadImageData(void* data);
+  int WriteImageInfo();
+  int WriteImageData(void* data);
+};
+
+class imFormatPNG: public imFormat
+{
+public:
   imFormatPNG()
     :imFormat("PNG", 
               "Portable Network Graphic Format", 
@@ -64,14 +80,7 @@ public:
     {}
   ~imFormatPNG() {}
 
-  int Open(const char* file_name);
-  int New(const char* file_name);
-  void Close();
-  void* Handle(int index);
-  int ReadImageInfo(int index);
-  int ReadImageData(void* data);
-  int WriteImageInfo();
-  int WriteImageData(void* data);
+  imFileFormatBase* Create(void) const { return new imFileFormatPNG(this); }
   int CanWrite(const char* compression, int color_mode, int data_type) const;
 };
 
@@ -80,7 +89,7 @@ void imFormatRegisterPNG(void)
   imFormatRegister(new imFormatPNG());
 }
 
-int imFormatPNG::Open(const char* file_name)
+int imFileFormatPNG::Open(const char* file_name)
 {
   this->handle = imBinFileOpen(file_name);
   if (this->handle == NULL)
@@ -115,7 +124,7 @@ int imFormatPNG::Open(const char* file_name)
   return IM_ERR_NONE;
 }
 
-int imFormatPNG::New(const char* file_name)
+int imFileFormatPNG::New(const char* file_name)
 {
   this->handle = imBinFileNew(file_name);
   if (this->handle == NULL)
@@ -134,7 +143,7 @@ int imFormatPNG::New(const char* file_name)
   return IM_ERR_NONE;
 }
 
-void imFormatPNG::Close()
+void imFileFormatPNG::Close()
 {
   if (this->is_new)
     png_destroy_write_struct(&this->png_ptr,  &this->info_ptr);
@@ -144,7 +153,7 @@ void imFormatPNG::Close()
   imBinFileClose(this->handle);
 }
 
-void* imFormatPNG::Handle(int index)
+void* imFileFormatPNG::Handle(int index)
 {
   if (index == 0)
     return (void*)this->handle;
@@ -154,7 +163,7 @@ void* imFormatPNG::Handle(int index)
     return 0;
 }
 
-void imFormatPNG::iReadAttrib(imAttribTable* attrib_table)
+void imFileFormatPNG::iReadAttrib(imAttribTable* attrib_table)
 {
   double gamma;
   if (png_get_gAMA(png_ptr, info_ptr, &gamma))
@@ -377,7 +386,7 @@ static int iFindAttribString(void* user_data, int index, const char* name, int d
   return 1;
 }
 
-void imFormatPNG::iWriteAttrib(imAttribTable* attrib_table)
+void imFileFormatPNG::iWriteAttrib(imAttribTable* attrib_table)
 {
   const void* attrib_data = attrib_table->Get("Gamma");
   if (attrib_data)
@@ -563,7 +572,7 @@ void imFormatPNG::iWriteAttrib(imAttribTable* attrib_table)
   }
 }
 
-int imFormatPNG::ReadImageInfo(int index)
+int imFileFormatPNG::ReadImageInfo(int index)
 {
   (void)index;
 
@@ -678,7 +687,7 @@ int imFormatPNG::ReadImageInfo(int index)
   return IM_ERR_NONE;
 }
 
-int imFormatPNG::WriteImageInfo()
+int imFileFormatPNG::WriteImageInfo()
 {
   this->file_color_mode = imColorModeSpace(this->user_color_mode);
   this->file_color_mode |= IM_TOPDOWN;
@@ -805,7 +814,7 @@ static int iInterlaceRowCheck(int row_step, int pass)
   return 0;
 }
 
-int imFormatPNG::ReadImageData(void* data)
+int imFileFormatPNG::ReadImageData(void* data)
 {
   if (setjmp(this->png_ptr->jmpbuf))
     return IM_ERR_ACCESS;
@@ -856,7 +865,7 @@ int imFormatPNG::ReadImageData(void* data)
   return IM_ERR_NONE;
 }
 
-int imFormatPNG::WriteImageData(void* data)
+int imFileFormatPNG::WriteImageData(void* data)
 {
   if (setjmp(this->png_ptr->jmpbuf))
     return IM_ERR_ACCESS;

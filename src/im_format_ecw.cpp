@@ -23,20 +23,14 @@ static const char* iECWCompTable[2] =
   "JPEG-2000",
 };
 
-class imFormatECW: public imFormat
+class imFileFormatECW: public imFileFormatBase
 {
   NCSFileView *pNCSFileView;
 //  NCSEcwCompressClient *pClient;
 
 public:
-  imFormatECW()
-    :imFormat("ECW", 
-              "ECW JPEG-2000 File Format", 
-              "*.ecw;*.jp2;*.j2k;*.jpc;*.j2c;", 
-              iECWCompTable, 
-              2, 
-              0)
-    {}
+  imFileFormatECW(const imFormat* _iformat): imFileFormatBase(_iformat) {}
+  ~imFileFormatECW() {}
 
   int Open(const char* file_name);
   int New(const char* file_name);
@@ -46,6 +40,22 @@ public:
   int ReadImageData(void* data);
   int WriteImageInfo(){return 0;} // do nothing for now;
   int WriteImageData(void* data){(void)data; return 0;} // do nothing for now;
+};
+
+class imFormatECW: public imFormat
+{
+public:
+  imFormatECW()
+    :imFormat("ECW", 
+              "ECW JPEG-2000 File Format", 
+              "*.ecw;*.jp2;*.j2k;*.jpc;*.j2c;", 
+              iECWCompTable, 
+              2, 
+              0)
+    {}
+  ~imFormatECW() {}
+
+  imFileFormatBase* Create(void) const { return new imFileFormatECW(this); }
   int CanWrite(const char* compression, int color_mode, int data_type) const;
 };
 
@@ -54,7 +64,7 @@ void imFormatRegisterECW(void)
   imFormatRegister(new imFormatECW());
 }
 
-int imFormatECW::Open(const char* file_name)
+int imFileFormatECW::Open(const char* file_name)
 {
   NCSError eError = NCScbmOpenFileView((char*)file_name, &this->pNCSFileView, NULL);
   if (eError != NCS_SUCCESS) 
@@ -82,7 +92,7 @@ int imFormatECW::Open(const char* file_name)
   return IM_ERR_NONE;
 }
 
-int imFormatECW::New(const char* file_name)
+int imFileFormatECW::New(const char* file_name)
 {
   strcpy(this->compression, "JPEG-2000");
   this->image_count = 1;
@@ -91,7 +101,7 @@ int imFormatECW::New(const char* file_name)
   return IM_ERR_FORMAT;
 }
 
-void imFormatECW::Close()
+void imFileFormatECW::Close()
 {
   if (this->is_new)
     ;// NCSEcwCompressClose(this->pClient);
@@ -99,7 +109,7 @@ void imFormatECW::Close()
     NCScbmCloseFileView(this->pNCSFileView);
 }
 
-void* imFormatECW::Handle(int index)
+void* imFileFormatECW::Handle(int index)
 {
   (void)index;
 
@@ -109,7 +119,7 @@ void* imFormatECW::Handle(int index)
     return (void*)this->pNCSFileView;
 }
 
-int imFormatECW::ReadImageInfo(int index)
+int imFileFormatECW::ReadImageInfo(int index)
 {
   NCSFileViewFileInfoEx *pNCSFileInfo;
   imAttribTable* attrib_table = AttribTable();
@@ -245,7 +255,7 @@ static void iCopyDataBuffer(UINT8 **ppOutputLine, imbyte* line_buffer, int nBand
     memcpy(line_buffer, ppOutputLine[0], nBands*type_size*view_width);
 }
 
-int imFormatECW::ReadImageData(void* data)
+int imFileFormatECW::ReadImageData(void* data)
 {
   imAttribTable* attrib_table = AttribTable();
   int i, *attrib_data, view_width, view_height,

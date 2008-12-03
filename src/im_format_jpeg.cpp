@@ -69,7 +69,7 @@ static const char* iJPEGCompTable[1] =
   "JPEG"
 };
 
-class imFormatJPEG: public imFormat
+class imFileFormatJPEG: public imFileFormatBase
 {
   jpeg_decompress_struct dinfo;
   jpeg_compress_struct cinfo;
@@ -84,6 +84,22 @@ class imFormatJPEG: public imFormat
 #endif
 
 public:
+  imFileFormatJPEG(const imFormat* _iformat): imFileFormatBase(_iformat) {}
+  ~imFileFormatJPEG() {}
+
+  int Open(const char* file_name);
+  int New(const char* file_name);
+  void Close();
+  void* Handle(int index);
+  int ReadImageInfo(int index);
+  int ReadImageData(void* data);
+  int WriteImageInfo();
+  int WriteImageData(void* data);
+};
+
+class imFormatJPEG: public imFormat
+{
+public:
   imFormatJPEG()
     :imFormat("JPEG", 
               "JPEG File Interchange Format", 
@@ -94,14 +110,7 @@ public:
     {}
   ~imFormatJPEG() {}
 
-  int Open(const char* file_name);
-  int New(const char* file_name);
-  void Close();
-  void* Handle(int index);
-  int ReadImageInfo(int index);
-  int ReadImageData(void* data);
-  int WriteImageInfo();
-  int WriteImageData(void* data);
+  imFileFormatBase* Create(void) const { return new imFileFormatJPEG(this); }
   int CanWrite(const char* compression, int color_mode, int data_type) const;
 };
 
@@ -110,7 +119,7 @@ void imFormatRegisterJPEG(void)
   imFormatRegister(new imFormatJPEG());
 }
 
-int imFormatJPEG::Open(const char* file_name)
+int imFileFormatJPEG::Open(const char* file_name)
 {
   this->handle = imBinFileOpen(file_name);
   if (this->handle == NULL)
@@ -158,7 +167,7 @@ int imFormatJPEG::Open(const char* file_name)
   return IM_ERR_NONE;
 }
 
-int imFormatJPEG::New(const char* file_name)
+int imFileFormatJPEG::New(const char* file_name)
 {
   this->handle = imBinFileNew(file_name);
   if (this->handle == NULL)
@@ -190,7 +199,7 @@ int imFormatJPEG::New(const char* file_name)
   return IM_ERR_NONE;
 }
 
-void imFormatJPEG::Close()
+void imFileFormatJPEG::Close()
 {
   if (this->is_new)
     jpeg_destroy_compress(&this->cinfo);
@@ -200,7 +209,7 @@ void imFormatJPEG::Close()
   imBinFileClose(this->handle);
 }
 
-void* imFormatJPEG::Handle(int index)
+void* imFileFormatJPEG::Handle(int index)
 {
   if (index == 0)
     return this->handle;
@@ -216,7 +225,7 @@ void* imFormatJPEG::Handle(int index)
 }
 
 #ifdef USE_EXIF
-void imFormatJPEG::iReadExifAttrib(unsigned char* data, int data_length, imAttribTable* attrib_table)
+void imFileFormatJPEG::iReadExifAttrib(unsigned char* data, int data_length, imAttribTable* attrib_table)
 {
   ExifData* exif = exif_data_new_from_data(data, data_length);
   if (!exif)
@@ -377,7 +386,7 @@ static void iGetRational(float fvalue, int *num, int *den, int sign)
 	*num = sign * imRound(fvalue);
 }
 
-void imFormatJPEG::iWriteExifAttrib(imAttribTable* attrib_table)
+void imFileFormatJPEG::iWriteExifAttrib(imAttribTable* attrib_table)
 {
   ExifData* exif = exif_data_new();
 
@@ -525,7 +534,7 @@ void imFormatJPEG::iWriteExifAttrib(imAttribTable* attrib_table)
 }
 #endif
 
-int imFormatJPEG::ReadImageInfo(int index)
+int imFileFormatJPEG::ReadImageInfo(int index)
 {
   (void)index;
   this->fix_adobe = 0;
@@ -635,7 +644,7 @@ int imFormatJPEG::ReadImageInfo(int index)
   return IM_ERR_NONE;
 }
 
-int imFormatJPEG::WriteImageInfo()
+int imFileFormatJPEG::WriteImageInfo()
 {
   this->file_color_mode = imColorModeSpace(this->user_color_mode);
   this->file_color_mode |= IM_TOPDOWN;
@@ -737,7 +746,7 @@ static void iFixAdobe(unsigned char* line_buffer, int width)
   }
 }
 
-int imFormatJPEG::ReadImageData(void* data)
+int imFileFormatJPEG::ReadImageData(void* data)
 {
   if (setjmp(this->jerr.setjmp_buffer)) 
     return IM_ERR_ACCESS;
@@ -769,7 +778,7 @@ int imFormatJPEG::ReadImageData(void* data)
   return IM_ERR_NONE;
 }
 
-int imFormatJPEG::WriteImageData(void* data)
+int imFileFormatJPEG::WriteImageData(void* data)
 {
   if (setjmp(this->jerr.setjmp_buffer)) 
     return IM_ERR_ACCESS;

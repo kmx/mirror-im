@@ -21,7 +21,7 @@ imFile* imFileOpenRaw(const char* file_name, int *error)
 {
   assert(file_name);
 
-  imFormat* iformat = imFormatInitRAW();
+  imFileFormatBase* iformat = imFormatInitRAW();
   *error = iformat->Open(file_name);
   if (*error)
   {
@@ -42,7 +42,7 @@ imFile* imFileNewRaw(const char* file_name, int *error)
 {
   assert(file_name);
 
-  imFormat* iformat = imFormatInitRAW();
+  imFileFormatBase* iformat = imFormatInitRAW();
   *error = iformat->New(file_name);
   if (*error) 
   {

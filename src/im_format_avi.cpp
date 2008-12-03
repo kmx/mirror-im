@@ -41,7 +41,7 @@ static const char* iAVICompTable[15] =
   "CUSTOM"    // (show compression dialog)
 };
 
-class imFormatAVI: public imFormat
+class imFileFormatAVI: public imFileFormatBase
 {
   PAVIFILE file;
   PAVISTREAM stream;
@@ -63,15 +63,8 @@ class imFormatAVI: public imFormat
   void InitMasks(imDib* dib);
 
 public:
-  imFormatAVI()
-    :imFormat("AVI", 
-              "Windows Audio-Video Interleaved RIFF", 
-              "*.avi;", 
-              iAVICompTable, 
-              15, 
-              1)
-    {}
-  ~imFormatAVI() {}
+  imFileFormatAVI(const imFormat* _iformat): imFileFormatBase(_iformat) {}
+  ~imFileFormatAVI() {}
 
   int Open(const char* file_name);
   int New(const char* file_name);
@@ -81,6 +74,22 @@ public:
   int ReadImageData(void* data);
   int WriteImageInfo();
   int WriteImageData(void* data);
+};
+
+class imFormatAVI: public imFormat
+{
+public:
+  imFormatAVI()
+    :imFormat("AVI", 
+              "Windows Audio-Video Interleaved RIFF", 
+              "*.avi;", 
+              iAVICompTable, 
+              15, 
+              1)
+  {}
+  ~imFormatAVI() {}
+
+  imFileFormatBase* Create(void) const { return new imFileFormatAVI(this); }
   int CanWrite(const char* compression, int color_mode, int data_type) const;
 };
 
@@ -89,9 +98,9 @@ void imFormatRegisterAVI(void)
   imFormatRegister(new imFormatAVI());
 }
 
-int imFormatAVI::Open(const char* file_name)
+int imFileFormatAVI::Open(const char* file_name)
 {
-  /* initializes avi file library */
+  /* initializes avi file library, can be called many times */
   AVIFileInit();
 
   /* open existing file */
@@ -152,9 +161,9 @@ int imFormatAVI::Open(const char* file_name)
   return IM_ERR_NONE;
 }
 
-int imFormatAVI::New(const char* file_name)
+int imFileFormatAVI::New(const char* file_name)
 {
-  /* initializes avi file library */
+  /* initializes avi file library, can be called many times */
   AVIFileInit();
 
   /* creates a new file */
@@ -179,7 +188,7 @@ int imFormatAVI::New(const char* file_name)
   return IM_ERR_NONE;
 }
 
-void imFormatAVI::Close()
+void imFileFormatAVI::Close()
 {
   if (this->dib) imDibDestroy(this->dib);
 
@@ -193,10 +202,10 @@ void imFormatAVI::Close()
   if (this->stream) AVIStreamRelease(this->stream);
 
   AVIFileRelease(this->file);
-  AVIFileExit();
+  AVIFileExit();    /* called one for each AVIFileInit */
 }
 
-void* imFormatAVI::Handle(int index)
+void* imFileFormatAVI::Handle(int index)
 {
   if (index == 1)
     return (void*)this->file;
@@ -206,7 +215,7 @@ void* imFormatAVI::Handle(int index)
     return NULL;
 }
 
-int imFormatAVI::ReadImageInfo(int index)
+int imFileFormatAVI::ReadImageInfo(int index)
 {
   this->current_frame = index;
 
@@ -280,7 +289,7 @@ int imFormatAVI::ReadImageInfo(int index)
   return IM_ERR_NONE;
 }
 
-int imFormatAVI::WriteImageInfo()
+int imFileFormatAVI::WriteImageInfo()
 {
   if (dib)
   {
@@ -423,7 +432,7 @@ int imFormatAVI::WriteImageInfo()
   return IM_ERR_NONE;
 }
 
-void imFormatAVI::ReadPalette(unsigned char* bmp_colors)
+void imFileFormatAVI::ReadPalette(unsigned char* bmp_colors)
 {
   /* convert the color map to the IM format */
   for (int c = 0; c < this->palette_count; c++)
@@ -435,7 +444,7 @@ void imFormatAVI::ReadPalette(unsigned char* bmp_colors)
   }
 }
 
-void imFormatAVI::WritePalette(unsigned char* bmp_colors)
+void imFileFormatAVI::WritePalette(unsigned char* bmp_colors)
 {
   /* convert the color map to the IM format */
   for (int c = 0; c < this->palette_count; c++)
@@ -446,7 +455,7 @@ void imFormatAVI::WritePalette(unsigned char* bmp_colors)
   }
 }
 
-void imFormatAVI::InitMasks(imDib* dib)
+void imFileFormatAVI::InitMasks(imDib* dib)
 {
   if (dib->bmih->biCompression == BI_BITFIELDS)
   {
@@ -495,7 +504,7 @@ void imFormatAVI::InitMasks(imDib* dib)
   }
 }
 
-void imFormatAVI::FixRGB(int bpp)
+void imFileFormatAVI::FixRGB(int bpp)
 {
   int x;
 
@@ -552,7 +561,7 @@ void imFormatAVI::FixRGB(int bpp)
   }
 }
 
-int imFormatAVI::ReadImageData(void* data)
+int imFileFormatAVI::ReadImageData(void* data)
 {
   imCounterTotal(this->counter, this->height, "Reading AVI Frame...");
 
@@ -596,7 +605,7 @@ int imFormatAVI::ReadImageData(void* data)
   return IM_ERR_NONE;
 }
 
-int imFormatAVI::WriteImageData(void* data)
+int imFileFormatAVI::WriteImageData(void* data)
 {
   imCounterTotal(this->counter, this->height, "Writing AVI Frame...");
 

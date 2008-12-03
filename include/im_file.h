@@ -23,7 +23,7 @@ extern "C" {
  * \ingroup file */
 
 
-/** \brief Image File Format Base (SDK Use Only)
+/** \brief Image File Format Base Class (SDK Use Only)
  *
  * \par
  * Base container to hold format independent state variables.

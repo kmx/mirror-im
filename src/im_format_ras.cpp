@@ -153,7 +153,7 @@ static const char* iRASCompTable[2] =
   "RLE"
 };
 
-class imFormatRAS: public imFormat
+class imFileFormatRAS: public imFileFormatBase
 {
   imBinFile* handle;          /* the binary file handle */
   unsigned int bpp,          /* number of bits per pixel */
@@ -166,6 +166,22 @@ class imFormatRAS: public imFormat
   void FixRGB();
 
 public:
+  imFileFormatRAS(const imFormat* _iformat): imFileFormatBase(_iformat) {}
+  ~imFileFormatRAS() {}
+
+  int Open(const char* file_name);
+  int New(const char* file_name);
+  void Close();
+  void* Handle(int index);
+  int ReadImageInfo(int index);
+  int ReadImageData(void* data);
+  int WriteImageInfo();
+  int WriteImageData(void* data);
+};
+
+class imFormatRAS: public imFormat
+{
+public:
   imFormatRAS()
     :imFormat("RAS", 
               "Sun Raster File", 
@@ -176,23 +192,17 @@ public:
     {}
   ~imFormatRAS() {}
 
-  int Open(const char* file_name);
-  int New(const char* file_name);
-  void Close();
-  void* Handle(int index);
-  int ReadImageInfo(int index);
-  int ReadImageData(void* data);
-  int WriteImageInfo();
-  int WriteImageData(void* data);
+  imFileFormatBase* Create(void) const { return new imFileFormatRAS(this); }
   int CanWrite(const char* compression, int color_mode, int data_type) const;
 };
+
 
 void imFormatRegisterRAS(void)
 {
   imFormatRegister(new imFormatRAS());
 }
 
-int imFormatRAS::Open(const char* file_name)
+int imFileFormatRAS::Open(const char* file_name)
 {
   unsigned int dword_value;
 
@@ -238,7 +248,7 @@ int imFormatRAS::Open(const char* file_name)
   return IM_ERR_NONE;
 }
 
-int imFormatRAS::New(const char* file_name)
+int imFileFormatRAS::New(const char* file_name)
 {
   /* opens the binary file for writing with motorola byte order */
   handle = imBinFileNew(file_name);
@@ -252,12 +262,12 @@ int imFormatRAS::New(const char* file_name)
   return IM_ERR_NONE;
 }
 
-void imFormatRAS::Close()
+void imFileFormatRAS::Close()
 {
   imBinFileClose(handle);
 }
 
-void* imFormatRAS::Handle(int index)
+void* imFileFormatRAS::Handle(int index)
 {
   if (index == 0)
     return (void*)this->handle;
@@ -265,7 +275,7 @@ void* imFormatRAS::Handle(int index)
     return NULL;
 }
 
-int imFormatRAS::ReadImageInfo(int index)
+int imFileFormatRAS::ReadImageInfo(int index)
 {
   (void)index;
   unsigned int dword_value;
@@ -347,7 +357,7 @@ int imFormatRAS::ReadImageInfo(int index)
   return IM_ERR_NONE;
 }
 
-int imFormatRAS::WriteImageInfo()
+int imFileFormatRAS::WriteImageInfo()
 {
   this->file_data_type = IM_BYTE;
   this->file_color_mode = imColorModeSpace(this->user_color_mode);
@@ -420,7 +430,7 @@ int imFormatRAS::WriteImageInfo()
   return IM_ERR_NONE;
 }
 
-int imFormatRAS::ReadPalette()
+int imFileFormatRAS::ReadPalette()
 {
   unsigned char ras_colors[256 * 3];
 
@@ -451,7 +461,7 @@ int imFormatRAS::ReadPalette()
   return IM_ERR_NONE;
 }
 
-int imFormatRAS::WritePalette()
+int imFileFormatRAS::WritePalette()
 {
   int c;
   unsigned char ras_colors[256 * 3];
@@ -471,7 +481,7 @@ int imFormatRAS::WritePalette()
   return IM_ERR_NONE;
 }
 
-void imFormatRAS::FixRGB()
+void imFileFormatRAS::FixRGB()
 {
   int x;
   imbyte* byte_data = (imbyte*)this->line_buffer;
@@ -509,7 +519,7 @@ void imFormatRAS::FixRGB()
   }
 }
 
-int imFormatRAS::ReadImageData(void* data)
+int imFileFormatRAS::ReadImageData(void* data)
 {
   imCounterTotal(this->counter, this->height, "Reading RAS...");
 
@@ -541,7 +551,7 @@ int imFormatRAS::ReadImageData(void* data)
   return IM_ERR_NONE;
 }
 
-int imFormatRAS::WriteImageData(void* data)
+int imFileFormatRAS::WriteImageData(void* data)
 {
   imCounterTotal(this->counter, this->height, "Writing RAS...");
 

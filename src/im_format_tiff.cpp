@@ -590,7 +590,7 @@ static void iTIFFWriteAttributes(TIFF* tiff, imAttribTable* attrib_table)
   iTIFFWriteCustomTags(tiff, attrib_table);
 }
 
-class imFormatTIFF: public imFormat
+class imFileFormatTIFF: public imFileFormatBase
 {
   TIFF* tiff;
   int invert,      // must invert black and white reference
@@ -606,6 +606,22 @@ class imFormatTIFF: public imFormat
   int ReadTileline(void* line_buffer, int row, int plane);
 
 public:
+  imFileFormatTIFF(const imFormat* _iformat): imFileFormatBase(_iformat) {}
+  ~imFileFormatTIFF() {}
+
+  int Open(const char* file_name);
+  int New(const char* file_name);
+  void Close();
+  void* Handle(int index);
+  int ReadImageInfo(int index);
+  int ReadImageData(void* data);
+  int WriteImageInfo();
+  int WriteImageData(void* data);
+};
+
+class imFormatTIFF: public imFormat
+{
+public:
   imFormatTIFF()
     :imFormat("TIFF", 
               "Tagged Image File Format", 
@@ -616,14 +632,7 @@ public:
     {}
   ~imFormatTIFF() {}
 
-  int Open(const char* file_name);
-  int New(const char* file_name);
-  void Close();
-  void* Handle(int index);
-  int ReadImageInfo(int index);
-  int ReadImageData(void* data);
-  int WriteImageInfo();
-  int WriteImageData(void* data);
+  imFileFormatBase* Create(void) const { return new imFileFormatTIFF(this); }
   int CanWrite(const char* compression, int color_mode, int data_type) const;
 };
 
@@ -639,7 +648,7 @@ void imFormatRegisterTIFF(void)
   imFormatRegister(new imFormatTIFF());
 }
 
-int imFormatTIFF::Open(const char* file_name)
+int imFileFormatTIFF::Open(const char* file_name)
 {
   this->tiff = TIFFOpen(file_name, "r");
   if (this->tiff == NULL)
@@ -659,7 +668,7 @@ int imFormatTIFF::Open(const char* file_name)
   return IM_ERR_NONE;
 }
 
-int imFormatTIFF::New(const char* file_name)
+int imFileFormatTIFF::New(const char* file_name)
 {
   this->tiff = TIFFOpen(file_name, "w");
   if (this->tiff == NULL)
@@ -670,7 +679,7 @@ int imFormatTIFF::New(const char* file_name)
   return IM_ERR_NONE;
 }
 
-void imFormatTIFF::Close()
+void imFileFormatTIFF::Close()
 {
   if (this->tile_buf)
   {
@@ -682,7 +691,7 @@ void imFormatTIFF::Close()
   TIFFClose(this->tiff);
 }
 
-void* imFormatTIFF::Handle(int index)
+void* imFileFormatTIFF::Handle(int index)
 {
   if (index == 0)
     return (void*)this->tiff->tif_fd;
@@ -692,7 +701,7 @@ void* imFormatTIFF::Handle(int index)
     return NULL;
 }
                 
-int imFormatTIFF::ReadImageInfo(int index)
+int imFileFormatTIFF::ReadImageInfo(int index)
 {
   this->cpx_int = 0;
   this->invert = 0;
@@ -1011,7 +1020,7 @@ int imFormatTIFF::ReadImageInfo(int index)
   return IM_ERR_NONE;
 }
 
-int imFormatTIFF::WriteImageInfo()
+int imFileFormatTIFF::WriteImageInfo()
 {
   this->file_color_mode = this->user_color_mode;
   this->file_data_type = this->user_data_type;
@@ -1254,7 +1263,7 @@ static void iTIFFLabFix(void* line_buffer, int width, int data_type, int is_new)
   // Do NOT know how it is encoded for other data types.
 }
 
-int imFormatTIFF::ReadTileline(void* line_buffer, int row, int plane)
+int imFileFormatTIFF::ReadTileline(void* line_buffer, int row, int plane)
 {
   int t;
 
@@ -1295,7 +1304,7 @@ int imFormatTIFF::ReadTileline(void* line_buffer, int row, int plane)
   return 1;
 }
 
-int imFormatTIFF::ReadImageData(void* data)
+int imFileFormatTIFF::ReadImageData(void* data)
 {
   int count = imFileLineBufferCount(this);
 
@@ -1348,7 +1357,7 @@ int imFormatTIFF::ReadImageData(void* data)
   return IM_ERR_NONE;
 }
 
-int imFormatTIFF::WriteImageData(void* data)
+int imFileFormatTIFF::WriteImageData(void* data)
 {
   int count = imFileLineBufferCount(this);
 

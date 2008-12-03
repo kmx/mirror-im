@@ -98,13 +98,29 @@ static const char* iPNMCompTable[2] =
   "ASCII"
 };
 
-class imFormatPNM: public imFormat
+class imFileFormatPNM: public imFileFormatBase
 {
   imBinFile* handle;          /* the binary file handle */
   unsigned char image_type;
 
   void FixBinary();
 
+public:
+  imFileFormatPNM(const imFormat* _iformat): imFileFormatBase(_iformat) {}
+  ~imFileFormatPNM() {}
+
+  int Open(const char* file_name);
+  int New(const char* file_name);
+  void Close();
+  void* Handle(int index);
+  int ReadImageInfo(int index);
+  int ReadImageData(void* data);
+  int WriteImageInfo();
+  int WriteImageData(void* data);
+};
+
+class imFormatPNM: public imFormat
+{
 public:
   imFormatPNM()
     :imFormat("PNM", 
@@ -116,23 +132,17 @@ public:
     {}
   ~imFormatPNM() {}
 
-  int Open(const char* file_name);
-  int New(const char* file_name);
-  void Close();
-  void* Handle(int index);
-  int ReadImageInfo(int index);
-  int ReadImageData(void* data);
-  int WriteImageInfo();
-  int WriteImageData(void* data);
+  imFileFormatBase* Create(void) const { return new imFileFormatPNM(this); }
   int CanWrite(const char* compression, int color_mode, int data_type) const;
 };
+
 
 void imFormatRegisterPNM(void)
 {
   imFormatRegister(new imFormatPNM());
 }
 
-int imFormatPNM::Open(const char* file_name)
+int imFileFormatPNM::Open(const char* file_name)
 {
   unsigned char sig[2];
 
@@ -168,7 +178,7 @@ int imFormatPNM::Open(const char* file_name)
   return IM_ERR_NONE;
 }
 
-int imFormatPNM::New(const char* file_name)
+int imFileFormatPNM::New(const char* file_name)
 {
   /* opens the binary file for writing */
   handle = imBinFileNew(file_name);
@@ -180,12 +190,12 @@ int imFormatPNM::New(const char* file_name)
   return IM_ERR_NONE;
 }
 
-void imFormatPNM::Close()
+void imFileFormatPNM::Close()
 {
   imBinFileClose(handle);
 }
 
-void* imFormatPNM::Handle(int index)
+void* imFileFormatPNM::Handle(int index)
 {
   if (index == 0)
     return (void*)this->handle;
@@ -193,7 +203,7 @@ void* imFormatPNM::Handle(int index)
     return NULL;
 }
 
-int imFormatPNM::ReadImageInfo(int index)
+int imFileFormatPNM::ReadImageInfo(int index)
 {
   (void)index;
 
@@ -249,7 +259,7 @@ int imFormatPNM::ReadImageInfo(int index)
   return IM_ERR_NONE;
 }
 
-int imFormatPNM::WriteImageInfo()
+int imFileFormatPNM::WriteImageInfo()
 {
   this->file_data_type = this->user_data_type;
   this->file_color_mode = imColorModeSpace(this->user_color_mode);
@@ -328,7 +338,7 @@ int imFormatPNM::WriteImageInfo()
   return IM_ERR_NONE;
 }
 
-void imFormatPNM::FixBinary()
+void imFileFormatPNM::FixBinary()
 {
   unsigned char* buf = (unsigned char*)this->line_buffer;
   for (int b = 0; b < this->line_buffer_size; b++)
@@ -338,7 +348,7 @@ void imFormatPNM::FixBinary()
   }
 }
 
-int imFormatPNM::ReadImageData(void* data)
+int imFileFormatPNM::ReadImageData(void* data)
 {
   imCounterTotal(this->counter, this->height, "Reading PNM...");
 
@@ -414,7 +424,7 @@ int imFormatPNM::ReadImageData(void* data)
   return IM_ERR_NONE;
 }
 
-int imFormatPNM::WriteImageData(void* data)
+int imFileFormatPNM::WriteImageData(void* data)
 {
   imCounterTotal(this->counter, this->height, "Writing PNM...");
 

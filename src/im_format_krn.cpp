@@ -124,10 +124,26 @@ static const char* iKRNCompTable[1] =
   "NONE"
 };
 
-class imFormatKRN: public imFormat
+class imFileFormatKRN: public imFileFormatBase
 {
   imBinFile* handle;          /* the binary file handle */
 
+public:
+  imFileFormatKRN(const imFormat* _iformat): imFileFormatBase(_iformat) {}
+  ~imFileFormatKRN() {}
+
+  int Open(const char* file_name);
+  int New(const char* file_name);
+  void Close();
+  void* Handle(int index);
+  int ReadImageInfo(int index);
+  int ReadImageData(void* data);
+  int WriteImageInfo();
+  int WriteImageData(void* data);
+};
+
+class imFormatKRN: public imFormat
+{
 public:
   imFormatKRN()
     :imFormat("KRN", 
@@ -139,14 +155,7 @@ public:
     {}
   ~imFormatKRN() {}
 
-  int Open(const char* file_name);
-  int New(const char* file_name);
-  void Close();
-  void* Handle(int index);
-  int ReadImageInfo(int index);
-  int ReadImageData(void* data);
-  int WriteImageInfo();
-  int WriteImageData(void* data);
+  imFileFormatBase* Create(void) const { return new imFileFormatKRN(this); }
   int CanWrite(const char* compression, int color_mode, int data_type) const;
 };
 
@@ -155,7 +164,7 @@ void imFormatRegisterKRN(void)
   imFormatRegister(new imFormatKRN());
 }
 
-int imFormatKRN::Open(const char* file_name)
+int imFileFormatKRN::Open(const char* file_name)
 {
   char sig[9];
 
@@ -186,7 +195,7 @@ int imFormatKRN::Open(const char* file_name)
   return IM_ERR_NONE;
 }
 
-int imFormatKRN::New(const char* file_name)
+int imFileFormatKRN::New(const char* file_name)
 {
   /* opens the binary file for writing */
   handle = imBinFileNew(file_name);
@@ -203,12 +212,12 @@ int imFormatKRN::New(const char* file_name)
   return IM_ERR_NONE;
 }
 
-void imFormatKRN::Close()
+void imFileFormatKRN::Close()
 {
   imBinFileClose(handle);
 }
 
-void* imFormatKRN::Handle(int index)
+void* imFileFormatKRN::Handle(int index)
 {
   if (index == 0)
     return (void*)this->handle;
@@ -216,7 +225,7 @@ void* imFormatKRN::Handle(int index)
     return NULL;
 }
 
-int imFormatKRN::ReadImageInfo(int index)
+int imFileFormatKRN::ReadImageInfo(int index)
 {
   (void)index;
   this->file_color_mode = IM_GRAY|IM_TOPDOWN;
@@ -248,7 +257,7 @@ int imFormatKRN::ReadImageInfo(int index)
   return IM_ERR_NONE;
 }
 
-int imFormatKRN::WriteImageInfo()
+int imFileFormatKRN::WriteImageInfo()
 {
   this->file_data_type = this->user_data_type;
   this->file_color_mode = IM_GRAY|IM_TOPDOWN;
@@ -283,7 +292,7 @@ int imFormatKRN::WriteImageInfo()
   return IM_ERR_NONE;
 }
 
-int imFormatKRN::ReadImageData(void* data)
+int imFileFormatKRN::ReadImageData(void* data)
 {
   imCounterTotal(this->counter, this->height, "Reading KRN...");
 
@@ -318,7 +327,7 @@ int imFormatKRN::ReadImageData(void* data)
   return IM_ERR_NONE;
 }
 
-int imFormatKRN::WriteImageData(void* data)
+int imFileFormatKRN::WriteImageData(void* data)
 {
   imCounterTotal(this->counter, this->height, "Writing KRN...");
 

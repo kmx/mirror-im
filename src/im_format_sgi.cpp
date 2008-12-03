@@ -133,14 +133,30 @@ static const char* iSGICompTable[2] =
   "RLE"
 };
 
-class imFormatSGI: public imFormat
+class imFileFormatSGI: public imFileFormatBase
 {
   imBinFile* handle;          /* the binary file handle */
   unsigned char comp_type,    /* sgi compression information */
                 bpc;          /* bytes per channels */
-  unsigned int *starttab,    /* compression control buffer */
-               *lengthtab;   /* compression control buffer */
+  unsigned int *starttab,     /* compression control buffer */
+               *lengthtab;    /* compression control buffer */
 
+public:
+  imFileFormatSGI(const imFormat* _iformat): imFileFormatBase(_iformat) {}
+  ~imFileFormatSGI() {}
+
+  int Open(const char* file_name);
+  int New(const char* file_name);
+  void Close();
+  void* Handle(int index);
+  int ReadImageInfo(int index);
+  int ReadImageData(void* data);
+  int WriteImageInfo();
+  int WriteImageData(void* data);
+};
+
+class imFormatSGI: public imFormat
+{
 public:
   imFormatSGI()
     :imFormat("SGI", 
@@ -152,14 +168,7 @@ public:
     {}
   ~imFormatSGI() {}
 
-  int Open(const char* file_name);
-  int New(const char* file_name);
-  void Close();
-  void* Handle(int index);
-  int ReadImageInfo(int index);
-  int ReadImageData(void* data);
-  int WriteImageInfo();
-  int WriteImageData(void* data);
+  imFileFormatBase* Create(void) const { return new imFileFormatSGI(this); }
   int CanWrite(const char* compression, int color_mode, int data_type) const;
 };
 
@@ -168,7 +177,7 @@ void imFormatRegisterSGI(void)
   imFormatRegister(new imFormatSGI());
 }
 
-int imFormatSGI::Open(const char* file_name)
+int imFileFormatSGI::Open(const char* file_name)
 {
   unsigned short word_value;
 
@@ -213,7 +222,7 @@ int imFormatSGI::Open(const char* file_name)
   return IM_ERR_NONE;
 }
 
-int imFormatSGI::New(const char* file_name)
+int imFileFormatSGI::New(const char* file_name)
 {
   /* opens the binary file for writing with motorola byte order */
   handle = imBinFileNew(file_name);
@@ -230,14 +239,14 @@ int imFormatSGI::New(const char* file_name)
   return IM_ERR_NONE;
 }
 
-void imFormatSGI::Close()
+void imFileFormatSGI::Close()
 {
   if (this->starttab) free(this->starttab);
   if (this->lengthtab) free(this->lengthtab);
   imBinFileClose(handle);
 }
 
-void* imFormatSGI::Handle(int index)
+void* imFileFormatSGI::Handle(int index)
 {
   if (index == 0)
     return (void*)this->handle;
@@ -245,7 +254,7 @@ void* imFormatSGI::Handle(int index)
     return NULL;
 }
 
-int imFormatSGI::ReadImageInfo(int index)
+int imFileFormatSGI::ReadImageInfo(int index)
 {
   (void)index;
   unsigned short word_value, dimension, depth;
@@ -378,7 +387,7 @@ int imFormatSGI::ReadImageInfo(int index)
   return IM_ERR_NONE;
 }
 
-int imFormatSGI::WriteImageInfo()
+int imFileFormatSGI::WriteImageInfo()
 {
   unsigned int dword_value;
   unsigned short word_value;
@@ -487,7 +496,7 @@ int imFormatSGI::WriteImageInfo()
   return IM_ERR_NONE;
 }
 
-int imFormatSGI::ReadImageData(void* data)
+int imFileFormatSGI::ReadImageData(void* data)
 {
   int count = imFileLineBufferCount(this);
 
@@ -533,7 +542,7 @@ int imFormatSGI::ReadImageData(void* data)
   return IM_ERR_NONE;
 }
 
-int imFormatSGI::WriteImageData(void* data)
+int imFileFormatSGI::WriteImageData(void* data)
 {
   int count = imFileLineBufferCount(this);
 

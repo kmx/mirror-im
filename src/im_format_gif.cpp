@@ -932,7 +932,7 @@ static const char* iGIFCompTable[1] =
   "LZW"
 };
 
-class imFormatGIF: public imFormat
+class imFileFormatGIF: public imFileFormatBase
 {
   imBinFile* handle;
   iGIFData gif_data;
@@ -940,6 +940,22 @@ class imFormatGIF: public imFormat
   int GIFReadImageInfo();
   int GIFWriteImageInfo();
 
+public:
+  imFileFormatGIF(const imFormat* _iformat): imFileFormatBase(_iformat) {}
+  ~imFileFormatGIF() {}
+
+  int Open(const char* file_name);
+  int New(const char* file_name);
+  void Close();
+  void* Handle(int index);
+  int ReadImageInfo(int index);
+  int ReadImageData(void* data);
+  int WriteImageInfo();
+  int WriteImageData(void* data);
+};
+
+class imFormatGIF: public imFormat
+{
 public:
   imFormatGIF()
     :imFormat("GIF", 
@@ -951,14 +967,7 @@ public:
     {}
   ~imFormatGIF() {}
 
-  int Open(const char* file_name);
-  int New(const char* file_name);
-  void Close();
-  void* Handle(int index);
-  int ReadImageInfo(int index);
-  int ReadImageData(void* data);
-  int WriteImageInfo();
-  int WriteImageData(void* data);
+  imFileFormatBase* Create(void) const { return new imFileFormatGIF(this); }
   int CanWrite(const char* compression, int color_mode, int data_type) const;
 };
 
@@ -967,7 +976,7 @@ void imFormatRegisterGIF(void)
   imFormatRegister(new imFormatGIF());
 }
 
-int imFormatGIF::Open(const char* file_name)
+int imFileFormatGIF::Open(const char* file_name)
 {
   this->handle = imBinFileOpen(file_name);
   if (this->handle == NULL)
@@ -1044,7 +1053,7 @@ int imFormatGIF::Open(const char* file_name)
   return IM_ERR_NONE;
 }
 
-int imFormatGIF::New(const char* file_name)
+int imFileFormatGIF::New(const char* file_name)
 {
   this->handle = imBinFileNew(file_name);
   if (this->handle == NULL)
@@ -1070,7 +1079,7 @@ int imFormatGIF::New(const char* file_name)
   return IM_ERR_NONE;
 }
 
-void imFormatGIF::Close()
+void imFileFormatGIF::Close()
 {
   if (this->is_new && !imBinFileError(this->handle))
     imBinFileWrite(this->handle, (void*)";", 1, 1);
@@ -1078,7 +1087,7 @@ void imFormatGIF::Close()
   imBinFileClose(this->handle);
 }
 
-void* imFormatGIF::Handle(int index)
+void* imFileFormatGIF::Handle(int index)
 {
   if (index == 0)
     return (void*)this->handle;
@@ -1086,7 +1095,7 @@ void* imFormatGIF::Handle(int index)
     return NULL;
 }
 
-int imFormatGIF::GIFReadImageInfo()
+int imFileFormatGIF::GIFReadImageInfo()
 {
   imbyte byte_value;
   imushort word_value;
@@ -1165,7 +1174,7 @@ int imFormatGIF::GIFReadImageInfo()
   return IM_ERR_NONE;
 }
 
-int imFormatGIF::GIFWriteImageInfo()
+int imFileFormatGIF::GIFWriteImageInfo()
 {
   this->file_data_type = IM_BYTE;
   this->file_color_mode = imColorModeSpace(this->user_color_mode);
@@ -1235,7 +1244,7 @@ int imFormatGIF::GIFWriteImageInfo()
   return IM_ERR_NONE;
 }
 
-int imFormatGIF::ReadImageInfo(int index)
+int imFileFormatGIF::ReadImageInfo(int index)
 {
   imAttribTable* attrib_table = AttribTable();
   attrib_table->RemoveAll();
@@ -1316,7 +1325,7 @@ int imFormatGIF::ReadImageInfo(int index)
   return IM_ERR_NONE;
 }
 
-int imFormatGIF::WriteImageInfo()
+int imFileFormatGIF::WriteImageInfo()
 {
   this->file_color_mode = imColorModeSpace(this->user_color_mode);
   this->file_color_mode |= IM_TOPDOWN;
@@ -1396,7 +1405,7 @@ int imFormatGIF::WriteImageInfo()
   return iGIFCompressOutput(&gif_data, handle, gif_data.ClearCode);
 }
 
-int imFormatGIF::ReadImageData(void* data)
+int imFileFormatGIF::ReadImageData(void* data)
 {
   imCounterTotal(this->counter, this->height, "Reading GIF...");
 
@@ -1433,7 +1442,7 @@ int imFormatGIF::ReadImageData(void* data)
   return IM_ERR_NONE;
 }
 
-int imFormatGIF::WriteImageData(void* data)
+int imFileFormatGIF::WriteImageData(void* data)
 {
   imCounterTotal(this->counter, this->height, "Writing GIF...");
 

@@ -207,7 +207,7 @@ static const char* iTGACompTable[2] =
   "RLE"
 };
 
-class imFormatTGA: public imFormat
+class imFileFormatTGA: public imFileFormatBase
 {
   imBinFile* handle;          /* the binary file handle */
   unsigned char id_lenght;
@@ -220,6 +220,22 @@ class imFormatTGA: public imFormat
   int SaveExtensionArea();
 
 public:
+  imFileFormatTGA(const imFormat* _iformat): imFileFormatBase(_iformat) {}
+  ~imFileFormatTGA() {}
+
+  int Open(const char* file_name);
+  int New(const char* file_name);
+  void Close();
+  void* Handle(int index);
+  int ReadImageInfo(int index);
+  int ReadImageData(void* data);
+  int WriteImageInfo();
+  int WriteImageData(void* data);
+};
+
+class imFormatTGA: public imFormat
+{
+public:
   imFormatTGA()
     :imFormat("TGA", 
               "Truevision Graphics Adapter File", 
@@ -230,14 +246,7 @@ public:
     {}
   ~imFormatTGA() {}
 
-  int Open(const char* file_name);
-  int New(const char* file_name);
-  void Close();
-  void* Handle(int index);
-  int ReadImageInfo(int index);
-  int ReadImageData(void* data);
-  int WriteImageInfo();
-  int WriteImageData(void* data);
+  imFileFormatBase* Create(void) const { return new imFileFormatTGA(this); }
   int CanWrite(const char* compression, int color_mode, int data_type) const;
 };
 
@@ -246,7 +255,7 @@ void imFormatRegisterTGA(void)
   imFormatRegister(new imFormatTGA());
 }
 
-int imFormatTGA::Open(const char* file_name)
+int imFileFormatTGA::Open(const char* file_name)
 {
   /* opens the binary file for reading with intel byte order */
   handle = imBinFileOpen(file_name);
@@ -294,7 +303,7 @@ int imFormatTGA::Open(const char* file_name)
   return IM_ERR_NONE;
 }
 
-int imFormatTGA::New(const char* file_name)
+int imFileFormatTGA::New(const char* file_name)
 {
   /* opens the binary file for writing with intel byte order */
   handle = imBinFileNew(file_name);
@@ -306,12 +315,12 @@ int imFormatTGA::New(const char* file_name)
   return IM_ERR_NONE;
 }
 
-void imFormatTGA::Close()
+void imFileFormatTGA::Close()
 {
   imBinFileClose(handle);
 }
 
-void* imFormatTGA::Handle(int index)
+void* imFileFormatTGA::Handle(int index)
 {
   if (index == 0)
     return (void*)this->handle;
@@ -319,7 +328,7 @@ void* imFormatTGA::Handle(int index)
     return NULL;
 }
 
-int imFormatTGA::ReadImageInfo(int index)
+int imFileFormatTGA::ReadImageInfo(int index)
 {
   (void)index;
   unsigned char byte_value;
@@ -436,7 +445,7 @@ int imFormatTGA::ReadImageInfo(int index)
   return IM_ERR_NONE;
 }
 
-int imFormatTGA::WriteImageInfo()
+int imFileFormatTGA::WriteImageInfo()
 {
   unsigned char byte_value;
   unsigned short word_value;
@@ -487,7 +496,7 @@ int imFormatTGA::WriteImageInfo()
 
   int length = 0;
   const char* desc_attrib = (const char*)attrib_table->Get("Title", NULL, &length);
-  if (desc)
+  if (desc_attrib)
   {
     if (length > 255)
       this->id_lenght = 255;
@@ -600,7 +609,7 @@ static long iTGARGB2Color(int c, unsigned char *colors, int map_bpp)
   return imColorEncode(r, g, b);
 }
 
-int imFormatTGA::ReadPalette()
+int imFileFormatTGA::ReadPalette()
 {
   int map_size = imFileLineSizeAligned(this->palette_count, this->map_bpp, 1);
   unsigned char* tga_colors = (unsigned char*) malloc(map_size);
@@ -622,7 +631,7 @@ int imFormatTGA::ReadPalette()
   return 1;
 }
 
-int imFormatTGA::WritePalette()
+int imFileFormatTGA::WritePalette()
 {
   unsigned char tga_color[256*3];
   
@@ -642,7 +651,7 @@ int imFormatTGA::WritePalette()
   return 1;
 }
 
-int imFormatTGA::LoadExtensionArea()
+int imFileFormatTGA::LoadExtensionArea()
 {
   unsigned int dword_value;
   imBinFileSeekFrom(handle, -26);  
@@ -807,7 +816,7 @@ static void iGetRational(float fvalue, int *num, int *den)
 	*num = imRound(fvalue);
 }
 
-int imFormatTGA::SaveExtensionArea()
+int imFileFormatTGA::SaveExtensionArea()
 {
   unsigned int dword_value;
   unsigned short word_value;
@@ -971,7 +980,7 @@ int imFormatTGA::SaveExtensionArea()
   return 1;
 }
 
-void imFormatTGA::FixRGB()
+void imFileFormatTGA::FixRGB()
 {
   int x;
   imbyte* byte_data = (imbyte*)this->line_buffer;
@@ -1010,7 +1019,7 @@ void imFormatTGA::FixRGB()
   }
 }
 
-int imFormatTGA::ReadImageData(void* data)
+int imFileFormatTGA::ReadImageData(void* data)
 {
   imCounterTotal(this->counter, this->height, "Reading TGA...");
 
@@ -1044,7 +1053,7 @@ int imFormatTGA::ReadImageData(void* data)
   return IM_ERR_NONE;
 }
 
-int imFormatTGA::WriteImageData(void* data)
+int imFileFormatTGA::WriteImageData(void* data)
 {
   imCounterTotal(this->counter, this->height, "Writing TGA...");
 
