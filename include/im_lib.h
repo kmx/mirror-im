@@ -31,7 +31,7 @@ extern "C" {
  */
 #define IM_AUTHOR "Antonio Scuri"
 #define IM_COPYRIGHT "Copyright (C) 1994-2008 Tecgraf, PUC-Rio."
-#define IM_VERSION "3.4.0"
+#define IM_VERSION "3.4"
 #define IM_VERSION_NUMBER 304000
 #define IM_VERSION_DATE "2008/10/14"
 #define IM_DESCRIPTION "Image Representation, Storage, Capture and Processing"
@@ -39,7 +39,7 @@ extern "C" {
 /** @} */
 
 
-/** Returns the library current version. Returns the definition IM_VERSION.
+/** Returns the library current version. Returns the definition IM_VERSION plus the bug fix number.
  *
  * \verbatim im.Version() -> version: string [in Lua 5] \endverbatim
  * \ingroup lib */
@@ -51,7 +51,7 @@ const char* imVersion(void);
  * \ingroup lib */
 const char* imVersionDate(void);
 
-/** Returns the library current version number. Returns the definition IM_VERSION_NUMBER. \n
+/** Returns the library current version number. Returns the definition IM_VERSION_NUMBER plus the bug fix number. \n
  * Can be compared in run time with IM_VERSION_NUMBER to compare compiled and linked versions of the library.
  *
  * \verbatim im.VersionNumber() -> version: number [in Lua 5] \endverbatim

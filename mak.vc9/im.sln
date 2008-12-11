@@ -26,11 +26,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "imlua_process5", "imlua_pro
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "im_ecw", "im_ecw.vcproj", "{CB86E507-6B6C-4FDF-9B6D-27AA123AE463}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "imlab", "..\..\imlab\mak.vc9\imlab.vcproj", "{C0E4757A-8A78-48C1-B507-E2A95AA18B25}"
-	ProjectSection(ProjectDependencies) = postProject
-		{5A761929-07C3-48BD-8E4A-B37EC5C72C42} = {5A761929-07C3-48BD-8E4A-B37EC5C72C42}
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -110,14 +105,6 @@ Global
 		{CB86E507-6B6C-4FDF-9B6D-27AA123AE463}.Release|Win32.ActiveCfg = Debug|Win32
 		{CB86E507-6B6C-4FDF-9B6D-27AA123AE463}.Release|Win32.Build.0 = Debug|Win32
 		{CB86E507-6B6C-4FDF-9B6D-27AA123AE463}.Release|x64.ActiveCfg = Debug|Win32
-		{C0E4757A-8A78-48C1-B507-E2A95AA18B25}.Debug|Win32.ActiveCfg = Debug|Win32
-		{C0E4757A-8A78-48C1-B507-E2A95AA18B25}.Debug|Win32.Build.0 = Debug|Win32
-		{C0E4757A-8A78-48C1-B507-E2A95AA18B25}.Debug|x64.ActiveCfg = Debug|x64
-		{C0E4757A-8A78-48C1-B507-E2A95AA18B25}.Debug|x64.Build.0 = Debug|x64
-		{C0E4757A-8A78-48C1-B507-E2A95AA18B25}.Release|Win32.ActiveCfg = Release|Win32
-		{C0E4757A-8A78-48C1-B507-E2A95AA18B25}.Release|Win32.Build.0 = Release|Win32
-		{C0E4757A-8A78-48C1-B507-E2A95AA18B25}.Release|x64.ActiveCfg = Release|x64
-		{C0E4757A-8A78-48C1-B507-E2A95AA18B25}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
