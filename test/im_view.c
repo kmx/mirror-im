@@ -6,6 +6,7 @@
 
     Example: im_view test.tif
 
+    
   Click on image to open another file.
 */
 
@@ -17,6 +18,7 @@
 
 #include <stdio.h>
 #include <string.h>
+
 
 static int disable_repaint = 0; /* used to optimize repaint, while opening a new file */
 
