@@ -67,10 +67,18 @@ function ShowImage(file_name)
     local image = dlg.image
     
     if (not canvas) then return end
+    
+    -- posy is top-down, CD is bottom-top.
+    -- invert scroll reference (YMAX-DY - POSY).
+    y = self.ymax-self.dy - self.posy
+    if (y < 0) then y = 0 end
+    
 
     canvas:Activate()
     canvas:Clear()
-    image:cdCanvasPutImageRect(canvas, 0, 0, image:Width(), image:Height(), 0, 0, 0, 0)
+    x = -self.posx
+    y = -y
+    image:cdCanvasPutImageRect(canvas, x, y, image:Width(), image:Height(), 0, 0, 0, 0)
     canvas:Flush()
     
     return iup.DEFAULT
@@ -91,10 +99,27 @@ function ShowImage(file_name)
 
   
   -- Set the Canvas inicial size (IUP will retain this value).
-  cnv.rastersize = string.format("%dx%d", image:Width(), image:Height())
+  w = image:Width()
+  h = image:Height()
+  if (w > 800) then w = 800 end
+  if (h > 600) then h = 600 end
+  cnv.rastersize = string.format("%dx%d", w, h)
+  cnv.border = "no"
+  cnv.scrollbar = "yes"  
+  cnv.xmax = image:Width()-1
+  cnv.ymax = image:Height()-1
+  
+  function cnv:resize_cb(w, h)
+    self.dx = w
+    self.dy = h
+    self.posx = self.posx -- needed only in IUP 2.x
+    self.posy = self.posy
+  end
   
   dlg = iup.dialog{cnv}
   dlg.title = file_name
+  dlg.cnv = cnv
+  dlg.image = image
   
   function dlg:close_cb()
     local canvas = self.canvas
@@ -106,15 +131,15 @@ function ShowImage(file_name)
     return iup.CLOSE
   end
 
+  function dlg:map_cb()
+    canvas = cd.CreateCanvas(cd.IUP, self.cnv)
+    self.canvas = canvas
+    self.posx = 0 -- needed only in IUP 2.x
+    self.posy = 0
+  end
+  
   dlg:show()
-
-  canvas = cd.CreateCanvas(cd.IUP, cnv)
-  assert(canvas)
-
-  dlg.canvas = canvas
-  dlg.image = image
-
-  cnv:action()
+  cnv.rastersize = nil -- to remove the minimum limit
   
   return true
 end
