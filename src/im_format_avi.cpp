@@ -59,7 +59,7 @@ class imFileFormatAVI: public imFileFormatBase
 
   void ReadPalette(unsigned char* bmp_colors);
   void WritePalette(unsigned char* bmp_colors);
-  void FixRGB(int bpp);
+  void FixRGBOrder(int bpp);
   void InitMasks(imDib* dib);
 
 public:
@@ -282,7 +282,19 @@ int imFileFormatAVI::ReadImageInfo(int index)
   this->line_buffer_extra = 4; // room enough for padding
 
   /* prepares to read data from the stream */
-  frame = AVIStreamGetFrameOpen(stream, NULL);
+  if (bpp == 32)
+  {
+    BITMAPINFOHEADER info;
+    memset(&info, 0, sizeof(BITMAPINFOHEADER));
+    info.biSize = sizeof(BITMAPINFOHEADER);
+    info.biWidth = width;
+    info.biHeight = height;
+    info.biPlanes = 1;
+    info.biBitCount = (WORD)bpp;
+    frame = AVIStreamGetFrameOpen(stream, &info);
+  }
+  else
+    frame = AVIStreamGetFrameOpen(stream, NULL);
   if (!frame)
     return IM_ERR_ACCESS;
 
@@ -504,7 +516,7 @@ void imFileFormatAVI::InitMasks(imDib* dib)
   }
 }
 
-void imFileFormatAVI::FixRGB(int bpp)
+void imFileFormatAVI::FixRGBOrder(int bpp)
 {
   int x;
 
@@ -532,13 +544,17 @@ void imFileFormatAVI::FixRGB(int bpp)
     break;
   case 32:
     {
+      /* inverts the DWORD values if not intel */
+      if (imBinCPUByteOrder() == IM_BIGENDIAN)
+        imBinSwapBytes4(this->line_buffer, this->width);
+
       unsigned int* dword_data = (unsigned int*)this->line_buffer;
       imbyte* byte_data = (imbyte*)this->line_buffer;
 
       for (x = 0; x < this->width; x++)
       {
         unsigned int dword_value = dword_data[x];
-        int c = x*3;
+        int c = x*4;
         byte_data[c]   = (imbyte)((rmask & dword_value) >> roff);
         byte_data[c+1] = (imbyte)((gmask & dword_value) >> goff);
         byte_data[c+2] = (imbyte)((bmask & dword_value) >> boff);
@@ -586,7 +602,7 @@ int imFileFormatAVI::ReadImageData(void* data)
     bits += dib->line_size;
 
     if (dib->bmih->biBitCount > 8)
-      FixRGB(dib->bmih->biBitCount);
+      FixRGBOrder(dib->bmih->biBitCount);
 
     imFileLineBufferRead(this, data, row, 0);
 
@@ -623,7 +639,7 @@ int imFileFormatAVI::WriteImageData(void* data)
     imFileLineBufferWrite(this, data, row, 0);
 
     if (dib->bmih->biBitCount > 8)
-      FixRGB(dib->bmih->biBitCount);
+      FixRGBOrder(dib->bmih->biBitCount);
 
     CopyMemory(bits, this->line_buffer, dib->line_size);
     bits += dib->line_size;
