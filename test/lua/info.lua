@@ -145,5 +145,5 @@ function main(arg)
   return 1
 end
 
---main(arg)
-PrintImageInfo("lena.jpg")
+main(arg)
+--PrintImageInfo("lena.jpg")
