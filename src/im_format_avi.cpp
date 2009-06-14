@@ -282,7 +282,7 @@ int imFileFormatAVI::ReadImageInfo(int index)
   this->line_buffer_extra = 4; // room enough for padding
 
   /* prepares to read data from the stream */
-  if (bpp == 32)
+  if (bpp == 32 || bpp == 16)
   {
     BITMAPINFOHEADER info;
     memset(&info, 0, sizeof(BITMAPINFOHEADER));
@@ -295,6 +295,7 @@ int imFileFormatAVI::ReadImageInfo(int index)
   }
   else
     frame = AVIStreamGetFrameOpen(stream, NULL);
+
   if (!frame)
     return IM_ERR_ACCESS;
 
