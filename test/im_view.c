@@ -147,13 +147,13 @@ static Ihandle* CreateDialog(void)
   return iup_dialog;
 }
 
-#include "im_format_avi.h"
+//#include "im_format_avi.h"
 
 int main(int argc, char* argv[])
 {
   Ihandle* dlg;
 
-  imFormatRegisterAVI();
+  //imFormatRegisterAVI();
   IupOpen(&argc, &argv);
 
   dlg = CreateDialog();
