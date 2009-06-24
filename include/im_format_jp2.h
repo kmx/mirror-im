@@ -21,7 +21,8 @@ extern "C" {
  * \par
  * You must link the application with "im_jp2.lib" 
  * and you must call the function \ref imFormatRegisterJP2 once 
- * to register the format into the IM core library. \n
+ * to register the format into the IM core library. 
+ * In Lua call require"imlua_jp2". \n
  * \par
  * Access to the JPEG2000 file format uses libJasper version 1.900.1 \n
  * http://www.ece.uvic.ca/~mdadams/jasper                             \n

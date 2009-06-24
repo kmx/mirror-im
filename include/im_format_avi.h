@@ -21,7 +21,8 @@ extern "C" {
  * When writing a new file you must use an ".avi" extension, or the Windows API will fail. \n
  * You must link the application with "im_avi.lib" 
  * and you must call the function \ref imFormatRegisterAVI once 
- * to register the format into the IM core library. \n
+ * to register the format into the IM core library. 
+ * In Lua call require"imlua_avi". \n
  * Depends also on the VFW library (vfw32.lib).
  * When using the "im_avi.dll" this extra library is not necessary. \n
  * If using Cygwin or MingW must link with "-lvfw32". 

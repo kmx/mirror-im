@@ -21,7 +21,8 @@ extern "C" {
  * Access to the WMV format uses Windows Media SDK. Available in Windows Only. \n
  * You must link the application with "im_wmv.lib" 
  * and you must call the function \ref imFormatRegisterWMV once 
- * to register the format into the IM core library. \n
+ * to register the format into the IM core library. 
+ * In Lua call require"imlua_wmv". \n
  * Depends also on the WMF SDK (wmvcore.lib).
  * When using the "im_wmv.dll" this extra library is not necessary.
  * \par

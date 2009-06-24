@@ -21,7 +21,8 @@ extern "C" {
  * \par
  * Several image processing functions based on the \ref imImage structure.
  * \par
- * You must link the application with "im_process.lib/.a/.so". \n
+ * You must link the application with "im_process.lib/.a/.so". 
+ * In Lua call require"imlua_process". \n
  * Some complex operations use the \ref counter.\n
  * There is no check on the input/output image properties, 
  * check each function documentation before using it.
