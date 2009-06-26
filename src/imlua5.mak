@@ -12,4 +12,5 @@ INCLUDES = lua5
 
 USE_IM = YES
 USE_LUA51 = YES
+NO_LUALINK = Yes
 IM = ..
