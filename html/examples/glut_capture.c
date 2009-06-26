@@ -4,7 +4,7 @@
         OpenGL for drawing
         IM for image I/O and capture
 
-  Needs "glut32.lib", "vfw32.lib", "strmiids.lib", 
+  Needs "opengl32.lib", "glu32.lib", "glut32.lib", "vfw32.lib", "strmiids.lib", 
         "im.lib", "im_capture.lib", "im_avi.lib" and "im_process.lib".
 
    Control Keys:
@@ -146,7 +146,10 @@ void idle(void)
       capture_process(user_key, image, back_image);
 
       if (video_file)
+      {
+        imFileWriteImageInfo(video_file, image->width, image->height, IM_RGB, IM_BYTE);
         imFileWriteImageData(video_file, image->data[0]);
+      }
     }
 
     imConvertPacking(image->data[0], gl_data, image->width, image->height, image->depth, image->data_type, 0);
@@ -344,7 +347,7 @@ int initcapture(void)
     printf("No capture device found.\n"); return 0;
   }
 
-  /* conects the device */
+  /* connects the device */
   if (!imVideoCaptureConnect(myVideoCap, getcapture())) {
     imVideoCaptureDestroy(myVideoCap);
     printf("Can not connect to capture device.\n");  return 0;

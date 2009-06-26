@@ -4,13 +4,15 @@
 
   Needs "im.lib".
 
-  Usage: im_copy <input_file_name> <output_file_name> [<output_format>]
+  Usage: im_copy <input_file_name> <output_file_name> [<output_format> [<output_compression]]
 
     Example: im_copy test.tif test_proc.tif
 */
 
 #include <im.h>
 #include <im_util.h>
+#include <im_format_avi.h>
+#include <im_format_wmv.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,6 +53,9 @@ int main(int argc, char* argv[])
     return 0;
   }
 
+//  imFormatRegisterAVI();
+//  imFormatRegisterWMV();
+
   void* data = NULL;
   imFile* ifile = NULL;
   imFile* ofile = NULL;
@@ -65,21 +70,30 @@ int main(int argc, char* argv[])
   int image_count;
   imFileGetInfo(ifile, format, compression, &image_count);
 
-  ofile = imFileNew(argv[2], argv[3]? argv[3]: format, &error);
+  ofile = imFileNew(argv[2], (argc < 3)? format: argv[3], &error);
   if (!ofile)
     goto man_error;
 
-  if (!argv[3])
+  if (argc < 4)
     imFileSetInfo(ofile, compression);
+  else
+    imFileSetInfo(ofile, argv[4]);
 
   for (int i = 0; i < image_count; i++)
   {
+    int size, max_size = 0;
     int width, height, color_mode, data_type;
     error = imFileReadImageInfo(ifile, i, &width, &height, &color_mode, &data_type);
     if (error != IM_ERR_NONE)
       goto man_error;
 
-    data = malloc(imImageDataSize(width, height, color_mode, data_type));
+    size = imImageDataSize(width, height, color_mode, data_type);
+
+    if (size > max_size)
+    {
+      data = realloc(data, size);
+      max_size = size;
+    }
 
     error = imFileReadImageData(ifile, data, 0, -1);
     if (error != IM_ERR_NONE)
@@ -96,6 +110,14 @@ int main(int argc, char* argv[])
       imFileSetAttribute(ofile, attrib_list[a], attrib_data_type, attrib_count, attrib_data);
     }
 
+    if (imColorModeSpace(color_mode) == IM_MAP)
+    {
+      long palette[256];
+      int palette_count;
+      imFileGetPalette(ifile, palette, &palette_count);
+      imFileSetPalette(ifile, palette, palette_count);
+    }
+
     error = imFileWriteImageInfo(ofile, width, height, color_mode, data_type);
     if (error != IM_ERR_NONE)
       goto man_error;
@@ -103,7 +125,10 @@ int main(int argc, char* argv[])
     error = imFileWriteImageData(ofile, data);
     if (error != IM_ERR_NONE)
       goto man_error;
+
+    printf(".");
   }
+  printf("done");
 
   free(data);
   imFileClose(ifile);  

@@ -10,8 +10,13 @@
 #include <im.h>
 #include <im_util.h>
 #include <im_binfile.h>
+#include <im_format_jp2.h>
+#include <im_format_avi.h>
+#include <im_format_wmv.h>
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <memory.h>
 
 void PrintError(int error)
 {
@@ -187,10 +192,12 @@ void PrintImageInfo(const char* file_name)
   imFileClose(ifile);  
 }
 
-#include <windows.h>
-
 int main(int argc, char* argv[])
 {
+//  imFormatRegisterJP2();
+//  imFormatRegisterAVI();
+//  imFormatRegisterWMV();   
+
   if (argc < 2)
   {
     printf("Invalid number of arguments.\n");
@@ -201,3 +208,4 @@ int main(int argc, char* argv[])
 
   return 1;
 }
+

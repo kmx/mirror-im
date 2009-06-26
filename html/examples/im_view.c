@@ -6,6 +6,7 @@
 
     Example: im_view test.tif
 
+    
   Click on image to open another file.
 */
 
@@ -18,6 +19,7 @@
 #include <stdio.h>
 #include <string.h>
 
+
 static int disable_repaint = 0; /* used to optimize repaint, while opening a new file */
 
 static void PrintError(int error)
@@ -25,25 +27,25 @@ static void PrintError(int error)
   switch (error)
   {
   case IM_ERR_OPEN:
-    printf("Error Opening File.\n");
+    IupMessage("IM", "Error Opening File.");
     break;
   case IM_ERR_MEM:
-    printf("Insuficient memory.\n");
+    IupMessage("IM", "Insuficient memory.");
     break;
   case IM_ERR_ACCESS:
-    printf("Error Accessing File.\n");
+    IupMessage("IM", "Error Accessing File.");
     break;
   case IM_ERR_DATA:
-    printf("Image type not Suported.\n");
+    IupMessage("IM", "Image type not Suported.");
     break;
   case IM_ERR_FORMAT:
-    printf("Invalid Format.\n");
+    IupMessage("IM", "Invalid Format.");
     break;
   case IM_ERR_COMPRESS:
-    printf("Invalid or unsupported compression.\n");
+    IupMessage("IM", "Invalid or unsupported compression.");
     break;
   default:
-    printf("Unknown Error.\n");
+    IupMessage("IM", "Unknown Error.");
   }
 }
 
@@ -55,19 +57,19 @@ static int cbRepaint(Ihandle* iup_canvas)
   if (!cd_canvas || disable_repaint)
     return IUP_DEFAULT;
 
-  cdActivate(cd_canvas);
-  cdClear();
+  cdCanvasActivate(cd_canvas);
+  cdCanvasClear(cd_canvas);
 
   if (!image)
     return IUP_DEFAULT;
 
   imcdCanvasPutImage(cd_canvas, image, 0, 0, image->width, image->height, 0, 0, 0, 0);
   
-  cdFlush();
+  cdCanvasFlush(cd_canvas);
   
   return IUP_DEFAULT;
 }
-                              
+
 static void ShowImage(char* file_name, Ihandle* iup_dialog)
 {
   int error;
@@ -76,11 +78,8 @@ static void ShowImage(char* file_name, Ihandle* iup_dialog)
   IupSetAttribute(iup_dialog, "imImage", NULL);
 
   image = imFileImageLoadBitmap(file_name, 0, &error);
-  if (!image) 
-  {
-    PrintError(error);
-    return;
-  }
+  if (error) PrintError(error);
+  if (!image) return;
 
   IupSetAttribute(iup_dialog, "imImage", (char*)image);
   IupStoreAttribute(iup_dialog, "TITLE", file_name);
@@ -116,6 +115,9 @@ static int cbClose(Ihandle* iup_dialog)
   if (cd_canvas) cdKillCanvas(cd_canvas);
   if (image) imImageDestroy(image);
 
+  IupSetAttribute(iup_dialog, "cdCanvas", NULL);
+  IupSetAttribute(iup_dialog, "imImage", NULL);
+
   return IUP_CLOSE;
 }
 
@@ -145,11 +147,14 @@ static Ihandle* CreateDialog(void)
   return iup_dialog;
 }
 
+//#include "im_format_avi.h"
+
 int main(int argc, char* argv[])
 {
   Ihandle* dlg;
 
-  IupOpen();
+  //imFormatRegisterAVI();
+  IupOpen(&argc, &argv);
 
   dlg = CreateDialog();
 
