@@ -58,6 +58,12 @@ mingw3-dll:
 	@dlltool -d im_capture.def -D im_capture.dll -l ../lib/mingw3/libim_capture.a
 	@cd ../src
 
+mingw4-dll:                    
+	@echo Importing MingW stub library
+	@cd ../lib/dll
+	@dlltool -d im_capture.def -D im_capture.dll -l ../lib/mingw4/libim_capture.a
+	@cd ../src
+
 bc56-dll:                    
 	@echo Importing Bcc stub library
 	@d:/lng/cbuilderx/bin/implib -a ../lib/bc56/im_capture.lib ../lib/dll/im_capture.dll

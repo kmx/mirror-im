@@ -42,6 +42,7 @@ if "%1"=="dll"  goto dll
 goto end
 
 :dll
+call tecmake mingw4 "MF=im_capture" mingw4-dll
 call tecmake mingw3 "MF=im_capture" mingw3-dll
 call tecmake bc56 "MF=im_capture" bc56-dll
 REM call tecmake owc1 "MF=im_capture" owc1-dll
