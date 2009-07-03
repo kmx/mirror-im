@@ -16,10 +16,10 @@ extern "C" {
 
 /** \defgroup tiff TIFF - Tagged Image File Format
  * \section Description
- * 
+ *
  * \par
  * Copyright (c) 1986-1988, 1992 by Adobe Systems Incorporated. \n
- * Originally created by a group of companies, 
+ * Originally created by a group of companies,
  * the Aldus Corporation keeped the copyright until Aldus was aquired by Adobe. \n
  * TIFF Revision 6.0 Final — June 3, 1992 \n
  * http://www.adobe.com/Support/TechNotes.html
@@ -34,19 +34,19 @@ extern "C" {
 \verbatim
     Data Types: <all>
     Color Spaces: Gray, RGB, CMYK, YCbCr, Lab, XYZ, Map and Binary.
-    Compressions: 
+    Compressions:
       NONE - no compression  [default for IEEE Floating Point Data]
       CCITTRLE - CCITT modified Huffman RLE (binary only) [default for Binary]
       CCITTFAX3 - CCITT Group 3 fax         (binary only)
       CCITTFAX4 - CCITT Group 4 fax         (binary only)
       LZW - Lempel-Ziv & Welch  [default]
-      JPEG - ISO JPEG    [default for YCBCR] 
+      JPEG - ISO JPEG    [default for YCBCR]
       NEXT - NeXT 2-bit RLE (2 bpp only)
       CCITTRLEW - CCITT modified Huffman RLE with word alignment (binary only)
       RLE - Packbits (Macintosh RLE) [default for MAP]
       THUNDERSCAN - ThunderScan 4-bit RLE (only for 2 or 4 bpp)
       PIXARLOG - Pixar companded 11-bit ZIP (only byte, ushort and float)
-      DEFLATE - LZ77 variation (ZIP) 
+      DEFLATE - LZ77 variation (ZIP)
       ADOBE_DEFLATE - Adobe LZ77 variation
       SGILOG - SGI Log Luminance RLE for L and Luv (only byte, ushort and float) [default for XYZ]
       SGILOG24 - SGI Log 24-bit packed for Luv (only byte, ushort and float)
@@ -55,7 +55,7 @@ extern "C" {
     Components can be packed or not.
     Lines arranged from top down to bottom or bottom up to top.
     Handle(1) returns a TIFF* libTIFF structure.
- 
+
     Attributes:
       Photometric IM_USHORT (1) (when writing this will complement the color_mode information, for Mask, MinIsWhite, ITULab and ICCLab)
       ExtraSampleInfo IM_USHORT (1) (description of alpha channel: 0- uknown, 1- pre-multiplied, 2-normal)
@@ -63,7 +63,7 @@ extern "C" {
       ZIPQuality IM_INT (1) [1-9, default 6] (write only)
       ResolutionUnit (string) ["DPC", "DPI"]
       XResolution, YResolution IM_FLOAT (1)
-      Description, Author, Copyright, DateTime, DocumentName, 
+      Description, Author, Copyright, DateTime, DocumentName,
       PageName, TargetPrinter, Make, Model, Software, HostComputer (string)
       InkNames (strings separated by '0's)
       InkSet IM_USHORT (1)
@@ -77,7 +77,7 @@ extern "C" {
       YCbCrSubSampling IM_USHORT (2)
       YCbCrPositioning IM_USHORT (1)
       PageNumber IM_USHORT (2)
-      StoNits IM_FLOAT (1) 
+      StoNits IM_FLOAT (1)
       XPosition, YPosition IM_FLOAT (1)
       SMinSampleValue, SMaxSampleValue IM_FLOAT (1)
       HalftoneHints IM_USHORT (2)
@@ -102,7 +102,7 @@ extern "C" {
       SubIFD is handled only for DNG.
       Since LZW patent expired, LZW compression is enabled. LZW Copyright Unisys.
       libGeoTIFF can be used without XTIFF initialization. Use Handle(1) to obtain a TIFF*.
-      
+
     Changes:
       "tiff_jpeg.c" - commented "downsampled_output = TRUE" in 2 places.
       New file "tif_config.h" to match our needs.
@@ -113,7 +113,7 @@ void imFormatRegisterTIFF(void);
 
 /** \defgroup jpeg JPEG - JPEG File Interchange Format
  * \section Description
- * 
+ *
  * \par
  * ISO/IEC 10918 (1994, 1995, 1997, 1999)\n
  * http://www.jpeg.org/
@@ -132,31 +132,31 @@ void imFormatRegisterTIFF(void);
 \verbatim
     Data Types: Byte
     Color Spaces: Gray, RGB, CMYK and YCbCr (Binary Saved as Gray)
-    Compressions: 
+    Compressions:
       JPEG - ISO JPEG  [default]
     Only one image.
     No alpha channel.
     Internally the components are always packed.
     Internally the lines are arranged from top down to bottom.
-    Handle(1) returns jpeg_decompress_struct* when reading, and 
+    Handle(1) returns jpeg_decompress_struct* when reading, and
                       jpeg_compress_struct* when writing (libJPEG structures).
- 
+
     Attributes:
       AutoYCbCr IM_INT (1) (controls YCbCr auto conversion) default 1
       JPEGQuality IM_INT (1) [0-100, default 75] (write only)
       ResolutionUnit (string) ["DPC", "DPI"]
       XResolution, YResolution IM_FLOAT (1)
-      Interlaced (same as Progressive) IM_INT (1 | 0) default 0  
+      Interlaced (same as Progressive) IM_INT (1 | 0) default 0
       Description (string)
       (lots of Exif tags)
- 
+
     Changes to libJPEG:
       jdatadst.c - fflush and ferror replaced by macros JFFLUSH and JFERROR.
       jinclude.h - standard JFFLUSH and JFERROR definitions, and new macro HAVE_JFIO.
       jmorecfg.h - changed definition of INT32 to JINT32 for better compatibility.
       jdhuf.c - added support for OJPEG_SUPPORT in libTIFF.
       new file created: jconfig.h
- 
+
     Changes to libEXIF:
       new file config.h
       changed "exif-tag.c" to add new function
@@ -166,15 +166,15 @@ void imFormatRegisterTIFF(void);
     Comments:
       Other APPx markers are ignored.
       No thumbnail support.
-      RGB images are automatically converted to YCbCr when saved. 
-      Also YcbCr are converted to RGB when loaded. Use AutoYCbCr=0 to disable this behavior. 
+      RGB images are automatically converted to YCbCr when saved.
+      Also YcbCr are converted to RGB when loaded. Use AutoYCbCr=0 to disable this behavior.
 \endverbatim
  * \ingroup format */
 void imFormatRegisterJPEG(void);
 
 /** \defgroup png PNG - Portable Network Graphic Format
  * \section Description
- * 
+ *
  * \par
  * Access to the PNG file format uses libPNG version 1.2.22. \n
  * http://www.libpng.org                                    \n
@@ -185,19 +185,19 @@ void imFormatRegisterJPEG(void);
 \verbatim
     Data Types: Byte and UShort
     Color Spaces: Gray, RGB, MAP and Binary
-    Compressions: 
+    Compressions:
       DEFLATE - LZ77 variation (ZIP) [default]
     Only one image.
     Can have an alpha channel.
     Internally the components are always packed.
     Internally the lines are arranged from top down to bottom.
     Handle(1) returns png_structp libPNG structure.
- 
+
     Attributes:
       ZIPQuality IM_INT (1) [1-9, default 6] (write only)
       ResolutionUnit (string) ["DPC", "DPI"]
       XResolution, YResolution IM_FLOAT (1)
-      Interlaced (same as Progressive) IM_INT (1 | 0) default 0 
+      Interlaced (same as Progressive) IM_INT (1 | 0) default 0
       Gamma IM_FLOAT (1)
       WhitePoint IMFLOAT (2)
       PrimaryChromaticities  IMFLOAT (6)
@@ -206,7 +206,7 @@ void imFormatRegisterJPEG(void);
       TransparencyIndex IM_BYTE (1 or N)
       TransparentColor IM_BYTE (3)
       CalibrationName, CalibrationUnits (string)
-      CalibrationLimits IM_INT (2) 
+      CalibrationLimits IM_INT (2)
       CalibrationEquation IM_BYTE (1) [0-Linear,1-Exponential,2-Arbitrary,3-HyperbolicSine)]
       CalibrationParam (string) [params separated by '\\n']
       Title, Author, Description, Copyright, DateTime (string)
@@ -232,7 +232,7 @@ void imFormatRegisterPNG(void);
 
 /** \defgroup gif GIF - Graphics Interchange Format
  * \section Description
- * 
+ *
  * \par
  * Copyright (c) 1987,1988,1989,1990 CompuServe Incorporated. \n
  * GIF is a Service Mark property of CompuServe Incorporated. \n
@@ -248,27 +248,27 @@ void imFormatRegisterPNG(void);
 \verbatim
     Data Types: Byte
     Color Spaces: MAP only, (Gray and Binary saved as MAP)
-    Compressions: 
+    Compressions:
       LZW - Lempel-Ziv & Welch      [default]
     Can have more than one image.
     No alpha channel.
     Internally the lines are arranged from top down to bottom.
- 
+
     Attributes:
       ScreenHeight, ScreenWidth IM_USHORT (1) screen size [default to the first image size]
-      Interlaced IM_INT (1 | 0) default 0 
+      Interlaced IM_INT (1 | 0) default 0
       Description (string)
       TransparencyIndex IM_BYTE (1)
       XScreen, YScreen IM_USHORT (1) screen position
       UserInput IM_BYTE (1) [1, 0]
       Disposal (string) [UNDEF, LEAVE, RBACK, RPREV]
-      Delay IM_USHORT (1)
-      Iterations IM_USHORT (1) (NETSCAPE2.0 Application Extension)
+      Delay IM_USHORT (1) [time to wait betweed frames in 1/100 of a second]
+      Iterations IM_USHORT (1) (NETSCAPE2.0 Application Extension) [The number of times to repeat the animation. 0 means to repeat forever. ]
 
     Comments:
       Attributes after the last image are ignored.
       Reads GIF87 and GIF89, but writes GIF89 always.
-      Ignored attributes: Background Color Index, Pixel Aspect Ratio, 
+      Ignored attributes: Background Color Index, Pixel Aspect Ratio,
                           Plain Text Extensions, Application Extensions...
 \endverbatim
  * \ingroup format */
@@ -276,7 +276,7 @@ void imFormatRegisterGIF(void);
 
 /** \defgroup bmp BMP - Windows Device Independent Bitmap
  * \section Description
- * 
+ *
  * \par
  * Windows Copyright Microsoft Corporation.
  * \par
@@ -287,14 +287,14 @@ void imFormatRegisterGIF(void);
 \verbatim
     Data Types: Byte
     Color Spaces: RGB, MAP and Binary (Gray saved as MAP)
-    Compressions: 
+    Compressions:
       NONE - no compression [default]
       RLE  - Run Lenght Encoding (only for MAP and Gray)
     Only one image.
     Can have an alpha channel (only for RGB)
     Internally the components are always packed.
     Lines arranged from top down to bottom or bottom up to top. But are saved always as bottom up.
- 
+
     Attributes:
       ResolutionUnit (string) ["DPC", "DPI"]
       XResolution, YResolution IM_FLOAT (1)
@@ -308,7 +308,7 @@ void imFormatRegisterBMP(void);
 
 /** \defgroup ras RAS - Sun Raster File
  * \section Description
- * 
+ *
  * \par
  * Copyright Sun Corporation.
  * \par
@@ -319,14 +319,14 @@ void imFormatRegisterBMP(void);
 \verbatim
     Data Types: Byte
     Color Spaces: Gray, RGB, MAP and Binary
-    Compressions: 
+    Compressions:
       NONE - no compression   [default]
       RLE  - Run Lenght Encoding
     Only one image.
     Can have an alpha channel (only for IM_RGB)
     Internally the components are always packed.
     Internally the lines are arranged from top down to bottom.
- 
+
     Attributes:
       none
 \endverbatim
@@ -335,7 +335,7 @@ void imFormatRegisterRAS(void);
 
 /** \defgroup led LED - IUP image in LED
  * \section Description
- * 
+ *
  * \par
  * Copyright Tecgraf/PUC-Rio and PETROBRAS/CENPES.
  * \par
@@ -346,12 +346,12 @@ void imFormatRegisterRAS(void);
 \verbatim
     Data Types: Byte
     Color Spaces: MAP only (Gray and Binary saved as MAP)
-    Compressions: 
+    Compressions:
       NONE - no compression  [default]
-    Only one image. 
+    Only one image.
     No alpha channel.
     Internally the lines are arranged from top down to bottom.
- 
+
     Attributes:
       none
 
@@ -363,7 +363,7 @@ void imFormatRegisterLED(void);
 
 /** \defgroup sgi SGI - Silicon Graphics Image File Format
  * \section Description
- * 
+ *
  * \par
  * SGI is a trademark of Silicon Graphics, Inc.
  * \par
@@ -374,14 +374,14 @@ void imFormatRegisterLED(void);
 \verbatim
     Data Types: Byte and UShort
     Color Spaces: Gray and RGB (Binary saved as Gray, MAP with fixed palette when reading only)
-    Compressions: 
+    Compressions:
       NONE - no compression  [default]
       RLE  - Run Lenght Encoding
     Only one image.
     Can have an alpha channel (only for IM_RGB)
     Internally the components are always packed.
     Internally the lines are arranged from bottom up to top.
- 
+
     Attributes:
       Description (string)
 \endverbatim
@@ -390,7 +390,7 @@ void imFormatRegisterSGI(void);
 
 /** \defgroup pcx PCX - ZSoft Picture
  * \section Description
- * 
+ *
  * \par
  * Copyright ZSoft Corporation. \n
  * ZSoft (1988) PCX Technical Reference Manual.
@@ -402,14 +402,14 @@ void imFormatRegisterSGI(void);
 \verbatim
     Data Types: Byte
     Color Spaces: RGB, MAP and Binary (Gray saved as MAP)
-    Compressions: 
-      NONE - no compression 
+    Compressions:
+      NONE - no compression
       RLE  - Run Lenght Encoding [default - since uncompressed PCX is not well supported]
     Only one image.
     No alpha channel.
     Internally the components are always packed.
     Internally the lines are arranged from top down to bottom.
- 
+
     Attributes:
       ResolutionUnit (string) ["DPC", "DPI"]
       XResolution, YResolution IM_FLOAT (1)
@@ -423,7 +423,7 @@ void imFormatRegisterPCX(void);
 
 /** \defgroup tga TGA - Truevision Graphics Adapter File
  * \section Description
- * 
+ *
  * \par
  * Truevision TGA File Format Specification Version 2.0 \n
  * Technical Manual Version 2.2 January, 1991           \n
@@ -436,14 +436,14 @@ void imFormatRegisterPCX(void);
 \verbatim
     Supports 8 bits per component only. Data type is always Byte.
     Color Spaces: Gray, RGB and MAP (Binary saved as Gray)
-    Compressions: 
+    Compressions:
       NONE - no compression [default]
       RLE  - Run Lenght Encoding
     Only one image.
     No alpha channel.
     Internally the components are always packed.
     Internally the lines are arranged from bottom up to top or from top down to bottom.
- 
+
     Attributes:
       XScreen, YScreen IM_USHORT (1) screen position
       Title, Author, Description, JobName, Software (string)
@@ -456,7 +456,7 @@ void imFormatRegisterTGA(void);
 
 /** \defgroup pnm PNM - Netpbm Portable Image Map
  * \section Description
- * 
+ *
  * \par
  * PNM formats Copyright Jef Poskanzer
  * \par
@@ -467,14 +467,14 @@ void imFormatRegisterTGA(void);
 \verbatim
     Data Types: Byte and UShort
     Color Spaces: Gray, RGB and Binary
-    Compressions: 
+    Compressions:
       NONE - no compression [default]
       ASCII (textual data)
     Can have more than one image, but sequencial access only.
     No alpha channel.
     Internally the components are always packed.
     Internally the lines are arranged from top down to bottom.
- 
+
     Attributes:
       Description (string)
 
@@ -486,7 +486,7 @@ void imFormatRegisterPNM(void);
 
 /** \defgroup ico ICO - Windows Icon
  * \section Description
- * 
+ *
  * \par
  * Windows Copyright Microsoft Corporation.
  * \par
@@ -497,21 +497,21 @@ void imFormatRegisterPNM(void);
 \verbatim
     Data Types: Byte
     Color Spaces: RGB, MAP and Binary (Gray saved as MAP)
-    Compressions: 
+    Compressions:
       NONE - no compression [default]
     Can have more than one image. But writing is limited to 5 images,
       and all images must have different sizes and bpp.
     Can have an alpha channel (only for RGB)
     Internally the components are always packed.
     Internally the lines are arranged from bottom up to top.
- 
+
     Attributes:
       TransparencyIndex IM_BYTE (1 or N)
 
     Comments:
       If the user specifies an alpha channel, the AND mask is loaded as alpha if
         the file color mode does not contain the IM_ALPHA flag.
-      For MAP imagens, if the user does not specifies an alpha channel 
+      For MAP imagens, if the user does not specifies an alpha channel
         the TransparencyIndex is used to initialize the AND mask when writing,
         and if the user does specifies an alpha channel
         the most repeated index with transparency will be the transparent index.
@@ -524,7 +524,7 @@ void imFormatRegisterICO(void);
 
 /** \defgroup krn KRN - IM Kernel File Format
  * \section Description
- * 
+ *
  * \par
  * Textual format to provied a simple way to create kernel convolution images.
  * \par
@@ -535,12 +535,12 @@ void imFormatRegisterICO(void);
 \verbatim
     Data Types: Byte, Int
     Color Spaces: Gray
-    Compressions: 
+    Compressions:
       NONE - no compression [default]
     Only one image.
     No alpha channel.
     Internally the lines are arranged from top down to bottom.
- 
+
     Attributes:
       Description (string)
 
@@ -561,9 +561,9 @@ void imFormatRegisterICO(void);
       Gradian
       3 3
       0
-      0 -1 0     
-      0  1 0  
-      0  0 0  
+      0 -1 0
+      0  1 0
+      0  0 0
 \endverbatim
  * \ingroup format */
 void imFormatRegisterKRN(void);

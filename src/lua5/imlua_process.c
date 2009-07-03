@@ -606,8 +606,8 @@ static int imluaProcessReduceBy4 (lua_State *L)
   imImage* dst_image = imlua_checkimage(L, 2);
 
   imlua_matchcolor(L, src_image, dst_image);
-  luaL_argcheck(L, 
-    dst_image->width == (src_image->width / 2) && 
+  luaL_argcheck(L,
+    dst_image->width == (src_image->width / 2) &&
     dst_image->height == (src_image->height / 2), 3, "destiny image size must be source image width/2, height/2");
 
   imProcessReduceBy4(src_image, dst_image);
@@ -626,9 +626,9 @@ static int imluaProcessCrop (lua_State *L)
 
   imlua_matchcolor(L, src_image, dst_image);
   luaL_argcheck(L, xmin >= 0 && xmin < src_image->width, 3, "xmin must be >= 0 and < width");
-  luaL_argcheck(L, ymin >= 0 && ymin < src_image->height, 3, "ymin must be >= 0 and < height");
-  luaL_argcheck(L, dst_image->width <= (src_image->width - xmin), 2, "destiny image size must be smaller than source image width-xmin, height-ymin");
-  luaL_argcheck(L, dst_image->height <= (src_image->height - ymin), 2, "destiny image size must be smaller than source image width-xmin, height-ymin");
+  luaL_argcheck(L, ymin >= 0 && ymin < src_image->height, 4, "ymin must be >= 0 and < height");
+  luaL_argcheck(L, dst_image->width <= (src_image->width - xmin), 2, "destiny image size must be smaller than source image width-xmin");
+  luaL_argcheck(L, dst_image->height <= (src_image->height - ymin), 2, "destiny image size must be smaller than source image height-ymin");
 
   imProcessCrop(src_image, dst_image, xmin, ymin);
   return 0;
@@ -722,9 +722,9 @@ static int imluaProcessRotateRef (lua_State *L)
   imImage *dst_image = imlua_checkimage(L, 2);
   double cos0 = (double) luaL_checknumber(L, 3);
   double sin0 = (double) luaL_checknumber(L, 4);
-  int x = luaL_checkint(L, 5); 
-  int y = luaL_checkint(L, 6); 
-  int to_origin = luaL_checkint(L, 7); 
+  int x = luaL_checkint(L, 5);
+  int y = luaL_checkint(L, 6);
+  int to_origin = luaL_checkint(L, 7);
   int order = luaL_checkint(L, 8);
 
   imlua_matchcolor(L, src_image, dst_image);
@@ -741,8 +741,8 @@ static int imluaProcessRotate90 (lua_State *L)
 {
   imImage *src_image = imlua_checkimage(L, 1);
   imImage *dst_image = imlua_checkimage(L, 2);
-  int dir = luaL_checkint(L, 3); 
-  
+  int dir = luaL_checkint(L, 3);
+
   imlua_matchcolor(L, src_image, dst_image);
   luaL_argcheck(L, dst_image->width == src_image->height && dst_image->height == src_image->width, 2, "destiny width and height must have the source height and width");
   luaL_argcheck(L, (dir == -1 || dir == 1), 3, "invalid dir, can be -1 or 1 only");
@@ -1234,7 +1234,7 @@ static int imluaProcessConvolve (lua_State *L)
   lua_pushboolean(L, imProcessConvolve(src_image, dst_image, kernel));
   return 1;
 }
-  
+
 /*****************************************************************************\
  im.ProcessConvolveDual
 \*****************************************************************************/
@@ -1494,7 +1494,7 @@ static int imluaGaussianStdDev2KernelSize (lua_State *L)
 
 
 /*****************************************************************************\
- Arithmetic Operations 
+ Arithmetic Operations
 \*****************************************************************************/
 
 /*****************************************************************************\
@@ -1529,34 +1529,34 @@ static int imluaProcessArithmeticOp (lua_State *L)
   switch (src_image1->data_type)
   {
   case IM_BYTE:
-    luaL_argcheck(L, 
-      dst_image->data_type == IM_BYTE || 
-      dst_image->data_type == IM_USHORT || 
-      dst_image->data_type == IM_INT || 
-      dst_image->data_type == IM_FLOAT, 
+    luaL_argcheck(L,
+      dst_image->data_type == IM_BYTE ||
+      dst_image->data_type == IM_USHORT ||
+      dst_image->data_type == IM_INT ||
+      dst_image->data_type == IM_FLOAT,
       2, "source image is byte, destiny image data type can be byte, ushort, int and float only.");
     break;
   case IM_USHORT:
-    luaL_argcheck(L, 
-      dst_image->data_type == IM_USHORT || 
-      dst_image->data_type == IM_INT || 
-      dst_image->data_type == IM_FLOAT, 
+    luaL_argcheck(L,
+      dst_image->data_type == IM_USHORT ||
+      dst_image->data_type == IM_INT ||
+      dst_image->data_type == IM_FLOAT,
       2, "source image is ushort, destiny image data type can be ushort, int and float only.");
     break;
   case IM_INT:
-    luaL_argcheck(L, 
-      dst_image->data_type == IM_INT || 
-      dst_image->data_type == IM_FLOAT, 
+    luaL_argcheck(L,
+      dst_image->data_type == IM_INT ||
+      dst_image->data_type == IM_FLOAT,
       2, "source image is int, destiny image data type can be int and float only.");
     break;
   case IM_FLOAT:
-    luaL_argcheck(L, 
-      dst_image->data_type == IM_FLOAT, 
+    luaL_argcheck(L,
+      dst_image->data_type == IM_FLOAT,
       2, "source image is float, destiny image data type can be float only.");
     break;
   case IM_CFLOAT:
-    luaL_argcheck(L, 
-      dst_image->data_type == IM_CFLOAT, 
+    luaL_argcheck(L,
+      dst_image->data_type == IM_CFLOAT,
       2, "source image is cfloat, destiny image data type can be cfloat only.");
     break;
   }
@@ -1580,34 +1580,34 @@ static int imluaProcessArithmeticConstOp (lua_State *L)
   switch (src_image->data_type)
   {
   case IM_BYTE:
-    luaL_argcheck(L, 
-      dst_image->data_type == IM_BYTE || 
-      dst_image->data_type == IM_USHORT || 
-      dst_image->data_type == IM_INT || 
-      dst_image->data_type == IM_FLOAT, 
+    luaL_argcheck(L,
+      dst_image->data_type == IM_BYTE ||
+      dst_image->data_type == IM_USHORT ||
+      dst_image->data_type == IM_INT ||
+      dst_image->data_type == IM_FLOAT,
       2, "source image is byte, destiny image data type can be byte, ushort, int and float only.");
     break;
   case IM_USHORT:
-    luaL_argcheck(L, 
-      dst_image->data_type == IM_USHORT || 
-      dst_image->data_type == IM_INT || 
-      dst_image->data_type == IM_FLOAT, 
+    luaL_argcheck(L,
+      dst_image->data_type == IM_USHORT ||
+      dst_image->data_type == IM_INT ||
+      dst_image->data_type == IM_FLOAT,
       2, "source image is ushort, destiny image data type can be ushort, int and float only.");
     break;
   case IM_INT:
-    luaL_argcheck(L, 
-      dst_image->data_type == IM_INT || 
-      dst_image->data_type == IM_FLOAT, 
+    luaL_argcheck(L,
+      dst_image->data_type == IM_INT ||
+      dst_image->data_type == IM_FLOAT,
       2, "source image is int, destiny image data type can be int and float only.");
     break;
   case IM_FLOAT:
-    luaL_argcheck(L, 
-      dst_image->data_type == IM_FLOAT, 
+    luaL_argcheck(L,
+      dst_image->data_type == IM_FLOAT,
       2, "source image is float, destiny image data type can be float only.");
     break;
   case IM_CFLOAT:
-    luaL_argcheck(L, 
-      dst_image->data_type == IM_CFLOAT, 
+    luaL_argcheck(L,
+      dst_image->data_type == IM_CFLOAT,
       2, "source image is cfloat, destiny image data type can be cfloat only.");
     break;
   }
@@ -2299,16 +2299,16 @@ static int imluaProcessRenderConstant (lua_State *L)
   int count = image->depth;
 
   imlua_checknotcfloat(L, image, 1);
-  
+
   if (lua_istable(L, 2))
   {
     value = (float*) malloc (sizeof(float) * count);
-    
+
     for (i = 0; i < count; i++)
     {
       lua_rawgeti(L, 2, i+1);
       value[i] = (float) lua_tonumber(L, -1);
-      lua_pop(L, 1);      
+      lua_pop(L, 1);
     }
   }
 
@@ -2536,10 +2536,10 @@ static int imluaProcessDirectConv (lua_State *L)
   imImage *src_image = imlua_checkimage(L, 1);
   imImage *dst_image = imlua_checkimage(L, 2);
 
-  luaL_argcheck(L, 
-    src_image->data_type == IM_USHORT || 
+  luaL_argcheck(L,
+    src_image->data_type == IM_USHORT ||
     src_image->data_type == IM_INT ||
-    src_image->data_type == IM_FLOAT, 
+    src_image->data_type == IM_FLOAT,
     1, "data type can be ushort, int or float only");
   imlua_checkdatatype(L, 2, dst_image, IM_BYTE);
   imlua_matchsize(L, src_image, dst_image);
@@ -3063,18 +3063,18 @@ int imlua_open_process(lua_State *L)
 #include "loh/im_process_be64.loh"
 #else
 #include "loh/im_process_be32.loh"
-#endif  
+#endif
 #else
 #ifdef TEC_64
 #ifdef WIN64
 #include "loh/im_process_le64w.loh"
 #else
 #include "loh/im_process_le64.loh"
-#endif  
+#endif
 #else
 #include "loh/im_process.loh"
-#endif  
-#endif  
+#endif
+#endif
   imlua_open_kernel(L);
   return 1;
 }

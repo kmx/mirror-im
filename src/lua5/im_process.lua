@@ -30,7 +30,7 @@ end
 
 local function TwoSourcesOneDest (funcname, width, height, color_space, data_type)
   local func = im[funcname]
-  
+
   -- see if function is really defined
   assert(func, string.format("undefined function `%s'", funcname))
 
@@ -148,12 +148,12 @@ function im.ProcessResizeNew (src_image, width, height)
   return im.ProcessResize(src_image, dst_image), dst_image
 end
 
-OneSourceOneDest("ProcessReduceBy4", function (image) return image:Width() / 2 end, 
+OneSourceOneDest("ProcessReduceBy4", function (image) return image:Width() / 2 end,
                                      function (image) return image:Height() / 2 end)
 
 function im.ProcessCropNew (src_image, xmin, xmax, ymin, ymax)
   local width = xmax - xmin + 1
-  local height = xmax - ymin + 1
+  local height = ymax - ymin + 1
   local dst_image = im.ImageCreateBased(src_image, width, height)
   im.ProcessCrop(src_image, dst_image, xmin, ymin)
   return dst_image
@@ -163,7 +163,7 @@ TwoSourcesOneDest("ProcessInsert")
 
 function im.ProcessAddMarginsNew (src_image, xmin, xmax, ymin, ymax)
   local width = xmax - xmin + 1
-  local height = xmax - ymin + 1
+  local height = ymax - ymin + 1
   local dst_image = im.ImageCreateBased(src_image, width, height)
   im.ProcessAddMargins(src_image, dst_image, xmin, ymin)
   return dst_image
@@ -217,7 +217,7 @@ function im.ProcessInterlaceSplitNew(src_image)
   if math.mod(src_image:Height(), 2) then
     dst_height1 = dst_height1 + 1
   end
-  
+
   local dst_image1 = im.ImageCreateBased(src_image, nil, dst_height1)
   local dst_image2 = im.ImageCreateBased(src_image, nil, src_image:Height()/2)
 
