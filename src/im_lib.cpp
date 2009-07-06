@@ -11,8 +11,8 @@
 #include "im_lib.h"
 
 /* This appears only here to avoid changing the iup.h header fo bug fixes */
-#define IM_VERSION_FIX ".1"
-#define IM_VERSION_FIX_NUMBER 1
+#define IM_VERSION_FIX ".2"
+#define IM_VERSION_FIX_NUMBER 2
 
 static char *iVersion = "TECVERID.str:IM:LIB:" IM_VERSION IM_VERSION_FIX;
 
