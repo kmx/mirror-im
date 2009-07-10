@@ -51,7 +51,7 @@ extern "C" {
 
     Attributes:
       Width, Height, ColorMode, DataType IM_INT (1)
-      StartOffset, SwitchType, ByteOrder, Padding  IM_INT (1)
+      ImageCount[1], StartOffset[0], SwitchType[FALSE], ByteOrder[IM_LITTLEENDIAN], Padding[0]  IM_INT (1)
 \endverbatim
  * \ingroup format */
 imFileFormatBase* imFormatInitRAW(void);

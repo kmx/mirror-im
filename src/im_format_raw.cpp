@@ -73,7 +73,7 @@ int imFileFormatRAW::Open(const char* file_name)
 
   strcpy(this->compression, "NONE");
 
-  this->image_count = 0;
+  this->image_count = 1;  /* at least one image */
   this->padding = 0;
 
   return IM_ERR_NONE;
