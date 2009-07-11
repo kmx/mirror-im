@@ -176,9 +176,9 @@ void imFormatRegisterJPEG(void);
  * \section Description
  *
  * \par
- * Access to the PNG file format uses libPNG version 1.2.22. \n
+ * Access to the PNG file format uses libPNG version 1.2.37. \n
  * http://www.libpng.org                                    \n
- * Copyright (C) 1998-2007 Glenn Randers-Pehrson
+ * Copyright (C) 1998-2009 Glenn Randers-Pehrson
  *
  * \section Features
  *
@@ -218,14 +218,12 @@ void imFormatRegisterJPEG(void);
 
     Comments:
       Attributes after the image are ignored.
-      Define PNG_NO_CONSOLE_IO to avoid printfs.
-      We define PNG_TIME_RFC1123_SUPPORTED.
-      Add the following files to the makefile to optimize the library:
+      Define PNG_NO_CONSOLE_IO to avoid printfs. We also define PNG_TIME_RFC1123_SUPPORTED.
+      Added the following files to the makefile to optimize the library:
       pngvcrd.c  - PNG_USE_PNGVCRD
                    For Intel x86 CPU and Microsoft Visual C++ compiler
       pnggccrd.c - PNG_USE_PNGGCCRD
                    For Intel x86 CPU (Pentium-MMX or later) and GNU C compiler.
-      Changed pngconf.h to use int instead of long in png_uint_32 and png_int_32.
 \endverbatim
  * \ingroup format */
 void imFormatRegisterPNG(void);

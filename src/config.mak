@@ -25,7 +25,7 @@ SRCTIFF = \
     tif_dirinfo.c   tif_flush.c      tif_pixarlog.c  tif_zip.c      \
     tif_dirread.c   tif_getimage.c   tif_predict.c   tif_version.c  \
     tif_write.c     tif_warning.c    tif_ojpeg.c
-SRCTIFF  := $(addprefix libtiff/, $(SRCTIFF))
+SRCTIFF  := $(addprefix libtiff/, $(SRCTIFF)) im_format_tiff.cpp
 INCLUDES += libtiff 
 
 SRCJPEG = \
@@ -37,14 +37,14 @@ SRCJPEG = \
     jchuff.c    jcprepct.c  jdcolor.c   jdphuff.c   jidctflt.c  jutils.c   \
     jcinit.c    jcsample.c  jddctmgr.c  jdpostct.c  jidctfst.c             \
     jcmainct.c  jctrans.c   jdhuff.c    jdsample.c  jidctint.c
-SRCJPEG  := $(addprefix libjpeg/, $(SRCJPEG))
+SRCJPEG  := $(addprefix libjpeg/, $(SRCJPEG)) im_format_jpeg.cpp
 INCLUDES += libjpeg 
 
 SRCPNG = \
     png.c       pngget.c    pngread.c   pngrutil.c     pngwtran.c  \
     pngerror.c  pngmem.c    pngrio.c    pngset.c    pngwio.c    pngwutil.c  \
     pngpread.c  pngrtran.c  pngtrans.c  pngwrite.c
-SRCPNG  := $(addprefix libpng/, $(SRCPNG))
+SRCPNG  := $(addprefix libpng/, $(SRCPNG)) im_format_png.cpp
 INCLUDES += libpng 
 DEFINES += PNG_NO_STDIO PNG_TIME_RFC1123_SUPPORTED
 
@@ -71,16 +71,17 @@ INCLUDES += liblzf
 SRC = \
     old_imcolor.c         old_imresize.c      tiff_binfile.c       im_converttype.cpp \
     im_attrib.cpp         im_format.cpp       im_format_tga.cpp    im_filebuffer.cpp \
-    im_bin.cpp            im_format_all.cpp   im_format_tiff.cpp   im_format_raw.cpp \
+    im_bin.cpp            im_format_all.cpp   im_format_raw.cpp \
     im_binfile.cpp        im_format_sgi.cpp   im_datatype.cpp      im_format_pcx.cpp \
     im_colorhsi.cpp       im_format_bmp.cpp   im_image.cpp         im_rgb2map.cpp    \
     im_colormode.cpp      im_format_gif.cpp   im_lib.cpp           im_format_pnm.cpp \
-    im_colorutil.cpp      im_format_ico.cpp   im_palette.cpp       im_format_png.cpp \
+    im_colorutil.cpp      im_format_ico.cpp   im_palette.cpp    \
     im_convertbitmap.cpp  im_format_led.cpp   im_counter.cpp       im_str.cpp        \
-    im_convertcolor.cpp   im_format_jpeg.cpp  im_fileraw.cpp       im_format_krn.cpp \
+    im_convertcolor.cpp   im_fileraw.cpp      im_format_krn.cpp \
     im_file.cpp           im_format_ras.cpp   old_im.cpp           im_compress.cpp   \
     $(SRCJPEG) $(SRCTIFF) $(SRCPNG) $(SRCZLIB) $(SRCLZF)
 
+    
 ifneq ($(findstring Win, $(TEC_SYSNAME)), )
     SRC += im_sysfile_win32.cpp im_dib.cpp im_dibxbitmap.cpp
     
