@@ -132,6 +132,13 @@
   creation parameters there are many auxiliary parameters like <b>depth</b>, <b>count</b>, <b>line_size</b>, <b>
   plane_size</b> and <b>size</b>. </p>
 
+<p>
+As the library is designed to work with such a wide range of image data 
+organization, there are no general purpose functions for getting/setting 
+individual pixels, as they would be too complicated and inefficient. Rather, you 
+should use the components of the imImage structure to access image pixels in the 
+most efficient way.
+</p>
 
 </body>
 
