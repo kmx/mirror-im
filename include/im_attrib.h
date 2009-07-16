@@ -96,13 +96,16 @@ public:
   void CopyFrom(const imAttribArray& table)
     { imAttribArrayCopyFrom(ptable, table.ptable); }
 
-  /** Inserts an attribute into the array. \n 
-   * Data is duplicated if not NULL, else data is initialized with zeros.
+  /** Inserts one attribute into the array. 
+   * The attribute data is a simple array of data_type elements of count length. \n 
+   * Data is duplicated if not NULL, else data is initialized with zeros. 
+   * When NULL is specified use the Get method to retrieve a pointer to the data 
+   * so you can initialize it with other values.
    * See also \ref imDataType. */
   void Set(int index, const char* name, int data_type, int count, const void* data)
     { imAttribArraySet(ptable, index, name, data_type, count, data); }
 
-  /** Finds an attribute in the array.
+  /** Finds one attribute in the array.
    * Returns the attribute if found, NULL otherwise.
    * See also \ref imDataType. */
   const void* Get(int index, char *name = 0, int *data_type = 0, int *count = 0) const
