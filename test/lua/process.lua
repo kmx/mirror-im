@@ -47,4 +47,4 @@ replace:Save("lena_replace.jpg", "JPEG")
 
 local bitmask = image:Duplicate()
 im.ProcessBitMask(image, bitmask, "01111010", im.BIT_XOR)
-replace:Save("lena_bitmask.jpg", "JPEG")
+bitmask:Save("lena_bitmask.jpg", "JPEG")
