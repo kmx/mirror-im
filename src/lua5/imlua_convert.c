@@ -25,7 +25,7 @@ static int imluaConvertDataType (lua_State *L)
   imImage* dst_image = imlua_checkimage(L, 2);
   int cpx2real = luaL_checkint(L, 3);
   float gamma = (float) luaL_checknumber(L, 4);
-  int abssolute = luaL_checkint(L, 5);
+  int abssolute = lua_toboolean(L, 5);
   int cast_mode = luaL_checkint(L, 6);
 
   imlua_matchcolorspace(L, src_image, dst_image);
@@ -55,7 +55,7 @@ static int imluaConvertToBitmap (lua_State *L)
   imImage* dst_image = imlua_checkimage(L, 2);
   int cpx2real = luaL_checkint(L, 3);
   float gamma = (float) luaL_checknumber(L, 4);
-  int abssolute = luaL_checkint(L, 5);
+  int abssolute = lua_toboolean(L, 5);
   int cast_mode = luaL_checkint(L, 6);
 
   imlua_matchsize(L, src_image, dst_image);

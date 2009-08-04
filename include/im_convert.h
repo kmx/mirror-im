@@ -65,7 +65,7 @@ enum imCastMode
  * Returns IM_ERR_NONE, IM_ERR_DATA or IM_ERR_COUNTER, see also \ref imErrorCodes.
  * See also \ref imComplex2Real, \ref imGammaFactor and \ref imCastMode.
  *
- * \verbatim im.ConvertDataType(src_image: imImage, dst_image: imImage, cpx2real: number, gamma: number, abssolute: bool, cast_mode: number) -> error: number [in Lua 5] \endverbatim
+ * \verbatim im.ConvertDataType(src_image: imImage, dst_image: imImage, cpx2real: number, gamma: number, abssolute: boolean, cast_mode: number) -> error: number [in Lua 5] \endverbatim
  * \ingroup convert */
 int imConvertDataType(const imImage* src_image, imImage* dst_image, int cpx2real, float gamma, int abssolute, int cast_mode);
 
@@ -85,7 +85,7 @@ int imConvertColorSpace(const imImage* src_image, imImage* dst_image);
  * Returns IM_ERR_NONE, IM_ERR_DATA or IM_ERR_COUNTER, see also \ref imErrorCodes.
  * See also \ref imComplex2Real, \ref imGammaFactor and \ref imCastMode.
  *
- * \verbatim im.ConvertToBitmap(src_image: imImage, dst_image: imImage, cpx2real: number, gamma: number, abssolute: bool, cast_mode: number) -> error: number [in Lua 5] \endverbatim
+ * \verbatim im.ConvertToBitmap(src_image: imImage, dst_image: imImage, cpx2real: number, gamma: number, abssolute: boolean, cast_mode: number) -> error: number [in Lua 5] \endverbatim
  * \ingroup convert */
 int imConvertToBitmap(const imImage* src_image, imImage* dst_image, int cpx2real, float gamma, int abssolute, int cast_mode);
 

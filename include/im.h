@@ -206,7 +206,7 @@ int imFileWriteImageInfo(imFile* ifile, int width, int height, int user_color_mo
  * Returns an error code.
  * See also \ref imErrorCodes, \ref imDataType, \ref imColorSpace and \ref imColorModeConfig.
  *
- * \verbatim ifile:ReadImageData(data: userdata, convert2bitmap: bool, color_mode_flags: number) -> error: number [in Lua 5] \endverbatim
+ * \verbatim ifile:ReadImageData(data: userdata, convert2bitmap: boolean, color_mode_flags: number) -> error: number [in Lua 5] \endverbatim
  * \ingroup file */
 int imFileReadImageData(imFile* ifile, void* data, int convert2bitmap, int color_mode_flags);
                            

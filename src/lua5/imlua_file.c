@@ -542,20 +542,20 @@ static int imluaFileWriteImageInfo (lua_State *L)
 }
 
 /*****************************************************************************\
- file:imFileReadImageData(data)
+ file:ReadImageData(data)
 \*****************************************************************************/
 static int imluaFileReadImageData (lua_State *L)
 {
   imFile *ifile = imlua_checkfile(L, 1);
   void* data = lua_touserdata(L, 2);
-  int convert2bitmap = luaL_checkint(L, 3);
+  int convert2bitmap = lua_toboolean(L, 3);
   int color_mode_flags = luaL_checkint(L, 4);
   imlua_pusherror(L, imFileReadImageData(ifile, data, convert2bitmap, color_mode_flags));
   return 1;
 }
 
 /*****************************************************************************\
- file:imFileWriteImageData(data)
+ file:WriteImageData(data)
 \*****************************************************************************/
 static int imluaFileWriteImageData (lua_State *L)
 {

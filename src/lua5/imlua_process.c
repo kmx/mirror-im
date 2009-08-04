@@ -724,7 +724,7 @@ static int imluaProcessRotateRef (lua_State *L)
   double sin0 = (double) luaL_checknumber(L, 4);
   int x = luaL_checkint(L, 5);
   int y = luaL_checkint(L, 6);
-  int to_origin = luaL_checkint(L, 7);
+  int to_origin = lua_toboolean(L, 7);
   int order = luaL_checkint(L, 8);
 
   imlua_matchcolor(L, src_image, dst_image);
@@ -741,7 +741,7 @@ static int imluaProcessRotate90 (lua_State *L)
 {
   imImage *src_image = imlua_checkimage(L, 1);
   imImage *dst_image = imlua_checkimage(L, 2);
-  int dir = luaL_checkint(L, 3);
+  int dir = lua_toboolean(L, 3);
 
   imlua_matchcolor(L, src_image, dst_image);
   luaL_argcheck(L, dst_image->width == src_image->height && dst_image->height == src_image->width, 2, "destiny width and height must have the source height and width");
@@ -1010,7 +1010,7 @@ static int imluaProcessBinMorphConvolve (lua_State *L)
   imImage *src_image = imlua_checkimage(L, 1);
   imImage *dst_image = imlua_checkimage(L, 2);
   imImage *kernel = imlua_checkimage(L, 3);
-  int hit_white = luaL_checkint(L, 4);
+  int hit_white = lua_toboolean(L, 4);
   int iter = luaL_checkint(L, 5);
 
   imlua_checkcolorspace(L, 1, src_image, IM_BINARY);
@@ -1659,7 +1659,7 @@ static int imluaProcessSplitComplex (lua_State *L)
   imImage *src_image = imlua_checkimage(L, 1);
   imImage *dst_image1 = imlua_checkimage(L, 2);
   imImage *dst_image2 = imlua_checkimage(L, 3);
-  int polar = luaL_checkint(L, 4);
+  int polar = lua_toboolean(L, 4);
 
   imlua_checkdatatype(L, 1, src_image, IM_CFLOAT);
   imlua_checkdatatype(L, 2, dst_image1, IM_FLOAT);
@@ -1783,7 +1783,7 @@ static int imluaProcessAutoCovariance (lua_State *L)
   imlua_matchcolorspace(L, src_image, dst_image);
   imlua_checkdatatype(L, 3, dst_image, IM_FLOAT);
 
-  lua_pushnumber(L, imProcessAutoCovariance(src_image, mean_image, dst_image));
+  lua_pushboolean(L, imProcessAutoCovariance(src_image, mean_image, dst_image));
   return 1;
 }
 
@@ -1815,7 +1815,7 @@ static int imluaProcessQuantizeRGBUniform (lua_State *L)
 {
   imImage *src_image = imlua_checkimage(L, 1);
   imImage *dst_image = imlua_checkimage(L, 2);
-  int dither = luaL_checkint(L, 3);
+  int dither = lua_toboolean(L, 3);
 
   imlua_checktype(L, 1, src_image, IM_RGB, IM_BYTE);
   imlua_checkcolorspace(L, 2, dst_image, IM_MAP);
@@ -2131,7 +2131,7 @@ static int imluaProcessBitPlane (lua_State *L)
   imImage *src_image = imlua_checkimage(L, 1);
   imImage *dst_image = imlua_checkimage(L, 2);
   int plane = luaL_checkint(L, 3);
-  int reset = luaL_checkint(L, 4);
+  int reset = lua_toboolean(L, 4);
 
   imlua_checkdatatype(L, 1, src_image, IM_BYTE);
   imlua_match(L, src_image, dst_image);
@@ -2201,7 +2201,7 @@ static float imluaRenderCondFunc (int x, int y, int d, int *cond, float *param)
 
   lua_call(L, 4, 2);
 
-  *cond = luaL_checkint(L, -1);
+  *cond = lua_toboolean(L, -1);
   return (float) luaL_checknumber(L, -2);
 }
 
@@ -3088,4 +3088,3 @@ int luaopen_imlua_process51(lua_State *L)
 {
   return imlua_open_process(L);
 }
-
