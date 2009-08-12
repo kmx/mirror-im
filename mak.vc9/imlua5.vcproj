@@ -100,6 +100,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\lua5\imlua.def"
+				>
+			</File>
+			<File
 				RelativePath="..\src\lua5\imlua_aux.c"
 				>
 			</File>

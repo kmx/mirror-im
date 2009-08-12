@@ -96,6 +96,10 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
+				RelativePath="..\src\im_ecw.def"
+				>
+			</File>
+			<File
 				RelativePath="..\src\im_format_ecw.cpp"
 				>
 			</File>

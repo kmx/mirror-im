@@ -103,6 +103,10 @@
 				RelativePath="..\src\lua5\imlua_fftw.c"
 				>
 			</File>
+			<File
+				RelativePath="..\src\lua5\imlua_fftw.def"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

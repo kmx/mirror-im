@@ -47,19 +47,19 @@ const char* IM_DECL imVideoCaptureDeviceDesc(int device);
  *
  * \verbatim im.VideoCaptureDeviceExDesc(device: number) -> desc: string [in Lua 5] \endverbatim
  * \ingroup capture */
-const char* imVideoCaptureDeviceExDesc(int device);
+const char* IM_DECL imVideoCaptureDeviceExDesc(int device);
 
 /** Returns the device path configuration. This is a unique string. 
  *
  * \verbatim im.VideoCaptureDevicePath(device: number) -> desc: string [in Lua 5] \endverbatim
  * \ingroup capture */
-const char* imVideoCaptureDevicePath(int device);
+const char* IM_DECL imVideoCaptureDevicePath(int device);
 
 /** Returns the vendor information. May return NULL.
  *
  * \verbatim im.VideoCaptureDeviceVendorInfo(device: number) -> desc: string [in Lua 5] \endverbatim
  * \ingroup capture */
-const char* imVideoCaptureDeviceVendorInfo(int device);
+const char* IM_DECL imVideoCaptureDeviceVendorInfo(int device);
 
 /** Reload the device list. The devices can be dynamically removed or added to the system.
  * Returns the number of available devices.
@@ -117,17 +117,17 @@ int IM_DECL imVideoCaptureDialogCount(imVideoCapture* vc);
  * dialog can be from 0 to \ref imVideoCaptureDialogCount. \n
  * Returns zero if failed.
  *
- * \verbatim vc:ShowDialog(dialog: number, parent: userdata) -> error: number [in Lua 5] \endverbatim
+ * \verbatim vc:ShowDialog(dialog: number, parent: userdata) -> error: boolean [in Lua 5] \endverbatim
  * \ingroup capture */
 int IM_DECL imVideoCaptureShowDialog(imVideoCapture* vc, int dialog, void* parent);
 
 /** Allows to control the input and output of devices that have multiple input and outputs.
- * cross controls in which stage the input/output will be set. Usually use 1, but some capture boards
+ * The cross index controls in which stage the input/output will be set. Usually use 1, but some capture boards
  * has a second stage. In Direct X it controls the crossbars.
  *
- * \verbatim vc:SetInOut(input, output, cross: number) -> error: number [in Lua 5] \endverbatim
+ * \verbatim vc:SetInOut(input, output, cross: number) -> error: boolean [in Lua 5] \endverbatim
  * \ingroup capture */
-int imVideoCaptureSetInOut(imVideoCapture* vc, int input, int output, int cross);
+int IM_DECL imVideoCaptureSetInOut(imVideoCapture* vc, int input, int output, int cross);
 
 /** Returns the description of a configuration dialog.
  * dialog can be from 0 to \ref imVideoCaptureDialogCount. \n
@@ -139,7 +139,7 @@ const char* IM_DECL imVideoCaptureDialogDesc(imVideoCapture* vc, int dialog);
 /** Returns the number of available video formats. \n
  * Returns zero if failed.
  *
- * \verbatim vc:FormatCount() -> error: number [in Lua 5] \endverbatim
+ * \verbatim vc:FormatCount() -> count: number [in Lua 5] \endverbatim
  * \ingroup capture */
 int IM_DECL imVideoCaptureFormatCount(imVideoCapture* vc);
 
@@ -150,7 +150,7 @@ int IM_DECL imVideoCaptureFormatCount(imVideoCapture* vc);
  * Other sizes can be available using \ref imVideoCaptureSetImageSize. \n
  * Returns zero if failed.
  *
- * \verbatim vc:GetFormat(format: number) -> error: number, width: number, height: number, desc: string [in Lua 5] \endverbatim
+ * \verbatim vc:GetFormat(format: number) -> error: boolean, width: number, height: number, desc: string [in Lua 5] \endverbatim
  * \ingroup capture */
 int IM_DECL imVideoCaptureGetFormat(imVideoCapture* vc, int format, int *width, int *height, char* desc);
 
@@ -162,7 +162,7 @@ int IM_DECL imVideoCaptureGetFormat(imVideoCapture* vc, int format, int *width, 
  * This will not affect color_mode of the capture image. \n
  * Returns zero if failed.
  *
- * \verbatim vc:SetFormat(format: number) -> error: number [in Lua 5] \endverbatim
+ * \verbatim vc:SetFormat([format: number]) -> error: boolean | format: number [in Lua 5] \endverbatim
  * \ingroup capture */
 int IM_DECL imVideoCaptureSetFormat(imVideoCapture* vc, int format);
 
@@ -178,7 +178,7 @@ void IM_DECL imVideoCaptureGetImageSize(imVideoCapture* vc, int *width, int *hei
  * Valid sizes can be obtained with  \ref imVideoCaptureGetFormat. \n
  * Returns zero if failed.
  *
- * \verbatim vc:SetImageSize(width: number, height: number) -> error: number [in Lua 5] \endverbatim
+ * \verbatim vc:SetImageSize(width: number, height: number) -> error: boolean [in Lua 5] \endverbatim
  * \ingroup capture */
 int IM_DECL imVideoCaptureSetImageSize(imVideoCapture* vc, int width, int height);
 
@@ -188,7 +188,7 @@ int IM_DECL imVideoCaptureSetImageSize(imVideoCapture* vc, int width, int height
  * It can not have an alpha channel and orientation is always bottom up. \n
  * Returns zero if failed or timeout expired, the buffer is not changed.
  *
- * \verbatim vc:Frame(image: imImage, timeout: number) -> error: number [in Lua 5] \endverbatim
+ * \verbatim vc:Frame(image: imImage, timeout: number) -> error: boolean [in Lua 5] \endverbatim
  * \ingroup capture */
 int IM_DECL imVideoCaptureFrame(imVideoCapture* vc, unsigned char* data, int color_mode, int timeout);
 
@@ -197,7 +197,7 @@ int IM_DECL imVideoCaptureFrame(imVideoCapture* vc, unsigned char* data, int col
  * Data format is the same as imVideoCaptureFrame. \n
  * Returns zero if failed.
  *
- * \verbatim vc:OneFrame(image: imImage) -> error: number [in Lua 5] \endverbatim
+ * \verbatim vc:OneFrame(image: imImage) -> error: boolean [in Lua 5] \endverbatim
  * \ingroup capture */
 int IM_DECL imVideoCaptureOneFrame(imVideoCapture* vc, unsigned char* data, int color_mode);
 
@@ -205,7 +205,7 @@ int IM_DECL imVideoCaptureOneFrame(imVideoCapture* vc, unsigned char* data, int 
  * Use -1 to return the current state. \n
  * Returns zero if failed.
  *
- * \verbatim vc:Live(live: number) -> error: number [in Lua 5] \endverbatim
+ * \verbatim vc:Live([live: number]) -> error: boolean | live: number [in Lua 5] \endverbatim
  * \ingroup capture */
 int IM_DECL imVideoCaptureLive(imVideoCapture* vc, int live); 
 
@@ -214,21 +214,21 @@ int IM_DECL imVideoCaptureLive(imVideoCapture* vc, int live);
  * Not all attributes support automatic modes. \n
  * Returns zero if failed.
  *
- * \verbatim vc:ResetAttribute(attrib: string, fauto: number) -> error: number [in Lua 5] \endverbatim
+ * \verbatim vc:ResetAttribute(attrib: string, fauto: boolean) -> error: boolean [in Lua 5] \endverbatim
  * \ingroup capture */
 int IM_DECL imVideoCaptureResetAttribute(imVideoCapture* vc, const char* attrib, int fauto);
 
 /** Returns a camera or video attribute in percentage of the valid range value. \n
  * Returns zero if failed or attribute not supported.
  *
- * \verbatim vc:GetAttribute(attrib: string) -> error: number, percent: number [in Lua 5] \endverbatim
+ * \verbatim vc:GetAttribute(attrib: string) -> error: boolean, percent: number [in Lua 5] \endverbatim
  * \ingroup capture */
 int IM_DECL imVideoCaptureGetAttribute(imVideoCapture* vc, const char* attrib, float *percent);
 
 /** Changes a camera or video attribute in percentage of the valid range value. \n
  * Returns zero if failed or attribute not supported.
  *
- * \verbatim vc:SetAttribute(attrib: string, percent: number) -> error: number [in Lua 5] \endverbatim
+ * \verbatim vc:SetAttribute(attrib: string, percent: number) -> error: boolean [in Lua 5] \endverbatim
  * \ingroup capture */
 int IM_DECL imVideoCaptureSetAttribute(imVideoCapture* vc, const char* attrib, float percent);
 

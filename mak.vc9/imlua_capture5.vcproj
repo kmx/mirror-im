@@ -99,6 +99,10 @@
 				RelativePath="..\src\lua5\imlua_capture.c"
 				>
 			</File>
+			<File
+				RelativePath="..\src\lua5\imlua_capture.def"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

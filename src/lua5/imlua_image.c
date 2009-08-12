@@ -437,6 +437,28 @@ static int imluaImageIsBitmap (lua_State *L)
   return 1;
 }
 
+
+/*****************************************************************************\
+ image:GetOpenGLData()
+\*****************************************************************************/
+static int imluaImageGetOpenGLData (lua_State *L)
+{
+  int format;
+  imbyte* gldata;
+  imImage *image = imlua_checkimage(L, 1);
+
+  gldata = imImageGetOpenGLData(image, &format);
+  if (!gldata)
+  {
+    lua_pushnil(L);
+    return 1;
+  }
+
+  lua_pushlightuserdata(L, gldata);
+  lua_pushinteger(L, format);
+  return 2;
+}
+
 /*****************************************************************************\
  image:GetPalette()
 \*****************************************************************************/
@@ -547,6 +569,15 @@ static int imluaImageSetBinary (lua_State *L)
 static int imluaImageMakeBinary (lua_State *L)
 {
   imImageMakeBinary(imlua_checkimage(L, 1));
+  return 0;
+}
+
+/*****************************************************************************\
+ image:MakeGray()
+\*****************************************************************************/
+static int imluaImageMakeGray (lua_State *L)
+{
+  imImageMakeGray(imlua_checkimage(L, 1));
   return 0;
 }
 
@@ -965,6 +996,7 @@ static const luaL_reg imimage_metalib[] = {
   {"GetAttributeList", imluaImageGetAttributeList},
   {"Clear", imluaImageClear},
   {"IsBitmap", imluaImageIsBitmap},
+  {"GetOpenGLData", imluaImageGetOpenGLData},
   {"SetPalette", imluaImageSetPalette},
   {"GetPalette", imluaImageGetPalette},
   {"CopyAttributes", imluaImageCopyAttributes},
@@ -975,6 +1007,7 @@ static const luaL_reg imimage_metalib[] = {
   {"Match", imluaImageMatch},
   {"SetBinary", imluaImageSetBinary},
   {"MakeBinary", imluaImageMakeBinary},
+  {"MakeGray", imluaImageMakeGray},
   {"Width", imluaImageWidth},
   {"Height", imluaImageHeight},
   {"Depth", imluaImageDepth},

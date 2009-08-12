@@ -99,6 +99,10 @@
 				RelativePath="..\src\im_lua3.c"
 				>
 			</File>
+			<File
+				RelativePath="..\src\imlua3.def"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"

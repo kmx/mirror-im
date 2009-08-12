@@ -122,17 +122,17 @@ void imProcessBlend(const imImage* src_image1, const imImage* src_image2, const 
  * or magnitude and phase parts (polar). \n
  * Source image must be IM_CFLOAT, destiny images must be IM_FLOAT.
  *
- * \verbatim im.ProcessSplitComplex(src_image: imImage, dst_image1: imImage, dst_image2: imImage, do_polar: boolean) [in Lua 5] \endverbatim
- * \verbatim im.ProcessSplitComplexNew(image: imImage, do_polar: boolean) -> dst_image1: imImage, dst_image2: imImage [in Lua 5] \endverbatim
+ * \verbatim im.ProcessSplitComplex(src_image: imImage, dst_image1: imImage, dst_image2: imImage, polar: boolean) [in Lua 5] \endverbatim
+ * \verbatim im.ProcessSplitComplexNew(image: imImage, polar: boolean) -> dst_image1: imImage, dst_image2: imImage [in Lua 5] \endverbatim
  * \ingroup arithm */
-void imProcessSplitComplex(const imImage* src_image, imImage* dst_image1, imImage* dst_image2, int do_polar);
+void imProcessSplitComplex(const imImage* src_image, imImage* dst_image1, imImage* dst_image2, int polar);
 
 /** Merges two images as the real and imaginary parts of a complex image, \n
  * or as magnitude and phase parts (polar = 1). \n
  * Source images must be IM_FLOAT, destiny image must be IM_CFLOAT.
  *
- * \verbatim im.ProcessMergeComplex(src_image1: imImage, src_image2: imImage, dst_image: imImage) [in Lua 5] \endverbatim
- * \verbatim im.ProcessMergeComplexNew(image1: imImage, image2: imImage) -> new_image: imImage [in Lua 5] \endverbatim
+ * \verbatim im.ProcessMergeComplex(src_image1: imImage, src_image2: imImage, dst_image: imImage, polar: boolean) [in Lua 5] \endverbatim
+ * \verbatim im.ProcessMergeComplexNew(image1: imImage, image2: imImage, polar: boolean) -> new_image: imImage [in Lua 5] \endverbatim
  * \ingroup arithm */
 void imProcessMergeComplex(const imImage* src_image1, const imImage* src_image2, imImage* dst_image, int polar);
 

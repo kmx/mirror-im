@@ -160,6 +160,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\im_process.def"
+				>
+			</File>
+			<File
 				RelativePath="..\src\process\im_quantize.cpp"
 				>
 			</File>

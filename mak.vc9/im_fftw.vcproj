@@ -99,6 +99,10 @@
 				RelativePath="..\src\process\im_fft.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\src\im_fftw.def"
+				>
+			</File>
 			<Filter
 				Name="FFTW"
 				>

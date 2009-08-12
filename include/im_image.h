@@ -68,7 +68,7 @@ typedef struct _imImage
 
 
 /** Creates a new image.
- * See also \ref imDataType and \ref imColorSpace. \n
+ * See also \ref imDataType and \ref imColorSpace. Image data is cleared as \ref imImageClear. \n
  * In Lua the IM image metatable name is "imImage".
  * When converted to a string will return "imImage(%p) [width=%d,height=%d,color_space=%s,data_type=%s,depth=%d]" where %p is replaced by the userdata address,
  * and other values are replaced by the respective attributes.
@@ -85,7 +85,7 @@ imImage* imImageInit(int width, int height, int color_space, int data_type, void
 
 /** Creates a new image based on an existing one. \n
  * If the addicional parameters are -1, the given image parameters are used. \n
- * The image atributes always are copied.
+ * The image atributes always are copied. HasAlpha is copied.
  * See also \ref imDataType and \ref imColorSpace.
  *
  * \verbatim im.ImageCreateBased(image: imImage, [width: number], [height: number], [color_space: number], [data_type: number]) -> image: imImage [in Lua 5] \endverbatim
@@ -141,6 +141,14 @@ imImage* imImageDuplicate(const imImage* image);
  * \ingroup imgclass */
 imImage* imImageClone(const imImage* image);
 
+/** Returns an OpenGL compatible data buffer. Also returns the correspondant pixel format. \n
+ * The memory allocated is stored in the attribute "GLDATA" with BYTE type. And it will exists while the image exists. \n
+ * It can also be cleared setting the attribute to NULL.
+ *
+ * \verbatim image:GetOpenGLData() -> gldata: userdata, format: number [in Lua 5] \endverbatim
+ * \ingroup imgclass */
+void* imImageGetOpenGLData(imImage* image, int *format);
+
 /** Changes an extended attribute. \n
  * The data will be internally duplicated. \n
  * If data is NULL the attribute is removed. \n
@@ -168,7 +176,8 @@ const void* imImageGetAttribute(const imImage* image, const char* attrib, int *d
  * \ingroup imgclass */
 void imImageGetAttributeList(const imImage* image, char** attrib, int *attrib_count);
 
-/** Sets all image data to zero.
+/** Sets all image data to zero. But if color space is YCBCR, LAB or LUV, and data type is BYTE or USHORT, then
+ * data is initialized with 128 or 32768 accordingly.
  *
  * \verbatim image:Clear() [in Lua 5] \endverbatim
  * \ingroup imgclass */
@@ -230,11 +239,17 @@ int imImageMatch(const imImage* image1, const imImage* image2);
  * \ingroup imgclass */
 void imImageSetBinary(imImage* image);
 
-/** Changes a gray data into a binary data, done in-place.
+/** Changes a gray BYTE data (0,255) into a binary data (0,1), done in-place. Color space is not changed.
  *
  * \verbatim image:MakeBinary() [in Lua 5] \endverbatim
  * \ingroup imgclass */
 void imImageMakeBinary(imImage *image);
+
+/** Changes a binary data (0,1) into a gray BYTE data (0,255), done in-place. Color space is not changed.
+ *
+ * \verbatim image:MakeGray() [in Lua 5] \endverbatim
+ * \ingroup imgclass */
+void imImageMakeGray(imImage *image);
 
 
 
@@ -292,7 +307,7 @@ imImage* imFileLoadBitmap(imFile* ifile, int index, int *error);
  * or will be a Bitmap image. \n
  * Attributes from the file will be stored at the image.
  * See also \ref imErrorCodes. \n
- * For now works only for ECW file format.
+ * For now, it works only for the ECW file format.
  *
  * \verbatim ifile:LoadRegion(index, bitmap, xmin, xmax, ymin, ymax, width, height: number) -> image: imImage, error: number [in Lua 5] \endverbatim
  * Default index is 0.
@@ -349,7 +364,7 @@ imImage* imFileImageLoadBitmap(const char* file_name, int index, int *error);
  * Returns NULL if failed.
  * Attributes from the file will be stored at the image.
  * See also \ref imErrorCodes. \n
- * For now works only for ECW file format.
+ * For now, it works only for the ECW file format.
  *
  * \verbatim im.FileImageLoadRegion(file_name: string, index, bitmap, xmin, xmax, ymin, ymax, width, height: number, ) -> image: imImage, error: number [in Lua 5] \endverbatim
  * Default index is 0.

@@ -45,7 +45,7 @@ unsigned long imCalcCountColors(const imImage* image);
  * Histogram is always 256 positions long. \n
  * When cumulative is different from zero it calculates the cumulative histogram.
  *
- * \verbatim im.CalcHistogram(image: imImage, plane: number, cumulative: number) -> histo: table of numbers [in Lua 5] \endverbatim
+ * \verbatim im.CalcHistogram(image: imImage, plane: number, cumulative: boolean) -> histo: table of numbers [in Lua 5] \endverbatim
  * Where plane is the depth plane to calculate the histogram. \n
  * The returned table is zero indexed. image can be IM_USHORT or IM_BYTE.
  * \ingroup stats */
@@ -64,7 +64,7 @@ void imCalcUShortHistogram(const unsigned short* data, int count, unsigned long*
  * Histogram is always 256 positions long. \n
  * When cumulative is different from zero it calculates the cumulative histogram.
  *
- * \verbatim im.CalcGrayHistogram(image: imImage, cumulative: number) -> histo: table of numbers [in Lua 5] \endverbatim
+ * \verbatim im.CalcGrayHistogram(image: imImage, cumulative: boolean) -> histo: table of numbers [in Lua 5] \endverbatim
  * \ingroup stats */
 void imCalcGrayHistogram(const imImage* image, unsigned long* histo, int cumulative);
 
@@ -120,8 +120,8 @@ void imCalcHistoImageStatistics(const imImage* image, int* median, int* mode);
  * Returns the number of regions found. Background is marked as 0. \n
  * Regions touching the border are considered only if touch_border=1.
  *
- * \verbatim im.AnalyzeFindRegions(src_image: imImage, dst_image: imImage, connect: number, touch_border: number) -> count: number [in Lua 5] \endverbatim
- * \verbatim im.AnalyzeFindRegionsNew(image: imImage, connect: number, touch_border: number) -> count: number, new_image: imImage [in Lua 5] \endverbatim
+ * \verbatim im.AnalyzeFindRegions(src_image: imImage, dst_image: imImage, connect: number, touch_border: boolean) -> count: number [in Lua 5] \endverbatim
+ * \verbatim im.AnalyzeFindRegionsNew(image: imImage, connect: number, touch_border: boolean) -> count: number, new_image: imImage [in Lua 5] \endverbatim
  * \ingroup analyze */
 int imAnalyzeFindRegions(const imImage* src_image, imImage* dst_image, int connect, int touch_border);
 

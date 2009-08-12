@@ -99,6 +99,10 @@
 				RelativePath="..\src\im_format_wmv.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\src\im_wmv.def"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"

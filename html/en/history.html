@@ -12,22 +12,35 @@
 
 <h1>History of Changes</h1>
 <h3 dir="ltr">
-    CVS (04/Aug/2009)</h3>
+    CVS (11/Aug/2009)</h3>
     <ul>
-        <li><span style="color: #008000">Changed:</span> libPNG updated to version 
+        <li><span style="color: #0000FF">New:</span> function <strong>
+		imImageGetOpenGLData</strong>.</li>
+		<li><span style="color: #008000">Changed:</span> libPNG updated to version 
 	1.2.37. Removed changes to the library that made it incompatible with other 
 		libPNG distributions.</li>
+		<li><span style="color: #008000">Changed: <span
+            style="color: #000000"> <strong>imImageCreateBased</strong> now also 
+		consider the alpha plane.</span></span></li>
 		<li><span style="color: #008000"><span style="color: #ff0000">Fixed:</span><span
             style="color: #000000"> new image size computation of <strong>im.ProcessCropNew</strong>
             in Lua.</span></span>&nbsp;</li>
 		<li><span style="color: #008000"><span style="color: #ff0000">Fixed:</span><span
             style="color: #000000"> loading of RAW data.</span></span></li>
 		<li><span style="color: #008000"><span style="color: #ff0000">Fixed:</span><span
+            style="color: #000000"> <strong>imImageClear</strong> to initialize 
+		data just like <strong>imImageCreate</strong> does. </span></span></li>
+		<li><span style="color: #008000"><span style="color: #ff0000">Fixed:</span><span
+            style="color: #000000"> <strong>imImageReshape</strong> when the 
+		image has an alpha plane. Image is not cleared anymore. </span></span></li>
+		<li><span style="color: #008000"><span style="color: #ff0000">Fixed:</span><span
             style="color: #000000"> boolean parameters in <strong>
-		file:ReadImageData, im.ProcessSplitComplex, 
+		file:ReadImageData, im.ConvertDataType, im.ConvertToBitmap, im.ProcessSplitComplex, 
 		im.ProcessQuantizeRGBUniform, im.ProcessBitPlane, im.ProcessRotateRef, 
-		im.ProcessRotate90, im.ProcessBinMorphConvolve, im.ConvertDataType</strong> 
-		and <strong>im.ConvertToBitmap</strong> in Lua.</span></span></li>
+		im.ProcessRotate90, im.ProcessBinMorphConvolve, im.ProcessMergeComplex, 
+		im.CalcHistogram, im.CalcGrayHistogram </strong>and <strong>
+		im.AnalyzeFindRegions</strong> in Lua. Changed <strong>im.Capture*</strong> 
+		functions to use boolean values in Lua.</span></span></li>
     </ul>
     <h3 dir="ltr">
         Version 3.4.2 (26/Jun/2009)</h3>

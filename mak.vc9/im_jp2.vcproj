@@ -100,6 +100,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\im_jp2.def"
+				>
+			</File>
+			<File
 				RelativePath="..\src\jas_binfile.c"
 				>
 			</File>

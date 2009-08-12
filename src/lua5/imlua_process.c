@@ -77,7 +77,7 @@ static int imluaCalcHistogram (lua_State *L)
 {
   imImage* src_image = imlua_checkimage(L, 1);
   int plane = luaL_checkint(L, 2);
-  int cumulative = luaL_checkint(L, 3);
+  int cumulative = lua_toboolean(L, 3);
 
   switch (src_image->data_type)
   {
@@ -112,7 +112,7 @@ static int imluaCalcGrayHistogram (lua_State *L)
 {
   unsigned long hist[256];
   imImage* src_image = imlua_checkimage(L, 1);
-  int cumulative = luaL_checkint(L, 2);
+  int cumulative = lua_toboolean(L, 2);
 
   imlua_checkdatatype(L, 1, src_image, IM_BYTE);
   if (src_image->color_space >= IM_CMYK)
@@ -1679,7 +1679,7 @@ static int imluaProcessMergeComplex (lua_State *L)
   imImage *src_image1 = imlua_checkimage(L, 1);
   imImage *src_image2 = imlua_checkimage(L, 2);
   imImage *dst_image = imlua_checkimage(L, 3);
-  int polar = luaL_checkint(L, 5);
+  int polar = lua_toboolean(L, 4);
 
   imlua_checkdatatype(L, 1, src_image1, IM_FLOAT);
   imlua_checkdatatype(L, 2, src_image2, IM_FLOAT);

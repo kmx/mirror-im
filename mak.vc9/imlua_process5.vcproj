@@ -107,6 +107,10 @@
 				RelativePath="..\src\lua5\imlua_process.c"
 				>
 			</File>
+			<File
+				RelativePath="..\src\lua5\imlua_process.def"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

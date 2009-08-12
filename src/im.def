@@ -99,6 +99,7 @@ EXPORTS
   imImageLineCount
   imImageLineSize
   imImageIsBitmap
+  imImageGetOpenGLData
   imImageMatch
   imImageMatchColor
   imImageMatchColorSpace
@@ -112,6 +113,7 @@ EXPORTS
   imImageSetAttribute
   imImageSetBinary
   imImageMakeBinary
+  imImageMakeGray
   imImageSetPalette
   imImageCopy
   imImageCopyData
