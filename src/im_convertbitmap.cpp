@@ -119,3 +119,166 @@ void imConvertPacking(const void* src_data, void* dst_data, int width, int heigh
   }
 }
 
+static void iImageMakeGray(imbyte *map, int count, int step)
+{
+  for(int i = 0; i < count; i++)
+  {
+    if (*map)
+      *map = 255;
+    map += step;
+  }
+}
+
+static void iImageCopyMapAlpha(imbyte *map, imbyte *gldata, int depth, int count)
+{
+  /* gldata can be GL_RGBA or GL_LUMINANCE_ALPHA */
+  gldata += depth-1; /* position at first alpha */
+  for(int i = 0; i < count; i++)
+  {
+    *gldata = *map;
+    map++;
+    gldata += depth;  /* skip to next alpha */
+  }
+}
+
+static void iImageSetTranspMap(imbyte *map, imbyte *gldata, int count, imbyte *transp_map, int transp_count)
+{
+  /* gldata is GL_RGBA */
+  gldata += 3; /* position at first alpha */
+  for(int i = 0; i < count; i++)
+  {
+    if (*map < transp_count)
+      *gldata = transp_map[*map];
+    else
+      *gldata = 255;  /* opaque */
+
+    map++;
+    gldata += 4;
+  }
+}
+
+static void iImageSetTranspColor(imbyte *gldata, int count, imbyte r, imbyte g, imbyte b)
+{
+  /* gldata is GL_RGBA */
+  for(int i = 0; i < count; i++)
+  {
+    if (*(gldata+0) == r &&
+        *(gldata+1) == g &&
+        *(gldata+2) == b)
+      *(gldata+3) = 0;    /* transparent */
+    else
+      *(gldata+3) = 255;  /* opaque */
+    gldata += 4;
+  }
+}
+
+static void iImageSetTranspIndex(imbyte *map, imbyte *gldata, int depth, int count, imbyte index)
+{
+  /* gldata can be GL_RGBA or GL_LUMINANCE_ALPHA */
+  gldata += depth-1; /* position at first alpha */
+  for(int i = 0; i < count; i++)
+  {
+    if (*map == index)
+      *gldata = 0;    /* full transparent */
+    else
+      *gldata = 255;  /* opaque */
+
+    map++;
+    gldata += depth;  /* skip to next alpha */
+  }
+}
+
+/* To avoid including gl.h */
+#define GL_RGB                            0x1907
+#define GL_RGBA                           0x1908
+#define GL_LUMINANCE                      0x1909
+#define GL_LUMINANCE_ALPHA                0x190A
+
+void* imImageGetOpenGLData(const imImage* image, int *format)
+{
+  if (!imImageIsBitmap(image))
+    return NULL;
+
+  int transp_count;
+  imbyte* transp_index = (imbyte*)imImageGetAttribute(image, "TransparencyIndex", NULL, NULL);
+  imbyte* transp_map = (imbyte*)imImageGetAttribute(image, "TransparencyMap", NULL, &transp_count);
+  imbyte* transp_color = (imbyte*)imImageGetAttribute(image, "TransparencyColor", NULL, NULL);
+
+  int glformat;
+  switch(image->color_space)
+  {
+  case IM_MAP:
+    if (image->has_alpha || transp_map || transp_index)
+      glformat = GL_RGBA;
+    else
+      glformat = GL_RGB;
+    break;
+  case IM_RGB:
+    if (image->has_alpha || transp_color)
+      glformat = GL_RGBA;
+    else
+      glformat = GL_RGB;
+    break;
+  case IM_BINARY:
+  default: /* IM_GRAY */
+    if (image->has_alpha || transp_index)
+      glformat = GL_LUMINANCE_ALPHA;
+    else
+      glformat = GL_LUMINANCE;
+    break;
+  }
+
+  int depth;
+  switch (glformat)
+  {
+  case GL_RGB:
+    depth = 3;
+    break;
+  case GL_RGBA:
+    depth = 4;
+    break;
+  case GL_LUMINANCE_ALPHA:
+    depth = 2;
+    break;
+  default: /* GL_LUMINANCE */
+    depth = 1;
+    break;
+  }
+
+  int size = image->count*depth;
+  imImageSetAttribute(image, "GLDATA", IM_BYTE, size, NULL);
+  imbyte* gldata = (imbyte*)imImageGetAttribute(image, "GLDATA", NULL, NULL);
+
+  if (image->color_space == IM_RGB)
+  {
+    if (image->has_alpha)
+      imConvertPacking(image->data[0], gldata, image->width, image->height, 4, IM_BYTE, 0);
+    else
+    {
+      imConvertPacking(image->data[0], gldata, image->width, image->height, 3, IM_BYTE, 0);
+
+      if (transp_color)
+        iImageSetTranspColor(gldata, image->count, *(transp_color+0), *(transp_color+1), *(transp_color+2));
+    }
+  }
+  else
+  {
+    memcpy(gldata, image->data[0], image->size);
+
+    if (image->color_space == IM_MAP)
+      imConvertMapToRGB(gldata, image->count, depth, 1, image->palette, image->palette_count);
+    else if (image->color_space == IM_BINARY)
+      iImageMakeGray(gldata, image->count, (glformat==GL_LUMINANCE_ALPHA)? 2: 1);
+
+    if (image->has_alpha)
+      iImageCopyMapAlpha((imbyte*)image->data[1], gldata, depth, image->count);
+    else if (transp_map)
+      iImageSetTranspMap((imbyte*)image->data[0], gldata, image->count, transp_map, transp_count);
+    else if (transp_index)
+      iImageSetTranspIndex((imbyte*)image->data[0], gldata, depth, image->count, *transp_index);
+  }
+
+  if (format) *format = glformat;
+  return gldata;
+}
+

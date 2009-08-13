@@ -277,14 +277,25 @@ void imFileFormatPNG::iReadAttrib(imAttribTable* attrib_table)
     attrib_table->Set("CalibrationParam", IM_BYTE, total_size+1, param_buf);
   }
 
-  int num_trans;
-  png_bytep trans;
-  png_color_16p trans_values;
+  int num_trans = 0;
+  png_bytep trans = NULL;
+  png_color_16p trans_values = NULL;
   if (png_get_tRNS(png_ptr, info_ptr, &trans, &num_trans, &trans_values))
   {
     if (imColorModeSpace(file_color_mode) == IM_MAP)
     {
-      attrib_table->Set("TransparencyIndex", IM_BYTE, num_trans, trans);
+      int i, min_alpha = 256;
+      imbyte transp_index = 0;
+      attrib_table->Set("TransparencyMap", IM_BYTE, num_trans, trans);
+      for (i=0; i<num_trans; i++)
+      {
+        if (trans[i] < min_alpha)
+        {
+          min_alpha = trans[i];
+          transp_index = (imbyte)i;
+        }
+      }
+      attrib_table->Set("TransparencyIndex", IM_BYTE, 1, &transp_index);
     }
     else if (imColorModeSpace(file_color_mode) == IM_RGB)
     {                              
@@ -292,12 +303,12 @@ void imFileFormatPNG::iReadAttrib(imAttribTable* attrib_table)
       transp_color[0] = (imbyte)(trans_values->red >> 8);
       transp_color[1] = (imbyte)(trans_values->green >> 8);
       transp_color[2] = (imbyte)(trans_values->blue >> 8);
-      attrib_table->Set("TransparentColor", IM_BYTE, 3, transp_color);
+      attrib_table->Set("TransparencyColor", IM_BYTE, 3, transp_color);
     }
-    else
+    else if (imColorModeSpace(file_color_mode) == IM_GRAY)
     {
-      imbyte bvalue = (imbyte)(trans_values->gray >> 8);
-      attrib_table->Set("TransparencyIndex", IM_BYTE, 1, &bvalue);
+      imbyte transp_index = (imbyte)(trans_values->gray >> 8);
+      attrib_table->Set("TransparencyIndex", IM_BYTE, 1, &transp_index);
     }
   }
 
@@ -499,24 +510,37 @@ void imFileFormatPNG::iWriteAttrib(imAttribTable* attrib_table)
     png_set_pCAL(png_ptr, info_ptr, name, limits[0], limits[1], *equation, nparams, units, pparams);
   }
 
-  int transp_count;
-  attrib_data = attrib_table->Get("TransparencyIndex", NULL, &transp_count);
+  attrib_data = attrib_table->Get("TransparencyIndex", NULL, NULL);
   if (attrib_data)
   {
-    png_color_16 trans_values;
     if (imColorModeSpace(file_color_mode) == IM_MAP)
     {
-      png_set_tRNS(png_ptr, info_ptr, (imbyte*)attrib_data, transp_count, NULL);
+      int i;
+      imbyte transp_index = *(imbyte*)attrib_data;
+      imbyte transp_map[256];
+      for (i=0; i<256; i++)
+        transp_map[i] = 255;
+      transp_map[transp_index] = 0;
+      png_set_tRNS(png_ptr, info_ptr, transp_map, 256, NULL);
     }
     else if (imColorModeSpace(file_color_mode) == IM_GRAY)
     {
+      png_color_16 trans_values;
       imbyte *transp_color = (imbyte*)attrib_data;
       trans_values.gray = (png_uint_16)(transp_color[0] << 8);
       png_set_tRNS(png_ptr, info_ptr, NULL, 1, &trans_values);
     }
   }
 
-  attrib_data = attrib_table->Get("TransparentColor");
+  int transp_count;
+  attrib_data = attrib_table->Get("TransparencyMap", NULL, &transp_count);
+  if (attrib_data)
+  {
+    if (imColorModeSpace(file_color_mode) == IM_MAP)
+      png_set_tRNS(png_ptr, info_ptr, (imbyte*)attrib_data, transp_count, NULL);
+  }
+
+  attrib_data = attrib_table->Get("TransparencyColor");
   if (attrib_data)
   {
     if (imColorModeSpace(file_color_mode) == IM_RGB)

@@ -203,8 +203,9 @@ void imFormatRegisterJPEG(void);
       PrimaryChromaticities  IMFLOAT (6)
       XPosition, YPosition IM_FLOAT (1)
       sRGBIntent IM_INT (1) [0: Perceptual, 1: Relative colorimetric, 2: Saturation, 3: Absolute colorimetric]
-      TransparencyIndex IM_BYTE (1 or N)
-      TransparentColor IM_BYTE (3)
+      TransparencyMap IM_BYTE (N) (for MAP images is the alpha value of the corresponding palette index)
+      TransparencyIndex IM_BYTE (1) (for MAP images is the first index that has minimum alpha in TransparencyMap, for GRAY images is the index that it is fully transparent)
+      TransparencyColor IM_BYTE (3) (for RGB images is the color that is full transparent)
       CalibrationName, CalibrationUnits (string)
       CalibrationLimits IM_INT (2)
       CalibrationEquation IM_BYTE (1) [0-Linear,1-Exponential,2-Arbitrary,3-HyperbolicSine)]
@@ -217,6 +218,7 @@ void imFormatRegisterJPEG(void);
       XScale, YScale IM_FLOAT (1)
 
     Comments:
+      When saving PNG image with TransparencyIndex or TransparencyMap, TransparencyMap has precedence, so set it to NULL if you changed TransparencyIndex.
       Attributes after the image are ignored.
       Define PNG_NO_CONSOLE_IO to avoid printfs. We also define PNG_TIME_RFC1123_SUPPORTED.
       Added the following files to the makefile to optimize the library:
@@ -504,7 +506,7 @@ void imFormatRegisterPNM(void);
     Internally the lines are arranged from bottom up to top.
 
     Attributes:
-      TransparencyIndex IM_BYTE (1 or N)
+      TransparencyIndex IM_BYTE (1)
 
     Comments:
       If the user specifies an alpha channel, the AND mask is loaded as alpha if

@@ -89,6 +89,17 @@ int imConvertColorSpace(const imImage* src_image, imImage* dst_image);
  * \ingroup convert */
 int imConvertToBitmap(const imImage* src_image, imImage* dst_image, int cpx2real, float gamma, int abssolute, int cast_mode);
 
+/** Returns an OpenGL compatible data buffer. Also returns the correspondant pixel format. \n
+ * The memory allocated is stored in the attribute "GLDATA" with BYTE type. And it will exists while the image exists. \n
+ * It can also be cleared setting the attribute to NULL. \n
+ * MAP images are converted to RGB, and BINARY images are converted to GRAY.
+ * Alpha channel is considered and Transparency* attributes are converted to alpha channel.
+ * So calculate depth from glformat, not from image depth.
+ *
+ * \verbatim image:GetOpenGLData() -> gldata: userdata, glformat: number [in Lua 5] \endverbatim
+ * \ingroup convert */
+void* imImageGetOpenGLData(const imImage* image, int *glformat);
+
 
 
 /** \defgroup cnvutil Raw Data Conversion Utilities
@@ -99,13 +110,12 @@ int imConvertToBitmap(const imImage* src_image, imImage* dst_image, int cpx2real
  * \ingroup imagerep */
 
 
-/** Changes the packing of the data buffer.
+/** Changes the packing of the data buffer. Both must have the same depth.
  * \ingroup cnvutil */
 void imConvertPacking(const void* src_data, void* dst_data, int width, int height, int depth, int data_type, int src_is_packed);
 
 /** Changes in-place a MAP data into a RGB data. The data must have room for the RGB image. \n
  * depth can be 3 or 4. count=width*height. \n
- * Very usefull for OpenGL applications. 
  * \ingroup cnvutil */
 void imConvertMapToRGB(unsigned char* data, int count, int depth, int packed, long* palette, int palette_count);
                        

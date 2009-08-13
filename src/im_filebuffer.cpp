@@ -53,7 +53,7 @@ static void iDoFillLineBuffer(int width, int height, int line, int plane,
 
       // file is packed
       // NO color space conversion, color_space must match
-      // If ignore alpha if necessary.
+      // Ignore alpha if necessary.
       int depth = IM_MIN(file_depth, data_depth);      
       for (int d = 0; d < depth; d++)
       {

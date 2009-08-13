@@ -15,7 +15,6 @@
 #include "im_util.h"
 #include "im_attrib.h"
 #include "im_file.h"
-#include "im_convert.h"
 
 
 int imImageCheckFormat(int color_mode, int data_type)
@@ -335,125 +334,7 @@ imImage* imImageClone(const imImage* image)
   return new_image;
 }
 
-static void iImageMakeGray(imbyte *map, int count, int step)
-{
-  for(int i = 0; i < count; i++)
-  {
-    if (*map)
-      *map = 255;
-    map += step;
-  }
-}
-
-static void iImageCopyMapAlpha(imbyte *map, imbyte *gldata, int depth, int count)
-{
-  gldata += depth-1; /* position at first alpha */
-  for(int i = 0; i < count; i++)
-  {
-    *gldata = *map;
-    map++;
-    gldata += depth;  /* skip to next alpha */
-  }
-}
-
-static void iImageExpandTranspIndex(imbyte *map, imbyte *gldata, int depth, int count, imbyte index)
-{
-  gldata += depth-1; /* position at first alpha */
-  for(int i = 0; i < count; i++)
-  {
-    if (*map == index)
-      *gldata = 255;
-
-    map++;
-    gldata += depth;  /* skip to next alpha */
-  }
-}
-
-/* To avoid including gl.h */
-#define GL_RGB                            0x1907
-#define GL_RGBA                           0x1908
-#define GL_LUMINANCE                      0x1909
-#define GL_LUMINANCE_ALPHA                0x190A
-
-void* imImageGetOpenGLData(imImage* image, int *format)
-{
-  if (!imImageIsBitmap(image))
-    return NULL;
-
-  int transp_count;
-  imbyte* transp_index = (imbyte*)imImageGetAttribute(image, "TransparencyIndex", NULL, &transp_count);
-
-  int glformat;
-  switch(image->color_space)
-  {
-  case IM_MAP:
-    if (image->has_alpha || transp_index)
-      glformat = GL_RGBA;
-    else
-      glformat = GL_RGB;
-    break;
-  case IM_RGB:
-    if (image->has_alpha)
-      glformat = GL_RGBA;
-    else
-      glformat = GL_RGB;
-    break;
-  case IM_BINARY:
-  default: /* IM_GRAY */
-    if (image->has_alpha || transp_index)
-      glformat = GL_LUMINANCE_ALPHA;
-    else
-      glformat = GL_LUMINANCE;
-    break;
-  }
-
-  int depth;
-  switch (glformat)
-  {
-  case GL_RGB:
-    depth = 3;
-    break;
-  case GL_RGBA:
-    depth = 4;
-    break;
-  case GL_LUMINANCE_ALPHA:
-    depth = 2;
-    break;
-  default: /* GL_LUMINANCE */
-    depth = 1;
-    break;
-  }
-
-  int size = image->count*depth;
-  imImageSetAttribute(image, "GLDATA", IM_BYTE, size, NULL);
-  imbyte* gldata = (imbyte*)imImageGetAttribute(image, "GLDATA", NULL, NULL);
-
-  if (image->color_space == IM_RGB)
-    imConvertPacking(image->data[0], gldata, image->width, image->height, depth, IM_BYTE, 0);
-  else
-  {
-    memcpy(gldata, image->data[0], image->size);
-
-    if (image->color_space == IM_MAP)
-      imConvertMapToRGB(gldata, image->count, depth, 1, image->palette, image->palette_count);
-    else if (image->color_space == IM_BINARY)
-      iImageMakeGray(gldata, image->count, (glformat==GL_LUMINANCE_ALPHA)? 2: 1);
-
-    if (image->has_alpha)
-      iImageCopyMapAlpha((imbyte*)image->data[1], gldata, depth, image->count);
-    else if (transp_index)
-    {
-      int i;
-      for (i=0; i<transp_count; i++)
-        iImageExpandTranspIndex((imbyte*)image->data[0], gldata, depth, image->count, transp_index[i]);
-    }
-  }
-
-  if (format) *format = glformat;
-  return gldata;
-}
-
-void imImageSetAttribute(imImage* image, const char* attrib, int data_type, int count, const void* data)
+void imImageSetAttribute(const imImage* image, const char* attrib, int data_type, int count, const void* data)
 {
   assert(image);
   assert(attrib);
@@ -622,92 +503,12 @@ void imImageMakeGray(imImage *image)
   }
 }
 
-static void iImageGrayCheckChange(imImage *image)
-{
-  int i, do_remap = 0;
-  imbyte remap[256];
-  imbyte r, g, b;
-
-  for (i = 0; i < image->palette_count; i++)
-  {
-    imColorDecode(&r, &g, &b, image->palette[i]);
-
-    if (r != g || g != b)
-      return;
-
-    remap[i] = r;
-
-    if (r != i)
-      do_remap = 1;
-  }
-
-  if (do_remap)
-  {
-    imbyte *map = (imbyte*)image->data[0];
-    for(i = 0; i < image->count; i++)
-    {
-      *map = remap[*map];
-      map++;
-    }
-  }
-
-  image->color_space = IM_GRAY;
-  image->palette_count = 256;
-
-  for (i = 0; i < 256; i++)
-    image->palette[i] = imColorEncode((imbyte)i, (imbyte)i, (imbyte)i);
-}
-
-static int iImageCheckBinary(const imImage* image)
-{
-  if (image->color_space == IM_MAP && image->palette_count == 2)
-  {
-    long black = imColorEncode(0, 0, 0);
-    long white = imColorEncode(255, 255, 255);
-    if ((image->palette[0] == black || image->palette[0] == white) &&
-        (image->palette[1] == black || image->palette[1] == white))
-    {
-      return 1;
-    }
-  }
-
-  if (image->color_space == IM_GRAY && image->data_type == IM_BYTE)
-  {
-    imbyte* map = (imbyte*)image->data[0];
-    for (int i = 0; i < image->count; i++)
-    {
-      if (*map != 0 && *map != 255 && *map != 1) // allow 255 and 1
-        return 0;
-
-      map++;
-    }
-
-    return 1;
-  }
-  else
-    return 0;
-}
-
 static void iLoadImageData(imFile* ifile, imImage* image, int *error, int bitmap)
 {
   iAttributeTableCopy(ifile->attrib_table, image->attrib_table);
-
   *error = imFileReadImageData(ifile, image->data[0], bitmap, image->has_alpha);
-
   if (image->color_space == IM_MAP)
-  {
     imFileGetPalette(ifile, image->palette, &image->palette_count);
-
-    // convert to gray if all colors are grays
-    iImageGrayCheckChange(image);
-  }
-
-  // since Binary is a special case of Gray, check this
-  if (iImageCheckBinary(image))
-  {
-    imImageSetBinary(image);
-    imImageMakeBinary(image);
-  }
 }
 
 imImage* imFileLoadImage(imFile* ifile, int index, int *error)

@@ -141,14 +141,6 @@ imImage* imImageDuplicate(const imImage* image);
  * \ingroup imgclass */
 imImage* imImageClone(const imImage* image);
 
-/** Returns an OpenGL compatible data buffer. Also returns the correspondant pixel format. \n
- * The memory allocated is stored in the attribute "GLDATA" with BYTE type. And it will exists while the image exists. \n
- * It can also be cleared setting the attribute to NULL.
- *
- * \verbatim image:GetOpenGLData() -> gldata: userdata, format: number [in Lua 5] \endverbatim
- * \ingroup imgclass */
-void* imImageGetOpenGLData(imImage* image, int *format);
-
 /** Changes an extended attribute. \n
  * The data will be internally duplicated. \n
  * If data is NULL and count==0 the attribute is removed. \n
@@ -158,7 +150,7 @@ void* imImageGetOpenGLData(imImage* image, int *format);
  * \verbatim image:SetAttribute(attrib: string, data_type: number, data: table of numbers or string) [in Lua 5] \endverbatim
  * If data_type is IM_BYTE, as_string can be used as data.
  * \ingroup imgclass */
-void imImageSetAttribute(imImage* image, const char* attrib, int data_type, int count, const void* data);
+void imImageSetAttribute(const imImage* image, const char* attrib, int data_type, int count, const void* data);
 
 /** Returns an extended attribute. \n
  * Returns NULL if not found.
@@ -233,7 +225,7 @@ int imImageMatchColorSpace(const imImage* image1, const imImage* image2);
  * \ingroup imgclass */
 int imImageMatch(const imImage* image1, const imImage* image2);
 
-/** Changes the image space from gray to binary by just changing color_space and the palette.
+/** Changes the image color space from gray to binary by just changing color_space and the palette.
  *
  * \verbatim image:SetBinary() [in Lua 5] \endverbatim
  * \ingroup imgclass */

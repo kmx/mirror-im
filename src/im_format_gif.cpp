@@ -659,7 +659,7 @@ static void iGIFReadGraphicsControl(imBinFile* handle, imAttribTable* attrib_tab
   if (word_value)
     attrib_table->Set("Delay", IM_USHORT, 1, &word_value);
 
-  /* transparency color */
+  /* transparency index */
   if (byte_value & 0x01)
   {
     imBinFileRead(handle, &byte_value, 1, 1);
@@ -908,7 +908,7 @@ static int iGIFWriteGraphicsControl(imBinFile* handle, imAttribTable* attrib_tab
 
     imBinFileWrite(handle, &word_value, 1, 2);
 
-    /* transparency color */
+    /* transparency index */
     if (attrib_transparency)
     {
       byte_value = *(unsigned char*)attrib_transparency;

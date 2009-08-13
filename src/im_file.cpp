@@ -176,13 +176,28 @@ void imFileGetInfo(imFile* ifile, char* format, char* compression, int *image_co
 
 static int iFileCheckPaletteGray(imFile* ifile)
 {
+  int i;
   imbyte r, g, b;
-  for (int i = 0; i < ifile->palette_count; i++)
+  imbyte remaped[256];
+  memset(remaped, 0, 256);
+
+  for (i = 0; i < ifile->palette_count; i++)
   {
     imColorDecode(&r, &g, &b, ifile->palette[i]);
 
-    if (i != r || r != g || g != b)
+    /* if there are colors abort */
+    if (r != g || g != b)
       return 0;
+
+    /* grays out of order, will be remapped, but must be unique, 
+       if there are duplicates maybe they are used for different pourposes */
+    if (i != r)
+    {
+      if (!remaped[r])
+        remaped[r] = 1;
+      else
+        return 0;
+    }
   }
 
   return 1;
@@ -304,6 +319,16 @@ static void iFileCheckConvertGray(imFile* ifile, imbyte* data)
   {
     *data = remap[*data];
     data++;
+  }
+
+  int transp_count;
+  imbyte* transp_map = (imbyte*)imFileGetAttribute(ifile, "TransparencyMap", NULL, &transp_count);
+  if (transp_map)
+  {
+    imbyte new_transp_map[256];
+    for (i=0; i<transp_count; i++)
+      new_transp_map[i] = transp_map[remap[i]];
+    imFileSetAttribute(ifile, "TransparencyMap", IM_BYTE, transp_count, new_transp_map);
   }
 }
 
