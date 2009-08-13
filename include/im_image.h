@@ -151,7 +151,7 @@ void* imImageGetOpenGLData(imImage* image, int *format);
 
 /** Changes an extended attribute. \n
  * The data will be internally duplicated. \n
- * If data is NULL the attribute is removed. \n
+ * If data is NULL and count==0 the attribute is removed. \n
  * If count is -1 and data_type is IM_BYTE then data is zero terminated.
  * See also \ref imDataType.
  *

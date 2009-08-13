@@ -465,8 +465,10 @@ void imImageSetAttribute(imImage* image, const char* attrib, int data_type, int 
 
     attrib_table->Set(attrib, data_type, count, data);
   }
-  else
+  else if (count == 0)
     attrib_table->UnSet(attrib);
+  else
+    attrib_table->Set(attrib, data_type, count, NULL);
 }
 
 const void* imImageGetAttribute(const imImage* image, const char* attrib, int *data_type, int *count)
