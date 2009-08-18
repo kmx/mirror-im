@@ -1,90 +1,160 @@
+-- Based on a code from Stuart P. Bentley
+
 require"imlua"
 require"cdlua"
 require"cdluaim"
 require"iuplua"
 require"iupluacd"
+require"iupluaimglib"
 
-gimgs={}
-gimgs.delays={}
+images={}
+frame=1
 
-ggif=im.FileOpen(iup.GetFile("*.*"))
-
-for i=1, select(3,ggif:GetInfo()) do
-  gimgs[i]=ggif:LoadImage(i-1)
-  err, gimgs[i] = im.ConvertColorSpaceNew(gimgs[i], im.RGB, true)
-  local delay=gimgs[i]:GetAttribute "Delay"
-  if delay then
-    gimgs.delays[i]=delay[1]*10
+function print_error(err)
+  local msg = {}
+  msg[im.ERR_OPEN] = "Error Opening File."
+  msg[im.ERR_MEM] = "Insuficient memory."
+  msg[im.ERR_ACCESS] = "Error Accessing File."
+  msg[im.ERR_DATA] = "Image type not Suported."
+  msg[im.ERR_FORMAT] = "Invalid Format."
+  msg[im.ERR_COMPRESS] = "Invalid or unsupported compression."
+  
+  if msg[err] then
+    print(msg[err])
   else
-    gimgs.delays[i]=10
+    print("Unknown Error.")
   end
 end
 
-ggif:Close()
+function load_frames(file_name)
 
-function gifanimator(gimgs, behavior, start, final, runyn, initial)
+  ifile, err=im.FileOpen(file_name)
+  if not ifile then
+      print_error(err)
+      return
+  end
 
-  start=start or 1
-  final=final or #gimgs
-  local increment=1
-  local frame=initial or start
+  images={}
+  images.delays={}
+  images.disposal={}
+  frame=1
 
-  --hack to get data to canvas action
-  anii=frame
-  return iup.timer{
-    time=gimgs.delays[frame],
-    run=runyn or "YES",
-    action_cb=function(self)
-      self.run="NO"
-      if frame==final then
-        if behavior=="LOOP" then
-          frame=start
-        elseif behavior=="BOUNCE" then
-          increment=-1
-          frame=frame+increment
-        else
-          return nil
-        end
-      elseif frame==start and behavior=="BOUNCE" then
-        increment=1
-        frame=frame+increment
+  for i=1, select(3,ifile:GetInfo()) do
+    images[i]=ifile:LoadBitmap(i-1)
+    err, images[i] = im.ConvertColorSpaceNew(images[i], im.RGB, true)
+    local delay=images[i]:GetAttribute("Delay") -- time to wait betweed frames in 1/100 of a second]
+    if delay then
+      images.delays[i]=delay[1]*10 -- timer in miliseconds
+    else
+      if (i == 1) then 
+        images.delays[i]=100 
       else
-        frame=frame+increment
+        images.delays[i]=images.delays[i-1]
       end
-      self.time=gimgs.delays[frame]
-      self.run="YES"
+    end
+    images.disposal[i]=images[i]:GetAttribute("Disposal", true) --  [UNDEF, LEAVE, RBACK, RPREV]
+  end
 
-      --for the canvas redrawing function
-      anii=frame
-      --redraw the canvas. yeah, it's a bit of a hack.
-      cnv.action()
-    end}
+  ifile:Close()
+  
+  cnv.rastersize = images[1]:Width().."x"..images[1]:Height()
+  dlg.size=nil
+  iup.Refresh(cnv)
 end
 
-anit=gifanimator(gimgs,"LOOP")--,"BOUNCE",3,20)
+t = iup.timer{}
 
-cnv = iup.canvas{rastersize = gimgs[1]:Width().."x"..gimgs[1]:Height(),
- border = "NO",
- expand = "YES"}
+function start_timer()
+  dlg.title = "Animated Gif"
+  dlg.play_bt.image="IUP_MediaPause" dlg.play_bt.title="Pause"
+  t.run = "NO"
+  t.time = images.delays[frame]
+  t.run = "YES"
+  iup.Update(cnv)
+end
+
+function stop_timer()
+  dlg.title = "Animated Gif "..frame.."/"..#images
+  dlg.play_bt.image="IUP_MediaPlay" dlg.play_bt.title="Play" 
+  t.run="NO"
+  iup.Update(cnv)
+end
+
+function set_frame(f)
+  frame = f
+  if frame > #images then
+    frame = #images
+  end
+  if frame < 1 then
+    frame = 1
+  end
+  stop_timer()
+end
+
+function t:action_cb()
+  frame = frame + 1
+  if frame == #images+1 then
+    frame = 1
+  end
+  
+  start_timer()
+end
+    
+cnv = iup.canvas{border = "NO"}
 
 function cnv:map_cb()-- the CD canvas can only be created when the IUP canvas is mapped
-  cdanvas = cd.CreateCanvas(cd.IUP, self)
+  canvas = cd.CreateCanvas(cd.IUP, self)
+  canvas:Activate()
+  
+  start_timer()
 end
 
 function cnv:action()-- called everytime the IUP canvas needs to be repainted
-  cdanvas:Activate()
-  gimgs[anii]:cdCanvasPutImageRect(cdanvas, 0, 0, 0, 0, 0, 0, 0, 0) -- use default values
+  canvas:Activate()
+  if (images.disposal[frame] == "RBACK") then
+    canvas:Clear()
+  end
+  images[frame]:cdCanvasPutImageRect(canvas, 0, 0, 0, 0, 0, 0, 0, 0) -- use default values
 end
 
-dlg = iup.dialog{cnv,title="Animated Gif Player"}
+function cnv:resize_cb()
+  canvas:Activate()
+  canvas:Clear()
+end
+
+function cnv:button_cb(but, pressed)
+  if (but == iup.BUTTON1 and pressed==1) then
+    local file_name, error = iup.GetFile("*.*")
+    if error ~= 0 then
+      return
+    end
+    
+    load_frames(file_name)  
+    canvas:Activate()
+    canvas:Clear()
+    start_timer()
+  end
+end
+
+buts = iup.hbox{
+  iup.button{title="First", image="IUP_MediaGotoBegin", action=function(self) set_frame(1) end}, 
+  iup.button{title="Previous", image="IUP_MediaRewind", action=function(self) set_frame(frame-1) end}, 
+  iup.button{title="Pause", image="IUP_MediaPause", action=function(self) if (t.run=="YES") then stop_timer() else start_timer() end end}, 
+  iup.button{title="Next", image="IUP_MediaForward", action=function(self) set_frame(frame+1) end}, 
+  iup.button{title="Last", image="IUP_MediaGoToEnd", action=function(self) set_frame(#images) end}, 
+  }
+dlg = iup.dialog{iup.vbox{cnv, buts},title="Animated Gif", margin="5x5", gap=10}
+dlg.play_bt = dlg[1][2][3]
 
 function dlg:close_cb()
-  iup.Destroy(anit)
-  gimgs=nil --Destroys will be called by the garbage collector
-  cdanvas:Kill()
+  iup.Destroy(t)
+  images=nil --Destroys will be called by the garbage collector
+  canvas:Kill()
   self:destroy()
   return iup.IGNORE -- because we destroy the dialog
 end
+
+load_frames(iup.GetFile("*.*"))
 
 dlg:show()
 iup.MainLoop()

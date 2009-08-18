@@ -963,6 +963,8 @@ int imConvertColorSpace(const imImage* src_image, imImage* dst_image)
       imbyte* transp_color = (imbyte*)imImageGetAttribute(src_image, "TransparencyColor", NULL, NULL);
       if (transp_color)
         iConvertSetTranspColor((imbyte**)dst_image->data, dst_image->count, *(transp_color+0), *(transp_color+1), *(transp_color+2));
+      else
+        memset(dst_image->data[3], 255, dst_image->count);
     }
     else
     {
@@ -973,6 +975,8 @@ int imConvertColorSpace(const imImage* src_image, imImage* dst_image)
         iConvertSetTranspMap((imbyte*)src_image->data[0], (imbyte*)dst_image->data[3], dst_image->count, transp_map, transp_count);
       else if (transp_index)
         iConvertSetTranspIndex((imbyte*)src_image->data[0], (imbyte*)dst_image->data[3], dst_image->count, *transp_index);
+      else
+        memset(dst_image->data[3], 255, dst_image->count);
     }
   }
 
