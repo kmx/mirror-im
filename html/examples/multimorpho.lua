@@ -16,7 +16,7 @@ err_msg = {
   "Invalid or unrecognized file format.",
   "Invalid or unsupported data.",
   "Invalid or unsupported compression.",
-  "Insuficient memory",
+  "Insufficient memory",
   "Interrupted by the counter",
 }
 

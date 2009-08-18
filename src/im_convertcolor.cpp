@@ -56,6 +56,57 @@ void imConvertMapToRGB(unsigned char* data, int count, int depth, int packed, lo
   }
 }
 
+static void iConvertSetTranspMap(imbyte *src_map, imbyte *dst_alpha, int count, imbyte *transp_map, int transp_count)
+{
+  for(int i = 0; i < count; i++)
+  {
+    if (*src_map < transp_count)
+      *dst_alpha = transp_map[*src_map];
+    else
+      *dst_alpha = 255;  /* opaque */
+
+    src_map++;
+    dst_alpha++;
+  }
+}
+
+static void iConvertSetTranspIndex(imbyte *src_map, imbyte *dst_alpha, int count, imbyte index)
+{
+  for(int i = 0; i < count; i++)
+  {
+    if (*src_map == index)
+      *dst_alpha = 0;    /* full transparent */
+    else
+      *dst_alpha = 255;  /* opaque */
+
+    src_map++;
+    dst_alpha++;
+  }
+}
+
+static void iConvertSetTranspColor(imbyte **dst_data, int count, imbyte r, imbyte g, imbyte b)
+{
+  imbyte *pr = dst_data[0];
+  imbyte *pg = dst_data[1];
+  imbyte *pb = dst_data[2];
+  imbyte *pa = dst_data[3];
+
+  for(int i = 0; i < count; i++)
+  {
+    if (*pr == r &&
+        *pg == g &&
+        *pb == b)
+      *pa = 0;    /* transparent */
+    else
+      *pa = 255;  /* opaque */
+    
+    pr++;
+    pg++;
+    pb++;
+    pa++;
+  }
+}
+
 // convert bin2gray and gray2bin
 inline void iConvertBinary(imbyte* map, int count, imbyte value)
 {
@@ -124,7 +175,7 @@ static void iConvertMapToRGB(const imbyte* src_map, imbyte* red, imbyte* green, 
 
 template <class T> 
 int iDoConvert2Gray(int count, int data_type, 
-                           const T** src_data, int src_color_space, T** dst_data, int counter)
+                    const T** src_data, int src_color_space, T** dst_data, int counter)
 {
   int i;
   T max;
@@ -201,7 +252,7 @@ int iDoConvert2Gray(int count, int data_type,
 
 template <class T> 
 int iDoConvert2RGB(int count, int data_type, 
-                          const T** src_data, int src_color_space, T** dst_data, int counter)
+                   const T** src_data, int src_color_space, T** dst_data, int counter)
 {
   int i;
   T max, zero;
@@ -303,7 +354,7 @@ int iDoConvert2RGB(int count, int data_type,
 
 template <class T> 
 int iDoConvert2YCbCr(int count, int data_type, 
-                            const T** src_data, int src_color_space, T** dst_data, int counter)
+                     const T** src_data, int src_color_space, T** dst_data, int counter)
 {
   int i;
   T zero;
@@ -339,7 +390,7 @@ int iDoConvert2YCbCr(int count, int data_type,
 
 template <class T> 
 int iDoConvert2XYZ(int count, int data_type, 
-                          const T** src_data, int src_color_space, T** dst_data, int counter)
+                   const T** src_data, int src_color_space, T** dst_data, int counter)
 {
   int i;
   T max;
@@ -439,7 +490,7 @@ int iDoConvert2XYZ(int count, int data_type,
 
 template <class T> 
 int iDoConvert2Lab(int count, int data_type, 
-                          const T** src_data, int src_color_space, T** dst_data, int counter)
+                   const T** src_data, int src_color_space, T** dst_data, int counter)
 {
   int i;
   T max;
@@ -561,7 +612,7 @@ int iDoConvert2Lab(int count, int data_type,
 
 template <class T> 
 int iDoConvert2Luv(int count, int data_type, 
-                          const T** src_data, int src_color_space, T** dst_data, int counter)
+                   const T** src_data, int src_color_space, T** dst_data, int counter)
 {
   int i;
   T max;
@@ -779,105 +830,152 @@ static int iConvertColorSpace(const imImage* src_image, imImage* dst_image)
 
 int imConvertColorSpace(const imImage* src_image, imImage* dst_image)
 {
+  int ret = IM_ERR_NONE;
   assert(src_image);
   assert(dst_image);
 
   if (!imImageMatchDataType(src_image, dst_image))
     return IM_ERR_DATA;
 
-  if (src_image->color_space == dst_image->color_space)
-    return IM_ERR_DATA;
-
-  switch(dst_image->color_space)
+  if (src_image->color_space != dst_image->color_space)
   {
-  case IM_RGB:
-    switch(src_image->color_space)
+    switch(dst_image->color_space)
     {
-    case IM_BINARY:
-        memcpy(dst_image->data[0], src_image->data[0], dst_image->plane_size);
-        iConvertBinary((imbyte*)dst_image->data[0], dst_image->count, 255);
-        memcpy(dst_image->data[1], dst_image->data[0], dst_image->plane_size);
-        memcpy(dst_image->data[2], dst_image->data[0], dst_image->plane_size);
-      return IM_ERR_NONE;
-    case IM_MAP:
-      iConvertMapToRGB((imbyte*)src_image->data[0], (imbyte*)dst_image->data[0], (imbyte*)dst_image->data[1], (imbyte*)dst_image->data[2], dst_image->count, src_image->palette, src_image->palette_count);
-      return IM_ERR_NONE;
-    case IM_GRAY:
-        memcpy(dst_image->data[0], src_image->data[0], dst_image->plane_size);
-        memcpy(dst_image->data[1], src_image->data[0], dst_image->plane_size);
-        memcpy(dst_image->data[2], src_image->data[0], dst_image->plane_size);
-      return IM_ERR_NONE;
-    default: 
-      return iConvertColorSpace(src_image, dst_image);
-    }
-  case IM_GRAY:  
-    switch(src_image->color_space)
-    {
-    case IM_BINARY:
-      memcpy(dst_image->data[0], src_image->data[0], dst_image->size);
-      iConvertBinary((imbyte*)dst_image->data[0], dst_image->count, 255);
-      return IM_ERR_NONE;
-    case IM_MAP:
-      iConvertMap2Gray((imbyte*)src_image->data[0], (imbyte*)dst_image->data[0], dst_image->count, src_image->palette, src_image->palette_count);
-      return IM_ERR_NONE;
-    case IM_YCBCR: 
-      memcpy(dst_image->data[0], src_image->data[0], dst_image->plane_size);
-      return IM_ERR_NONE;
-    default:
-      return iConvertColorSpace(src_image, dst_image);
-    }
-  case IM_MAP:   
-    switch(src_image->color_space)
-    {
-    case IM_BINARY: // no break, same procedure as gray
-    case IM_GRAY:
-      memcpy(dst_image->data[0], src_image->data[0], dst_image->size);
-      dst_image->palette_count = src_image->palette_count;
-      memcpy(dst_image->palette, src_image->palette, dst_image->palette_count*sizeof(long));
-      return IM_ERR_NONE;
     case IM_RGB:
-      dst_image->palette_count = 256;
-      return imConvertRGB2Map(src_image->width, src_image->height, 
-                             (imbyte*)src_image->data[0], (imbyte*)src_image->data[1], (imbyte*)src_image->data[2], 
-                             (imbyte*)dst_image->data[0], dst_image->palette, &dst_image->palette_count);
-    default:
-      return IM_ERR_DATA;
-    }
-  case IM_BINARY:
-    switch(src_image->color_space)
-    {
-    case IM_GRAY:
-      memcpy(dst_image->data[0], src_image->data[0], dst_image->size);
-      iConvertBinary((imbyte*)dst_image->data[0], dst_image->count, 1);
-      return IM_ERR_NONE;
-    case IM_MAP:           // convert to gray, then convert to binary
-      iConvertMap2Gray((imbyte*)src_image->data[0], (imbyte*)dst_image->data[0], dst_image->count, src_image->palette, src_image->palette_count);
-      iConvertBinary((imbyte*)dst_image->data[0], dst_image->count, 1);
-      return IM_ERR_NONE;
-    case IM_YCBCR:         // convert to gray, then convert to binary
-      memcpy(dst_image->data[0], src_image->data[0], dst_image->plane_size);
-      iConvertBinary((imbyte*)dst_image->data[0], dst_image->count, 1);
-      return IM_ERR_NONE;
-    default:               // convert to gray, then convert to binary
+      switch(src_image->color_space)
       {
-        dst_image->color_space = IM_GRAY;
-        int ret = iConvertColorSpace(src_image, dst_image);
-        dst_image->color_space = IM_BINARY;
-        if (ret != IM_ERR_NONE) return ret;
-        iConvertBinary((imbyte*)dst_image->data[0], dst_image->count, 1);
-        return IM_ERR_NONE;
+      case IM_BINARY:
+          memcpy(dst_image->data[0], src_image->data[0], dst_image->plane_size);
+          iConvertBinary((imbyte*)dst_image->data[0], dst_image->count, 255);
+          memcpy(dst_image->data[1], dst_image->data[0], dst_image->plane_size);
+          memcpy(dst_image->data[2], dst_image->data[0], dst_image->plane_size);
+        ret = IM_ERR_NONE;
+        break;
+      case IM_MAP:
+        iConvertMapToRGB((imbyte*)src_image->data[0], (imbyte*)dst_image->data[0], (imbyte*)dst_image->data[1], (imbyte*)dst_image->data[2], dst_image->count, src_image->palette, src_image->palette_count);
+        ret = IM_ERR_NONE;
+        break;
+      case IM_GRAY:
+          memcpy(dst_image->data[0], src_image->data[0], dst_image->plane_size);
+          memcpy(dst_image->data[1], src_image->data[0], dst_image->plane_size);
+          memcpy(dst_image->data[2], src_image->data[0], dst_image->plane_size);
+        ret = IM_ERR_NONE;
+        break;
+      default: 
+        ret = iConvertColorSpace(src_image, dst_image);
+        break;
       }
+      break;
+    case IM_GRAY:  
+      switch(src_image->color_space)
+      {
+      case IM_BINARY:
+        memcpy(dst_image->data[0], src_image->data[0], dst_image->size);
+        iConvertBinary((imbyte*)dst_image->data[0], dst_image->count, 255);
+        ret = IM_ERR_NONE;
+        break;
+      case IM_MAP:
+        iConvertMap2Gray((imbyte*)src_image->data[0], (imbyte*)dst_image->data[0], dst_image->count, src_image->palette, src_image->palette_count);
+        ret = IM_ERR_NONE;
+        break;
+      case IM_YCBCR: 
+        memcpy(dst_image->data[0], src_image->data[0], dst_image->plane_size);
+        ret = IM_ERR_NONE;
+        break;
+      default:
+        ret = iConvertColorSpace(src_image, dst_image);
+        break;
+      }
+      break;
+    case IM_MAP:   
+      switch(src_image->color_space)
+      {
+      case IM_BINARY: // no break, same procedure as gray
+      case IM_GRAY:
+        memcpy(dst_image->data[0], src_image->data[0], dst_image->size);
+        dst_image->palette_count = src_image->palette_count;
+        memcpy(dst_image->palette, src_image->palette, dst_image->palette_count*sizeof(long));
+        ret = IM_ERR_NONE;
+        break;
+      case IM_RGB:
+        dst_image->palette_count = 256;
+        ret = imConvertRGB2Map(src_image->width, src_image->height, 
+                               (imbyte*)src_image->data[0], (imbyte*)src_image->data[1], (imbyte*)src_image->data[2], 
+                               (imbyte*)dst_image->data[0], dst_image->palette, &dst_image->palette_count);
+        break;
+      default:
+        ret = IM_ERR_DATA;
+        break;
+      }
+      break;
+    case IM_BINARY:
+      switch(src_image->color_space)
+      {
+      case IM_GRAY:
+        memcpy(dst_image->data[0], src_image->data[0], dst_image->size);
+        iConvertBinary((imbyte*)dst_image->data[0], dst_image->count, 1);
+        ret = IM_ERR_NONE;
+        break;
+      case IM_MAP:           // convert to gray, then convert to binary
+        iConvertMap2Gray((imbyte*)src_image->data[0], (imbyte*)dst_image->data[0], dst_image->count, src_image->palette, src_image->palette_count);
+        iConvertBinary((imbyte*)dst_image->data[0], dst_image->count, 1);
+        ret = IM_ERR_NONE;
+        break;
+      case IM_YCBCR:         // convert to gray, then convert to binary
+        memcpy(dst_image->data[0], src_image->data[0], dst_image->plane_size);
+        iConvertBinary((imbyte*)dst_image->data[0], dst_image->count, 1);
+        ret = IM_ERR_NONE;
+        break;
+      default:               // convert to gray, then convert to binary
+        dst_image->color_space = IM_GRAY;
+        ret = iConvertColorSpace(src_image, dst_image);
+        dst_image->color_space = IM_BINARY;
+        if (ret == IM_ERR_NONE)
+          iConvertBinary((imbyte*)dst_image->data[0], dst_image->count, 1);
+        ret = IM_ERR_NONE;
+        break;
+      }
+      break;
+    case IM_YCBCR: 
+      switch(src_image->color_space)
+      {
+      case IM_GRAY:
+        memcpy(dst_image->data[0], src_image->data[0], dst_image->plane_size);
+        ret = IM_ERR_NONE;
+        break;
+      default:
+        ret = iConvertColorSpace(src_image, dst_image);
+        break;
+      }
+      break;
+    default: 
+      ret = iConvertColorSpace(src_image, dst_image);
+      break;
     }
-  case IM_YCBCR: 
-    switch(src_image->color_space)
-    {
-    case IM_GRAY:
-      memcpy(dst_image->data[0], src_image->data[0], dst_image->plane_size);
-      return IM_ERR_NONE;
-    default:
-      return iConvertColorSpace(src_image, dst_image);
-    }
-  default: 
-    return iConvertColorSpace(src_image, dst_image);
   }
+
+  if (src_image->has_alpha && dst_image->has_alpha)
+    memcpy(dst_image->data[dst_image->depth], src_image->data[src_image->depth], src_image->plane_size);
+  else if (dst_image->color_space == IM_RGB && dst_image->data_type == IM_BYTE && dst_image->has_alpha)
+  {
+    if (src_image->color_space == IM_RGB)
+    {
+      imbyte* transp_color = (imbyte*)imImageGetAttribute(src_image, "TransparencyColor", NULL, NULL);
+      if (transp_color)
+        iConvertSetTranspColor((imbyte**)dst_image->data, dst_image->count, *(transp_color+0), *(transp_color+1), *(transp_color+2));
+    }
+    else
+    {
+      int transp_count;
+      imbyte* transp_index = (imbyte*)imImageGetAttribute(src_image, "TransparencyIndex", NULL, NULL);
+      imbyte* transp_map = (imbyte*)imImageGetAttribute(src_image, "TransparencyMap", NULL, &transp_count);
+      if (transp_map)
+        iConvertSetTranspMap((imbyte*)src_image->data[0], (imbyte*)dst_image->data[3], dst_image->count, transp_map, transp_count);
+      else if (transp_index)
+        iConvertSetTranspIndex((imbyte*)src_image->data[0], (imbyte*)dst_image->data[3], dst_image->count, *transp_index);
+    }
+  }
+
+  return ret;
 }
+

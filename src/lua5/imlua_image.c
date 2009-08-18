@@ -1055,40 +1055,26 @@ static void createmeta (lua_State *L)
   lua_pop(L, 1);  /* removes the metatable from the top of the stack */
 }
 
-/* If all parameteres, besides the image, are nil, this is equivalent to image:Clone.
-   If any parameter is not nil, then the value is used instead of the one from the source image.
-   If a parameter is a function, then the function is called, passing the source
-   image as parameter, to obtain the substituion value. */
-static void reg_image(lua_State *L)
-{
-  const char* data = {
-"function im.ImageCreateBased(image, width, height, color_space, data_type)        \n"
-"  -- default values are those of the source image                                 \n"
-"  width       = width       or image:Width()                                      \n"
-"  height      = height      or image:Height()                                     \n"
-"  color_space = color_space or image:ColorSpace()                                 \n"
-"  data_type   = data_type   or image:DataType()                                   \n"
-"                                                                                  \n"
-"  -- callback to calculate parameters based on source image                       \n"
-"  if type(width)       == \"function\" then       width = width(image) end        \n"
-"  if type(height)      == \"function\" then      height = height(image) end       \n"
-"  if type(color_space) == \"function\" then color_space = color_space(image) end  \n"
-"  if type(data_type)   == \"function\" then   data_type = data_type(image) end    \n"
-"                                                                                  \n"
-"  -- create a new image                                                           \n"
-"  new_image = im.ImageCreate(width, height, color_space, data_type)               \n"
-"  image:CopyAttributes(new_image)                                                 \n"
-"  return new_image                                                                \n"
-"end                                                                               \n"
-  };                                                                       
-  
-  if (luaL_loadbuffer(L, data, strlen(data), "reg_image")==0) lua_pcall(L, 0, 0, 0);
-}
-
 void imlua_open_image (lua_State *L)
 {
   /* "im" table is at the top of the stack */
   createmeta(L);
   luaL_register(L, NULL, imimage_lib);
-  reg_image(L);
+#ifdef TEC_BIGENDIAN
+#ifdef TEC_64
+#include "loh/im_image_be64.loh"
+#else
+#include "loh/im_image_be32.loh"
+#endif
+#else
+#ifdef TEC_64
+#ifdef WIN64
+#include "loh/im_image_le64w.loh"
+#else
+#include "loh/im_image_le64.loh"
+#endif
+#else
+#include "loh/im_image.loh"
+#endif
+#endif
 }

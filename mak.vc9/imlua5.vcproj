@@ -96,6 +96,14 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
+				RelativePath="..\src\lua5\im_convert.lua"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua5\im_image.lua"
+				>
+			</File>
+			<File
 				RelativePath="..\src\lua5\imlua.c"
 				>
 			</File>

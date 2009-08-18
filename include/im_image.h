@@ -169,7 +169,7 @@ const void* imImageGetAttribute(const imImage* image, const char* attrib, int *d
 void imImageGetAttributeList(const imImage* image, char** attrib, int *attrib_count);
 
 /** Sets all image data to zero. But if color space is YCBCR, LAB or LUV, and data type is BYTE or USHORT, then
- * data is initialized with 128 or 32768 accordingly.
+ * data is initialized with 128 or 32768 accordingly. Alpha is initialized as transparent (0).
  *
  * \verbatim image:Clear() [in Lua 5] \endverbatim
  * \ingroup imgclass */

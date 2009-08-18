@@ -1,6 +1,5 @@
 PROJNAME = im
 LIBNAME = imlua_process51
-DEF_FILE = imlua_process.def
 
 OPT = YES
 

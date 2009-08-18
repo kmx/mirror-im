@@ -129,7 +129,7 @@ static void iImageMakeGray(imbyte *map, int count, int step)
   }
 }
 
-static void iImageCopyMapAlpha(imbyte *map, imbyte *gldata, int depth, int count)
+static void iImageGLCopyMapAlpha(imbyte *map, imbyte *gldata, int depth, int count)
 {
   /* gldata can be GL_RGBA or GL_LUMINANCE_ALPHA */
   gldata += depth-1; /* position at first alpha */
@@ -141,7 +141,22 @@ static void iImageCopyMapAlpha(imbyte *map, imbyte *gldata, int depth, int count
   }
 }
 
-static void iImageSetTranspMap(imbyte *map, imbyte *gldata, int count, imbyte *transp_map, int transp_count)
+static void iImageGLSetTranspColor(imbyte *gldata, int count, imbyte r, imbyte g, imbyte b)
+{
+  /* gldata is GL_RGBA */
+  for(int i = 0; i < count; i++)
+  {
+    if (*(gldata+0) == r &&
+        *(gldata+1) == g &&
+        *(gldata+2) == b)
+      *(gldata+3) = 0;    /* transparent */
+    else
+      *(gldata+3) = 255;  /* opaque */
+    gldata += 4;
+  }
+}
+
+static void iImageGLSetTranspMap(imbyte *map, imbyte *gldata, int count, imbyte *transp_map, int transp_count)
 {
   /* gldata is GL_RGBA */
   gldata += 3; /* position at first alpha */
@@ -157,22 +172,7 @@ static void iImageSetTranspMap(imbyte *map, imbyte *gldata, int count, imbyte *t
   }
 }
 
-static void iImageSetTranspColor(imbyte *gldata, int count, imbyte r, imbyte g, imbyte b)
-{
-  /* gldata is GL_RGBA */
-  for(int i = 0; i < count; i++)
-  {
-    if (*(gldata+0) == r &&
-        *(gldata+1) == g &&
-        *(gldata+2) == b)
-      *(gldata+3) = 0;    /* transparent */
-    else
-      *(gldata+3) = 255;  /* opaque */
-    gldata += 4;
-  }
-}
-
-static void iImageSetTranspIndex(imbyte *map, imbyte *gldata, int depth, int count, imbyte index)
+static void iImageGLSetTranspIndex(imbyte *map, imbyte *gldata, int depth, int count, imbyte index)
 {
   /* gldata can be GL_RGBA or GL_LUMINANCE_ALPHA */
   gldata += depth-1; /* position at first alpha */
@@ -258,7 +258,7 @@ void* imImageGetOpenGLData(const imImage* image, int *format)
       imConvertPacking(image->data[0], gldata, image->width, image->height, 3, IM_BYTE, 0);
 
       if (transp_color)
-        iImageSetTranspColor(gldata, image->count, *(transp_color+0), *(transp_color+1), *(transp_color+2));
+        iImageGLSetTranspColor(gldata, image->count, *(transp_color+0), *(transp_color+1), *(transp_color+2));
     }
   }
   else
@@ -271,11 +271,11 @@ void* imImageGetOpenGLData(const imImage* image, int *format)
       iImageMakeGray(gldata, image->count, (glformat==GL_LUMINANCE_ALPHA)? 2: 1);
 
     if (image->has_alpha)
-      iImageCopyMapAlpha((imbyte*)image->data[1], gldata, depth, image->count);
+      iImageGLCopyMapAlpha((imbyte*)image->data[1], gldata, depth, image->count);
     else if (transp_map)
-      iImageSetTranspMap((imbyte*)image->data[0], gldata, image->count, transp_map, transp_count);
+      iImageGLSetTranspMap((imbyte*)image->data[0], gldata, image->count, transp_map, transp_count);
     else if (transp_index)
-      iImageSetTranspIndex((imbyte*)image->data[0], gldata, depth, image->count, *transp_index);
+      iImageGLSetTranspIndex((imbyte*)image->data[0], gldata, depth, image->count, *transp_index);
   }
 
   if (format) *format = glformat;
