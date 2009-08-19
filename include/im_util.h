@@ -241,9 +241,9 @@ void imBinSwapBytes8(void *data, int count);
  * http://www.zlib.org/                                      \n
  * Copyright (C) 1995-2004 Jean-loup Gailly and Mark Adler
  * \par
- * LZF compression support uses libLZF version 1.51.     \n
- * http://liblzf.plan9.de/                                \n
- * Copyright (C) 2000-2005 Marc Alexander Lehmann
+ * LZF compression support uses libLZF version 3.5.       \n
+ * http://software.schmorp.de/pkg/liblzf                  \n
+ * Copyright (C) 2000-2009 Marc Alexander Lehmann
  * See \ref im_util.h
  * \ingroup util */
 

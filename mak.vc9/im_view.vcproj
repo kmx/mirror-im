@@ -106,10 +106,6 @@
 				RelativePath="..\test\im_view.c"
 				>
 			</File>
-			<File
-				RelativePath="..\..\..\Downloads\_Tecgraf\image.cpp"
-				>
-			</File>
 		</Filter>
 	</Files>
 	<Globals>

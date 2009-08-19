@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000-2005 Marc Alexander Lehmann <schmorp@schmorp.de>
+ * Copyright (c) 2000-2008 Marc Alexander Lehmann <schmorp@schmorp.de>
  * 
  * Redistribution and use in source and binary forms, with or without modifica-
  * tion, are permitted provided that the following conditions are met:
@@ -10,9 +10,6 @@
  *   2.  Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- * 
- *   3.  The name of the author may not be used to endorse or promote products
- *       derived from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MER-
@@ -26,14 +23,15 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * Alternatively, the contents of this file may be used under the terms of
- * the GNU General Public License version 2 (the "GPL"), in which case the
- * provisions of the GPL are applicable instead of the above. If you wish to
- * allow the use of your version of this file only under the terms of the
- * GPL and not to allow others to use your version of this file under the
- * BSD license, indicate your decision by deleting the provisions above and
- * replace them with the notice and other provisions required by the GPL. If
- * you do not delete the provisions above, a recipient may use your version
- * of this file under either the BSD or the GPL.
+ * the GNU General Public License ("GPL") version 2 or any later version,
+ * in which case the provisions of the GPL are applicable instead of
+ * the above. If you wish to allow the use of your version of this file
+ * only under the terms of the GPL and not to allow others to use your
+ * version of this file under the BSD license, indicate your decision
+ * by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL. If you do not delete the
+ * provisions above, a recipient may use your version of this file under
+ * either the BSD or the GPL.
  */
 
 #ifndef LZF_H
@@ -48,21 +46,22 @@
 **
 ***********************************************************************/
 
-#define LZF_VERSION 0x0105 /* 1.5 */
+#define LZF_VERSION 0x0105 /* 1.5, API version */
 
 /*
  * Compress in_len bytes stored at the memory block starting at
  * in_data and write the result to out_data, up to a maximum length
  * of out_len bytes.
  *
- * If the output buffer is not large enough or any error occurs
- * return 0, otherwise return the number of bytes used (which might
- * be considerably larger than in_len, so it makes sense to always
- * use out_len == in_len - 1), to ensure _some_ compression, and store
- * the data uncompressed otherwise.
+ * If the output buffer is not large enough or any error occurs return 0,
+ * otherwise return the number of bytes used, which might be considerably
+ * more than in_len (but less than 104% of the original size), so it
+ * makes sense to always use out_len == in_len - 1), to ensure _some_
+ * compression, and store the data uncompressed otherwise (with a flag, of
+ * course.
  *
  * lzf_compress might use different algorithms on different systems and
- * even diferent runs, thus might result in different compressed strings
+ * even different runs, thus might result in different compressed strings
  * depending on the phase of the moon or similar factors. However, all
  * these strings are architecture-independent and will result in the
  * original data when decompressed using lzf_decompress.

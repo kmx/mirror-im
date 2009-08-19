@@ -176,7 +176,7 @@ void imFormatRegisterJPEG(void);
  * \section Description
  *
  * \par
- * Access to the PNG file format uses libPNG version 1.2.37. \n
+ * Access to the PNG file format uses libPNG version 1.2.39. \n
  * http://www.libpng.org                                    \n
  * Copyright (C) 1998-2009 Glenn Randers-Pehrson
  *

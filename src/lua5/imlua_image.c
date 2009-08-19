@@ -12,6 +12,7 @@
 #include "im.h"
 #include "im_image.h"
 #include "im_util.h"
+#include "im_convert.h"
 
 #include <lua.h>
 #include <lauxlib.h>
