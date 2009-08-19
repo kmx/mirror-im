@@ -479,9 +479,9 @@ static void iTIFFReadAttributes(TIFF* tiff, imAttribTable* attrib_table)
     if (xres != 0 && yres != 0)
     {
       if (ResolutionUnit == RESUNIT_INCH)
-        attrib_table->Set("ResolutionUnit", IM_BYTE, 4, "DPI");
+        attrib_table->Set("ResolutionUnit", IM_BYTE, -1, "DPI");
       else
-        attrib_table->Set("ResolutionUnit", IM_BYTE, 4, "DPC");
+        attrib_table->Set("ResolutionUnit", IM_BYTE, -1, "DPC");
 
       attrib_table->Set("XResolution", IM_FLOAT, 1, (void*)&xres);
       attrib_table->Set("YResolution", IM_FLOAT, 1, (void*)&yres);

@@ -264,9 +264,9 @@ void imFileFormatJPEG::iReadExifAttrib(unsigned char* data, int data_length, imA
           int res_unit = (int)exif_get_short (entry->data, byte_order);
 
           if (res_unit == 2)
-            attrib_table->Set("ResolutionUnit", IM_BYTE, 4, "DPI");
+            attrib_table->Set("ResolutionUnit", IM_BYTE, -1, "DPI");
           else if (res_unit == 3)
-            attrib_table->Set("ResolutionUnit", IM_BYTE, 4, "DPC");
+            attrib_table->Set("ResolutionUnit", IM_BYTE, -1, "DPC");
 
           continue;
         }
@@ -604,9 +604,9 @@ int imFileFormatJPEG::ReadImageInfo(int index)
           yres = (float)this->dinfo.Y_density;
 
     if (this->dinfo.density_unit == 1)
-      attrib_table->Set("ResolutionUnit", IM_BYTE, 4, "DPI");
+      attrib_table->Set("ResolutionUnit", IM_BYTE, -1, "DPI");
     else
-      attrib_table->Set("ResolutionUnit", IM_BYTE, 4, "DPC");
+      attrib_table->Set("ResolutionUnit", IM_BYTE, -1, "DPC");
 
     attrib_table->Set("XResolution", IM_FLOAT, 1, (void*)&xres);
     attrib_table->Set("YResolution", IM_FLOAT, 1, (void*)&yres);

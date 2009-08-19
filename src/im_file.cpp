@@ -56,6 +56,9 @@ imFile* imFileOpen(const char* file_name, int *error)
   imFileClear(ifileformat);
 
   ifileformat->attrib_table = new imAttribTable(599);
+  imFileSetAttribute(ifileformat, "FileFormat", IM_BYTE, -1, ifileformat->iformat->format);
+  imFileSetAttribute(ifileformat, "FileCompression", IM_BYTE, -1, ifileformat->compression);
+  imFileSetAttribute(ifileformat, "FileImageCount", IM_INT, 1, &ifileformat->image_count);
 
   ifileformat->counter = imCounterBegin(file_name);
 
@@ -73,6 +76,9 @@ imFile* imFileOpenAs(const char* file_name, const char* format, int *error)
   imFileClear(ifileformat);
 
   ifileformat->attrib_table = new imAttribTable(599);
+  imFileSetAttribute(ifileformat, "FileFormat", IM_BYTE, -1, ifileformat->iformat->format);
+  imFileSetAttribute(ifileformat, "FileCompression", IM_BYTE, -1, ifileformat->compression);
+  imFileSetAttribute(ifileformat, "FileImageCount", IM_INT, 1, &ifileformat->image_count);
 
   ifileformat->counter = imCounterBegin(file_name);
 

@@ -152,6 +152,9 @@ void imAttribTableSet(imAttribTablePrivate* ptable, const char* name, int data_t
   int index = iHashIndex(name, ptable->hash_size);
   imAttribNode* first_node = ptable->hash_table[index];
 
+  if (data_type == 0 && count == -1)  /* BYTE */
+    count = strlen((char*)data)+1;
+
   // The name already exists ?
   imAttribNode* cur_node = first_node;
   imAttribNode* prev_node = NULL;

@@ -541,7 +541,7 @@ int imFileFormatBMP::ReadImageInfo(int index)
     imAttribTable* attrib_table = AttribTable();
     attrib_table->Set("XResolution", IM_FLOAT, 1, &xres);
     attrib_table->Set("YResolution", IM_FLOAT, 1, &yres);
-    attrib_table->Set("ResolutionUnit", IM_BYTE, 4, "DPC");
+    attrib_table->Set("ResolutionUnit", IM_BYTE, -1, "DPC");
   }
 
   if (this->bpp <= 8)

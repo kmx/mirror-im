@@ -114,9 +114,13 @@ void imFileClose(imFile* ifile);
 void* imFileHandle(imFile* ifile, int index);  
 
 /** Returns file information. 
- *  image_count is the number of images in a stack or 
- *  the number of frames in a video/animation or the depth of a volume data. \n
- *  compression and image_count can be NULL.
+ * image_count is the number of images in a stack or 
+ * the number of frames in a video/animation or the depth of a volume data. \n
+ * compression and image_count can be NULL. \n
+ * These informations are also available as attributes:
+ * \verbatim FileFormat (string) \endverbatim
+ * \verbatim FileCompression (string) \endverbatim
+ * \verbatim FileImageCount IM_INT (1) \endverbatim
  * See also \ref format.
  *
  * \verbatim ifile:GetInfo() -> format: string, compression: string, image_count: number [in Lua 5] \endverbatim
@@ -134,7 +138,8 @@ void imFileSetInfo(imFile* ifile, const char* compression);
 
 /** Changes an extended attribute. \n
  * The data will be internally duplicated. \n
- * If data is NULL the attribute is removed.
+ * If data is NULL the attribute is removed. 
+ * If data_type is BYTE then count can be -1 to indicate a NULL terminated string.
  * See also \ref imDataType.
  *
  * \verbatim ifile:SetAttribute(attrib: string, data_type: number, data: table of numbers or string) [in Lua 5] \endverbatim

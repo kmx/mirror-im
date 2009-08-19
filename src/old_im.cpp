@@ -339,7 +339,7 @@ int imSaveRGB(int width, int height, int format, unsigned char *red, unsigned ch
   {
     char img_desc[50];
     iOldTiffImageDescCB(filename, img_desc);
-    imFileSetAttribute(ifile, "Description", IM_BYTE, strlen(img_desc)+1, (void*)img_desc);
+    imFileSetAttribute(ifile, "Description", IM_BYTE, -1, (void*)img_desc);
   }
 
   if (iOldGifTranspIndexCB)
@@ -414,7 +414,7 @@ int imSaveMap(int width, int height, int format, unsigned char *map, int palette
   {
     char img_desc[50];
     iOldTiffImageDescCB(filename, img_desc);
-    imFileSetAttribute(ifile, "Description", IM_BYTE, strlen(img_desc)+1, (void*)img_desc);
+    imFileSetAttribute(ifile, "Description", IM_BYTE, -1, (void*)img_desc);
   }
 
   if (iOldGifTranspIndexCB)

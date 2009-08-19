@@ -182,7 +182,7 @@ void imFileFormatPNG::iReadAttrib(imAttribTable* attrib_table)
       float yres = yr / 100.0f;
       attrib_table->Set("XResolution", IM_FLOAT, 1, &xres);
       attrib_table->Set("YResolution", IM_FLOAT, 1, &yres);
-      attrib_table->Set("ResolutionUnit", IM_BYTE, 4, "DPC");
+      attrib_table->Set("ResolutionUnit", IM_BYTE, -1, "DPC");
     }
   }
 
@@ -257,9 +257,9 @@ void imFileFormatPNG::iReadAttrib(imAttribTable* attrib_table)
     char param_buf[255*100], *param_ptr;
     int p, size, total_size = 0;
 
-    attrib_table->Set("CalibrationName", IM_BYTE, strlen(pcal_purpose)+1, pcal_purpose);
+    attrib_table->Set("CalibrationName", IM_BYTE, -1, pcal_purpose);
     attrib_table->Set("CalibrationLimits", IM_INT, 2, pcal_limits);
-    attrib_table->Set("CalibrationUnits", IM_BYTE, strlen(pcal_units)+1, pcal_units);
+    attrib_table->Set("CalibrationUnits", IM_BYTE, -1, pcal_units);
     attrib_table->Set("CalibrationEquation", IM_BYTE, 1, &pcal_type);
 
     param_ptr = &param_buf[0];
@@ -334,7 +334,7 @@ void imFileFormatPNG::iReadAttrib(imAttribTable* attrib_table)
   if (png_get_tIME(png_ptr, info_ptr, &time))
   {
     char* stime = png_convert_to_rfc1123(png_ptr, time);
-    attrib_table->Set("DateTimeModified", IM_BYTE, strlen(stime)+1, stime);
+    attrib_table->Set("DateTimeModified", IM_BYTE, -1, stime);
   }
 
   png_charp name;
@@ -355,9 +355,9 @@ void imFileFormatPNG::iReadAttrib(imAttribTable* attrib_table)
       attrib_table->Set("XScale", IM_FLOAT, 1, &xscale);
       attrib_table->Set("YScale", IM_FLOAT, 1, &yscale);
       if (scale_unit == PNG_SCALE_METER)
-        attrib_table->Set("ScaleUnit", IM_BYTE, 7, "meters");
+        attrib_table->Set("ScaleUnit", IM_BYTE, -1, "meters");
       else
-        attrib_table->Set("ScaleUnit", IM_BYTE, 8, "radians");
+        attrib_table->Set("ScaleUnit", IM_BYTE, -1, "radians");
     }
   }
 }

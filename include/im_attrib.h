@@ -46,6 +46,7 @@ public:
     { imAttribTableCopyFrom(ptable, table.ptable); }
 
   /** Inserts an attribute into the table. \n 
+   * If data_type is BYTE then count can be -1 to indicate a NULL terminated string.
    * Data is duplicated if not NULL, else data is initialized with zeros.
    * See also \ref imDataType. */
   void Set(const char* name, int data_type, int count, const void* data)

@@ -651,7 +651,7 @@ static void iGIFReadGraphicsControl(imBinFile* handle, imAttribTable* attrib_tab
       break;
     }
 
-    attrib_table->Set("Disposal", IM_BYTE, 6, disposal);
+    attrib_table->Set("Disposal", IM_BYTE, -1, disposal);
   }
 
   /* delay time */
