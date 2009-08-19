@@ -214,7 +214,9 @@ glDrawPixels(image-&gt;width, image-&gt;height, GL_RGB, GL_UNSIGNED_BYTE, (GLvoi
   imConvertMapToRGB(gl_data, width*height, depth, packed, palette, palette_count);
 }</pre>
   
-  <p>If you just want to save your OpenGL buffer then you can use:</p>
+  <p>If you are using the <strong>imImage</strong> structure then you can 
+	instead use the function <strong>imImageGetOpenGLData</strong>.</p>
+<p>If you just want to save your OpenGL buffer then you can use:</p>
   
     <pre>glPixelStorei(GL_PACK_ALIGNMENT, 1); /* data alignment must be 1 */
 glReadPixels(x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid*)gl_data);
