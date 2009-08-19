@@ -17,7 +17,7 @@ function im.ImageCreateBased(image, width, height, color_space, data_type)
   if type(data_type)   == "function" then   data_type = data_type(image) end    
                                                                                   
   -- create a new image                                                           
-  new_image = im.ImageCreate(width, height, color_space, data_type)               
+  local new_image = im.ImageCreate(width, height, color_space, data_type)               
   image:CopyAttributes(new_image)                                                 
   if (image:HasAlpha()) then new_image:AddAlpha() end
   return new_image                                                                
