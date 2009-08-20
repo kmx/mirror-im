@@ -1,26 +1,6 @@
 /** \file
  * \brief Fast Fourier Transform using FFTW library
  *
- * Comments only for FFTW 3:
- *
- * Where used only non optimal file for better portability.
- * You must change the makefile to add other files.
- *
- * Duplicated files: buffered.c conf.c direct.c indirect.c generic.c 
- *                   nop.c plan.c problem.c rader.c rank0.c rank-geq2.c
- *                   vrank-geq1.c solve.c ct.c codlist.c
- *    These were renamed to "r*" when in the rdft folder, and to "k*" when in the kernel folder.
- * 
- * New File:  api\config.h
- *
- * From the FTW manual:
-\verbatim
-    "FFTW is best at handling sizes of the form 2a 3b 5c 7d 11e 13f, 
-     where e+f is either 0 or 1, and the other exponents are arbitrary. 
-     Other sizes are computed by means of a slow, 
-     general-purpose algorithm (which nevertheless retains O(n log n)."
-\endverbatim
- *
  * See Copyright Notice in im_lib.h
  * $Id$
  */

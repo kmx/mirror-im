@@ -102,10 +102,10 @@ void imProcessRegionalMaximum(const imImage* src_image, imImage* dst_image);
 
 /** \defgroup fourier Fourier Transform Operations
  * \par
- * All Fourier transforms use FFTW library version 2.1.5. \n
- * Although there are newer versions, we build binaries only to version 2 
- * because it is small and as fast as newer versions.
- * Source code to use FFTW version 3 is available.
+ * All Fourier transforms use FFTW library. \n
+ * The pre-compiled binaries for FFTW version 2.1.5 includes all the necessary files.
+ * The pre-compiled binaries for FFTW version 3.x depends on an external library, not provided.
+ * To build the code that uses FFTW version 3 you must define USE_FFTW3.
  * \par
  * FFTW Copyright Matteo Frigo, Steven G. Johnson and the MIT. \n
  * http://www.fftw.org                                         \n
@@ -113,7 +113,7 @@ void imProcessRegionalMaximum(const imImage* src_image, imImage* dst_image);
  * \par
  * Must link with "im_fftw" library. \n
  * \par
- * The FFTW lib has a GPL license. The license of the "im_fftw" library is automatically the GPL.
+ * IMPORTANT: The FFTW lib has a GPL license. The license of the "im_fftw" library is automatically the GPL.
  * So you cannot use it for commercial applications without contacting the authors. 
  * \par
  * See \ref im_process_glo.h
