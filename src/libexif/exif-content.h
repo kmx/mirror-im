@@ -1,6 +1,6 @@
 /* exif-content.h
  *
- * Copyright © 2001 Lutz Müller <lutz@users.sourceforge.net>
+ * Copyright (c) 2001 Lutz Mueller <lutz@users.sourceforge.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -52,9 +52,10 @@ void         exif_content_ref     (ExifContent *content);
 void         exif_content_unref   (ExifContent *content);
 void         exif_content_free    (ExifContent *content);
 
-void         exif_content_add_entry     (ExifContent *content, ExifEntry *e);
-void         exif_content_remove_entry  (ExifContent *content, ExifEntry *e);
-ExifEntry   *exif_content_get_entry     (ExifContent *content, ExifTag tag);
+void         exif_content_add_entry    (ExifContent *, ExifEntry *);
+void         exif_content_remove_entry (ExifContent *, ExifEntry *);
+ExifEntry   *exif_content_get_entry    (ExifContent *, ExifTag);
+void         exif_content_fix          (ExifContent *);
 
 typedef void (* ExifContentForeachEntryFunc) (ExifEntry *, void *user_data);
 void         exif_content_foreach_entry (ExifContent *content,
@@ -62,6 +63,7 @@ void         exif_content_foreach_entry (ExifContent *content,
 					 void *user_data);
 
 /* For your convenience */
+ExifIfd exif_content_get_ifd (ExifContent *);
 #define exif_content_get_value(c,t,v,m)					\
 	(exif_content_get_entry (c,t) ?					\
 	 exif_entry_get_value (exif_content_get_entry (c,t),v,m) : NULL)

@@ -1,4 +1,4 @@
-/* exif-byte-order.c
+/* mnote-fuji-entry.h
  *
  * Copyright (c) 2002 Lutz Mueller <lutz@users.sourceforge.net>
  *
@@ -18,22 +18,28 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#include <config.h>
+#ifndef __MNOTE_FUJI_ENTRY_H__
+#define __MNOTE_FUJI_ENTRY_H__
 
-#include <libexif/exif-byte-order.h>
-#include <libexif/i18n.h>
+#include <libexif/exif-format.h>
+#include <libexif/fuji/mnote-fuji-tag.h>
 
-#include <stdlib.h>
+typedef struct _MnoteFujiEntry        MnoteFujiEntry;
+typedef struct _MnoteFujiEntryPrivate MnoteFujiEntryPrivate;
 
-const char *
-exif_byte_order_get_name (ExifByteOrder order)
-{
-	switch (order) {
-	case EXIF_BYTE_ORDER_MOTOROLA:
-		return (_("Motorola"));
-	case EXIF_BYTE_ORDER_INTEL:
-		return (_("Intel"));
-	default:
-		return NULL;
-	}
-}
+#include <libexif/fuji/exif-mnote-data-fuji.h>
+
+struct _MnoteFujiEntry {
+	MnoteFujiTag tag;
+	ExifFormat format;
+	unsigned long components;
+
+	unsigned char *data;
+	unsigned int size;
+
+	ExifByteOrder order;
+};
+
+char *mnote_fuji_entry_get_value (MnoteFujiEntry *entry, char *val, unsigned int maxlen);
+
+#endif /* __MNOTE_FUJI_ENTRY_H__ */

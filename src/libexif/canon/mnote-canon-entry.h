@@ -1,6 +1,6 @@
 /* mnote-canon-entry.h
  *
- * Copyright © 2002 Lutz Müller <lutz@users.sourceforge.net>
+ * Copyright (c) 2002 Lutz Mueller <lutz@users.sourceforge.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -38,6 +38,7 @@ struct _MnoteCanonEntry {
 	ExifByteOrder order;
 };
 
-char *mnote_canon_entry_get_value (const MnoteCanonEntry *entry, char *val, unsigned int maxlen);
+unsigned int mnote_canon_entry_count_values (const MnoteCanonEntry *);
+char        *mnote_canon_entry_get_value    (const MnoteCanonEntry *, unsigned int t, char *val, unsigned int maxlen);
 
 #endif /* __MNOTE_CANON_ENTRY_H__ */

@@ -459,10 +459,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\src\libjpeg\jcphuff.c"
-					>
-				</File>
-				<File
 					RelativePath="..\src\libjpeg\jcprepct.c"
 					>
 				</File>
@@ -504,6 +500,10 @@
 				</File>
 				<File
 					RelativePath="..\src\libjpeg\jddctmgr.c"
+					>
+				</File>
+				<File
+					RelativePath="..\src\libjpeg\jdhuff.c"
 					>
 				</File>
 				<File
@@ -686,6 +686,50 @@
 					RelativePath="..\src\zlib\zutil.c"
 					>
 				</File>
+				<Filter
+					Name="inc"
+					>
+					<File
+						RelativePath="..\src\zlib\crc32.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\zlib\deflate.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\zlib\inffast.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\zlib\inffixed.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\zlib\inflate.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\zlib\inftrees.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\zlib\trees.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\zlib\zconf.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\zlib\zlib.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\zlib\zutil.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="libEXIF"
@@ -731,6 +775,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\src\libexif\fuji\exif-mnote-data-fuji.c"
+					>
+				</File>
+				<File
 					RelativePath="..\src\libexif\olympus\exif-mnote-data-olympus.c"
 					>
 				</File>
@@ -756,6 +804,14 @@
 				</File>
 				<File
 					RelativePath="..\src\libexif\canon\mnote-canon-tag.c"
+					>
+				</File>
+				<File
+					RelativePath="..\src\libexif\fuji\mnote-fuji-entry.c"
+					>
+				</File>
+				<File
+					RelativePath="..\src\libexif\fuji\mnote-fuji-tag.c"
 					>
 				</File>
 				<File
@@ -794,6 +850,10 @@
 						>
 					</File>
 					<File
+						RelativePath="..\src\libexif\exif-data-type.h"
+						>
+					</File>
+					<File
 						RelativePath="..\src\libexif\exif-data.h"
 						>
 					</File>
@@ -826,6 +886,10 @@
 						>
 					</File>
 					<File
+						RelativePath="..\src\libexif\fuji\exif-mnote-data-fuji.h"
+						>
+					</File>
+					<File
 						RelativePath="..\src\libexif\olympus\exif-mnote-data-olympus.h"
 						>
 					</File>
@@ -842,15 +906,15 @@
 						>
 					</File>
 					<File
+						RelativePath="..\src\libexif\exif-system.h"
+						>
+					</File>
+					<File
 						RelativePath="..\src\libexif\exif-tag.h"
 						>
 					</File>
 					<File
 						RelativePath="..\src\libexif\exif-utils.h"
-						>
-					</File>
-					<File
-						RelativePath="..\src\libexif\exif.h"
 						>
 					</File>
 					<File
@@ -863,6 +927,14 @@
 					</File>
 					<File
 						RelativePath="..\src\libexif\canon\mnote-canon-tag.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\libexif\fuji\mnote-fuji-entry.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\libexif\fuji\mnote-fuji-tag.h"
 						>
 					</File>
 					<File

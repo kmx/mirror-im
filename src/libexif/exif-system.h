@@ -1,6 +1,7 @@
-/* exif-byte-order.c
+/** \file exif-system.h
+ * \brief System specific definitions, not for installation!
  *
- * Copyright (c) 2002 Lutz Mueller <lutz@users.sourceforge.net>
+ * Copyright (C) 2007 Hans Ulrich Niedermann <gp@n-dimensional.de>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,22 +19,13 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#include <config.h>
+#ifndef EXIF_SYSTEM_H
+#define EXIF_SYSTEM_H
 
-#include <libexif/exif-byte-order.h>
-#include <libexif/i18n.h>
+#if defined(__GNUC__) && (__GNUC__ >= 2)
+# define UNUSED(param) UNUSED_PARAM_##param __attribute__((unused))
+#else
+# define UNUSED(param) param
+#endif
 
-#include <stdlib.h>
-
-const char *
-exif_byte_order_get_name (ExifByteOrder order)
-{
-	switch (order) {
-	case EXIF_BYTE_ORDER_MOTOROLA:
-		return (_("Motorola"));
-	case EXIF_BYTE_ORDER_INTEL:
-		return (_("Intel"));
-	default:
-		return NULL;
-	}
-}
+#endif /* !defined(EXIF_SYSTEM_H) */

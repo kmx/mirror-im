@@ -1,7 +1,7 @@
 /*! \file exif-log.h
  *  \brief log message infrastructure
  *
- * Copyright © 2004 Lutz Müller <lutz@users.sourceforge.net>
+ * Copyright (c) 2004 Lutz Mueller <lutz@users.sourceforge.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -55,18 +55,28 @@ typedef void (* ExifLogFunc) (ExifLog *log, ExifLogCode, const char *domain,
  */
 void     exif_log_set_func (ExifLog *log, ExifLogFunc func, void *data);
 
+#ifndef NO_VERBOSE_TAG_STRINGS
 void     exif_log  (ExifLog *log, ExifLogCode, const char *domain,
 		    const char *format, ...)
 #ifdef __GNUC__
 			__attribute__((__format__(printf,4,5)))
 #endif
 ;
+#else
+#if defined(__STDC_VERSION__) &&  __STDC_VERSION__ >= 199901L
+#define exif_log(...) do { } while (0)
+#elif defined(__GNUC__)
+#define exif_log(x...) do { } while (0)
+#else
+#define exif_log (void)
+#endif
+#endif
 
 void     exif_logv (ExifLog *log, ExifLogCode, const char *domain,
 		    const char *format, va_list args);
 
 /* For your convenience */
-#define EXIF_LOG_NO_MEMORY(l,d,s) exif_log (l, EXIF_LOG_CODE_NO_MEMORY, d, "Could not allocate %i byte(s).", s)
+#define EXIF_LOG_NO_MEMORY(l,d,s) exif_log ((l), EXIF_LOG_CODE_NO_MEMORY, (d), "Could not allocate %lu byte(s).", (unsigned long)(s))
 
 #ifdef __cplusplus
 }

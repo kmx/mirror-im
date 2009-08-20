@@ -1,6 +1,6 @@
 /* exif-utils.h
  *
- * Copyright © 2001 Lutz Müller <lutz@users.sourceforge.net>
+ * Copyright (c) 2001 Lutz Mueller <lutz@users.sourceforge.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,14 +33,20 @@ extern "C" {
 /* If these definitions don't work for you, please let us fix the 
  * macro generating _stdint.h */
 	
-typedef char		ExifByte;          /* 1 byte  */
+typedef unsigned char	ExifByte;          /* 1 byte  */
+typedef signed char	ExifSByte;         /* 1 byte  */
 typedef char *		ExifAscii;
 typedef uint16_t	ExifShort;         /* 2 bytes */
 typedef int16_t         ExifSShort;        /* 2 bytes */
 typedef uint32_t	ExifLong;          /* 4 bytes */
+
+/** EXIF Unsigned Rational */
 typedef struct {ExifLong numerator; ExifLong denominator;} ExifRational;
+
 typedef char		ExifUndefined;     /* 1 byte  */
 typedef int32_t		ExifSLong;         /* 4 bytes */
+
+/** EXIF Signed Rational. */
 typedef struct {ExifSLong numerator; ExifSLong denominator;} ExifSRational;
 
 
@@ -64,12 +70,17 @@ void exif_set_rational  (unsigned char *b, ExifByteOrder order,
 void exif_set_srational (unsigned char *b, ExifByteOrder order,
 			 ExifSRational value);
 
+void exif_convert_utf16_to_utf8 (char *out, const unsigned short *in, int maxlen);
+
 /* Please do not use this function outside of the library. */
 void exif_array_set_byte_order (ExifFormat, unsigned char *, unsigned int,
 		ExifByteOrder o_orig, ExifByteOrder o_new);
 
 #undef  MIN
 #define MIN(a, b)  (((a) < (b)) ? (a) : (b))
+
+#undef  MAX
+#define MAX(a, b)  (((a) > (b)) ? (a) : (b))
 
 /* For compatibility with older versions */
 #define EXIF_TAG_SUBSEC_TIME EXIF_TAG_SUB_SEC_TIME

@@ -1,7 +1,7 @@
 /* exif-mnote-data-canon.c
  *
- * Copyright © 2002, 2003 Lutz Müller <lutz@users.sourceforge.net>
- * Copyright © 2003 Matthieu Castet <mat-c@users.sourceforge.net>
+ * Copyright (c) 2002, 2003 Lutz Mueller <lutz@users.sourceforge.net>
+ * Copyright (c) 2003 Matthieu Castet <mat-c@users.sourceforge.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -60,14 +60,33 @@ exif_mnote_data_canon_free (ExifMnoteData *n)
 	exif_mnote_data_canon_clear ((ExifMnoteDataCanon *) n);
 }
 
+static void
+exif_mnote_data_canon_get_tags (ExifMnoteDataCanon *dc, unsigned int n,
+		unsigned int *m, unsigned int *s)
+{
+	unsigned int from = 0, to;
+
+	if (!dc || !m) return;
+	for (*m = 0; *m < dc->count; (*m)++) {
+		to = from + mnote_canon_entry_count_values (&dc->entries[*m]);
+		if (to > n) {
+			if (s) *s = n - from;
+			break;
+		}
+		from = to;
+	}
+}
+
 static char *
 exif_mnote_data_canon_get_value (ExifMnoteData *note, unsigned int n, char *val, unsigned int maxlen)
 {
-	ExifMnoteDataCanon *cnote = (ExifMnoteDataCanon *) note;
+	ExifMnoteDataCanon *dc = (ExifMnoteDataCanon *) note;
+	unsigned int m, s;
 
-	if (!note) return NULL;
-	if (cnote->count <= n) return NULL;
-	return mnote_canon_entry_get_value (&cnote->entries[n], val, maxlen);
+	if (!dc) return NULL;
+	exif_mnote_data_canon_get_tags (dc, n, &m, &s);
+	if (m >= dc->count) return NULL;
+	return mnote_canon_entry_get_value (&dc->entries[m], s, val, maxlen);
 }
 
 static void
@@ -99,7 +118,9 @@ exif_mnote_data_canon_save (ExifMnoteData *ne,
 	unsigned char **buf, unsigned int *buf_size)
 {
 	ExifMnoteDataCanon *n = (ExifMnoteDataCanon *) ne;
-	unsigned int i, o, s, doff;
+	size_t i, o, s, doff;
+	unsigned char *t;
+	size_t ts;
 
 	if (!n || !buf || !buf_size) return;
 
@@ -124,14 +145,22 @@ exif_mnote_data_canon_save (ExifMnoteData *ne,
 		o += 8;
 		s = exif_format_get_size (n->entries[i].format) *
 						n->entries[i].components;
+		if (s > 65536) {
+			/* Corrupt data: EXIF data size is limited to the
+			 * maximum size of a JPEG segment (64 kb).
+			 */
+			continue;
+		}
 		if (s > 4) {
-			*buf_size += s;
+			ts = *buf_size + s;
 
 			/* Ensure even offsets. Set padding bytes to 0. */
-			if (s & 1) *buf_size += 1;
-			*buf = exif_mem_realloc (ne->mem, *buf,
-						 sizeof (char) * *buf_size);
-			if (!*buf) return;
+			if (s & 1) ts += 1;
+			t = exif_mem_realloc (ne->mem, *buf,
+						 sizeof (char) * ts);
+			if (!t) return;
+			*buf = t;
+			*buf_size = ts;
 			doff = *buf_size - s;
 			if (s & 1) { doff--; *(*buf + *buf_size - 1) = '\0'; }
 			exif_set_long (*buf + o, n->order, n->offset + doff);
@@ -166,7 +195,8 @@ exif_mnote_data_canon_load (ExifMnoteData *ne,
 {
 	ExifMnoteDataCanon *n = (ExifMnoteDataCanon *) ne;
 	ExifShort c;
-	unsigned int i, o, s;
+	size_t i, o, s;
+	MnoteCanonEntry *t;
 
 	if (!n || !buf || !buf_size || (buf_size < 6 + n->offset + 2)) return;
 
@@ -176,86 +206,102 @@ exif_mnote_data_canon_load (ExifMnoteData *ne,
 
 	/* Parse the entries */
 	for (i = 0; i < c; i++) {
-	    o = 6 + 2 + n->offset + 12 * i;
-	    if (o + 8 > buf_size) return;
+		o = 6 + 2 + n->offset + 12 * i;
+	  if (o + 8 > buf_size) return;
 
-	    n->count = i + 1;
-	    n->entries = exif_mem_realloc (ne->mem, n->entries,
-					   sizeof (MnoteCanonEntry) * (i+1));
-	    memset (&n->entries[i], 0, sizeof (MnoteCanonEntry));
-	    n->entries[i].tag        = exif_get_short (buf + o, n->order);
-	    n->entries[i].format     = exif_get_short (buf + o + 2, n->order);
-	    n->entries[i].components = exif_get_long (buf + o + 4, n->order);
-	    n->entries[i].order      = n->order;
+		t = exif_mem_realloc (ne->mem, n->entries,
+				sizeof (MnoteCanonEntry) * (i + 1));
+		if (!t) return;
+		n->count = i + 1;
+		n->entries = t;
+		memset (&n->entries[i], 0, sizeof (MnoteCanonEntry));
+	  n->entries[i].tag        = exif_get_short (buf + o, n->order);
+	  n->entries[i].format     = exif_get_short (buf + o + 2, n->order);
+	  n->entries[i].components = exif_get_long (buf + o + 4, n->order);
+	  n->entries[i].order      = n->order;
 
-	    /*
-	     * Size? If bigger than 4 bytes, the actual data is not
-	     * in the entry but somewhere else (offset).
-	     */
-	    s = exif_format_get_size (n->entries[i].format) *
-		    		      n->entries[i].components;
-	    if (!s) return;
-	    o += 8;
-	    if (s > 4) o = exif_get_long (buf + o, n->order) + 6;
-	    if (o + s > buf_size) return;
-	    
-	    /* Sanity check */
-	    n->entries[i].data = exif_mem_alloc (ne->mem, sizeof (char) * s);
-	    if (!n->entries[i].data) return;
-	    n->entries[i].size = s;
-	    memcpy (n->entries[i].data, buf + o, s);
+	  /*
+	   * Size? If bigger than 4 bytes, the actual data is not
+	   * in the entry but somewhere else (offset).
+	   */
+	  s = exif_format_get_size (n->entries[i].format) * n->entries[i].components;
+		if (!s) return;
+		o += 8;
+		if (s > 4) o = exif_get_long (buf + o, n->order) + 6;
+		if (o + s > buf_size) return;
+
+		/* Sanity check */
+		n->entries[i].data = exif_mem_alloc (ne->mem, sizeof (char) * s);
+		if (!n->entries[i].data) return;
+		n->entries[i].size = s;
+		memcpy (n->entries[i].data, buf + o, s);
 	}
 }
 
 static unsigned int
 exif_mnote_data_canon_count (ExifMnoteData *n)
 {
-	return n ? ((ExifMnoteDataCanon *) n)->count : 0;
+	ExifMnoteDataCanon *dc = (ExifMnoteDataCanon *) n;
+	unsigned int i, c;
+
+	for (i = c = 0; dc && (i < dc->count); i++)
+		c += mnote_canon_entry_count_values (&dc->entries[i]);
+	return c;
 }
 
 static unsigned int
-exif_mnote_data_canon_get_id (ExifMnoteData *d, unsigned int n)
+exif_mnote_data_canon_get_id (ExifMnoteData *d, unsigned int i)
 {
-	ExifMnoteDataCanon *note = (ExifMnoteDataCanon *) d;
+	ExifMnoteDataCanon *dc = (ExifMnoteDataCanon *) d;
+	unsigned int m;
 
-	if (!note) return 0;
-	if (note->count <= n) return 0;
-	return note->entries[n].tag;
+	if (!dc) return 0;
+	exif_mnote_data_canon_get_tags (dc, i, &m, NULL);
+	if (m >= dc->count) return 0;
+	return dc->entries[m].tag;
 }
 
 static const char *
 exif_mnote_data_canon_get_name (ExifMnoteData *note, unsigned int i)
 {
-	ExifMnoteDataCanon *cnote = (ExifMnoteDataCanon *) note;
+	ExifMnoteDataCanon *dc = (ExifMnoteDataCanon *) note;
+	unsigned int m, s;
 
-	if (!note) return NULL;
-	if (i >= cnote->count) return NULL;
-	return mnote_canon_tag_get_name (cnote->entries[i].tag);
+	if (!dc) return NULL;
+	exif_mnote_data_canon_get_tags (dc, i, &m, &s);
+	if (m >= dc->count) return NULL;
+	return mnote_canon_tag_get_name_sub (dc->entries[m].tag, s, dc->options);
 }
 
 static const char *
 exif_mnote_data_canon_get_title (ExifMnoteData *note, unsigned int i)
 {
-	ExifMnoteDataCanon *cnote = (ExifMnoteDataCanon *) note;
+	ExifMnoteDataCanon *dc = (ExifMnoteDataCanon *) note;
+	unsigned int m, s;
 
-	if (!note) return NULL;
-	if (i >= cnote->count) return NULL;
-	return mnote_canon_tag_get_title (cnote->entries[i].tag);
+	if (!dc) return NULL;
+	exif_mnote_data_canon_get_tags (dc, i, &m, &s);
+	if (m >= dc->count) return NULL;
+	return mnote_canon_tag_get_title_sub (dc->entries[m].tag, s, dc->options);
 }
 
 static const char *
 exif_mnote_data_canon_get_description (ExifMnoteData *note, unsigned int i)
 {
-	ExifMnoteDataCanon *cnote = (ExifMnoteDataCanon *) note;
-	if (!note) return NULL;
-	if (i >= cnote->count) return NULL;
-	return mnote_canon_tag_get_description (cnote->entries[i].tag);
+	ExifMnoteDataCanon *dc = (ExifMnoteDataCanon *) note;
+	unsigned int m;
+
+	if (!dc) return NULL;
+	exif_mnote_data_canon_get_tags (dc, i, &m, NULL);
+	if (m >= dc->count) return NULL;
+	return mnote_canon_tag_get_description (dc->entries[m].tag);
 }
 
 ExifMnoteData *
-exif_mnote_data_canon_new (ExifMem *mem)
+exif_mnote_data_canon_new (ExifMem *mem, ExifDataOption o)
 {
 	ExifMnoteData *d;
+	ExifMnoteDataCanon *dc;
 
 	if (!mem) return NULL;
 
@@ -277,5 +323,7 @@ exif_mnote_data_canon_new (ExifMem *mem)
 	d->methods.get_description = exif_mnote_data_canon_get_description;
 	d->methods.get_value       = exif_mnote_data_canon_get_value;
 
+	dc = (ExifMnoteDataCanon*)d;
+	dc->options = o;
 	return d;
 }

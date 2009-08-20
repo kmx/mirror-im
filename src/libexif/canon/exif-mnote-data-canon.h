@@ -1,6 +1,6 @@
 /* exif-mnote-data-canon.h
  *
- * Copyright © 2002, 2003 Lutz Müller <lutz@users.sourceforge.net>
+ * Copyright (c) 2002, 2003 Lutz Mueller <lutz@users.sourceforge.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,6 +25,7 @@
 #include <libexif/exif-mnote-data.h>
 #include <libexif/exif-mnote-data-priv.h>
 #include <libexif/exif-mem.h>
+#include <libexif/exif-data.h>
 
 typedef struct _ExifMnoteDataCanon ExifMnoteDataCanon;
 
@@ -38,8 +39,10 @@ struct _ExifMnoteDataCanon {
 
 	ExifByteOrder order;
 	unsigned int offset;
+
+	ExifDataOption options;
 };
 
-ExifMnoteData *exif_mnote_data_canon_new (ExifMem *mem);
+ExifMnoteData *exif_mnote_data_canon_new (ExifMem *mem, ExifDataOption o);
 
 #endif /* __EXIF_MNOTE_DATA_CANON_H__ */

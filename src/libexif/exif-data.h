@@ -1,7 +1,7 @@
 /*! \file exif-data.h
- * \brief FIXME foo bar blah
+ * \brief Defines the ExifData type and the associated functions.
  *
- * \author Lutz Müller <lutz@users.sourceforge.net>
+ * \author Lutz Mueller <lutz@users.sourceforge.net>
  * \date 2001-2005
  *
  * This library is free software; you can redistribute it and/or
@@ -28,6 +28,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 #include <libexif/exif-byte-order.h>
+#include <libexif/exif-data-type.h>
 #include <libexif/exif-ifd.h>
 #include <libexif/exif-log.h>
 #include <libexif/exif-tag.h>
@@ -54,8 +55,6 @@ ExifData *exif_data_new_mem       (ExifMem *);
 
 /*! \brief load exif data from file
  *  \param[in] path filename including path
- *  
- *  Foo bar blah bleh baz.
  */
 ExifData *exif_data_new_from_file (const char *path);
 ExifData *exif_data_new_from_data (const unsigned char *data,
@@ -74,17 +73,32 @@ ExifByteOrder exif_data_get_byte_order  (ExifData *data);
 void          exif_data_set_byte_order  (ExifData *data, ExifByteOrder order);
 
 ExifMnoteData *exif_data_get_mnote_data (ExifData *);
+void           exif_data_fix (ExifData *);
 
 typedef void (* ExifDataForeachContentFunc) (ExifContent *, void *user_data);
 void          exif_data_foreach_content (ExifData *data,
 					 ExifDataForeachContentFunc func,
 					 void *user_data);
 
+typedef enum {
+	EXIF_DATA_OPTION_IGNORE_UNKNOWN_TAGS = 1 << 0,
+	EXIF_DATA_OPTION_FOLLOW_SPECIFICATION = 1 << 1,
+	EXIF_DATA_OPTION_DONT_CHANGE_MAKER_NOTE = 1 << 2
+} ExifDataOption;
+
+const char *exif_data_option_get_name        (ExifDataOption);
+const char *exif_data_option_get_description (ExifDataOption);
+void        exif_data_set_option             (ExifData *, ExifDataOption);
+void        exif_data_unset_option           (ExifData *, ExifDataOption);
+
+void         exif_data_set_data_type (ExifData *, ExifDataType);
+ExifDataType exif_data_get_data_type (ExifData *);
+
 /* For debugging purposes and error reporting */
 void exif_data_dump (ExifData *data);
 void exif_data_log  (ExifData *data, ExifLog *log);
 
-/* For your convenience */
+/** convenience macro. */
 #define exif_data_get_entry(d,t)					\
 	(exif_content_get_entry(d->ifd[EXIF_IFD_0],t) ?			\
 	 exif_content_get_entry(d->ifd[EXIF_IFD_0],t) :			\

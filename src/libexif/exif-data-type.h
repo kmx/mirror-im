@@ -1,6 +1,6 @@
-/* exif-format.h
+/* exif-data-tag.h
  *
- * Copyright (c) 2001 Lutz Mueller <lutz@users.sourceforge.net>
+ * Copyright (c) 2005 Lutz Mueller <lutz@users.sourceforge.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,33 +18,23 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __EXIF_FORMAT_H__
-#define __EXIF_FORMAT_H__
+#ifndef __EXIF_DATA_TYPE_H__
+#define __EXIF_DATA_TYPE_H__
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
 typedef enum {
-        EXIF_FORMAT_BYTE       =  1,
-        EXIF_FORMAT_ASCII      =  2,
-        EXIF_FORMAT_SHORT      =  3,
-        EXIF_FORMAT_LONG       =  4,
-        EXIF_FORMAT_RATIONAL   =  5,
-	EXIF_FORMAT_SBYTE      =  6,
-        EXIF_FORMAT_UNDEFINED  =  7,
-	EXIF_FORMAT_SSHORT     =  8,
-        EXIF_FORMAT_SLONG      =  9,
-        EXIF_FORMAT_SRATIONAL  = 10,
-	EXIF_FORMAT_FLOAT      = 11,
-	EXIF_FORMAT_DOUBLE     = 12
-} ExifFormat;
-
-const char   *exif_format_get_name (ExifFormat format);
-unsigned char exif_format_get_size (ExifFormat format);
+	EXIF_DATA_TYPE_UNCOMPRESSED_CHUNKY = 0,
+	EXIF_DATA_TYPE_UNCOMPRESSED_PLANAR,
+	EXIF_DATA_TYPE_UNCOMPRESSED_YCC,
+	EXIF_DATA_TYPE_COMPRESSED,
+	EXIF_DATA_TYPE_COUNT
+} ExifDataType;
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* __EXIF_FORMAT_H__ */
+#endif /* __EXIF_TAG_H__ */

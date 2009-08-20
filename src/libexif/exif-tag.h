@@ -1,6 +1,6 @@
 /* exif-tag.h
  *
- * Copyright © 2001 Lutz Müller <lutz@users.sourceforge.net>
+ * Copyright (c) 2001 Lutz Mueller <lutz@users.sourceforge.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,6 +24,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+#include <libexif/exif-ifd.h>
+#include <libexif/exif-data-type.h>
 
 typedef enum {
 	EXIF_TAG_INTEROPERABILITY_INDEX		= 0x0001,
@@ -104,6 +107,11 @@ typedef enum {
 	EXIF_TAG_SUB_SEC_TIME			= 0x9290,
 	EXIF_TAG_SUB_SEC_TIME_ORIGINAL		= 0x9291,
 	EXIF_TAG_SUB_SEC_TIME_DIGITIZED		= 0x9292,
+	EXIF_TAG_XP_TITLE			= 0x9c9b,
+	EXIF_TAG_XP_COMMENT			= 0x9c9c,
+	EXIF_TAG_XP_AUTHOR			= 0x9c9d,
+	EXIF_TAG_XP_KEYWORDS			= 0x9c9e,
+	EXIF_TAG_XP_SUBJECT			= 0x9c9f,
 	EXIF_TAG_FLASH_PIX_VERSION		= 0xa000,
 	EXIF_TAG_COLOR_SPACE			= 0xa001,
 	EXIF_TAG_PIXEL_X_DIMENSION		= 0xa002,
@@ -133,13 +141,65 @@ typedef enum {
 	EXIF_TAG_SHARPNESS			= 0xa40a,
 	EXIF_TAG_DEVICE_SETTING_DESCRIPTION	= 0xa40b,
 	EXIF_TAG_SUBJECT_DISTANCE_RANGE		= 0xa40c,
-	EXIF_TAG_IMAGE_UNIQUE_ID		= 0xa420
+	EXIF_TAG_IMAGE_UNIQUE_ID		= 0xa420,
+	EXIF_TAG_GAMMA				= 0xa500,
+	EXIF_TAG_PRINT_IMAGE_MATCHING		= 0xc4a5
 } ExifTag;
 
-ExifTag         exif_tag_from_name       (const char *);
+/* GPS tags overlap with above ones. */
+#define EXIF_TAG_GPS_VERSION_ID        0x0000
+#define EXIF_TAG_GPS_LATITUDE_REF      0x0001 /* INTEROPERABILITY_INDEX   */
+#define EXIF_TAG_GPS_LATITUDE          0x0002 /* INTEROPERABILITY_VERSION */
+#define EXIF_TAG_GPS_LONGITUDE_REF     0x0003
+#define EXIF_TAG_GPS_LONGITUDE         0x0004
+#define EXIF_TAG_GPS_ALTITUDE_REF      0x0005
+#define EXIF_TAG_GPS_ALTITUDE          0x0006
+#define EXIF_TAG_GPS_TIME_STAMP        0x0007
+#define EXIF_TAG_GPS_SATELLITES        0x0008
+#define EXIF_TAG_GPS_STATUS            0x0009
+#define EXIF_TAG_GPS_MEASURE_MODE      0x000a
+#define EXIF_TAG_GPS_DOP               0x000b
+#define EXIF_TAG_GPS_SPEED_REF         0x000c
+#define EXIF_TAG_GPS_SPEED             0x000d
+#define EXIF_TAG_GPS_TRACK_REF         0x000e
+#define EXIF_TAG_GPS_TRACK             0x000f
+#define EXIF_TAG_GPS_IMG_DIRECTION_REF 0x0010
+#define EXIF_TAG_GPS_IMG_DIRECTION     0x0011
+#define EXIF_TAG_GPS_MAP_DATUM         0x0012
+#define EXIF_TAG_GPS_DEST_LATITUDE_REF 0x0013
+#define EXIF_TAG_GPS_DEST_LATITUDE     0x0014
+#define EXIF_TAG_GPS_DEST_LONGITUDE_REF 0x0015
+#define EXIF_TAG_GPS_DEST_LONGITUDE     0x0016
+#define EXIF_TAG_GPS_DEST_BEARING_REF   0x0017
+#define EXIF_TAG_GPS_DEST_BEARING       0x0018
+#define EXIF_TAG_GPS_DEST_DISTANCE_REF  0x0019
+#define EXIF_TAG_GPS_DEST_DISTANCE      0x001a
+#define EXIF_TAG_GPS_PROCESSING_METHOD  0x001b
+#define EXIF_TAG_GPS_AREA_INFORMATION   0x001c
+#define EXIF_TAG_GPS_DATE_STAMP         0x001d
+#define EXIF_TAG_GPS_DIFFERENTIAL       0x001e
+
+typedef enum {
+	EXIF_SUPPORT_LEVEL_UNKNOWN = 0,
+	EXIF_SUPPORT_LEVEL_NOT_RECORDED,
+	EXIF_SUPPORT_LEVEL_MANDATORY,
+	EXIF_SUPPORT_LEVEL_OPTIONAL
+} ExifSupportLevel;
+
+ExifTag          exif_tag_from_name                (const char *);
+const char      *exif_tag_get_name_in_ifd          (ExifTag, ExifIfd);
+const char      *exif_tag_get_title_in_ifd         (ExifTag, ExifIfd);
+const char      *exif_tag_get_description_in_ifd   (ExifTag, ExifIfd);
+ExifSupportLevel exif_tag_get_support_level_in_ifd (ExifTag, ExifIfd,
+                                                    ExifDataType);
+
+/* Don't use these functions. They are here for compatibility only. */
 const char     *exif_tag_get_name        (ExifTag tag);
 const char     *exif_tag_get_title       (ExifTag tag);
 const char     *exif_tag_get_description (ExifTag tag);
+
+/* Don't use these definitions. They are here for compatibility only. */
+#define EXIF_TAG_UNKNOWN_C4A5 EXIF_TAG_PRINT_IMAGE_MATCHING
 
 #ifdef __cplusplus
 }

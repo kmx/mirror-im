@@ -1,6 +1,6 @@
 /* mnote-olympus-data.h
  *
- * Copyright © 2002 Lutz Müller <lutz@users.sourceforge.net>
+ * Copyright (c) 2002 Lutz Mueller <lutz@users.sourceforge.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,6 +25,9 @@
 #include <libexif/olympus/mnote-olympus-entry.h>
 #include <libexif/exif-byte-order.h>
 #include <libexif/exif-mem.h>
+
+enum OlympusVersion {nikonV1 = 1, nikonV2 = 2, olympusV1 = 3, olympusV2 = 4, sanyoV1 = 5 };
+
 
 typedef struct _ExifMnoteDataOlympus ExifMnoteDataOlympus;
 

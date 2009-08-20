@@ -55,6 +55,7 @@ SRCZLIB  := $(addprefix zlib/, $(SRCZLIB))
 INCLUDES += zlib
 
 SRCEXIF = \
+    fuji/exif-mnote-data-fuji.c  fuji/mnote-fuji-entry.c  fuji/mnote-fuji-tag.c              \
     canon/exif-mnote-data-canon.c  canon/mnote-canon-entry.c  canon/mnote-canon-tag.c              \
     olympus/exif-mnote-data-olympus.c  olympus/mnote-olympus-entry.c  olympus/mnote-olympus-tag.c  \
     pentax/exif-mnote-data-pentax.c  pentax/mnote-pentax-entry.c  pentax/mnote-pentax-tag.c        \

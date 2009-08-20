@@ -1,6 +1,6 @@
 /* exif-format.c
  *
- * Copyright © 2001 Lutz Müller <lutz@users.sourceforge.net>
+ * Copyright (c) 2001 Lutz Mueller <lutz@users.sourceforge.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,7 @@
 
 #include <stdlib.h>
 
-static struct {
+static const struct {
         ExifFormat format;
 	const char *name;
         unsigned char size;
@@ -51,7 +51,12 @@ exif_format_get_name (ExifFormat format)
 	unsigned int i;
 
 	/* FIXME: This belongs to somewhere else. */
-	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+	/* libexif should use the default system locale.
+	 * If an application specifically requires UTF-8, then we
+	 * must give the application a way to tell libexif that.
+	 * 
+	 * bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+	 */
 	bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 
 	for (i = 0; ExifFormatTable[i].name; i++)

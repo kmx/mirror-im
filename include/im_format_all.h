@@ -123,7 +123,7 @@ void imFormatRegisterTIFF(void);
  * Copyright (C) 1994-2009, Thomas G. Lane, Guido Vollbeding  \n
  *   from the Independent JPEG Group.
  * \par
- * Access to the EXIF attributes uses libEXIF version 0.6.12. \n
+ * Access to the EXIF attributes uses libEXIF version 0.6.17. \n
  * http://sourceforge.net/projects/libexif                    \n
  * Copyright (C) 2001-2003, Lutz Müller
  *
@@ -153,15 +153,13 @@ void imFormatRegisterTIFF(void);
     Changes to libJPEG:
       jdatadst.c - fflush and ferror replaced by macros JFFLUSH and JFERROR.
       jinclude.h - standard JFFLUSH and JFERROR definitions, and new macro HAVE_JFIO.
-      --  jmorecfg.h - changed definition of INT32 to JINT32 for better compatibility.
       jdhuf.c - added support for OJPEG_SUPPORT in libTIFF.
       new file created: jconfig.h
 
     Changes to libEXIF:
-      new file config.h
+      new files config.h and _stdint.h
       changed "exif-tag.c" to add new function
       changed "exif-entry.c" to improve exif_entry_initialize
-      fixed small bug in "mnote-pentax-tag.h".
 
     Comments:
       Other APPx markers are ignored.

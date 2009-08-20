@@ -1,6 +1,6 @@
 /* exif-ifd.c
  *
- * Copyright © 2002 Lutz Müller <lutz@users.sourceforge.net>
+ * Copyright (c) 2002 Lutz Mueller <lutz@users.sourceforge.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,7 +24,7 @@
 
 #include <stdlib.h>
 
-static struct {
+static const struct {
 	ExifIfd ifd;
 	const char *name;
 } ExifIfdTable[] = {

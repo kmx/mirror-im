@@ -1,6 +1,6 @@
 /* exif-mnote-data-pentax.h
  *
- * Copyright © 2002 Lutz Müller <lutz@users.sourceforge.net>
+ * Copyright (c) 2002 Lutz Mueller <lutz@users.sourceforge.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,6 +27,8 @@
 #include <libexif/pentax/mnote-pentax-entry.h>
 #include <libexif/exif-mem.h>
 
+enum PentaxVersion {pentaxV1 = 1, pentaxV2 = 2, pentaxV3 = 4, casioV2 = 4 };
+
 typedef struct _ExifMnoteDataPentax ExifMnoteDataPentax;
 
 struct _ExifMnoteDataPentax {
@@ -37,6 +39,8 @@ struct _ExifMnoteDataPentax {
 
 	ExifByteOrder order;
 	unsigned int offset;
+
+	enum PentaxVersion version;
 };
 
 ExifMnoteData *exif_mnote_data_pentax_new (ExifMem *);
