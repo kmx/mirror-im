@@ -29,14 +29,14 @@ SRCTIFF  := $(addprefix libtiff/, $(SRCTIFF)) im_format_tiff.cpp
 INCLUDES += libtiff 
 
 SRCJPEG = \
-    jcapimin.c  jcmarker.c  jdapimin.c  jdinput.c   jdtrans.c   jidctred.c \
+    jcapimin.c  jcmarker.c  jdapimin.c  jdinput.c   jdtrans.c   \
     jcapistd.c  jcmaster.c  jdapistd.c  jdmainct.c  jerror.c    jmemmgr.c  \
     jccoefct.c  jcomapi.c   jdatadst.c  jdmarker.c  jfdctflt.c  jmemnobs.c \
     jccolor.c   jcparam.c   jdatasrc.c  jdmaster.c  jfdctfst.c  jquant1.c  \
-    jcdctmgr.c  jcphuff.c   jdcoefct.c  jdmerge.c   jfdctint.c  jquant2.c  \
-    jchuff.c    jcprepct.c  jdcolor.c   jdphuff.c   jidctflt.c  jutils.c   \
-    jcinit.c    jcsample.c  jddctmgr.c  jdpostct.c  jidctfst.c             \
-    jcmainct.c  jctrans.c   jdhuff.c    jdsample.c  jidctint.c
+    jcdctmgr.c  jdcoefct.c  jdmerge.c   jfdctint.c  jquant2.c  \
+    jchuff.c    jcprepct.c  jdcolor.c   jidctflt.c  jutils.c    jdarith.c \
+    jcinit.c    jcsample.c  jddctmgr.c  jdpostct.c  jidctfst.c  jaricom.c  \
+    jcmainct.c  jctrans.c   jdhuff.c    jdsample.c  jidctint.c  jcarith.c
 SRCJPEG  := $(addprefix libjpeg/, $(SRCJPEG)) im_format_jpeg.cpp
 INCLUDES += libjpeg 
 

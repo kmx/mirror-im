@@ -403,11 +403,19 @@
 				Name="libJPEG"
 				>
 				<File
+					RelativePath="..\src\libjpeg\jaricom.c"
+					>
+				</File>
+				<File
 					RelativePath="..\src\libjpeg\jcapimin.c"
 					>
 				</File>
 				<File
 					RelativePath="..\src\libjpeg\jcapistd.c"
+					>
+				</File>
+				<File
+					RelativePath="..\src\libjpeg\jcarith.c"
 					>
 				</File>
 				<File
@@ -475,6 +483,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\src\libjpeg\jdarith.c"
+					>
+				</File>
+				<File
 					RelativePath="..\src\libjpeg\jdatadst.c"
 					>
 				</File>
@@ -495,10 +507,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\src\libjpeg\jdhuff.c"
-					>
-				</File>
-				<File
 					RelativePath="..\src\libjpeg\jdinput.c"
 					>
 				</File>
@@ -516,10 +524,6 @@
 				</File>
 				<File
 					RelativePath="..\src\libjpeg\jdmerge.c"
-					>
-				</File>
-				<File
-					RelativePath="..\src\libjpeg\jdphuff.c"
 					>
 				</File>
 				<File
@@ -560,10 +564,6 @@
 				</File>
 				<File
 					RelativePath="..\src\libjpeg\jidctint.c"
-					>
-				</File>
-				<File
-					RelativePath="..\src\libjpeg\jidctred.c"
 					>
 				</File>
 				<File
