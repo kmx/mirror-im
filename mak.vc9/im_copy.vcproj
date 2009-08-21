@@ -66,11 +66,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="im.lib im_avi.lib vfw32.lib"
-				OutputFile="$(OutDir)/im_copy.exe"
-				LinkIncremental="2"
+				OutputFile="$(OutDir)\$(ProjectName).exe"
+				LinkIncremental="1"
 				AdditionalLibraryDirectories="D:\LNG\WMFSDK9\lib;../lib"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/im_copy.pdb"
+				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
