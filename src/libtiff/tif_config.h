@@ -253,6 +253,34 @@
 #define inline
 #endif
 
+#ifdef _MSC_VER
+#if _MSC_VER>1400
+/* Signed 64-bit type formatter */
+#define TIFF_INT64_FORMAT "%I64d"
+
+/* Signed 64-bit type */
+#define TIFF_INT64_T signed __int64
+
+/* Unsigned 64-bit type formatter */
+#define TIFF_UINT64_FORMAT "%I64u"
+
+/* Unsigned 64-bit type */
+#define TIFF_UINT64_T unsigned __int64
+//#else
+///* Signed 64-bit type formatter */
+//#define TIFF_INT64_FORMAT "%I64d"
+//
+///* Signed 64-bit type */
+//#define TIFF_INT64_T signed __int64
+//
+///* Unsigned 64-bit type formatter */
+//#define TIFF_UINT64_FORMAT "%I64u"
+//
+///* Unsigned 64-bit type */
+//#define TIFF_UINT64_T unsigned __int64
+#endif
+#endif
+
 /* Define to `long' if <sys/types.h> does not define. */
 /* #undef off_t */
 
