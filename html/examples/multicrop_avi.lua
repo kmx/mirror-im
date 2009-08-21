@@ -1,7 +1,8 @@
--- lua multicrop_gif.lua 60 60 0 0 newfile.gif DSC003*.jpg
+-- lua multicrop_avi.lua 60 60 0 0 newfile.avi DSC003*.jpg
 
 require"imlua"
 require"imlua_process"
+require"imlua_avi"
 
 err_msg = {
   "No error.",
@@ -25,7 +26,7 @@ if (not x1 or not x2 or not y1 or not y2 or not new_filename or not filename1) t
   print("Must have the rectangle coordinates and at least one file name as parameters.")
   print("  Can have more than one file name as parameters and can use wildcards.")
   print("  Usage:")
-  print("    lua multicrop_gif.lua x1 x2 y1 y2 new_filename filename1 filename2 ...")
+  print("    lua multicrop_avi.lua x1 x2 y1 y2 new_filename filename1 filename2 ...")
   return
 end
 
@@ -39,19 +40,22 @@ function ProcessImageFile(file_name, ifile)
   end
 
   local new_image = im.ProcessCropNew(image, x1, image:Width()-1-x2, y1, image:Height()-1-y2)
-  local map_image = im.ImageCreateBased(new_image, nil, nil, im.MAP, im.BYTE)
-  im.ConvertColorSpace(new_image, map_image)
-  ifile:SaveImage(map_image)
+  ifile:SaveImage(new_image)
 
-  map_image:Destroy()
   new_image:Destroy()
   image:Destroy()
 end
 
-ifile = im.FileNew(new_filename, "GIF")
+ifile = im.FileNew(new_filename, "AVI")
+--ifile:SetInfo("MP42") -- Microsoft MPEG-4 Video Codec V2
+--ifile:SetInfo("DIVX") -- DivX must be installed
+ifile:SetInfo("CUSTOM") -- show compression dialog 
+                        -- (once you choosed the compression that give the best results 
+                        --  you can then edit the script and hardcode it)
 
-ifile:SetAttribute("Delay", im.USHORT, {30}) -- Time to wait betweed frames in 1/100 of a second.
-ifile:SetAttribute("Iterations", im.USHORT, {0}) -- The number of times to repeat the animation. 0 means to repeat forever.
+ifile:SetAttribute("FPS", im.FLOAT, {15}) -- Frames per second
+--ifile:SetAttribute("AVIQuality", im.INT, {-1}) -- Default Quality
+
 
 file_count = 0
 for index,value in ipairs(arg) do
