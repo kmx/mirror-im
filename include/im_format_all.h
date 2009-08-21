@@ -24,7 +24,7 @@ extern "C" {
  * TIFF Revision 6.0 Final — June 3, 1992 \n
  * http://www.adobe.com/Support/TechNotes.html
  * \par
- * Access to the TIFF file format uses libTIFF version 3.8.2 \n
+ * Access to the TIFF file format uses libTIFF version 3.9.0 \n
  * http://www.remotesensing.org/libtiff/                     \n
  * Copyright (c) 1988-1997 Sam Leffler                      \n
  * Copyright (c) 1991-1997 Silicon Graphics, Inc.           \n
