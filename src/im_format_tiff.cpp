@@ -34,9 +34,6 @@
 
 static const TIFFFieldInfo iTiffFieldInfo[] = 
 {
-  /* missing in libTIFF (fixed in libtiff 4.0) */
-  { EXIFTAG_COLORSPACE, 1, 1, TIFF_SHORT, FIELD_CUSTOM, TRUE,	FALSE, "ColorSpace" },
-
   /* Patch from Dave Coffin (Used for DNG) */
   { TIFFTAG_WHITELEVEL,	-2, -1,	TIFF_LONG,	FIELD_CUSTOM,  0,	1,	"WhiteLevel" },
   { TIFFTAG_WHITELEVEL,	-2, -1,	TIFF_SHORT,	FIELD_CUSTOM,  0,	1,	"WhiteLevel" },
@@ -301,12 +298,16 @@ static void iTIFFReadCustomTags(TIFF* tiff, imAttribTable* attrib_table)
     if (fld == NULL)
       continue;
 
-    if (fld->field_tag == TIFFTAG_EXIFIFD ||         /* offset */
+    /* offsets */
+    if (fld->field_tag == TIFFTAG_EXIFIFD ||         
         fld->field_tag == TIFFTAG_GPSIFD ||          
         fld->field_tag == TIFFTAG_INTEROPERABILITYIFD ||   
 	      fld->field_tag == TIFFTAG_SUBIFD ||          
-	      fld->field_tag == TIFFTAG_COLORMAP ||        /* handled elsewhere */
-	      fld->field_tag == TIFFTAG_EXTRASAMPLES ||
+	      fld->field_tag == TIFFTAG_COLORMAP)
+      continue;
+        
+    /* handled elsewhere */
+	  if (fld->field_tag == TIFFTAG_EXTRASAMPLES ||
 	      fld->field_tag == TIFFTAG_TRANSFERFUNCTION ||
 	      fld->field_tag == TIFFTAG_RESOLUTIONUNIT ||
 	      fld->field_tag == TIFFTAG_XRESOLUTION ||
@@ -449,7 +450,47 @@ static void iTIFFReadCustomTags(TIFF* tiff, imAttribTable* attrib_table)
               delete [] float_data;
             }
             else
+            {
+              char* newstr = NULL;
+
+              if (fld->field_type == TIFF_ASCII && ((char*)data)[data_count-1] != 0)
+              {
+                int i = data_count-1;
+                char* p = (char*)data;
+                while (i > 0 && p[i] != 0)
+                  i--;
+                if (i == 0)
+                {
+                  if (fld->field_tag == TIFFTAG_DATETIME ||
+			                fld->field_tag == EXIFTAG_DATETIMEORIGINAL ||
+                      fld->field_tag == EXIFTAG_DATETIMEDIGITIZED)
+                  {
+                    /* sometimes theses tags get non standard strings,
+                       libTIIF does not returns the actual number os bytes read,
+                       it returns the standard value of 20.
+                       so we will try to find the actual string size, but we risk in a memory invalid access. */
+                    i = data_count;
+                    while (i < data_count+6 && p[i] != 0)
+                      i++;
+                    if (i < data_count+6)
+                      data_count = i+1;
+                  }
+                  else
+                  {
+                    newstr = (char*)malloc(data_count+1);
+                    memcpy(newstr, data, data_count);
+                    newstr[data_count] = 0;
+                    data_count++;
+                  }
+                }
+                else
+                  data_count = i;
+              }
+
               attrib_table->Set(fld->field_name, data_type, data_count, data);
+
+              if (newstr) free(newstr);
+            }
           }
         }
       }

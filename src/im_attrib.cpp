@@ -62,12 +62,15 @@ static char* utlStrDup(const char* str)
 
 imAttribNode::imAttribNode(const char* name, int _data_type, int _count, const void* _data, imAttribNode* _next)
 {
+  if (_data_type == 0 && _count == -1)  /* BYTE meaning a string */
+    _count = strlen((char*)_data)+1;
+
   this->name = utlStrDup(name);
   this->data_type = _data_type;
   this->count = _count;
   this->next = _next;
 
-  int size = count * imDataTypeSize(_data_type);
+  int size = _count * imDataTypeSize(_data_type);
   this->data = malloc(size);
   if (_data) memcpy(this->data, _data, size);
   else memset(this->data, 0, size);
@@ -151,9 +154,6 @@ void imAttribTableSet(imAttribTablePrivate* ptable, const char* name, int data_t
 
   int index = iHashIndex(name, ptable->hash_size);
   imAttribNode* first_node = ptable->hash_table[index];
-
-  if (data_type == 0 && count == -1)  /* BYTE */
-    count = strlen((char*)data)+1;
 
   // The name already exists ?
   imAttribNode* cur_node = first_node;
