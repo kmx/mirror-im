@@ -1247,7 +1247,11 @@ int imFileFormatGIF::GIFWriteImageInfo()
 int imFileFormatGIF::ReadImageInfo(int index)
 {
   imAttribTable* attrib_table = AttribTable();
+
+  /* must clear the attribute list, because it can have multiple images and 
+     has many attributes that may exists only for specific images. */
   attrib_table->RemoveAll();
+  imFileSetBaseAttributes(this);
 
   if (gif_data.screen_width) 
   {

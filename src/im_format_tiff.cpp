@@ -762,8 +762,10 @@ int imFileFormatTIFF::ReadImageInfo(int index)
 
   uint16* sub_ifd = (uint16*)attrib_table->Get("SubIFDSelect");
 
-  /* must clear the attribute list, because TIFF can have many different images */
+  /* must clear the attribute list, because it can have multiple images and 
+     has many attributes that may exists only for specific images. */
   attrib_table->RemoveAll();
+  imFileSetBaseAttributes(this);
 
   void* data = NULL;
   if (TIFFGetField(this->tiff, TIFFTAG_DNGVERSION, &data) == 1 && data)

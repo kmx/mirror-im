@@ -45,6 +45,16 @@ void imFileClear(imFile* ifile)
     ifile->palette[i] = imColorEncode((imbyte)i, (imbyte)i, (imbyte)i);
 }
 
+void imFileSetBaseAttributes(imFile* ifile)
+{
+  imFileFormatBase* ifileformat = (imFileFormatBase*)ifile;
+  imAttribTable* atable = (imAttribTable*)ifileformat->attrib_table;
+
+  atable->Set("FileFormat", IM_BYTE, -1, ifileformat->iformat->format);
+  atable->Set("FileCompression", IM_BYTE, -1, ifileformat->compression);
+  atable->Set("FileImageCount", IM_INT, 1, &ifileformat->image_count);
+}
+
 imFile* imFileOpen(const char* file_name, int *error)
 {
   assert(file_name);
@@ -56,9 +66,7 @@ imFile* imFileOpen(const char* file_name, int *error)
   imFileClear(ifileformat);
 
   ifileformat->attrib_table = new imAttribTable(599);
-  imFileSetAttribute(ifileformat, "FileFormat", IM_BYTE, -1, ifileformat->iformat->format);
-  imFileSetAttribute(ifileformat, "FileCompression", IM_BYTE, -1, ifileformat->compression);
-  imFileSetAttribute(ifileformat, "FileImageCount", IM_INT, 1, &ifileformat->image_count);
+  imFileSetBaseAttributes(ifileformat);
 
   ifileformat->counter = imCounterBegin(file_name);
 
@@ -76,9 +84,7 @@ imFile* imFileOpenAs(const char* file_name, const char* format, int *error)
   imFileClear(ifileformat);
 
   ifileformat->attrib_table = new imAttribTable(599);
-  imFileSetAttribute(ifileformat, "FileFormat", IM_BYTE, -1, ifileformat->iformat->format);
-  imFileSetAttribute(ifileformat, "FileCompression", IM_BYTE, -1, ifileformat->compression);
-  imFileSetAttribute(ifileformat, "FileImageCount", IM_INT, 1, &ifileformat->image_count);
+  imFileSetBaseAttributes(ifileformat);
 
   ifileformat->counter = imCounterBegin(file_name);
 

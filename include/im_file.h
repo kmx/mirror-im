@@ -79,7 +79,6 @@ void imFileLineBufferInit(imFile* ifile);
 int imFileCheckConversion(imFile* ifile);
 
 
-
 /* File Format SDK */
 
 /** Number of lines to be accessed.
@@ -102,6 +101,11 @@ void imFileLineBufferWrite(imFile* ifile, const void* data, int line, int plane)
  * "align" can be 1, 2 or 4.
  * \ingroup filesdk */
 int imFileLineSizeAligned(int width, int bpp, int align);
+
+/** Set the attributes FileFormat, FileCompression and FileImageCount. \n
+ * Used in imFileOpen and imFileOpenAs, and after the attribute list cleared with RemoveAll.
+ * \ingroup filesdk */
+void imFileSetBaseAttributes(imFile* ifile);
 
 
 #if defined(__cplusplus)

@@ -1175,6 +1175,11 @@ int imFileFormatWMV::ReadImageInfo(int index)
 
   imAttribTable* attrib_table = AttribTable();
 
+  /* must clear the attribute list, because it can have multiple images and 
+     has many attributes that may exists only for specific images. */
+  attrib_table->RemoveAll();
+  imFileSetBaseAttributes(this);
+
   if (MediaType->formattype == WMFORMAT_VideoInfo)
   {
     WMVIDEOINFOHEADER* info_header = (WMVIDEOINFOHEADER*)MediaType->pbFormat;

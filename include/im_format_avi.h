@@ -62,9 +62,9 @@ extern "C" {
  
     Attributes:
       FPS IM_FLOAT (1) (should set when writing, default 15)
-      AVIQuality IM_INT (1) [1-10000, default -1] (write only)
-      KeyFrameRate IM_INT (1) (write only) [key frame frequency, if 0 not using key frames, default 15]
-      DataRate IM_INT (1) (write only) [kilobits/second, default 2400]
+      AVIQuality IM_INT (1) [1-10000, default -1] (write only) [unsed if compression=CUSTOM]
+      KeyFrameRate IM_INT (1) (write only) [key frame frequency, if 0 not using key frames, default 15, unsed if compression=CUSTOM]
+      DataRate IM_INT (1) (write only) [kilobits/second, default 2400, unsed if compression=CUSTOM]
 
     Comments:
       Reads only the first video stream. Other streams are ignored.
