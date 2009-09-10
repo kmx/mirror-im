@@ -22,8 +22,9 @@ extern "C" {
  * \par
  * Internal Implementation.
  * \par
- * Supports RAW binary images. You must know image parameters a priori. \n
- * You must set the IM_INT attributes "Width", "Height", "ColorMode", "DataType" before the imFileReadImageInfo/imFileWriteImageInfo functions.
+ * Supports RAW binary images. This is a unstructured and uncompressed binary data. 
+ * It is NOT a Camera RAW file generated in many professional digital cameras. \n
+ * You must know image parameters a priori and must set the IM_INT attributes "Width", "Height", "ColorMode", "DataType" before the imFileReadImageInfo/imFileWriteImageInfo functions.
  * \par
  * The data must be in binary form, but can start in an arbitrary offset from the begining of the file, use attribute "StartOffset".
  * The default is at 0 offset. 
@@ -54,8 +55,9 @@ extern "C" {
       ImageCount[1], StartOffset[0], SwitchType[FALSE], ByteOrder[IM_LITTLEENDIAN], Padding[0]  IM_INT (1)
 \endverbatim
  * \ingroup format */
-imFileFormatBase* imFormatInitRAW(void);
+imFormat* imFormatInitRAW(void);
 
+void imFormatFinishRAW(void);
 
 #if defined(__cplusplus)
 }

@@ -58,11 +58,23 @@ public:
   int CanWrite(const char* compression, int color_mode, int data_type) const;
 };
 
+static imFormat* raw_format = NULL;
 
-imFileFormatBase* imFormatInitRAW(void)
+void imFormatFinishRAW(void)
 {
-  imFormatRAW iformat;
-  return iformat.Create();
+  if (raw_format)
+  {
+    delete raw_format;
+    raw_format = NULL;
+  }
+}
+
+imFormat* imFormatInitRAW(void)
+{
+  if (!raw_format)
+    raw_format = new imFormatRAW();
+
+  return raw_format;
 }
 
 int imFileFormatRAW::Open(const char* file_name)

@@ -477,7 +477,7 @@ void imFormatRegisterTGA(void);
       Description (string)
 
     Comments:
-      In fact ASCII is an expansion...
+      In fact ASCII is an expansion, not a compression, because the file will be larger than binary data.
 \endverbatim
  * \ingroup format */
 void imFormatRegisterPNM(void);
