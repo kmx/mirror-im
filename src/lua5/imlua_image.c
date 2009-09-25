@@ -479,7 +479,9 @@ static int imluaImageSetPalette (lua_State *L)
 {
   imImage *image = imlua_checkimage(L, 1);
   imluaPalette *pal = imlua_checkpalette(L, 2);
-  imImageSetPalette(image, pal->color, pal->count);
+  long* palette = (long*)malloc(sizeof(long)*256);
+  memcpy(palette, pal->color, pal->count*sizeof(long));
+  imImageSetPalette(image, palette, pal->count);
   return 0;
 }
 

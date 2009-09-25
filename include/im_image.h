@@ -183,7 +183,8 @@ void imImageClear(imImage* image);
 int imImageIsBitmap(const imImage* image);
 
 /** Changes the image palette.
- * This will destroy the existing palette and replace it with the given palette buffer.
+ * This will destroy the existing palette and replace it with the given palette pointer.
+ * Only the pointer is stored, so the palette should be a new palette and it can not be a static array.
  *
  * \verbatim image:SetPalette(palette: imPalette) [in Lua 5] \endverbatim
  * \ingroup imgclass */

@@ -24,8 +24,7 @@ void imProcessQuantizeRGBUniform(const imImage* src_image, imImage* dst_image, i
          *green_map=(imbyte*)src_image->data[1],
          *blue_map=(imbyte*)src_image->data[2];
 
-  long *palette = imPaletteUniform();
-  imImageSetPalette(dst_image, palette, 256);
+  imImageSetPalette(dst_image, imPaletteUniform(), 256);
 
   for (int y = 0; y < src_image->height; y++)
   {
