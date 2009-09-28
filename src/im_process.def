@@ -121,7 +121,7 @@ EXPORTS
   imAnalyzeMeasureHoles
   imProcessPerimeterLine
   imAnalyzeMeasurePerimeter
-  imProcessPrune
+  imProcessRemoveByArea
   imProcessFillHoles
   imAnalyzeMeasurePerimArea
   imProcessSliceThreshold

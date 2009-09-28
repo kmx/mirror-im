@@ -131,7 +131,7 @@ end
 
 OneSourceOneDest("AnalyzeFindRegions", nil, nil, nil, im.USHORT)
 OneSourceOneDest("ProcessPerimeterLine")
-OneSourceOneDest("ProcessPrune")
+OneSourceOneDest("ProcessRemoveByArea")
 OneSourceOneDest("ProcessFillHoles")
 OneSourceOneDest("ProcessHoughLines", 180, hough_height, im.GRAY, im.INT)
 OneSourceOneDest("ProcessHoughLinesDraw")

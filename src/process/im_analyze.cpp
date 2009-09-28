@@ -1186,7 +1186,7 @@ void imAnalyzeMeasurePerimArea(const imImage* image, float* area_data)
   }
 }
 
-void imProcessPrune(const imImage* image, imImage* NewImage, int connect, int start_size, int end_size)
+void imProcessRemoveByArea(const imImage* image, imImage* NewImage, int connect, int start_size, int end_size, int inside)
 {
   imImage *region_image = imImageCreate(image->width, image->height, IM_GRAY, IM_USHORT);
   if (!region_image)
@@ -1200,6 +1200,12 @@ void imProcessPrune(const imImage* image, imImage* NewImage, int connect, int st
     return;
   }
 
+  if (end_size == 0)
+    end_size = image->width*image->height;
+
+  int outside=0;
+  if (!inside) outside = 1;
+
   int* area_data = (int*)malloc(region_count*sizeof(int));
   imAnalyzeMeasureArea(region_image, area_data, region_count);
 
@@ -1211,10 +1217,10 @@ void imProcessPrune(const imImage* image, imImage* NewImage, int connect, int st
     if (*region_data)
     {
       int area = area_data[(*region_data) - 1];
-      if (area < start_size || (end_size && area > end_size))
-        *img_data = 0;
+      if (area < start_size || area > end_size)
+        *img_data = (imbyte)outside;
       else
-        *img_data = 1;
+        *img_data = (imbyte)inside;
     }
     else
       *img_data = 0;

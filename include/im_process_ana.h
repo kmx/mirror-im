@@ -195,14 +195,15 @@ void imAnalyzeMeasurePerimeter(const imImage* image, float* perim, int region_co
  * \ingroup analyze */
 void imProcessPerimeterLine(const imImage* src_image, imImage* dst_image);
 
-/** Eliminates regions that have size outside the given interval. \n
+/** Eliminates regions that have area size outside or inside the given interval. \n
  * Source and destiny are a binary images. Regions can be 4 connected or 8 connected. \n
- * Can be done in-place. end_size can be zero to ignore big objects.
+ * Can be done in-place. end_size can be zero to indicate no upper limit or an area with width*height size. \n
+ * When searching inside the region the limits are inclusive (<= size >=), when searching outside the limits are exclusive (> size <).
  *
- * \verbatim im.ProcessPrune(src_image: imImage, dst_image: imImage, connect: number, start_size: number, end_size: number) [in Lua 5] \endverbatim
- * \verbatim im.ProcessPruneNew(image: imImage, connect: number, start_size: number, end_size: number) -> new_image: imImage [in Lua 5] \endverbatim
+ * \verbatim im.ProcessRemoveByArea(src_image: imImage, dst_image: imImage, connect: number, start_size: number, end_size: number, inside: boolean) [in Lua 5] \endverbatim
+ * \verbatim im.ProcessRemoveByAreaNew(image: imImage, connect: number, start_size: number, end_size: number, inside: boolean) -> new_image: imImage [in Lua 5] \endverbatim
  * \ingroup analyze */
-void imProcessPrune(const imImage* src_image, imImage* dst_image, int connect, int start_size, int end_size);
+void imProcessRemoveByArea(const imImage* src_image, imImage* dst_image, int connect, int start_size, int end_size, int inside);
 
 /** Fill holes inside white regions. \n
  * Source and destiny are a binary images. Regions can be 4 connected or 8 connected. \n
