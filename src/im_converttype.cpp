@@ -72,7 +72,7 @@ inline int iIntMax()
 template <class T>
 inline T iAbs(const T& v)
 {
-  if (v <= 0)
+  if (v < 0)
     return -1*v;
   return v;
 }
