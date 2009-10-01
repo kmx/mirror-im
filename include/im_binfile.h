@@ -73,6 +73,16 @@ unsigned long imBinFileWrite(imBinFile* bfile, void* pValues, unsigned long pCou
  * \ingroup binfile */
 unsigned long imBinFilePrintf(imBinFile* bfile, char *format, ...);
 
+/** Reads an integer number from the current position until found a non integer character.
+ * Returns a non zero value if sucessfull.
+ * \ingroup binfile */
+int imBinFileReadInteger(imBinFile* handle, int *value);
+
+/** Reads an floating point number from the current position until found a non number character.
+ * Returns a non zero value if sucessfull.
+ * \ingroup binfile */
+int imBinFileReadFloat(imBinFile* handle, float *value);
+
 /** Moves the file pointer from the begining of the file.\n
  * When writing to a file seeking can go beyond the end of the file.
  * \ingroup binfile */

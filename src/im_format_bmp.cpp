@@ -524,7 +524,7 @@ int imFileFormatBMP::ReadImageInfo(int index)
     return IM_ERR_NONE;
   }
 
-  /* we already readed the compression information */
+  /* we already read the compression information */
   /* jump 8 bytes (compression, image size) */
   imBinFileSeekOffset(handle, 8);
 

@@ -17,66 +17,6 @@
 #include <memory.h>
 #include <math.h>
 
-static int iKRNReadNextInteger(imBinFile* handle, int *value)
-{
-  int c = 0, found = 0;
-  static char buffer[10];
-
-  while (!found)
-  {
-    imBinFileRead(handle, &buffer[c], 1, 1);
-
-    /* if it's a number increments the number of characters readed */
-    if ((buffer[c] >= (int)'0' && buffer[c] <= (int)'9') || buffer[c] == (int)'-')
-      c++;
-    else
-    {
-      /* if it's not a number and we readed some characters convert them to an integer */
-      if (c > 0)
-      {
-        buffer[c] = 0;
-        *value = atoi(buffer);
-        found = 1;
-      }
-    }
-
-    if (imBinFileError(handle) || c > 10)
-      return 0;
-  } 
-
-  return 1;
-}
-
-static int iKRNReadNextReal(imBinFile* handle, float *value)
-{
-  int c = 0, found = 0;
-  static char buffer[16];
-
-  while (!found)
-  {
-    imBinFileRead(handle, &buffer[c], 1, 1);
-
-    /* if it's a number increments the number of characters readed */
-    if ((buffer[c] >= (int)'0' && buffer[c] <= (int)'9') || buffer[c] == (int)'-' || buffer[c] == (int)'.')
-      c++;
-    else
-    {
-      /* if it's not a number and we readed some characters convert them to an integer */
-      if (c > 0)
-      {
-        buffer[c] = 0;
-        *value = (float)atof(buffer);
-        found = 1;
-      }
-    }
-
-    if (imBinFileError(handle) || c > 16)
-      return 0;
-  } 
-
-  return 1;
-}
-
 static int iKRNReadDescription(imBinFile* handle, char* comment, int *size)
 {
   imbyte byte_value = 0;
@@ -239,14 +179,14 @@ int imFileFormatKRN::ReadImageInfo(int index)
   if (desc_size)
     attrib_table->Set("Description", IM_BYTE, desc_size, desc);
 
-  if (!iKRNReadNextInteger(handle, &this->width))
+  if (!imBinFileReadInteger(handle, &this->width))
     return IM_ERR_ACCESS;
 
-  if (!iKRNReadNextInteger(handle, &this->height))
+  if (!imBinFileReadInteger(handle, &this->height))
     return IM_ERR_ACCESS;
 
   int type;
-  if (!iKRNReadNextInteger(handle, &type))
+  if (!imBinFileReadInteger(handle, &type))
     return IM_ERR_ACCESS;
 
   if (type == 0)
@@ -303,7 +243,7 @@ int imFileFormatKRN::ReadImageData(void* data)
       if (this->file_data_type == IM_INT)
       {
         int value;
-        if (!iKRNReadNextInteger(handle, &value))
+        if (!imBinFileReadInteger(handle, &value))
           return IM_ERR_ACCESS;
 
         ((int*)this->line_buffer)[col] = value;
@@ -311,7 +251,7 @@ int imFileFormatKRN::ReadImageData(void* data)
       else
       {
         float value;
-        if (!iKRNReadNextReal(handle, &value))
+        if (!imBinFileReadFloat(handle, &value))
           return IM_ERR_ACCESS;
 
         ((float*)this->line_buffer)[col] = value;
@@ -351,10 +291,9 @@ int imFileFormatKRN::WriteImageData(void* data)
         if (!imBinFilePrintf(handle, "%f ", (double)value))
           return IM_ERR_ACCESS;
       }
-
-      if (col == this->width-1)
-        imBinFileWrite(handle, (void*)"\n", 1, 1);
     }
+
+    imBinFileWrite(handle, (void*)"\n", 1, 1);
 
     if (imBinFileError(handle))
       return IM_ERR_ACCESS;     

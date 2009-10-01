@@ -46,36 +46,6 @@ LEDImage = IMAGE[
 )
 */
 
-static int iLEDReadNextInteger(imBinFile* handle, int *value)
-{
-  int c = 0, found = 0;
-  static char buffer[10];
-
-  while (!found)
-  {
-    imBinFileRead(handle, &buffer[c], 1, 1);
-
-    /* if it's a number increments the number of characters readed */
-    if (buffer[c] >= (int)'0' && buffer[c] <= (int)'9')
-      c++;
-    else
-    {
-      /* if it's not a number and we readed some characters convert them to an integer */
-      if (c > 0)
-      {
-        buffer[c] = 0;
-        *value = atoi(buffer);
-        found = 1;
-      }
-    }
-
-    if (imBinFileError(handle) || c > 10)
-      return 0;
-  } 
-
-  return 1;
-}
-
 static const char* iLEDCompTable[1] = 
 {
   "NONE"
@@ -222,8 +192,8 @@ int imFileFormatLED::ReadImageInfo(int index)
   if (ReadPalette() != IM_ERR_NONE)
     return IM_ERR_ACCESS;
 
-  iLEDReadNextInteger(handle, &this->width);
-  iLEDReadNextInteger(handle, &this->height);
+  imBinFileReadInteger(handle, &this->width);
+  imBinFileReadInteger(handle, &this->height);
  
   if (imBinFileError(handle))
     return IM_ERR_ACCESS;
@@ -256,10 +226,10 @@ int imFileFormatLED::ReadPalette()
   /* convert the color map to the IM format */
   for (c = 0; c < this->palette_count; c++)
   {
-    iLEDReadNextInteger(handle, &i);
-    iLEDReadNextInteger(handle, &r);
-    iLEDReadNextInteger(handle, &g);
-    iLEDReadNextInteger(handle, &b);
+    imBinFileReadInteger(handle, &i);
+    imBinFileReadInteger(handle, &r);
+    imBinFileReadInteger(handle, &g);
+    imBinFileReadInteger(handle, &b);
 
     this->palette[i] = imColorEncode((unsigned char)r, (unsigned char)g, (unsigned char)b);
 
@@ -305,7 +275,7 @@ int imFileFormatLED::ReadImageData(void* data)
   {
     for (int col = 0; col < this->width; col++)
     {
-      if (!iLEDReadNextInteger(handle, &value))
+      if (!imBinFileReadInteger(handle, &value))
         return IM_ERR_ACCESS;
 
       ((imbyte*)this->line_buffer)[col] = (unsigned char)value;
@@ -330,7 +300,8 @@ int imFileFormatLED::WriteImageData(void* data)
 
     for (int col = 0; col < this->width; col++)
     {
-      imBinFilePrintf(handle, ",%d", (int)((imbyte*)this->line_buffer)[col]);
+      if (!imBinFilePrintf(handle, ",%d", (int)((imbyte*)this->line_buffer)[col]))
+        return IM_ERR_ACCESS;
     }
   
     imBinFileWrite(handle, (void*)"\n", 1, 1);

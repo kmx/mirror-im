@@ -16,35 +16,6 @@
 #include <string.h>
 #include <memory.h>
 
-static int iPNMReadNextInteger(imBinFile* handle, int *value)
-{
-  int c = 0, found = 0;
-  static char buffer[10];
-
-  while (!found)
-  {
-    imBinFileRead(handle, &buffer[c], 1, 1);
-
-    /* if it's a number increments the number of characters readed */
-    if (buffer[c] >= (int)'0' && buffer[c] <= (int)'9')
-      c++;
-    else
-    {
-      /* if it's not a number and we readed some characters convert them to an integer */
-      if (c > 0)
-      {
-        buffer[c] = 0;
-        *value = atoi(buffer);
-        found = 1;
-      }
-    }
-
-    if (imBinFileError(handle) || c > 10)
-      return 0;
-  } 
-
-  return 1;
-}
 
 /* comments start with '#' after the first \n */
 static int iPNMReadComment(imBinFile* handle, char* comment, int *size)
@@ -236,10 +207,10 @@ int imFileFormatPNM::ReadImageInfo(int index)
   if (size)
     attrib_table->Set("Description", IM_BYTE, size, comment);
 
-  if (!iPNMReadNextInteger(handle, &this->width))
+  if (!imBinFileReadInteger(handle, &this->width))
     return IM_ERR_ACCESS;
 
-  if (!iPNMReadNextInteger(handle, &this->height))
+  if (!imBinFileReadInteger(handle, &this->height))
     return IM_ERR_ACCESS;
 
   if (this->height <= 0 || this->width <= 0)
@@ -248,7 +219,7 @@ int imFileFormatPNM::ReadImageInfo(int index)
   int max_val = 255;
   if (this->image_type != '4' && this->image_type != '1')
   {
-    if (!iPNMReadNextInteger(handle, &max_val))
+    if (!imBinFileReadInteger(handle, &max_val))
       return IM_ERR_ACCESS;
   }
 
@@ -264,16 +235,16 @@ int imFileFormatPNM::WriteImageInfo()
   this->file_data_type = this->user_data_type;
   this->file_color_mode = imColorModeSpace(this->user_color_mode);
 
-  int plain;
+  int ascii;
   if (imStrEqual(this->compression, "ASCII"))
-    plain = 1;
+    ascii = 1;
   else
-    plain = 0;
+    ascii = 0;
 
   switch (this->file_color_mode)
   {
   case IM_BINARY:
-    if (plain)
+    if (ascii)
       this->image_type = '1';
     else
     {
@@ -282,13 +253,13 @@ int imFileFormatPNM::WriteImageInfo()
     }
     break;
   case IM_GRAY:
-    if (plain)
+    if (ascii)
       this->image_type = '2';
     else
       this->image_type = '5';
     break;
   case IM_RGB:
-    if (plain)
+    if (ascii)
       this->image_type = '3';
     else
       this->image_type = '6';
@@ -360,18 +331,18 @@ int imFileFormatPNM::ReadImageData(void* data)
   else
     line_raw_size = imImageLineSize(this->width, this->file_color_mode, this->file_data_type);
 
-  int plain = 0;
+  int ascii = 0;
   if (this->image_type == '1' || this->image_type == '2' || this->image_type == '3')
-    plain = 1;
+    ascii = 1;
 
   for (int row = 0; row < this->height; row++)
   {
-    if (plain)
+    if (ascii)
     {
       int value;
       for (int col = 0; col < line_count; col++)
       {
-        if (!iPNMReadNextInteger(handle, &value))
+        if (!imBinFileReadInteger(handle, &value))
           return IM_ERR_ACCESS;
 
         if (this->image_type == '1' && value < 2)
@@ -436,15 +407,15 @@ int imFileFormatPNM::WriteImageData(void* data)
   else
     line_raw_size = imImageLineSize(this->width, this->file_color_mode, this->file_data_type);
 
-  int plain = 0;
+  int ascii = 0;
   if (this->image_type == '1' || this->image_type == '2' || this->image_type == '3')
-    plain = 1;
+    ascii = 1;
 
   for (int row = 0; row < this->height; row++)
   {
     imFileLineBufferWrite(this, data, row, 0);
 
-    if (plain)
+    if (ascii)
     {
       int line_size = 0;
       for (int col = 0; col < line_count; col++)

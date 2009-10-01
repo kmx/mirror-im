@@ -159,6 +159,8 @@ EXPORTS
   imBinFileRegisterModule
   imBinFileSetCurrentModule
   imBinFilePrintf
+  imBinFileReadInteger
+  imBinFileReadFloat
   imBinFileRead
   imBinFileSize
   imBinFileTell

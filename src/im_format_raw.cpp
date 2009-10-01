@@ -15,9 +15,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-static const char* iRAWCompTable[1] = 
+static const char* iRAWCompTable[2] = 
 {
-  "NONE"
+  "NONE",
+  "ASCII"
 };
 
 class imFileFormatRAW: public imFileFormatBase
@@ -49,7 +50,7 @@ public:
               "RAW File Format", 
               "*.*;", 
               iRAWCompTable, 
-              1, 
+              2, 
               1)
     {}
   ~imFormatRAW() {}
@@ -213,15 +214,51 @@ int imFileFormatRAW::ReadImageData(void* data)
     line_count *= 2;
   }
 
+  int ascii;
+  if (imStrEqual(this->compression, "ASCII"))
+    ascii = 1;
+  else
+    ascii = 0;
+
   imCounterTotal(this->counter, count, "Reading RAW...");
 
   int row = 0, plane = 0;
   for (int i = 0; i < count; i++)
   {
-    imBinFileRead(this->handle, (imbyte*)this->line_buffer, line_count, type_size);
+    if (ascii)
+    {
+      for (int col = 0; col < line_count; col++)
+      {
+        if (this->file_data_type == IM_FLOAT)
+        {
+          float value;
+          if (!imBinFileReadFloat(handle, &value))
+            return IM_ERR_ACCESS;
 
-    if (imBinFileError(this->handle))
-      return IM_ERR_ACCESS;
+          ((float*)this->line_buffer)[col] = value;
+        }
+        else
+        {
+          int value;
+          if (!imBinFileReadInteger(handle, &value))
+            return IM_ERR_ACCESS;
+
+          if (this->file_data_type == IM_INT)
+            ((int*)this->line_buffer)[col] = value;
+          else if (this->file_data_type == IM_USHORT)
+            ((imushort*)this->line_buffer)[col] = (imushort)value;
+          else
+            ((imbyte*)this->line_buffer)[col] = (unsigned char)value;
+        }
+      }
+    }
+    else
+    {
+      imBinFileRead(this->handle, (imbyte*)this->line_buffer, line_count, type_size);
+
+      if (imBinFileError(this->handle))
+        return IM_ERR_ACCESS;
+    }
 
     imFileLineBufferRead(this, data, row, plane);
 
@@ -250,6 +287,12 @@ int imFileFormatRAW::WriteImageData(void* data)
     line_count *= 2;
   }
 
+  int ascii;
+  if (imStrEqual(this->compression, "ASCII"))
+    ascii = 1;
+  else
+    ascii = 0;
+
   imCounterTotal(this->counter, count, "Writing RAW...");
 
   int row = 0, plane = 0;
@@ -257,7 +300,38 @@ int imFileFormatRAW::WriteImageData(void* data)
   {
     imFileLineBufferWrite(this, data, row, plane);
 
-    imBinFileWrite(this->handle, (imbyte*)this->line_buffer, line_count, type_size);
+    if (ascii)
+    {
+      for (int col = 0; col < line_count; col++)
+      {
+        if (this->file_data_type == IM_FLOAT)
+        {
+          float value = ((float*)this->line_buffer)[col];
+
+          if (!imBinFilePrintf(handle, "%f ", (double)value))
+            return IM_ERR_ACCESS;
+        }
+        else
+        {
+          int value;
+          if (this->file_data_type == IM_INT)
+            value = ((int*)this->line_buffer)[col];
+          else if (this->file_data_type == IM_USHORT)
+            value = ((imushort*)this->line_buffer)[col];
+          else
+            value = ((imbyte*)this->line_buffer)[col];
+
+          if (!imBinFilePrintf(handle, "%d ", value))
+            return IM_ERR_ACCESS;
+        }
+      }
+
+      imBinFileWrite(handle, (void*)"\n", 1, 1);
+    }
+    else
+    {
+      imBinFileWrite(this->handle, (imbyte*)this->line_buffer, line_count, type_size);
+    }
 
     if (imBinFileError(this->handle))
       return IM_ERR_ACCESS;
@@ -285,7 +359,7 @@ int imFormatRAW::CanWrite(const char* compression, int color_mode, int data_type
   if (!compression || compression[0] == 0)
     return IM_ERR_NONE;
 
-  if (!imStrEqual(compression, "NONE"))
+  if (!imStrEqual(compression, "NONE") && !imStrEqual(compression, "ASCII"))
     return IM_ERR_COMPRESS;
 
   return IM_ERR_NONE;

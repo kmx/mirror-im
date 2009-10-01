@@ -76,7 +76,7 @@ extern "C" {
       Only read support is implemented.
       To read a region of the image you must set the View* attributes before reading the image data.
       After reading a partial image the width and height returned in ReadImageInfo is the view size.
-      The view limits define the region to be readed. 
+      The view limits define the region to be read. 
       The view size is the actual size of the image, so the result can be zoomed.
 \endverbatim
  * \ingroup format */

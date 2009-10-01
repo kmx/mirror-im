@@ -94,7 +94,7 @@ extern "C" {
         Tags BlackLevel, DefaultCropOrigin and DefaultCropSize are incorrectly interpreted by libTIFF so they are ignored.
         Raw image is loaded in place of the thumbnail image in the main IFD.
         SubIFDCount IM_USHORT (1)    [Number of subifds of the current image.]
-        SubIFDSelect IM_USHORT (1)   [Subifd number to be readed. Must be set before reading image info.]
+        SubIFDSelect IM_USHORT (1)   [Subifd number to be read. Must be set before reading image info.]
       (other attributes can be obtained by using libTIFF directly using the Handle(1) function)
 
     Comments:

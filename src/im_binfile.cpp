@@ -637,6 +637,72 @@ unsigned long imBinFilePrintf(imBinFile* bfile, char *format, ...)
   return imBinFileWrite(bfile, buffer, size, 1);
 }
 
+int imBinFileReadInteger(imBinFile* handle, int *value)
+{
+  int i = 0, found = 0;
+  char buffer[11], c;
+
+  while (!found)
+  {
+    imBinFileRead(handle, &c, 1, 1);
+
+    /* if it's an integer, increments the number of characters read */
+    if ((c >= '0' && c <= '9') || (c == '-'))
+    {
+      buffer[i] = c;
+      i++;
+    }
+    else
+    {
+      /* if it's not, and we read some characters, convert them to an integer */
+      if (i > 0)
+      {
+        buffer[i] = 0;
+        *value = atoi(buffer);
+        found = 1;
+      }
+    }
+
+    if (imBinFileError(handle) || i > 10)
+      return 0;
+  } 
+
+  return 1;
+}
+
+int imBinFileReadFloat(imBinFile* handle, float *value)
+{
+  int i = 0, found = 0;
+  char buffer[17], c;
+
+  while (!found)
+  {
+    imBinFileRead(handle, &c, 1, 1);
+
+    /* if it's a floating point number, increments the number of characters read */
+    if ((c >= '0' && c <= '9') || c == '-' || c == '+' || c == '.' || c == 'e' || c == 'E')
+    {
+      buffer[i] = c;
+      i++;
+    }
+    else
+    {
+      /* if it's not, and we read some characters convert them to an integer */
+      if (i > 0)
+      {
+        buffer[i] = 0;
+        *value = (float)atof(buffer);
+        found = 1;
+      }
+    }
+
+    if (imBinFileError(handle) || i > 16)
+      return 0;
+  } 
+
+  return 1;
+}
+
 static imBinFileBase* iBinFileBaseHandle(const char* pFileName)
 {
   imBinFile* bfile = (imBinFile*)pFileName;
