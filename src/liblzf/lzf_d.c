@@ -50,6 +50,10 @@
         :  "0" (dst),  "1" (src),  "2" (len));
 #endif
 
+#if TEC_UNAME==SunOS510x86
+#undef lzf_movsb
+#endif
+
 unsigned int 
 lzf_decompress (const void *const in_data,  unsigned int in_len,
                 void             *out_data, unsigned int out_len)
