@@ -10,9 +10,9 @@
 
 #include "im_lib.h"
 
-/* This appears only here to avoid changing the iup.h header fo bug fixes */
-#define IM_VERSION_FIX ".2"
-#define IM_VERSION_FIX_NUMBER 2
+/* This appears only here to avoid changing the im_lib.h header for bug fixes */
+#define IM_VERSION_FIX ""
+#define IM_VERSION_FIX_NUMBER 0
 
 static char *iVersion = "TECVERID.str:IM:LIB:" IM_VERSION IM_VERSION_FIX;
 
