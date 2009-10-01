@@ -33,6 +33,11 @@
 #define _USE_MATH_DEFINES  /* required by MS compilers to define M_PI */
 #include <math.h>
 
+/* not defined by OpenWatcom */
+#ifndef M_PI
+#define M_PI       3.14159265358979323846
+#endif
+
 struct _ExifEntryPrivate
 {
 	unsigned int ref_count;

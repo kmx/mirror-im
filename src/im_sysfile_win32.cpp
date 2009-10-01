@@ -15,6 +15,11 @@
 #include "im_util.h"
 #include "im_binfile.h"
 
+/* not defined in VC6 */
+#ifndef INVALID_SET_FILE_POINTER
+#define INVALID_SET_FILE_POINTER ((DWORD)-1)
+#endif
+
 class imBinSystemFile: public imBinFileBase
 {
 protected:
