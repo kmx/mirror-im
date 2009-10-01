@@ -569,6 +569,35 @@ int imGaussianStdDev2KernelSize(float stddev);
  * \ingroup convolve */
 float imGaussianKernelSize2StdDev(int kernel_size);
 
+/** Edge enhancement using Unsharp mask. stddev control the gaussian filter, 
+ *  amount controls how much the edges will enhance the image (0<amount<1), and
+ *  threshold controls which edges will be considered, it compares to twice of the absolute size of the edge.
+ *  Although very similar to \ref imProcessSharp, produces better results.
+ *
+ * \verbatim im.ProcessUnsharp(src_image: imImage, dst_image: imImage, stddev: number, amount: number, threshold: number) [in Lua 5] \endverbatim
+ * \verbatim im.ProcessUnsharpNew(image: imImage, stddev: number, amount: number, threshold: number) -> new_image: imImage [in Lua 5] \endverbatim
+ * \ingroup convolve */
+int imProcessUnsharp(const imImage* src_image, imImage* dst_image, float stddev, float amount, float threshold);
+
+/** Edge enhancement using Laplacian8 mask. 
+ *  amount controls how much the edges will enhance the image (0<amount<1), and
+ *  threshold controls which edges will be considered, it compares to twice of the absolute size of the edge.
+ *
+ * \verbatim im.ProcessSharp(src_image: imImage, dst_image: imImage, amount: number, threshold: number) [in Lua 5] \endverbatim
+ * \verbatim im.ProcessSharpNew(image: imImage, amount: number, threshold: number) -> new_image: imImage [in Lua 5] \endverbatim
+ * \ingroup convolve */
+int imProcessSharp(const imImage* src_image, imImage* dst_image, float amount, float threshold);
+
+/** Edge enhancement using a given kernel.
+ *  If kernel has all positive values, then the unsharp technique is used, else sharp is used.
+ *  amount controls how much the edges will enhance the image (0<amount<1), and
+ *  threshold controls which edges will be considered, it compares to twice of the absolute size of the edge.
+ *
+ * \verbatim im.ProcessSharp(src_image: imImage, dst_image: imImage, amount: number, threshold: number) [in Lua 5] \endverbatim
+ * \verbatim im.ProcessSharpNew(image: imImage, amount: number, threshold: number) -> new_image: imImage [in Lua 5] \endverbatim
+ * \ingroup convolve */
+int imProcessSharpKernel(const imImage* src_image, const imImage* kernel, imImage* dst_image, float amount, float threshold);
+
 
 #if defined(__cplusplus)
 }

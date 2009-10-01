@@ -14,7 +14,9 @@
 <h3 dir="ltr">
     CVS (28/Set/2009)</h3>
     <ul>
-        <li><span style="color: #0000FF">New:</span> function <strong>
+        <li><span style="color: #0000FF">New:</span> functions <strong>
+		imProcessUnsharp</strong> and <strong>imProcessSharp</strong>.</li>
+		<li><span style="color: #0000FF">New:</span> function <strong>
 		imImageGetOpenGLData</strong>.</li>
 		<li><span style="color: #0000FF">New:</span> functions <strong>
 		im.ConvertDataTypeNew</strong>, <strong>im.ConvertColorSpaceNew</strong> 
@@ -38,6 +40,13 @@
 		<li><span style="color: #008000">Changed: </span><strong>imProcessPrune</strong> 
 		renamed to <strong>imProcessRemoveByArea</strong>, and added a new 
 		parameter to select inside or outside the interval.</li>
+		<li><span style="color: #008000">Changed: </span>removed IM_UN_INC operation from <strong>imProcessUnArithmeticOp</strong>. 
+		It was not an unary operation. Can simply be done in place by <strong>
+		imProcessArithmeticOp</strong> and IM_BIN_ADD. </li>
+		<li><span style="color: #008000">Changed: </span>now<strong> imProcessUnArithmeticOp</strong>,
+		<strong>imProcessArithmeticConstOp</strong> and <strong>
+		imProcessArithmeticOp</strong> willl crop the result to 0-255 if destiny 
+		has data type byte.</li>
 		<li><span style="color: #008000"><span style="color: #ff0000">Fixed:</span><span
             style="color: #000000"> PNG attribute TransparencyIndex. new PNG 
 		attribute TransparencyMap. TransparentColor renamed to 

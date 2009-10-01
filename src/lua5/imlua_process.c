@@ -1475,6 +1475,56 @@ static int imluaProcessCanny (lua_State *L)
 }
 
 /*****************************************************************************\
+ im.ProcessUnsharp
+\*****************************************************************************/
+static int imluaProcessUnsharp(lua_State *L)
+{
+  imImage *src_image = imlua_checkimage(L, 1);
+  imImage *dst_image = imlua_checkimage(L, 2);
+  float p1 = (float)luaL_checknumber(L, 3);
+  float p2 = (float)luaL_checknumber(L, 4);
+  float p3 = (float)luaL_checknumber(L, 5);
+
+  imlua_match(L, src_image, dst_image);
+
+  imProcessUnsharp(src_image, dst_image, p1, p2, p3);
+  return 0;
+}
+
+/*****************************************************************************\
+ im.ProcessSharp
+\*****************************************************************************/
+static int imluaProcessSharp(lua_State *L)
+{
+  imImage *src_image = imlua_checkimage(L, 1);
+  imImage *dst_image = imlua_checkimage(L, 2);
+  float p1 = (float)luaL_checknumber(L, 3);
+  float p2 = (float)luaL_checknumber(L, 4);
+
+  imlua_match(L, src_image, dst_image);
+
+  imProcessSharp(src_image, dst_image, p1, p2);
+  return 0;
+}
+
+/*****************************************************************************\
+ im.ProcessSharpKernel
+\*****************************************************************************/
+static int imluaProcessSharpKernel(lua_State *L)
+{
+  imImage *src_image = imlua_checkimage(L, 1);
+  imImage *kernel = imlua_checkimage(L, 2);
+  imImage *dst_image = imlua_checkimage(L, 3);
+  float p1 = (float)luaL_checknumber(L, 4);
+  float p2 = (float)luaL_checknumber(L, 5);
+
+  imlua_match(L, src_image, dst_image);
+
+  imProcessSharpKernel(src_image, kernel, dst_image, p1, p2);
+  return 0;
+}
+
+/*****************************************************************************\
  im.GaussianStdDev2Repetitions
 \*****************************************************************************/
 static int imluaGaussianKernelSize2StdDev(lua_State *L)
@@ -2927,6 +2977,9 @@ static const luaL_reg improcess_lib[] = {
   {"ProcessSplineEdgeConvolve", imluaProcessSplineEdgeConvolve},
   {"ProcessZeroCrossing", imluaProcessZeroCrossing},
   {"ProcessCanny", imluaProcessCanny},
+  {"ProcessUnsharp", imluaProcessUnsharp},
+  {"ProcessSharp", imluaProcessSharp},
+  {"ProcessSharpKernel", imluaProcessSharpKernel},
   {"GaussianKernelSize2StdDev", imluaGaussianKernelSize2StdDev},
   {"GaussianStdDev2KernelSize", imluaGaussianStdDev2KernelSize},
 
@@ -3013,7 +3066,6 @@ static const imlua_constant im_process_constants[] = {
   { "UN_EQL", IM_UN_EQL, NULL },
   { "UN_ABS", IM_UN_ABS, NULL },
   { "UN_LESS", IM_UN_LESS, NULL },
-  { "UN_INC", IM_UN_INC, NULL },
   { "UN_INV", IM_UN_INV, NULL },
   { "UN_SQR", IM_UN_SQR, NULL },
   { "UN_SQRT", IM_UN_SQRT, NULL },

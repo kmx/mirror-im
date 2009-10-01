@@ -71,10 +71,6 @@ static void DoUnaryOp(T1 *map, T2 *new_map, int count, int op)
     for (i = 0; i < count; i++)
       new_map[i] = (T2)map[i];
     break;
-  case IM_UN_INC:
-    for (i = 0; i < count; i++)
-      new_map[i] = (T2)(new_map[i] + map[i]);
-    break;
   case IM_UN_LESS:
     for (i = 0; i < count; i++)
       new_map[i] = less_op((T2)map[i]);
@@ -85,7 +81,7 @@ static void DoUnaryOp(T1 *map, T2 *new_map, int count, int op)
     break;
   case IM_UN_SQRT:
     for (i = 0; i < count; i++)
-      new_map[i] = (T2)sqrt_op(map[i]);
+      new_map[i] = sqrt_op((T2)map[i]);
     break;
   case IM_UN_LOG:
     for (i = 0; i < count; i++)
@@ -114,6 +110,56 @@ static void DoUnaryOp(T1 *map, T2 *new_map, int count, int op)
   }
 }
 
+template <class T1> 
+static void DoUnaryOpByte(T1 *map, imbyte *new_map, int count, int op)
+{
+  int i;
+
+  switch(op)
+  {
+  case IM_UN_ABS:
+    for (i = 0; i < count; i++)
+      new_map[i] = (imbyte)crop_byte(abs_op((int)map[i]));
+    break;
+  case IM_UN_INV:
+    for (i = 0; i < count; i++)
+      new_map[i] = (imbyte)crop_byte(inv_op((int)map[i]));   /* will always be 0 */
+    break;
+  case IM_UN_EQL:
+    for (i = 0; i < count; i++)
+      new_map[i] = (imbyte)crop_byte((int)map[i]);
+    break;
+  case IM_UN_LESS:
+    for (i = 0; i < count; i++)
+      new_map[i] = (imbyte)crop_byte(less_op((int)map[i]));
+    break;
+  case IM_UN_SQR:
+    for (i = 0; i < count; i++)
+      new_map[i] = (imbyte)crop_byte(sqr_op((int)map[i]));
+    break;
+  case IM_UN_SQRT:
+    for (i = 0; i < count; i++)
+      new_map[i] = (imbyte)crop_byte(sqrt_op((int)map[i]));
+    break;
+  case IM_UN_LOG:
+    for (i = 0; i < count; i++)
+      new_map[i] = (imbyte)crop_byte(log_op((int)map[i]));
+    break;
+  case IM_UN_SIN:
+    for (i = 0; i < count; i++)
+      new_map[i] = (imbyte)crop_byte(sin_op((int)map[i]));
+    break;
+  case IM_UN_COS:
+    for (i = 0; i < count; i++)
+      new_map[i] = (imbyte)crop_byte(cos_op((int)map[i]));
+    break;
+  case IM_UN_EXP:
+    for (i = 0; i < count; i++)
+      new_map[i] = (imbyte)crop_byte(exp_op((int)map[i]));
+    break;
+  }
+}
+
 void imProcessUnArithmeticOp(const imImage* src_image, imImage* dst_image, int op)
 {
   int total_count = src_image->count * src_image->depth;
@@ -128,11 +174,11 @@ void imProcessUnArithmeticOp(const imImage* src_image, imImage* dst_image, int o
     else if (dst_image->data_type == IM_USHORT)
       DoUnaryOp((imbyte*)src_image->data[0], (imushort*)dst_image->data[0], total_count, op);
     else
-      DoUnaryOp((imbyte*)src_image->data[0], (imbyte*)dst_image->data[0], total_count, op);
+      DoUnaryOpByte((imbyte*)src_image->data[0], (imbyte*)dst_image->data[0], total_count, op);
     break;                                                                                
   case IM_USHORT:
     if (dst_image->data_type == IM_BYTE)
-      DoUnaryOp((imushort*)src_image->data[0], (imbyte*)dst_image->data[0], total_count, op);
+      DoUnaryOpByte((imushort*)src_image->data[0], (imbyte*)dst_image->data[0], total_count, op);
     else if (dst_image->data_type == IM_INT)
       DoUnaryOp((imushort*)src_image->data[0], (int*)dst_image->data[0], total_count, op);
     else if (dst_image->data_type == IM_FLOAT)
@@ -142,7 +188,7 @@ void imProcessUnArithmeticOp(const imImage* src_image, imImage* dst_image, int o
     break;                                                                                
   case IM_INT:                                                                           
     if (dst_image->data_type == IM_BYTE)
-      DoUnaryOp((int*)src_image->data[0], (imbyte*)dst_image->data[0], total_count, op);
+      DoUnaryOpByte((int*)src_image->data[0], (imbyte*)dst_image->data[0], total_count, op);
     else if (dst_image->data_type == IM_USHORT)
       DoUnaryOp((int*)src_image->data[0], (imushort*)dst_image->data[0], total_count, op);
     else if (dst_image->data_type == IM_FLOAT)

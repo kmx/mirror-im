@@ -160,3 +160,6 @@ EXPORTS
   imProcessRotateRef 
   imProcessInterlaceSplit
   imProcessBarlettConvolve
+  imProcessUnsharp
+  imProcessSharp
+  imProcessSharpKernel

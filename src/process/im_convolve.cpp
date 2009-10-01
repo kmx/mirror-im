@@ -1426,59 +1426,6 @@ int imProcessDiffOfGaussianConvolve(const imImage* src_image, imImage* dst_image
   return 1;
 }
 
-#ifdef _TEST_CODE_
-int imProcessDiffOfGaussianConvolveTEST(const imImage* src_image, imImage* dst_image, float stddev1, float stddev2)
-{
-  int kernel_size1 = imGaussianStdDev2KernelSize(stddev1);
-  int kernel_size2 = imGaussianStdDev2KernelSize(stddev2);
-  int size = kernel_size1;
-  if (kernel_size1 < kernel_size2) size = kernel_size2;
-
-  imImage* kernel1 = imImageCreate(size, size, IM_GRAY, IM_FLOAT);
-  imImage* kernel2 = imImageCreate(size, size, IM_GRAY, IM_FLOAT);
-  if (!kernel1 || !kernel2)
-  {
-    if (kernel1) imImageDestroy(kernel1);
-    if (kernel2) imImageDestroy(kernel2);
-    return 0;
-  }
-
-  imImageSetAttribute(kernel1, "Description", IM_BYTE, -1, (void*)"Gaussian");
-  imImageSetAttribute(kernel2, "Description", IM_BYTE, -1, (void*)"Gaussian");
-
-  imProcessRenderGaussian(kernel1, stddev1);
-  imProcessRenderGaussian(kernel2, stddev2);
-
-  // ERROR: kernel 1 should be multiplied by a factor to improve the difference.
-
-  imProcessArithmeticOp(kernel1, kernel2, kernel1, IM_BIN_SUB);
-  imImageSetAttribute(kernel1, "Description", IM_BYTE, -1, (void*)"Difference of Gaussian");
-
-  int ret = 0;
-  if (src_image->data_type == IM_BYTE || src_image->data_type == IM_USHORT)
-  {
-    imImage* aux_image = imImageClone(dst_image);
-    if (!aux_image)
-    {
-      imImageDestroy(kernel1);
-      imImageDestroy(kernel2);
-      return 0;
-    }
-
-    imProcessUnArithmeticOp(src_image, aux_image, IM_UN_EQL);  // Convert to IM_INT
-    ret = imProcessConvolve(aux_image, dst_image, kernel1);
-    imImageDestroy(aux_image);
-  }
-  else
-    ret = imProcessConvolve(src_image, dst_image, kernel1);
-
-  imImageDestroy(kernel1);
-  imImageDestroy(kernel2);
-
-  return ret;
-}
-#endif
-
 int imProcessMeanConvolve(const imImage* src_image, imImage* dst_image, int ks)
 {
   int counter = imCounterBegin("Mean Convolve");
@@ -1510,3 +1457,138 @@ int imProcessMeanConvolve(const imImage* src_image, imImage* dst_image, int ks)
 
   return ret;
 }
+
+template <class T1, class T2> 
+static void DoSharpOp(T1 *src_map, T1 *dst_map, int count, float amount, T2 threshold, int gauss)
+{
+  int i;
+  T1 min, max;
+
+  int size_of = sizeof(imbyte);
+  if (sizeof(T1) == size_of)
+  {
+    min = 0;
+    max = 255;
+  }
+  else
+  {
+    imMinMax(src_map, count, min, max);
+
+    if (min == max)
+    {
+      max = min + 1;
+
+      if (min != 0)
+        min = min - 1;
+    }
+  }
+
+  for (i = 0; i < count; i++)
+  {
+    T2 diff;
+    
+    if (gauss)
+      diff = 20*(src_map[i] - dst_map[i]);  /* dst_map contains a gaussian filter of the source image, must compensate for small edge values */
+    else
+      diff = dst_map[i];  /* dst_map contains a laplacian filter of the source image */
+
+    if (threshold && abs_op(2*diff) < threshold)
+      diff = 0;
+
+    T2 value = (T2)(src_map[i] + amount*diff);
+    if (value < min)
+      value = min;
+    else if (value > max)
+      value = max;
+
+    dst_map[i] = (T1)value;
+  }
+}
+
+static void doSharp(const imImage* src_image, imImage* dst_image, float amount, float threshold, int gauss)
+{
+  int count = src_image->count;
+
+  for (int i = 0; i < src_image->depth; i++)
+  {
+    switch(src_image->data_type)
+    {
+    case IM_BYTE:
+      DoSharpOp((imbyte*)src_image->data[i], (imbyte*)dst_image->data[i], count, amount, (int)threshold, gauss);
+      break;
+    case IM_USHORT:
+      DoSharpOp((imushort*)src_image->data[i], (imushort*)dst_image->data[i], count, amount, (int)threshold, gauss);
+      break;
+    case IM_INT:
+      DoSharpOp((int*)src_image->data[i], (int*)dst_image->data[i], count, amount, (int)threshold, gauss);
+      break;
+    case IM_FLOAT:
+      DoSharpOp((float*)src_image->data[i], (float*)dst_image->data[i], count, amount, (float)threshold, gauss);
+      break;
+    }
+  }
+}
+
+int imProcessUnsharp(const imImage* src_image, imImage* dst_image, float stddev, float amount, float threshold)
+{
+  int kernel_size = imGaussianStdDev2KernelSize(stddev);
+
+  imImage* kernel = imImageCreate(kernel_size, kernel_size, IM_GRAY, IM_FLOAT);
+  if (!kernel)
+    return 0;
+
+  imImageSetAttribute(kernel, "Description", IM_BYTE, -1, (void*)"Unsharp");
+  imProcessRenderGaussian(kernel, stddev);
+
+  int ret = imProcessConvolveSep(src_image, dst_image, kernel);
+  doSharp(src_image, dst_image, amount, threshold, 1);
+
+  imImageDestroy(kernel);
+
+  return ret;
+}
+
+int imProcessSharp(const imImage* src_image, imImage* dst_image, float amount, float threshold)
+{
+  imImage* kernel = imKernelLaplacian8();
+  if (!kernel)
+    return 0;
+
+  int ret = imProcessConvolve(src_image, dst_image, kernel);
+  doSharp(src_image, dst_image, amount, threshold, 0);
+
+  imImageDestroy(kernel);
+
+  return ret;
+}
+
+static int iProcessCheckKernelType(const imImage* kernel)
+{
+  if (kernel->data_type == IM_INT)
+  {
+    int* kernel_data = (int*)kernel->data[0];
+    for (int i = 0; i < kernel->count; i++)
+    {
+      if (kernel_data[i] < 0)   /* if there are negative values, assume kernel is an edge detector */
+        return 0;
+    }
+  }
+  else if (kernel->data_type == IM_FLOAT)
+  {
+    float* kernel_data = (float*)kernel->data[0];
+    for (int i = 0; i < kernel->count; i++)
+    {
+      if (kernel_data[i] < 0)   /* if there are negative values, assume kernel is an edge detector */
+        return 0;
+    }
+  }
+  return 1;  /* default is kernel is a smooth filter */
+}
+
+int imProcessSharpKernel(const imImage* src_image, const imImage* kernel, imImage* dst_image, float amount, float threshold)
+{
+  int ret = imProcessConvolve(src_image, dst_image, kernel);
+  doSharp(src_image, dst_image, amount, threshold, iProcessCheckKernelType(kernel));
+  return ret;
+}
+

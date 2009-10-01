@@ -54,6 +54,26 @@ inline int operator <= (const imcfloat& C, const float& F)
   return ((F <= C.real) && (0 <= C.imag));
 }
 
+inline int operator < (const imcfloat& C1, const imcfloat& C2)
+{
+  return ((C1.real < C2.real) && (C1.imag < C2.imag));
+}
+
+inline int operator < (const imcfloat& C, const float& F)
+{
+  return ((F < C.real) && (0 < C.imag));
+}
+
+inline int operator > (const imcfloat& C1, const imcfloat& C2)
+{
+  return ((C1.real > C2.real) && (C1.imag > C2.imag));
+}
+
+inline int operator > (const imcfloat& C, const float& F)
+{
+  return ((F > C.real) && (0 > C.imag));
+}
+
 inline imcfloat operator + (const imcfloat& C1, const imcfloat& C2)
 {
   return imcfloat(C1.real + C2.real, C1.imag + C2.imag);

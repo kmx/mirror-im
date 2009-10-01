@@ -9,14 +9,12 @@
 
 #include "im_complex.h"
 
-//#define IM_NEARZERO 0.0000001f
-//#define IM_NEARINF   10000000
 
 /// Crop value to Byte limit
 template <class T>
 inline T crop_byte(const T& v)
 {
-  return v <= 0? 0: v <= 255? v: 255;
+  return v < 0? 0: v > 255? 255: v;
 }
 
 /// Generic Addition with 2 template types
@@ -44,7 +42,6 @@ inline T1 mul_op(const T1& v1, const T2& v2)
 template <class T1, class T2>
 inline T1 div_op(const T1& v1, const T2& v2)
 {
-//  if (v2 == 0) return (T1)IM_NEARINF;
   return v1 / v2;
 }
 
@@ -52,7 +49,6 @@ inline T1 div_op(const T1& v1, const T2& v2)
 template <class T>
 inline T inv_op(const T& v)
 {
-//  if (v == 0) return (T)IM_NEARINF;
   return 1/v;
 }
 
@@ -60,7 +56,7 @@ inline T inv_op(const T& v)
 template <class T1, class T2>
 inline T1 diff_op(const T1& v1, const T2& v2)
 {
-  if (v1 <= v2)
+  if (v1 < v2)
     return v2 - v1;
   return v1 - v2;
 }
@@ -69,7 +65,7 @@ inline T1 diff_op(const T1& v1, const T2& v2)
 template <class T1, class T2>
 inline T1 min_op(const T1& v1, const T2& v2)
 {
-  if (v1 <= v2)
+  if (v1 < v2)
     return v1;
   return v2;
 }
@@ -78,7 +74,7 @@ inline T1 min_op(const T1& v1, const T2& v2)
 template <class T1, class T2>
 inline T1 max_op(const T1& v1, const T2& v2)
 {
-  if (v1 <= v2)
+  if (v1 < v2)
     return v2;
   return v1;
 }
@@ -109,7 +105,7 @@ inline T1 pow_op(const T1& v1, const T2& v2)
 template <class T>
 inline T abs_op(const T& v)
 {
-  if (v <= 0)
+  if (v < 0)
     return -1*v;
   return v;
 }
@@ -161,7 +157,6 @@ inline int log(const int& v)
 template <class T>
 inline T log_op(const T& v)
 {
-//  if (v <= 0) return (T)IM_NEARINF;
   return (T)log(v);
 }
 

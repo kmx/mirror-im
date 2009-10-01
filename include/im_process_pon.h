@@ -22,14 +22,13 @@ extern "C" {
  * See \ref im_process_pon.h
  * \ingroup process */
 
-/** Unary Arithmetic Operations.
+/** Unary Arithmetic Operations. \n
  * Inverse and log may lead to math exceptions.
  * \ingroup arithm */
 enum imUnaryOp {
   IM_UN_EQL,    /**< equal             =     a        */
   IM_UN_ABS,    /**< abssolute         =    |a|       */
   IM_UN_LESS,   /**< less              =    -a        */
-  IM_UN_INC,    /**< increment        +=     a        */
   IM_UN_INV,    /**< invert            =   1/a       (#) */
   IM_UN_SQR,    /**< square            =     a*a      */
   IM_UN_SQRT,   /**< square root       =     a^(1/2)  */
@@ -42,15 +41,22 @@ enum imUnaryOp {
 };
 
 /** Apply an arithmetic unary operation. \n
- * Can be done in place, images must match size, does not need to match type.
+ * Can be done in place, images must match size. \n
+ * Destiny image can be several types depending on source: \n
+ * \li byte -> byte, ushort, int, float
+ * \li ushort -> byte, ushort, int, float
+ * \li int -> byte, ushort, int, float
+ * \li float -> float
+ * \li complex -> complex
+ * If destiny is byte, then the result is cropped to 0-255.
  *
  * \verbatim im.ProcessUnArithmeticOp(src_image: imImage, dst_image: imImage, op: number) [in Lua 5] \endverbatim
  * \verbatim im.ProcessUnArithmeticOpNew(image: imImage, op: number) -> new_image: imImage [in Lua 5] \endverbatim
  * \ingroup arithm */
 void imProcessUnArithmeticOp(const imImage* src_image, imImage* dst_image, int op);
 
-/** Binary Arithmetic Operations.
- * Inverse and log may lead to math exceptions.
+/** Binary Arithmetic Operations. \n
+ * Divide may lead to math exceptions.
  * \ingroup arithm */
 enum imBinaryOp {
   IM_BIN_ADD,    /**< add         =    a+b            */
@@ -72,6 +78,7 @@ enum imBinaryOp {
  * \li float -> float
  * \li complex -> complex
  * One exception is that you can combine complex with float resulting complex.
+ * If destiny is byte, then the result is cropped to 0-255.
  *
  * \verbatim im.ProcessArithmeticOp(src_image1: imImage, src_image2: imImage, dst_image: imImage, op: number) [in Lua 5] \endverbatim
  * \verbatim im.ProcessArithmeticOpNew(image1: imImage, image2: imImage, op: number) -> new_image: imImage [in Lua 5] \endverbatim
@@ -88,6 +95,7 @@ void imProcessArithmeticOp(const imImage* src_image1, const imImage* src_image2,
  * \li float -> float
  * \li complex -> complex
  * The constant value is type casted to an apropriate type before the operation.
+ * If destiny is byte, then the result is cropped to 0-255.
  *
  * \verbatim im.ProcessArithmeticConstOp(src_image: imImage, src_const: number, dst_image: imImage, op: number) [in Lua 5] \endverbatim
  * \verbatim im.ProcessArithmeticConstOpNew(image: imImage, src_const: number, op: number) -> new_image: imImage [in Lua 5] \endverbatim
@@ -523,7 +531,7 @@ enum imToneGamut {
  * Supports all data types except IM_CFLOAT. \n
  * The linear operation do a special convertion when min > 0 and max < 1, it forces min=0 and max=1. \n
  * IM_BYTE images have min=0 and max=255 always. \n
- * Can be done in place. When there is no extra params use NULL.
+ * Can be done in place. When there is no extra params, can use NULL.
  *
  * \verbatim im.ProcessToneGamut(src_image: imImage, dst_image: imImage, op: number, param: table of number) [in Lua 5] \endverbatim
  * \verbatim im.ProcessToneGamutNew(src_image: imImage, op: number, param: table of number) -> new_image: imImage [in Lua 5] \endverbatim

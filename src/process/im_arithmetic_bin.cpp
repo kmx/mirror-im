@@ -61,6 +61,47 @@ static void DoBinaryOp(T1 *map1, T2 *map2, T3 *map, int count, int op)
   }
 }
 
+static void DoBinaryOpByte(imbyte *map1, imbyte *map2, imbyte *map, int count, int op)
+{
+  int i;
+
+  switch(op)
+  {
+  case IM_BIN_ADD:
+    for (i = 0; i < count; i++)
+      map[i] = (imbyte)crop_byte(add_op((int)map1[i], (int)map2[i]));
+    break;
+  case IM_BIN_SUB:
+    for (i = 0; i < count; i++)
+      map[i] = (imbyte)crop_byte(sub_op((int)map1[i], (int)map2[i]));
+    break;
+  case IM_BIN_MUL:
+    for (i = 0; i < count; i++)
+      map[i] = (imbyte)crop_byte(mul_op((int)map1[i], (int)map2[i]));
+    break;
+  case IM_BIN_DIV:
+    for (i = 0; i < count; i++)
+      map[i] = (imbyte)crop_byte(div_op((int)map1[i], (int)map2[i]));
+    break;
+  case IM_BIN_DIFF:
+    for (i = 0; i < count; i++)
+      map[i] = (imbyte)crop_byte(diff_op((int)map1[i], (int)map2[i]));
+    break;
+  case IM_BIN_MIN:
+    for (i = 0; i < count; i++)
+      map[i] = (imbyte)crop_byte(min_op((int)map1[i], (int)map2[i]));
+    break;
+  case IM_BIN_MAX:
+    for (i = 0; i < count; i++)
+      map[i] = (imbyte)crop_byte(max_op((int)map1[i], (int)map2[i]));
+    break;
+  case IM_BIN_POW:
+    for (i = 0; i < count; i++)
+      map[i] = (imbyte)crop_byte(pow_op((int)map1[i], (int)map2[i]));
+    break;
+  }
+}
+
 static void DoBinaryOpCpxReal(imcfloat *map1, float *map2, imcfloat *map, int count, int op)
 {
   int i;
@@ -118,7 +159,7 @@ void imProcessArithmeticOp(const imImage* src_image1, const imImage* src_image2,
       else if (dst_image->data_type == IM_INT)
         DoBinaryOp((imbyte*)src_image1->data[i], (imbyte*)src_image2->data[i], (int*)dst_image->data[i], count, op);
       else
-        DoBinaryOp((imbyte*)src_image1->data[i], (imbyte*)src_image2->data[i], (imbyte*)dst_image->data[i], count, op);
+        DoBinaryOpByte((imbyte*)src_image1->data[i], (imbyte*)src_image2->data[i], (imbyte*)dst_image->data[i], count, op);
       break;
     case IM_USHORT:
       if (dst_image->data_type == IM_FLOAT)
@@ -304,6 +345,48 @@ static void DoBinaryConstOp(T1 *map1, T2 value, T3 *map, int count, int op)
   }
 }
 
+template <class T1> 
+static void DoBinaryConstOpByte(T1 *map1, int value, imbyte *map, int count, int op)
+{
+  int i;
+
+  switch(op)
+  {
+  case IM_BIN_ADD:
+    for (i = 0; i < count; i++)
+      map[i] = (imbyte)crop_byte(add_op((int)map1[i], value));
+    break;
+  case IM_BIN_SUB:
+    for (i = 0; i < count; i++)
+      map[i] = (imbyte)crop_byte(sub_op((int)map1[i], value));
+    break;
+  case IM_BIN_MUL:
+    for (i = 0; i < count; i++)
+      map[i] = (imbyte)crop_byte(mul_op((int)map1[i], value));
+    break;
+  case IM_BIN_DIV:
+    for (i = 0; i < count; i++)
+      map[i] = (imbyte)crop_byte(div_op((int)map1[i], value));
+    break;
+  case IM_BIN_DIFF:
+    for (i = 0; i < count; i++)
+      map[i] = (imbyte)crop_byte(diff_op((int)map1[i], value));
+    break;
+  case IM_BIN_MIN:
+    for (i = 0; i < count; i++)
+      map[i] = (imbyte)crop_byte(min_op((int)map1[i], value));
+    break;
+  case IM_BIN_MAX:
+    for (i = 0; i < count; i++)
+      map[i] = (imbyte)crop_byte(max_op((int)map1[i], value));
+    break;
+  case IM_BIN_POW:
+    for (i = 0; i < count; i++)
+      map[i] = (imbyte)crop_byte(pow_op((int)map1[i], value));
+    break;
+  }
+}
+
 void imProcessArithmeticConstOp(const imImage* src_image1, float value, imImage* dst_image, int op)
 {
   int count = src_image1->count;
@@ -320,7 +403,7 @@ void imProcessArithmeticConstOp(const imImage* src_image1, float value, imImage*
       else if (dst_image->data_type == IM_INT)
         DoBinaryConstOp((imbyte*)src_image1->data[i], (int)value, (int*)dst_image->data[i], count, op);
       else
-        DoBinaryConstOp((imbyte*)src_image1->data[i], (imushort)value, (imbyte*)dst_image->data[i], count, op);
+        DoBinaryConstOpByte((imbyte*)src_image1->data[i], (int)value, (imbyte*)dst_image->data[i], count, op);
       break;
     case IM_USHORT:
       if (dst_image->data_type == IM_FLOAT)
@@ -328,7 +411,7 @@ void imProcessArithmeticConstOp(const imImage* src_image1, float value, imImage*
       else if (dst_image->data_type == IM_INT)
         DoBinaryConstOp((imushort*)src_image1->data[i], (int)value, (int*)dst_image->data[i], count, op);
       else if (dst_image->data_type == IM_BYTE)
-        DoBinaryConstOp((imushort*)src_image1->data[i], (imushort)value, (imbyte*)dst_image->data[i], count, op);
+        DoBinaryConstOpByte((imushort*)src_image1->data[i], (int)value, (imbyte*)dst_image->data[i], count, op);
       else
         DoBinaryConstOp((imushort*)src_image1->data[i], (imushort)value, (imushort*)dst_image->data[i], count, op);
       break;
@@ -338,7 +421,7 @@ void imProcessArithmeticConstOp(const imImage* src_image1, float value, imImage*
       else if (dst_image->data_type == IM_USHORT)
         DoBinaryConstOp((int*)src_image1->data[i], (int)value, (imushort*)dst_image->data[i], count, op);
       else if (dst_image->data_type == IM_BYTE)
-        DoBinaryConstOp((int*)src_image1->data[i], (int)value, (imbyte*)dst_image->data[i], count, op);
+        DoBinaryConstOpByte((int*)src_image1->data[i], (int)value, (imbyte*)dst_image->data[i], count, op);
       else
         DoBinaryConstOp((int*)src_image1->data[i], (int)value, (int*)dst_image->data[i], count, op);
       break;
@@ -367,7 +450,8 @@ void imProcessMultipleMean(const imImage** src_image_list, int src_image_count, 
   for(int i = 0; i < src_image_count; i++)
   {
     const imImage *image = src_image_list[i];
-    imProcessUnArithmeticOp(image, acum_image, IM_UN_INC);
+    imProcessArithmeticOp(image, acum_image, acum_image, IM_BIN_ADD);  /* acum_image += image */
+
   }
 
   imProcessArithmeticConstOp(acum_image, float(src_image_count), dst_image, IM_BIN_DIV);
@@ -393,7 +477,7 @@ void imProcessMultipleStdDev(const imImage** src_image_list, int src_image_count
     imProcessUnArithmeticOp(aux_image, aux_image, IM_UN_SQR);
 
     // dst_image += aux_image
-    imProcessUnArithmeticOp(aux_image, dst_image, IM_UN_INC);
+    imProcessArithmeticOp(aux_image, dst_image, dst_image, IM_BIN_ADD);
   }
 
   // dst_image = dst_image / src_image_count;
