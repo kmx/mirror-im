@@ -12,6 +12,7 @@ EXPORTS
   imFileGetPalette
   imFileSetAttribute
   imFileGetAttributeList
+  imFileSetBaseAttributes
   imFileSetInfo
   imFileSetPalette
   imFileOpenAs 
