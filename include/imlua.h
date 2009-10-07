@@ -11,22 +11,12 @@
 extern "C" {
 #endif
 
-/** \defgroup imlua IM Lua 5 Binding
+/** \defgroup imlua ImLua 5 Binding Reference
  * \par
  * Binding for the Lua 5 scripting language.           \n
  * Lua 5.1 Copyright (C) 1994-2005 Lua.org, PUC-Rio    \n
  * R. Ierusalimschy, L. H. de Figueiredo & W. Celes    \n
  * http://www.lua.org
- * \par
- * The name of the functions were changed because of the namespace "im" and because of the object orientation. \n
- * As a general rule use:
-\verbatim
-    imXxx  -> im.Xxx
-    IM_XXX -> im.XXX
-    imFileXXX(ifile,... -> ifile:XXX(...
-    imImageXXX(image,... -> image:XXX(...
-\endverbatim
- * All the objects are garbage collected by the Lua garbage collector.
  * \par
  * See \ref imlua.h
  * \ingroup util */
