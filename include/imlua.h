@@ -34,6 +34,7 @@ void imlua_open(void);
 int imlua_open(lua_State *L);
 int luaopen_imlua(lua_State *L);
 
+#ifdef __IM_IMAGE_H  /* must include im_image.h before this */
 /** Pushes an image as a metatable on the stack.
  * \ingroup imlua */
 void imlua_pushimage(lua_State *L, imImage* image);
@@ -41,6 +42,7 @@ void imlua_pushimage(lua_State *L, imImage* image);
 /** Gets an image as a metatable from the stack, checks for correct type.
  * \ingroup imlua */
 imImage* imlua_checkimage(lua_State *L, int param);
+#endif
 
 /** Initializes the Lua binding of the capture library.  \n
  * Returns 1 (leaves the "im" table on the top of the stack).
