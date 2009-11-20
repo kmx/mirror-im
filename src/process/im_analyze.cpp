@@ -139,7 +139,7 @@ static int DoAnalyzeFindRegions(int width, int height, imbyte* map, imushort* ne
 
   int region_count = 2;  // 0- background, 1-border
   imushort* alias_table = new imushort [MAX_COUNT];
-  memset(alias_table, 0, MAX_COUNT); // aliases are all zero at start (not used)
+  memset(alias_table, 0, MAX_COUNT*sizeof(imushort)); // aliases are all zero at start (not used)
 
   for (i = 1; i < height; i++)
   {
@@ -273,7 +273,7 @@ static int DoAnalyzeFindRegionsBorder(int width, int height, imbyte* map, imusho
 
   int region_count = 2;  // still consider: 0- background, 1-border
   imushort* alias_table = new imushort [MAX_COUNT];
-  memset(alias_table, 0, MAX_COUNT); // aliases are all zero at start (not used)
+  memset(alias_table, 0, MAX_COUNT*sizeof(imushort)); // aliases are all zero at start (not used)
 
   for (i = 0; i < height; i++)
   {
@@ -402,8 +402,7 @@ int imAnalyzeFindRegions(const imImage* image, imImage* NewImage, int connect, i
 void imAnalyzeMeasureArea(const imImage* image, int* data_area, int region_count)
 {
   imushort* img_data = (imushort*)image->data[0];
-
-  memset(data_area, 0, region_count*sizeof(int));
+  memset(data_area, 0, region_count*sizeof(imushort));
 
   for (int i = 0; i < image->count; i++)
   {
@@ -981,7 +980,7 @@ void imAnalyzeMeasurePerimeter(const imImage* image, float* perim_data, int regi
 
   imushort* map = (imushort*)image->data[0];
 
-  memset(perim_data, 0, region_count*sizeof(int));
+  memset(perim_data, 0, region_count*sizeof(float));
 
   int width = image->width;
   int height = image->height;
