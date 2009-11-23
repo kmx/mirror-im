@@ -125,6 +125,7 @@ void imFileClose(imFile* ifile)
   if (ifile->line_buffer) free(ifile->line_buffer);
   
   delete attrib_table;
+  delete ifileformat;
 }
 
 void* imFileHandle(imFile* ifile, int index)

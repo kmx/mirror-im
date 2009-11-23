@@ -235,7 +235,7 @@ int imFileWriteImageData(imFile* ifile, void* data);
  * \ingroup format */
 void imFormatRegisterInternal(void);
 
-/** Remove all registered formats.
+/** Remove all registered formats. Call this if you are checking memory leaks.
  * \ingroup format */
 void imFormatRemoveAll(void);
 
