@@ -228,7 +228,7 @@ TIFFjpeg_error_exit(j_common_ptr cinfo)
 	char buffer[JMSG_LENGTH_MAX];
 
 	(*cinfo->err->format_message) (cinfo, buffer);
-	TIFFErrorExt(sp->tif->tif_clientdata, "JPEGLib", buffer);		/* display the error message */
+	TIFFErrorExt(sp->tif->tif_clientdata, "JPEGLib", "%s", buffer);		/* display the error message */
 	jpeg_abort(cinfo);			/* clean up libjpeg state */
 	LONGJMP(sp->exit_jmpbuf, 1);		/* return to libtiff caller */
 }
@@ -244,7 +244,7 @@ TIFFjpeg_output_message(j_common_ptr cinfo)
 	char buffer[JMSG_LENGTH_MAX];
 
 	(*cinfo->err->format_message) (cinfo, buffer);
-	TIFFWarningExt(((JPEGState *) cinfo)->tif->tif_clientdata, "JPEGLib", buffer);
+	TIFFWarningExt(((JPEGState *) cinfo)->tif->tif_clientdata, "JPEGLib", "%s", buffer);
 }
 
 /*
@@ -844,10 +844,9 @@ JPEGPreDecode(TIFF* tif, tsample_t s)
 			/* Suppress colorspace handling */
 		sp->cinfo.d.jpeg_color_space = JCS_UNKNOWN;
 		sp->cinfo.d.out_color_space = JCS_UNKNOWN;
- 		tif->tif_flags |= TIFF_UPSAMPLED;  /* IMLIB - allow upsampling when there is no  colorspace handling
 		if (td->td_planarconfig == PLANARCONFIG_CONTIG &&
 		    (sp->h_sampling != 1 || sp->v_sampling != 1))
-			downsampled_output = TRUE;  */
+			downsampled_output = TRUE;
 		/* XXX what about up-sampling? */
 	}
 	if (downsampled_output) {
@@ -1339,9 +1338,8 @@ JPEGPreEncode(TIFF* tif, tsample_t s)
 				sp->cinfo.c.in_color_space = JCS_RGB;
 			} else {
 				sp->cinfo.c.in_color_space = JCS_YCbCr;
-				tif->tif_flags |= TIFF_UPSAMPLED; /* IMLIB - allow upsampling in the input data
 				if (sp->h_sampling != 1 || sp->v_sampling != 1)
-					downsampled_input = TRUE;  */
+					downsampled_input = TRUE;
 			}
 			if (!TIFFjpeg_set_colorspace(sp, JCS_YCbCr))
 				return (0);
