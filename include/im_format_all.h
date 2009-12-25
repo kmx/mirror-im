@@ -24,7 +24,7 @@ extern "C" {
  * TIFF Revision 6.0 Final — June 3, 1992 \n
  * http://www.adobe.com/Support/TechNotes.html
  * \par
- * Access to the TIFF file format uses libTIFF version 3.9.0 \n
+ * Access to the TIFF file format uses libTIFF version 3.9.2 \n
  * http://www.remotesensing.org/libtiff/                     \n
  * Copyright (c) 1988-1997 Sam Leffler                      \n
  * Copyright (c) 1991-1997 Silicon Graphics, Inc.           \n
@@ -105,6 +105,7 @@ extern "C" {
 
     Changes:
       "tiff_jpeg.c" - commented "downsampled_output = TRUE" in 2 places.
+      A few fixes in some files, search for "IMLIB" to see the changes.
       New file "tif_config.h" to match our needs.
       New file "tiff_binfile.c" that implement I/O rotines using imBinFile.
 \endverbatim
