@@ -118,6 +118,7 @@ EXPORTS
   imImageSetPalette
   imImageCopy
   imImageCopyData
+  imImageCopyPlane
   imImageCreateBased
   imImageAddAlpha
   imDibToHBitmap

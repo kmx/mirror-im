@@ -129,6 +129,20 @@ void imImageCopy(const imImage* src_image, imImage* dst_image);
  * \ingroup imgclass */
 void imImageCopyData(const imImage* src_image, imImage* dst_image);
 
+/** Copies the image attributes from src to dst.
+ * Includes the pallete when a MAP or GRAY image.
+ *
+ * \verbatim image:CopyAttributes(dst_image: imImage) [in Lua 5] \endverbatim
+ * \ingroup imgclass */
+void imImageCopyAttributes(const imImage* src_image, imImage* dst_image);
+
+/** Copy one image plane fom one image to another. \n
+ * Images must have the same size and type.
+ *
+ * \verbatim image:CopyPlane(src_plane: number, dst_image: imImage, dst_plane: number) [in Lua 5] \endverbatim
+ * \ingroup imgclass */
+void imImageCopyPlane(const imImage* src_image, int src_plane, imImage* dst_image, int dst_plane);
+
 /** Creates a copy of the image.
  *
  * \verbatim image:Duplicate() -> new_image: imImage [in Lua 5] \endverbatim
@@ -189,12 +203,6 @@ int imImageIsBitmap(const imImage* image);
  * \verbatim image:SetPalette(palette: imPalette) [in Lua 5] \endverbatim
  * \ingroup imgclass */
 void imImageSetPalette(imImage* image, long* palette, int palette_count);
-
-/** Copies the image attributes from src to dst.
- *
- * \verbatim image:CopyAttributes(dst_image: imImage) [in Lua 5] \endverbatim
- * \ingroup imgclass */
-void imImageCopyAttributes(const imImage* src_image, imImage* dst_image);
 
 /** Returns 1 if the images match width and height. Returns 0 otherwise.
  *

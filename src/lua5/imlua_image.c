@@ -167,6 +167,28 @@ static int imluaImageCopyData (lua_State *L)
 }
 
 /*****************************************************************************\
+ image:CopyPlane()
+\*****************************************************************************/
+static int imluaImageCopyPlane(lua_State *L)
+{
+  imImage* src_image = imlua_checkimage(L, 1);
+  int src_plane = luaL_checkint(L, 2);
+  imImage* dst_image = imlua_checkimage(L, 3);
+  int dst_plane = luaL_checkint(L, 4);
+
+  imlua_match(L, src_image, dst_image);
+
+  if (src_plane < 0 || src_plane >= src_image->depth)
+    luaL_argerror(L, 2, "invalid source channel, out of bounds");
+
+  if (dst_plane < 0 || dst_plane >= dst_image->depth)
+    luaL_argerror(L, 4, "invalid destiny channel, out of bounds");
+
+  imImageCopyPlane(src_image, src_plane, dst_image, dst_plane);
+  return 0;
+}
+
+/*****************************************************************************\
  image:Duplicate()
 \*****************************************************************************/
 static int imluaImageDuplicate (lua_State *L)
@@ -992,6 +1014,7 @@ static const luaL_reg imimage_metalib[] = {
   {"Reshape", imluaImageReshape},
   {"Copy", imluaImageCopy},
   {"CopyData", imluaImageCopyData},
+  {"CopyPlane", imluaImageCopyPlane},
   {"Duplicate", imluaImageDuplicate},
   {"Clone", imluaImageClone},
   {"SetAttribute", imluaImageSetAttribute},
