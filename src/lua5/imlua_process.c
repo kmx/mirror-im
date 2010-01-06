@@ -2009,18 +2009,19 @@ static int imluaProcessMergeHSI (lua_State *L)
 \*****************************************************************************/
 static int imluaProcessSplitComponents (lua_State *L)
 {
-  int i;
+  int i, src_depth;
   imImage *src_image = imlua_checkimage(L, 1);
   imImage **dst_image_list;
 
   luaL_checktype(L, 2, LUA_TTABLE);
 
-  if (imlua_getn(L, 2) != src_image->depth)
+  src_depth = src_image->has_alpha? src_image->depth+1: src_image->depth;
+  if (imlua_getn(L, 2) != src_depth)
     luaL_error(L, "number of destiny images must match the depth of the source image");
 
-  dst_image_list = (imImage**)malloc(sizeof(imImage*)*src_image->depth);
+  dst_image_list = (imImage**)malloc(sizeof(imImage*)*src_depth);
 
-  for (i = 0; i < src_image->depth; i++)
+  for (i = 0; i < src_depth; i++)
   {
     lua_pushnumber(L, i+1);
     lua_gettable(L, 2);
@@ -2029,7 +2030,7 @@ static int imluaProcessSplitComponents (lua_State *L)
     lua_pop(L, 1);
   }
 
-  for (i = 0; i < src_image->depth; i++)
+  for (i = 0; i < src_depth; i++)
   {
     int check = imImageMatchDataType(src_image, dst_image_list[i]);
     if (!check) free(dst_image_list);
@@ -2048,19 +2049,20 @@ static int imluaProcessSplitComponents (lua_State *L)
 \*****************************************************************************/
 static int imluaProcessMergeComponents (lua_State *L)
 {
-  int i;
+  int i, dst_depth;
   imImage** src_image_list;
   imImage *dst_image;
 
   luaL_checktype(L, 1, LUA_TTABLE);
   dst_image = imlua_checkimage(L, 2);
 
-  if (imlua_getn(L, 1) != dst_image->depth)
+  dst_depth = dst_image->has_alpha? dst_image->depth+1: dst_image->depth;
+  if (imlua_getn(L, 1) != dst_depth)
     luaL_error(L, "number of source images must match the depth of the destination image");
 
-  src_image_list = (imImage**)malloc(sizeof(imImage*)*dst_image->depth);
+  src_image_list = (imImage**)malloc(sizeof(imImage*)*dst_depth);
 
-  for (i = 0; i < dst_image->depth; i++)
+  for (i = 0; i < dst_depth; i++)
   {
     lua_pushnumber(L, i+1);
     lua_gettable(L, 1);
@@ -2069,7 +2071,7 @@ static int imluaProcessMergeComponents (lua_State *L)
     lua_pop(L, 1);
   }
 
-  for (i = 0; i < dst_image->depth; i++)
+  for (i = 0; i < dst_depth; i++)
   {
     int check = imImageMatchDataType(src_image_list[i], dst_image);
     if (!check) free(src_image_list);

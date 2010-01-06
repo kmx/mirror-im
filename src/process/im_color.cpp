@@ -142,7 +142,7 @@ void imProcessSplitComponents(const imImage* src_image, imImage** dst_image)
   memcpy(dst_image[0]->data[0], src_image->data[0], src_image->plane_size);
   memcpy(dst_image[1]->data[0], src_image->data[1], src_image->plane_size);
   memcpy(dst_image[2]->data[0], src_image->data[2], src_image->plane_size);
-  if (imColorModeDepth(src_image->color_space) == 4) 
+  if (imColorModeDepth(src_image->color_space) == 4 || src_image->has_alpha) 
     memcpy(dst_image[3]->data[0], src_image->data[3], src_image->plane_size);
 }
 
@@ -151,7 +151,7 @@ void imProcessMergeComponents(const imImage** src_image, imImage* dst_image)
   memcpy(dst_image->data[0], src_image[0]->data[0], dst_image->plane_size);
   memcpy(dst_image->data[1], src_image[1]->data[0], dst_image->plane_size);
   memcpy(dst_image->data[2], src_image[2]->data[0], dst_image->plane_size);
-  if (imColorModeDepth(dst_image->color_space) == 4) 
+  if (imColorModeDepth(dst_image->color_space) == 4 || dst_image->has_alpha) 
     memcpy(dst_image->data[3], src_image[3]->data[0], dst_image->plane_size);
 }
 

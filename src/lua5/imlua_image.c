@@ -175,13 +175,16 @@ static int imluaImageCopyPlane(lua_State *L)
   int src_plane = luaL_checkint(L, 2);
   imImage* dst_image = imlua_checkimage(L, 3);
   int dst_plane = luaL_checkint(L, 4);
+  int src_depth, dst_depth;
 
   imlua_match(L, src_image, dst_image);
 
-  if (src_plane < 0 || src_plane >= src_image->depth)
+  src_depth = src_image->has_alpha? src_image->depth+1: src_image->depth;
+  if (src_plane < 0 || src_plane >= src_depth)
     luaL_argerror(L, 2, "invalid source channel, out of bounds");
 
-  if (dst_plane < 0 || dst_plane >= dst_image->depth)
+  dst_depth = dst_image->has_alpha? dst_image->depth+1: dst_image->depth;
+  if (dst_plane < 0 || dst_plane >= dst_depth)
     luaL_argerror(L, 4, "invalid destiny channel, out of bounds");
 
   imImageCopyPlane(src_image, src_plane, dst_image, dst_plane);
@@ -773,13 +776,14 @@ static int imluaImage_tostring (lua_State *L)
   if (*image_p)
   {
     imImage *image = *image_p;
-    lua_pushfstring(L, "imImage(%p) [width=%d,height=%d,color_space=%s,data_type=%s,depth=%d]", 
+    lua_pushfstring(L, "imImage(%p) [width=%d,height=%d,color_space=%s,data_type=%s,depth=%d,has_alpha=%d]", 
       image_p,
       image->width, 
       image->height,
       imColorModeSpaceName(image->color_space),
       imDataTypeName(image->data_type),
-      image->depth
+      image->depth,
+      image->has_alpha
     );
   }
   else
@@ -978,7 +982,8 @@ static int imluaImage_index (lua_State *L)
     int channel = luaL_checkint(L, 2);
 
     /* create channel */
-    if (channel < 0 || channel >= image->depth)
+    int depth = image->has_alpha? image->depth+1: image->depth;
+    if (channel < 0 || channel >= depth)
       luaL_argerror(L, 2, "invalid channel, out of bounds");
 
     imlua_newimagechannel(L, image, channel);
