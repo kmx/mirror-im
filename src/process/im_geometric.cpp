@@ -393,7 +393,8 @@ static void InterlaceSplit(int src_width,
 
 void imProcessRotate90(const imImage* src_image, imImage* dst_image, int dir)
 {
-  for (int i = 0; i < src_image->depth; i++)
+  int src_depth = src_image->has_alpha? src_image->depth+1: src_image->depth;
+  for (int i = 0; i < src_depth; i++)
   {
     switch(src_image->data_type)
     {
@@ -418,7 +419,8 @@ void imProcessRotate90(const imImage* src_image, imImage* dst_image, int dir)
 
 void imProcessRotate180(const imImage* src_image, imImage* dst_image)
 {
-  for (int i = 0; i < src_image->depth; i++)
+  int src_depth = src_image->has_alpha? src_image->depth+1: src_image->depth;
+  for (int i = 0; i < src_depth; i++)
   {
     switch(src_image->data_type)
     {
@@ -446,9 +448,10 @@ int imProcessRadial(const imImage* src_image, imImage* dst_image, float k1, int 
   int ret = 0;
 
   int counter = imCounterBegin("Radial Distort");
-  imCounterTotal(counter, dst_image->depth*dst_image->height, "Processing...");
+  int src_depth = src_image->has_alpha? src_image->depth+1: src_image->depth;
+  imCounterTotal(counter, src_depth*dst_image->height, "Processing...");  /* size of the destiny image */
 
-  for (int i = 0; i < src_image->depth; i++)
+  for (int i = 0; i < src_depth; i++)
   {
     switch(src_image->data_type)
     {
@@ -483,9 +486,10 @@ int imProcessSwirl(const imImage* src_image, imImage* dst_image, float k, int or
   int ret = 0;
 
   int counter = imCounterBegin("Swirl Distort");
-  imCounterTotal(counter, dst_image->depth*dst_image->height, "Processing...");
+  int src_depth = src_image->has_alpha? src_image->depth+1: src_image->depth;
+  imCounterTotal(counter, src_depth*dst_image->height, "Processing...");  /* size of the destiny image */
 
-  for (int i = 0; i < src_image->depth; i++)
+  for (int i = 0; i < src_depth; i++)
   {
     switch(src_image->data_type)
     {
@@ -559,7 +563,8 @@ int imProcessRotate(const imImage* src_image, imImage* dst_image, double cos0, d
   int ret = 0;
 
   int counter = imCounterBegin("Rotate");
-  imCounterTotal(counter, dst_image->depth*dst_image->height, "Processing...");
+  int src_depth = src_image->has_alpha? src_image->depth+1: src_image->depth;
+  imCounterTotal(counter, src_depth*dst_image->height, "Processing...");  /* size of the destiny image */
 
   if (src_image->color_space == IM_MAP)
   {
@@ -567,7 +572,7 @@ int imProcessRotate(const imImage* src_image, imImage* dst_image, double cos0, d
   }
   else
   {
-     for (int i = 0; i < src_image->depth; i++)
+    for (int i = 0; i < src_depth; i++)
     {
       switch(src_image->data_type)
       {
@@ -603,7 +608,8 @@ int imProcessRotateRef(const imImage* src_image, imImage* dst_image, double cos0
   int ret = 0;
 
   int counter = imCounterBegin("RotateRef");
-  imCounterTotal(counter, dst_image->depth*dst_image->height, "Processing...");
+  int src_depth = src_image->has_alpha? src_image->depth+1: src_image->depth;
+  imCounterTotal(counter, src_depth*dst_image->height, "Processing...");  /* size of the destiny image */
 
   if (src_image->color_space == IM_MAP)
   {
@@ -611,7 +617,7 @@ int imProcessRotateRef(const imImage* src_image, imImage* dst_image, double cos0
   }
   else
   {
-     for (int i = 0; i < src_image->depth; i++)
+    for (int i = 0; i < src_depth; i++)
     {
       switch(src_image->data_type)
       {
@@ -645,8 +651,9 @@ int imProcessRotateRef(const imImage* src_image, imImage* dst_image, double cos0
 void imProcessMirror(const imImage* src_image, imImage* dst_image)
 {
   int i;
+  int src_depth = src_image->has_alpha? src_image->depth+1: src_image->depth;
 
-  for (i = 0; i < src_image->depth; i++)
+  for (i = 0; i < src_depth; i++)
   {
     switch(src_image->data_type)
     {
@@ -672,8 +679,9 @@ void imProcessMirror(const imImage* src_image, imImage* dst_image)
 void imProcessFlip(const imImage* src_image, imImage* dst_image)
 {
   int i;
+  int src_depth = src_image->has_alpha? src_image->depth+1: src_image->depth;
 
-  for (i = 0; i < src_image->depth; i++)
+  for (i = 0; i < src_depth; i++)
   {
     switch(src_image->data_type)
     {
@@ -699,8 +707,9 @@ void imProcessFlip(const imImage* src_image, imImage* dst_image)
 void imProcessInterlaceSplit(const imImage* src_image, imImage* dst_image1, imImage* dst_image2)
 {
   int i;
+  int src_depth = src_image->has_alpha? src_image->depth+1: src_image->depth;
 
-  for (i = 0; i < src_image->depth; i++)
+  for (i = 0; i < src_depth; i++)
   {
     switch(src_image->data_type)
     {

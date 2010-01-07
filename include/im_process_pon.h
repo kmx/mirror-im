@@ -268,18 +268,18 @@ void imProcessSplitHSI(const imImage* src_image, imImage* h_image, imImage* s_im
  * \ingroup colorproc */
 void imProcessMergeHSI(const imImage* h_image, const imImage* s_image, const imImage* i_image, imImage* dst_image);
 
-/** Split a multicomponent image into separate components.\n
+/** Split a multicomponent image into separate components, including alpha.\n
  * Destiny images must be IM_GRAY. Size and data types must be all the same.\n
- * The number of destiny images must match the depth of the source image.
+ * The number of destiny images must match the depth of the source image, including alpha.
  *
  * \verbatim im.ProcessSplitComponents(src_image: imImage, dst_image_list: table of imImage) [in Lua 5] \endverbatim
  * \verbatim im.ProcessSplitComponentsNew(src_image: imImage) -> dst_image_list: table of imImage [in Lua 5] \endverbatim
  * \ingroup colorproc */
 void imProcessSplitComponents(const imImage* src_image, imImage** dst_image_list);
 
-/** Merges separate components into a multicomponent image.\n
+/** Merges separate components into a multicomponent image, including alpha.\n
  * Source images must be IM_GRAY. Size and data types must be all the same.\n
- * The number of source images must match the depth of the destiny image.
+ * The number of source images must match the depth of the destiny image, including alpha.
  *
  * \verbatim im.ProcessMergeComponents(src_image_list: table of imImage, dst_image: imImage) [in Lua 5] \endverbatim
  * \verbatim im.ProcessMergeComponentsNew(src_image_list: table of imImage) -> dst_image: imImage [in Lua 5] \endverbatim

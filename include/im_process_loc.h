@@ -17,7 +17,8 @@ extern "C" {
 
 /** \defgroup resize Image Resize
  * \par
- * Operations to change the image size.
+ * Operations to change the image size. \n
+ * All size operations include the alpha channel if any.
  * \par
  * See \ref im_process_loc.h
  * \ingroup process */
@@ -87,7 +88,8 @@ void imProcessAddMargins(const imImage* src_image, imImage* dst_image, int xmin,
 
 /** \defgroup geom Geometric Operations
  * \par
- * Operations to change the shape of the image.
+ * Operations to change the shape of the image. \n
+ * All geometric operations include the alpha channel if any.
  * \par
  * See \ref im_process_loc.h
  * \ingroup process */
