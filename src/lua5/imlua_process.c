@@ -1703,6 +1703,22 @@ static int imluaProcessBlend (lua_State *L)
 }
 
 /*****************************************************************************\
+ im.ProcessCompose
+\*****************************************************************************/
+static int imluaProcessCompose(lua_State *L)
+{
+  imImage *src_image1 = imlua_checkimage(L, 1);
+  imImage *src_image2 = imlua_checkimage(L, 2);
+  imImage *dst_image = imlua_checkimage(L, 4);
+
+  imlua_match(L, src_image1, src_image2);
+  imlua_match(L, src_image1, dst_image);
+
+  imProcessCompose(src_image1, src_image2, dst_image);
+  return 0;
+}
+
+/*****************************************************************************\
  im.ProcessSplitComplex
 \*****************************************************************************/
 static int imluaProcessSplitComplex (lua_State *L)
@@ -2990,6 +3006,7 @@ static const luaL_reg improcess_lib[] = {
   {"ProcessArithmeticConstOp", imluaProcessArithmeticConstOp},
   {"ProcessBlendConst", imluaProcessBlendConst},
   {"ProcessBlend", imluaProcessBlend},
+  {"ProcessCompose", imluaProcessCompose},
   {"ProcessSplitComplex", imluaProcessSplitComplex},
   {"ProcessMergeComplex", imluaProcessMergeComplex},
   {"ProcessMultipleMean", imluaProcessMultipleMean},

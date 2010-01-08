@@ -255,6 +255,7 @@ end
 
 TwoSourcesOneDest("ProcessBlendConst")
 ThreeSourcesOneDest("ProcessBlend")
+TwoSourcesOneDest("ProcessCompose")
 OneSourceTwoDests("ProcessSplitComplex")
 TwoSourcesOneDest("ProcessMergeComplex", nil, nil, nil, im.CFLOAT)
 

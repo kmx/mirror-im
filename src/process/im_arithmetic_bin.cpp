@@ -262,6 +262,148 @@ void imProcessBlend(const imImage* src_image1, const imImage* src_image2, const 
   }
 }
 
+#define COMPOSE_OVER(_SRC, _SRC_ALPHA, _DST, _TMP_MULTI, _TMP_ALPHA) (T)(((_SRC_ALPHA)*(_SRC) + (_TMP_MULTI)*(_DST)) / (_TMP_ALPHA))
+#define ALPHA_BLEND(_src,_dst,_alpha) (T)(((_src) * (_alpha) + (_dst) * (max - (_alpha))) / max)
+
+template <class T, class TA>
+static inline T compose_op(const T& v1, const T& v2, const T& alpha1, const T& alpha2, const TA& max)
+{
+  if (alpha1 != max)   /* some transparency */                                                                     
+  {                                                                                                                    
+    if (alpha1 != 0) /* source not full transparent */                                                             
+    {                                                                                                                  
+      if (alpha2 == 0) /* destiny full transparent */                                                            
+      {                                                                                                                
+        return v1;                                                                                           
+      }                                                                                                                
+      else if (alpha2 == max) /* destiny opaque */                                                               
+      {                                                                                                                
+        return ALPHA_BLEND(v1, v2, alpha1);                                                   
+      }                                                                                                                
+      else /* (0<alpha2<max && 0<alpha1<max) destiny and source are semi-transparent */                      
+      {                                                                                                                
+        /* Closed Compositing SRC over DST  (see smith95a.pdf)        */                                               
+        /* Colors NOT Premultiplied by Alpha                          */                                               
+        /* DST = SRC * SRC_ALPHA + DST * DST_ALPHA * (1 - SRC_ALPHA)  */                                               
+        /* DST_ALPHA = SRC_ALPHA + DST_ALPHA * (1 - SRC_ALPHA)        */                                               
+        /* DST /= DST_ALPHA */                                                                                         
+        TA _tmp_multi = alpha2 * (max - alpha1);                                                            
+        TA _tmp_src_alpha = alpha1*max;                                                                           
+        TA _tmp_alpha = _tmp_src_alpha + _tmp_multi;                                                                  
+        return COMPOSE_OVER(v1, _tmp_src_alpha, v2, _tmp_multi, _tmp_alpha);                     
+      }                                                                                                                
+    }                                                                                                                  
+    else  /* (alpha1 == 0) source full transparent */                                                              
+    {                                                                                                                  
+      return v2;                                                                                           
+    }                                                                                                                  
+  }                                                                                                                    
+  else  /* (alpha1 == max) source has no alpha = opaque */                                                         
+  {                                                                                                                    
+    return v1;                                                                                               
+  }                                                                                                                    
+}
+
+template <class T, class TA>
+static inline T compose_alpha_op(const T& alpha1, const T& alpha2, const TA& max)
+{
+  if (alpha1 != max)   /* some transparency */                                                                     
+  {                                                                                                                    
+    if (alpha1 != 0) /* source not full transparent */                                                             
+    {                                                                                                                  
+      if (alpha2 == 0) /* destiny full transparent */                                                            
+      {                                                                                                                
+        return alpha1;                                                                                     
+      }                                                                                                                
+      else if (alpha2 == max) /* destiny opaque */                                                               
+      {                                                                                                                
+        /* alpha2 is not changed */                                                                              
+        return alpha2;
+      }                                                                                                                
+      else /* (0<alpha2<max && 0<alpha1<max) destiny and source are semi-transparent */                      
+      {                                                                                                                
+        /* Closed Compositing SRC over DST  (see smith95a.pdf)        */                                               
+        /* Colors NOT Premultiplied by Alpha                          */                                               
+        /* DST = SRC * SRC_ALPHA + DST * DST_ALPHA * (1 - SRC_ALPHA)  */                                               
+        /* DST_ALPHA = SRC_ALPHA + DST_ALPHA * (1 - SRC_ALPHA)        */                                               
+        /* DST /= DST_ALPHA */                                                                                         
+        TA _tmp_multi = alpha2 * (max - alpha1);                                                            
+        TA _tmp_src_alpha = alpha1*max;                                                                           
+        TA _tmp_alpha = _tmp_src_alpha + _tmp_multi;                                                                  
+        return (T)(_tmp_alpha / max);
+      }                                                                                                                
+    }                                                                                                                  
+    else  /* (alpha1 == 0) source full transparent */                                                              
+    {                                                                                                                  
+      /* alpha2 is not changed */                                                                                
+      return alpha2;
+    }                                                                                                                  
+  }                                                                                                                    
+  else  /* (alpha1 == max) source has no alpha = opaque */                                                         
+  {                                                                                                                    
+    return (unsigned char)max;   /* set destiny as opaque */                                                   
+  }                                                                                                                    
+}
+
+template <class T, class TA> 
+static void DoCompose(T *map1, T *map2, T *alpha1, T *alpha2, T *map, int count, TA max)
+{
+  for (int i = 0; i < count; i++)
+    map[i] = compose_op(map1[i], map2[i], alpha1[i], alpha2[i], max);
+}
+
+template <class T, class TA> 
+static void DoComposeAlpha(T *alpha1, T *alpha2, T *dst_alpha, int count, TA max)
+{
+  for (int i = 0; i < count; i++)
+    dst_alpha[i] = compose_alpha_op(alpha1[i], alpha2[i], max);
+}
+
+void imProcessCompose(const imImage* src_image1, const imImage* src_image2, imImage* dst_image)
+{
+  int count = src_image1->count, 
+      src_alpha = src_image1->depth;
+
+  if (!src_image1->has_alpha || !src_image2->has_alpha || !dst_image->has_alpha)
+    return;
+
+  for (int i = 0; i < src_image1->depth; i++)
+  {
+    switch(src_image1->data_type)
+    {
+    case IM_BYTE:
+      DoCompose((imbyte*)src_image1->data[i], (imbyte*)src_image2->data[i], (imbyte*)src_image1->data[src_alpha], (imbyte*)src_image2->data[src_alpha], (imbyte*)dst_image->data[i], count, (int)255);
+      break;
+    case IM_USHORT:
+      DoCompose((imushort*)src_image1->data[i], (imushort*)src_image2->data[i], (imushort*)src_image1->data[src_alpha], (imushort*)src_image2->data[src_alpha], (imushort*)dst_image->data[i], count, (int)65535);
+      break;
+    case IM_INT:
+      DoCompose((int*)src_image1->data[i], (int*)src_image2->data[i], (int*)src_image1->data[src_alpha], (int*)src_image2->data[src_alpha], (int*)dst_image->data[i], count, (int)2147483647);
+      break;
+    case IM_FLOAT:
+      DoCompose((float*)src_image1->data[i], (float*)src_image2->data[i], (float*)src_image1->data[src_alpha], (float*)src_image2->data[src_alpha], (float*)dst_image->data[i], count, 1.0f);
+      break;
+    }
+  }
+
+  /* one more for the alpha channel */
+  switch(src_image1->data_type)
+  {
+  case IM_BYTE:
+    DoComposeAlpha((imbyte*)src_image1->data[src_alpha], (imbyte*)src_image2->data[src_alpha], (imbyte*)dst_image->data[src_alpha], count, (int)255);
+    break;
+  case IM_USHORT:
+    DoComposeAlpha((imushort*)src_image1->data[src_alpha], (imushort*)src_image2->data[src_alpha], (imushort*)dst_image->data[src_alpha], count, (int)65535);
+    break;
+  case IM_INT:
+    DoComposeAlpha((int*)src_image1->data[src_alpha], (int*)src_image2->data[src_alpha], (int*)dst_image->data[src_alpha], count, (int)2147483647);
+    break;
+  case IM_FLOAT:
+    DoComposeAlpha((float*)src_image1->data[src_alpha], (float*)src_image2->data[src_alpha], (float*)dst_image->data[src_alpha], count, 1.0f);
+    break;
+  }
+}
+
 static void DoBinaryConstOpCpxReal(imcfloat *map1, float value, imcfloat *map, int count, int op)
 {
   int i;

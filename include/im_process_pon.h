@@ -126,6 +126,20 @@ void imProcessBlendConst(const imImage* src_image1, const imImage* src_image2, i
  * \ingroup arithm */
 void imProcessBlend(const imImage* src_image1, const imImage* src_image2, const imImage* alpha_image, imImage* dst_image);
 
+/** Compose two images that have an alpha channel using the OVER operator. \n
+ * Can be done in place, images must match size and type. \n
+ * Integer alpha values must be:
+\verbatim 
+0 - 255        IM_BYTE  
+0 - 65535      IM_USHORT
+0 - 2147483647 IM_INT
+\endverbatim
+ * that will be normalized to 0 - 1.
+ * \verbatim im.ProcessCompose(src_image1: imImage, src_image2: imImage, dst_image: imImage) [in Lua 5] \endverbatim
+ * \verbatim im.ProcessComposeNew(image1: imImage, image2: imImage) -> new_image: imImage [in Lua 5] \endverbatim
+ * \ingroup arithm */
+void imProcessCompose(const imImage* src_image1, const imImage* src_image2, imImage* dst_image);
+
 /** Split a complex image into two images with real and imaginary parts \n
  * or magnitude and phase parts (polar). \n
  * Source image must be IM_CFLOAT, destiny images must be IM_FLOAT.

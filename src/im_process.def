@@ -73,6 +73,7 @@ EXPORTS
   imProcessBitwiseOp
   imProcessBlendConst
   imProcessBlend
+  imProcessCompose
   imProcessCalcRotateSize
   imProcessDifusionErrThreshold
   imProcessDirectConv
