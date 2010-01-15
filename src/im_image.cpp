@@ -306,9 +306,9 @@ void imImageCopyPlane(const imImage* src_image, int src_plane, imImage* dst_imag
 {
   assert(src_image);
   assert(dst_image);
-  assert(imImageMatch(src_image, dst_image));
+  assert(imImageMatchDataType(src_image, dst_image));
 
-  memcpy(dst_image->data[src_plane], src_image->data[dst_plane], src_image->plane_size);
+  memcpy(dst_image->data[dst_plane], src_image->data[src_plane], src_image->plane_size);
 }
 
 imImage* imImageDuplicate(const imImage* image)

@@ -177,7 +177,7 @@ static int imluaImageCopyPlane(lua_State *L)
   int dst_plane = luaL_checkint(L, 4);
   int src_depth, dst_depth;
 
-  imlua_match(L, src_image, dst_image);
+  imlua_matchdatatype(L, src_image, dst_image);
 
   src_depth = src_image->has_alpha? src_image->depth+1: src_image->depth;
   if (src_plane < 0 || src_plane >= src_depth)
