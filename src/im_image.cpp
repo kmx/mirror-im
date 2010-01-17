@@ -273,6 +273,39 @@ void imImageClear(imImage* image)
     memset(image->data[image->depth], 0, image->plane_size);
 }
 
+template <class T> 
+inline void iSet(T *map, T value, int count)
+{
+  for (int i = 0; i < count; i++)
+  {
+    *map++ = value;
+  }
+}
+  
+void imImageSetAlpha(imImage* image, float alpha)
+{
+  assert(image);
+
+  if (image->has_alpha)
+  {
+    switch(image->data_type)
+    {
+    case IM_BYTE:
+      memset(image->data[image->depth], (imbyte)alpha, image->plane_size);
+      break;                                                                                
+    case IM_USHORT:                                                                           
+      iSet((imushort*)image->data[image->depth], (imushort)alpha, image->plane_size);
+      break;                                                                                
+    case IM_INT:                                                                           
+      iSet((int*)image->data[image->depth], (int)alpha, image->plane_size);
+      break;                                                                                
+    case IM_FLOAT:                                                                           
+      iSet((float*)image->data[image->depth], (float)alpha, image->plane_size);
+      break;                                                                                
+    }
+  }
+}
+
 int imImageIsBitmap(const imImage* image)
 {
   assert(image);

@@ -128,6 +128,15 @@ static int imluaImageAddAlpha (lua_State *L)
 }
 
 /*****************************************************************************\
+ image:SetAlpha()
+\*****************************************************************************/
+static int imluaImageSetAlpha (lua_State *L)
+{
+  imImageSetAlpha(imlua_checkimage(L, 1), (float)luaL_checknumber(L, 2));
+  return 0;
+}
+
+/*****************************************************************************\
  image:Reshape()
 \*****************************************************************************/
 static int imluaImageReshape (lua_State *L)
@@ -1016,6 +1025,7 @@ static const luaL_reg imimage_lib[] = {
 static const luaL_reg imimage_metalib[] = {
   {"Destroy", imluaImageDestroy},
   {"AddAlpha", imluaImageAddAlpha},
+  {"SetAlpha", imluaImageSetAlpha},
   {"Reshape", imluaImageReshape},
   {"Copy", imluaImageCopy},
   {"CopyData", imluaImageCopyData},

@@ -103,11 +103,17 @@ imImage* imImageCreateBased(const imImage* image, int width, int height, int col
  * \ingroup imgclass */
 void imImageDestroy(imImage* image);
 
-/** Adds an alpha channel plane.
+/** Adds an alpha channel plane and sets its value to 0 (transparent).
  *
  * \verbatim image:AddAlpha() [in Lua 5] \endverbatim
  * \ingroup imgclass */
 void imImageAddAlpha(imImage* image);
+
+/** Sets the alpha channel plane to a constant.
+ *
+ * \verbatim image:SetAlpha() [in Lua 5] \endverbatim
+ * \ingroup imgclass */
+void imImageSetAlpha(imImage* image, float alpha);
 
 /** Changes the buffer size. Reallocate internal buffers if the new size is larger than the original.
  *
