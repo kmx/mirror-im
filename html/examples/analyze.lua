@@ -1,28 +1,23 @@
 require"imlua"
 require"imlua_process"
 
-local filename = "lena.jpg"
+local filename = "rice.png" -- image must be im.GRAY and im.BYTE for this script
 
 local image = im.FileImageLoad(filename)
-local gray = im.ImageCreate(image:Width(), image:Height(), im.GRAY, image:DataType())
-local binary = im.ImageCreate(image:Width(), image:Height(), im.BINARY, image:DataType())
-local region = im.ImageCreate(image:Width(), image:Height(), im.GRAY, im.USHORT)
-
--- make it grayscale
-im.ConvertColorSpace(image, gray)
-gray:Save("lena_gray.jpg", "JPEG")
+local binary = im.ImageCreateBased(image, nil, nil, im.BINARY, nil)
+local region = im.ImageCreateBased(image, nil, nil, nil, im.USHORT)
 
 -- make it binary
-im.ProcessSliceThreshold(gray, binary, 0, 128)
-binary:Save("lena_binary.jpg", "JPEG")
+im.ProcessPercentThreshold(image, binary, 70) --lots of background
 
-local count = im.AnalyzeFindRegions(binary, region, 4, 1)
+-- search for closed regions, don't count objects that touches the image borders
+local count = im.AnalyzeFindRegions(binary, region, 4, 0)
 print("regions: ", count)
 
-local region2 = im.ImageCreate(image:Width(), image:Height(), im.GRAY, im.BYTE)
-im.ConvertDataType(region, region2, 0, 0, 0, 0)
+local area = im.AnalyzeMeasureArea(region, count)
+local major_slope, major_length, minor_slope, minor_length = im.AnalyzeMeasurePrincipalAxis(region, area, nil, nil, count) 
 
-local region3 = im.ImageCreate(image:Width(), image:Height(), im.MAP, im.BYTE)
-im.ConvertColorSpace(region2, region3)
-region3:SetPalette(im.PaletteHighContrast(), 256)
-region3:Save("lena_region.gif", "GIF")
+print("object", "area", "major length", "minor length")
+for r=1, count do
+  print(r, area[r-1], string.format("%5.5g", major_length[r-1]), string.format("%5.5g", minor_length[r-1]))
+end

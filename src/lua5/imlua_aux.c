@@ -46,7 +46,7 @@ int imlua_newarrayint (lua_State *L, int *value, int count, int start)
   lua_newtable(L);
   for (i = 0; i < count; i++)
   {
-    lua_pushnumber(L, value[i]);
+    lua_pushinteger(L, value[i]);
     lua_rawseti(L, -2, i+start);
   }
   return 1;

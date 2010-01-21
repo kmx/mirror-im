@@ -402,7 +402,8 @@ int imAnalyzeFindRegions(const imImage* image, imImage* NewImage, int connect, i
 void imAnalyzeMeasureArea(const imImage* image, int* data_area, int region_count)
 {
   imushort* img_data = (imushort*)image->data[0];
-  memset(data_area, 0, region_count*sizeof(imushort));
+
+  memset(data_area, 0, region_count*sizeof(int));
 
   for (int i = 0; i < image->count; i++)
   {
