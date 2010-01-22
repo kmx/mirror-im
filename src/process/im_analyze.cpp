@@ -1203,8 +1203,19 @@ void imProcessRemoveByArea(const imImage* image, imImage* NewImage, int connect,
   if (end_size == 0)
     end_size = image->width*image->height;
 
-  int outside=0;
-  if (!inside) outside = 1;
+  int outside;
+  if (inside)
+  {
+    /* remove from inside */
+    inside = 0;
+    outside = 1;
+  }
+  else
+  {
+    /* remove from outside */
+    inside = 1;
+    outside = 0;
+  }
 
   int* area_data = (int*)malloc(region_count*sizeof(int));
   imAnalyzeMeasureArea(region_image, area_data, region_count);
