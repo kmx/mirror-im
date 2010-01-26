@@ -499,7 +499,7 @@ int imBinFileSetCurrentModule(int pModule)
   return old_module;
 }
 
-int imBinFileRegisterModule(imBinFileNewFunc pNewFunc)
+extern "C" int imBinFileRegisterModule(imBinFileNewFunc pNewFunc)
 {
   if (iBinFileModuleCount == MAX_MODULES) return -1;
   int id = iBinFileModuleCount;
