@@ -217,7 +217,7 @@ typedef imBinFileBase* (*imBinFileNewFunc)();
  * Returns the new function set id.\n
  * Accepts up to 10 modules.
  * \ingroup binfile */
-int imBinFileRegisterModule(imBinFileNewFunc pNewFunc);
+extern "C" int imBinFileRegisterModule(imBinFileNewFunc pNewFunc);
 
 #endif
 

@@ -964,7 +964,7 @@ void imDibDecodeToMap(const imDib* dib, unsigned char* map, long* palette)
   DIB <-> File
 *******************/
 
-int imDibSaveFile(const imDib* dib, char* filename)
+int imDibSaveFile(const imDib* dib, const char* filename)
 { 
   DWORD dwTmp; 
   HANDLE hFile;                 /* file handle */ 
