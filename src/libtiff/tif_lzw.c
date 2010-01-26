@@ -224,8 +224,7 @@ LZWSetupDecode(TIFF* tif)
 	if (sp->dec_codetab == NULL) {
 		sp->dec_codetab = (code_t*)_TIFFmalloc(CSIZE*sizeof (code_t));
 		if (sp->dec_codetab == NULL) {
-			TIFFErrorExt(tif->tif_clientdata, module,
-				     "No space for LZW code table");
+			TIFFErrorExt(tif->tif_clientdata, module, "No space for LZW code table");
 			return (0);
 		}
 		/*
@@ -238,11 +237,6 @@ LZWSetupDecode(TIFF* tif)
                     sp->dec_codetab[code].length = 1;
                     sp->dec_codetab[code].next = NULL;
                 } while (code--);
-		/*
-		 * Zero-out the unused entries
-                 */
-                 _TIFFmemset(&sp->dec_codetab[CODE_CLEAR], 0,
-			     (CODE_FIRST - CODE_CLEAR) * sizeof (code_t));
 	}
 	return (1);
 }
@@ -257,11 +251,6 @@ LZWPreDecode(TIFF* tif, tsample_t s)
 
 	(void) s;
 	assert(sp != NULL);
-        if( sp->dec_codetab == NULL )
-        {
-            tif->tif_setupdecode( tif );
-        }
-
 	/*
 	 * Check for old bit-reversed codes.
 	 */
@@ -361,7 +350,6 @@ LZWDecode(TIFF* tif, tidata_t op0, tsize_t occ0, tsample_t s)
 
 	(void) s;
 	assert(sp != NULL);
-        assert(sp->dec_codetab != NULL);
 	/*
 	 * Restart interrupted output operation.
 	 */
@@ -420,20 +408,12 @@ LZWDecode(TIFF* tif, tidata_t op0, tsize_t occ0, tsample_t s)
 			break;
 		if (code == CODE_CLEAR) {
 			free_entp = sp->dec_codetab + CODE_FIRST;
-			_TIFFmemset(free_entp, 0,
-				    (CSIZE - CODE_FIRST) * sizeof (code_t));
 			nbits = BITS_MIN;
 			nbitsmask = MAXCODE(BITS_MIN);
 			maxcodep = sp->dec_codetab + nbitsmask-1;
 			NextCode(tif, sp, bp, code, GetNextCode);
 			if (code == CODE_EOI)
 				break;
-			if (code == CODE_CLEAR) {
-				TIFFErrorExt(tif->tif_clientdata, tif->tif_name,
-				"LZWDecode: Corrupted LZW table at scanline %d",
-					     tif->tif_row);
-				return (0);
-			}
 			*op++ = (char)code, occ--;
 			oldcodep = sp->dec_codetab + code;
 			continue;
@@ -534,7 +514,7 @@ LZWDecode(TIFF* tif, tidata_t op0, tsize_t occ0, tsample_t s)
 
 	if (occ > 0) {
 		TIFFErrorExt(tif->tif_clientdata, tif->tif_name,
-		"LZWDecode: Not enough data at scanline %d (short %ld bytes)",
+		"LZWDecode: Not enough data at scanline %d (short %d bytes)",
 		    tif->tif_row, occ);
 		return (0);
 	}
@@ -624,20 +604,12 @@ LZWDecodeCompat(TIFF* tif, tidata_t op0, tsize_t occ0, tsample_t s)
 			break;
 		if (code == CODE_CLEAR) {
 			free_entp = sp->dec_codetab + CODE_FIRST;
-			_TIFFmemset(free_entp, 0,
-				    (CSIZE - CODE_FIRST) * sizeof (code_t));
 			nbits = BITS_MIN;
 			nbitsmask = MAXCODE(BITS_MIN);
 			maxcodep = sp->dec_codetab + nbitsmask;
 			NextCode(tif, sp, bp, code, GetNextCodeCompat);
 			if (code == CODE_EOI)
 				break;
-			if (code == CODE_CLEAR) {
-				TIFFErrorExt(tif->tif_clientdata, tif->tif_name,
-				"LZWDecode: Corrupted LZW table at scanline %d",
-					     tif->tif_row);
-				return (0);
-			}
 			*op++ = code, occ--;
 			oldcodep = sp->dec_codetab + code;
 			continue;
@@ -675,7 +647,6 @@ LZWDecodeCompat(TIFF* tif, tidata_t op0, tsize_t occ0, tsample_t s)
 		}
 		oldcodep = codep;
 		if (code >= 256) {
-			char *op_orig = op;
 			/*
 		 	 * Code maps to a string, copy string
 			 * value to output (written in reverse).
@@ -710,7 +681,7 @@ LZWDecodeCompat(TIFF* tif, tidata_t op0, tsize_t occ0, tsample_t s)
 			tp = op;
 			do {
 				*--tp = codep->value;
-			} while( (codep = codep->next) != NULL && tp > op_orig);
+			} while( (codep = codep->next) != NULL);
 		} else
 			*op++ = code, occ--;
 	}
@@ -726,7 +697,7 @@ LZWDecodeCompat(TIFF* tif, tidata_t op0, tsize_t occ0, tsample_t s)
 
 	if (occ > 0) {
 		TIFFErrorExt(tif->tif_clientdata, tif->tif_name,
-	    "LZWDecodeCompat: Not enough data at scanline %d (short %ld bytes)",
+	    "LZWDecodeCompat: Not enough data at scanline %d (short %d bytes)",
 		    tif->tif_row, occ);
 		return (0);
 	}
@@ -763,12 +734,6 @@ LZWPreEncode(TIFF* tif, tsample_t s)
 
 	(void) s;
 	assert(sp != NULL);
-        
-        if( sp->enc_hashtab == NULL )
-        {
-            tif->tif_setupencode( tif );
-        }
-
 	sp->lzw_nbits = BITS_MIN;
 	sp->lzw_maxcode = MAXCODE(BITS_MIN);
 	sp->lzw_free_ent = CODE_FIRST;
@@ -838,9 +803,6 @@ LZWEncode(TIFF* tif, tidata_t bp, tsize_t cc, tsample_t s)
 	(void) s;
 	if (sp == NULL)
 		return (0);
-
-        assert(sp->enc_hashtab != NULL);
-
 	/*
 	 * Load local state.
 	 */

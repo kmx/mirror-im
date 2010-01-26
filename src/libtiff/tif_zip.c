@@ -70,8 +70,7 @@ typedef	struct {
 	z_stream	stream;
 	int		zipquality;		/* compression level */
 	int		state;			/* state flags */
-#define ZSTATE_INIT_DECODE 0x01
-#define ZSTATE_INIT_ENCODE 0x02
+#define	ZSTATE_INIT	0x1		/* zlib setup successfully */
 
 	TIFFVGetMethod	vgetparent;		/* super-class method */
 	TIFFVSetMethod	vsetparent;		/* super-class method */
@@ -91,18 +90,11 @@ ZIPSetupDecode(TIFF* tif)
 	static const char module[] = "ZIPSetupDecode";
 
 	assert(sp != NULL);
-        
-        /* if we were last encoding, terminate this mode */
-	if (sp->state & ZSTATE_INIT_ENCODE) {
-            deflateEnd(&sp->stream);
-            sp->state = 0;
-        }
-
 	if (inflateInit(&sp->stream) != Z_OK) {
 		TIFFErrorExt(tif->tif_clientdata, module, "%s: %s", tif->tif_name, sp->stream.msg);
 		return (0);
 	} else {
-		sp->state |= ZSTATE_INIT_DECODE;
+		sp->state |= ZSTATE_INIT;
 		return (1);
 	}
 }
@@ -117,10 +109,6 @@ ZIPPreDecode(TIFF* tif, tsample_t s)
 
 	(void) s;
 	assert(sp != NULL);
-
-        if( (sp->state & ZSTATE_INIT_DECODE) == 0 )
-            tif->tif_setupdecode( tif );
-
 	sp->stream.next_in = tif->tif_rawdata;
 	sp->stream.avail_in = tif->tif_rawcc;
 	return (inflateReset(&sp->stream) == Z_OK);
@@ -134,8 +122,6 @@ ZIPDecode(TIFF* tif, tidata_t op, tsize_t occ, tsample_t s)
 
 	(void) s;
 	assert(sp != NULL);
-        assert(sp->state == ZSTATE_INIT_DECODE);
-
 	sp->stream.next_out = op;
 	sp->stream.avail_out = occ;
 	do {
@@ -172,16 +158,11 @@ ZIPSetupEncode(TIFF* tif)
 	static const char module[] = "ZIPSetupEncode";
 
 	assert(sp != NULL);
-	if (sp->state & ZSTATE_INIT_DECODE) {
-            inflateEnd(&sp->stream);
-            sp->state = 0;
-        }
-
 	if (deflateInit(&sp->stream, sp->zipquality) != Z_OK) {
 		TIFFErrorExt(tif->tif_clientdata, module, "%s: %s", tif->tif_name, sp->stream.msg);
 		return (0);
 	} else {
-		sp->state |= ZSTATE_INIT_ENCODE;
+		sp->state |= ZSTATE_INIT;
 		return (1);
 	}
 }
@@ -196,9 +177,6 @@ ZIPPreEncode(TIFF* tif, tsample_t s)
 
 	(void) s;
 	assert(sp != NULL);
-        if( sp->state != ZSTATE_INIT_ENCODE )
-            tif->tif_setupencode( tif );
-
 	sp->stream.next_out = tif->tif_rawdata;
 	sp->stream.avail_out = tif->tif_rawdatasize;
 	return (deflateReset(&sp->stream) == Z_OK);
@@ -212,9 +190,6 @@ ZIPEncode(TIFF* tif, tidata_t bp, tsize_t cc, tsample_t s)
 {
 	ZIPState *sp = EncoderState(tif);
 	static const char module[] = "ZIPEncode";
-
-        assert(sp != NULL);
-        assert(sp->state == ZSTATE_INIT_ENCODE);
 
 	(void) s;
 	sp->stream.next_in = bp;
@@ -282,12 +257,12 @@ ZIPCleanup(TIFF* tif)
 	tif->tif_tagmethods.vgetfield = sp->vgetparent;
 	tif->tif_tagmethods.vsetfield = sp->vsetparent;
 
-	if (sp->state & ZSTATE_INIT_ENCODE) {
-            deflateEnd(&sp->stream);
-            sp->state = 0;
-        } else if( sp->state & ZSTATE_INIT_DECODE) {
-            inflateEnd(&sp->stream);
-            sp->state = 0;
+	if (sp->state&ZSTATE_INIT) {
+		/* NB: avoid problems in the library */
+		if (tif->tif_mode == O_RDONLY)
+			inflateEnd(&sp->stream);
+		else
+			deflateEnd(&sp->stream);
 	}
 	_TIFFfree(sp);
 	tif->tif_data = NULL;
@@ -304,7 +279,7 @@ ZIPVSetField(TIFF* tif, ttag_t tag, va_list ap)
 	switch (tag) {
 	case TIFFTAG_ZIPQUALITY:
 		sp->zipquality = va_arg(ap, int);
-		if ( sp->state&ZSTATE_INIT_ENCODE ) {
+		if (tif->tif_mode != O_RDONLY && (sp->state&ZSTATE_INIT)) {
 			if (deflateParams(&sp->stream,
 			    sp->zipquality, Z_DEFAULT_STRATEGY) != Z_OK) {
 				TIFFErrorExt(tif->tif_clientdata, module, "%s: zlib error: %s",
@@ -342,21 +317,10 @@ static const TIFFFieldInfo zipFieldInfo[] = {
 int
 TIFFInitZIP(TIFF* tif, int scheme)
 {
-	static const char module[] = "TIFFInitZIP";
 	ZIPState* sp;
 
 	assert( (scheme == COMPRESSION_DEFLATE)
 		|| (scheme == COMPRESSION_ADOBE_DEFLATE));
-
-	/*
-	 * Merge codec-specific tag information.
-	 */
-	if (!_TIFFMergeFieldInfo(tif, zipFieldInfo,
-				 TIFFArrayCount(zipFieldInfo))) {
-		TIFFErrorExt(tif->tif_clientdata, module,
-			     "Merging Deflate codec-specific tags failed");
-		return 0;
-	}
 
 	/*
 	 * Allocate state block so tag methods have storage to record values.
@@ -371,8 +335,10 @@ TIFFInitZIP(TIFF* tif, int scheme)
 	sp->stream.data_type = Z_BINARY;
 
 	/*
-	 * Override parent get/set field methods.
+	 * Merge codec-specific tag information and
+	 * override parent get/set field methods.
 	 */
+	_TIFFMergeFieldInfo(tif, zipFieldInfo, TIFFArrayCount(zipFieldInfo));
 	sp->vgetparent = tif->tif_tagmethods.vgetfield;
 	tif->tif_tagmethods.vgetfield = ZIPVGetField; /* hook for codec tags */
 	sp->vsetparent = tif->tif_tagmethods.vsetfield;
@@ -403,7 +369,7 @@ TIFFInitZIP(TIFF* tif, int scheme)
 	(void) TIFFPredictorInit(tif);
 	return (1);
 bad:
-	TIFFErrorExt(tif->tif_clientdata, module,
+	TIFFErrorExt(tif->tif_clientdata, "TIFFInitZIP",
 		     "No space for ZIP state block");
 	return (0);
 }

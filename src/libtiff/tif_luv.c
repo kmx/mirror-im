@@ -451,7 +451,7 @@ LogL16Encode(TIFF* tif, tidata_t bp, tsize_t cc, tsample_t s)
 	tif->tif_rawcp = op;
 	tif->tif_rawcc = tif->tif_rawdatasize - occ;
 
-	return (1);
+	return (0);
 }
 
 /*
@@ -496,7 +496,7 @@ LogLuvEncode24(TIFF* tif, tidata_t bp, tsize_t cc, tsample_t s)
 	tif->tif_rawcp = op;
 	tif->tif_rawcc = tif->tif_rawdatasize - occ;
 
-	return (1);
+	return (0);
 }
 
 /*
@@ -585,7 +585,7 @@ LogLuvEncode32(TIFF* tif, tidata_t bp, tsize_t cc, tsample_t s)
 	tif->tif_rawcp = op;
 	tif->tif_rawcc = tif->tif_rawdatasize - occ;
 
-	return (1);
+	return (0);
 }
 
 /*
@@ -598,7 +598,7 @@ LogLuvEncodeStrip(TIFF* tif, tidata_t bp, tsize_t cc, tsample_t s)
 	tsize_t rowlen = TIFFScanlineSize(tif);
 
 	assert(cc%rowlen == 0);
-	while (cc && (*tif->tif_encoderow)(tif, bp, rowlen, s) == 1)
+	while (cc && (*tif->tif_encoderow)(tif, bp, rowlen, s) == 0)
 		bp += rowlen, cc -= rowlen;
 	return (cc == 0);
 }
@@ -613,7 +613,7 @@ LogLuvEncodeTile(TIFF* tif, tidata_t bp, tsize_t cc, tsample_t s)
 	tsize_t rowlen = TIFFTileRowSize(tif);
 
 	assert(cc%rowlen == 0);
-	while (cc && (*tif->tif_encoderow)(tif, bp, rowlen, s) == 1)
+	while (cc && (*tif->tif_encoderow)(tif, bp, rowlen, s) == 0)
 		bp += rowlen, cc -= rowlen;
 	return (cc == 0);
 }
@@ -1200,10 +1200,7 @@ LogL16InitState(TIFF* tif)
 		    "No support for converting user data format to LogL");
 		return (0);
 	}
-        if( isTiled(tif) )
-            sp->tbuflen = multiply(td->td_tilewidth, td->td_tilelength);
-        else
-            sp->tbuflen = multiply(td->td_imagewidth, td->td_rowsperstrip);
+	sp->tbuflen = multiply(td->td_imagewidth, td->td_rowsperstrip);
 	if (multiply(sp->tbuflen, sizeof (int16)) == 0 ||
 	    (sp->tbuf = (tidata_t*) _TIFFmalloc(sp->tbuflen * sizeof (int16))) == NULL) {
 		TIFFErrorExt(tif->tif_clientdata, module, "%s: No space for SGILog translation buffer",
@@ -1301,10 +1298,7 @@ LogLuvInitState(TIFF* tif)
 		    "No support for converting user data format to LogLuv");
 		return (0);
 	}
-        if( isTiled(tif) )
-            sp->tbuflen = multiply(td->td_tilewidth, td->td_tilelength);
-        else
-            sp->tbuflen = multiply(td->td_imagewidth, td->td_rowsperstrip);
+	sp->tbuflen = multiply(td->td_imagewidth, td->td_rowsperstrip);
 	if (multiply(sp->tbuflen, sizeof (uint32)) == 0 ||
 	    (sp->tbuf = (tidata_t*) _TIFFmalloc(sp->tbuflen * sizeof (uint32))) == NULL) {
 		TIFFErrorExt(tif->tif_clientdata, module, "%s: No space for SGILog translation buffer",
@@ -1567,16 +1561,6 @@ TIFFInitSGILog(TIFF* tif, int scheme)
 	assert(scheme == COMPRESSION_SGILOG24 || scheme == COMPRESSION_SGILOG);
 
 	/*
-	 * Merge codec-specific tag information.
-	 */
-	if (!_TIFFMergeFieldInfo(tif, LogLuvFieldInfo,
-				 TIFFArrayCount(LogLuvFieldInfo))) {
-		TIFFErrorExt(tif->tif_clientdata, module,
-			     "Merging SGILog codec-specific tags failed");
-		return 0;
-	}
-
-	/*
 	 * Allocate state block so tag methods have storage to record values.
 	 */
 	tif->tif_data = (tidata_t) _TIFFmalloc(sizeof (LogLuvState));
@@ -1603,9 +1587,9 @@ TIFFInitSGILog(TIFF* tif, int scheme)
 	tif->tif_close = LogLuvClose;
 	tif->tif_cleanup = LogLuvCleanup;
 
-	/* 
-	 * Override parent get/set field methods.
-	 */
+	/* override SetField so we can handle our private pseudo-tag */
+	_TIFFMergeFieldInfo(tif, LogLuvFieldInfo,
+			    TIFFArrayCount(LogLuvFieldInfo));
 	sp->vgetparent = tif->tif_tagmethods.vgetfield;
 	tif->tif_tagmethods.vgetfield = LogLuvVGetField;   /* hook for codec tags */
 	sp->vsetparent = tif->tif_tagmethods.vsetfield;
