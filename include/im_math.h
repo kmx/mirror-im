@@ -195,7 +195,7 @@ inline T imBilinearInterpolation(int width, int height, T *map, float xl, float 
     x1 = x0 = 0; 
     t = 0;
   }
-  else if (xl > width-0.5)
+  else if (xl >= width-0.5)
   {
     x1 = x0 = width-1;
     t = 0;
@@ -212,7 +212,7 @@ inline T imBilinearInterpolation(int width, int height, T *map, float xl, float 
     y1 = y0 = 0; 
     u = 0;
   }
-  else if (yl > height-0.5)
+  else if (yl >= height-0.5)
   {
     y1 = y0 = height-1;
     u = 0;
@@ -244,7 +244,7 @@ inline T imBicubicInterpolation(int width, int height, T *map, float xl, float y
   float t, u;
   (void)Dummy;
 
-  if (xl > width-0.5)
+  if (xl >= width-0.5)
   {
     X[3] = X[2] = X[1] = width-1;
     X[0] = X[1]-1;
@@ -265,7 +265,7 @@ inline T imBicubicInterpolation(int width, int height, T *map, float xl, float y
     t = xl - (X[1]+0.5f);
   }
 
-  if (yl > height-0.5)
+  if (yl >= height-0.5)
   {
     Y[3] = Y[2] = Y[1] = height-1;
     Y[0] = Y[1]-1;
