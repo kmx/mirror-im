@@ -378,6 +378,7 @@ int imFileFormatJP2::WriteImageInfo()
    
     // Adobe XMP
     data = attrib_table->Get("XMLPacket", NULL, &size);
+    if (data)
     {
       jas_metadata_box_t *metabox = &image->metadata.boxes[JAS_IMAGE_BOX_XMP]; 
       jas_box_alloc(metabox, size);
