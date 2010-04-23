@@ -114,7 +114,7 @@ ifneq ($(findstring Win, $(TEC_SYSNAME)), )
       USE_EXIF = Yes
     endif
 else
-    SRC += im_sysfile_unix.cpp
+  SRC += im_sysfile_unix.cpp
 endif
 
 ifdef USE_EXIF
