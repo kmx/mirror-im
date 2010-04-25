@@ -240,7 +240,7 @@ struct vcDevice
 static vcDevice vc_DeviceList[VC_MAXVIDDEVICES];
 static int vc_DeviceCount = 0;
 
-static void vc_AddDevice(IBaseFilter *filter, char* desc, char* ex_desc, char* path, char* vendorinfo)
+static void vc_AddDevice(IBaseFilter *filter, const char* desc, const char* ex_desc, const char* path, const char* vendorinfo)
 {
   int i = vc_DeviceCount;
   vcDevice* device = &vc_DeviceList[i];
@@ -596,14 +596,19 @@ int imVideoCaptureDeviceCount(void)
   return vc_DeviceCount;
 }
 
-int imVideoCaptureReloadDevices(void)
+void imVideoCaptureReleaseDevices(void)
 {
   for (int i = 0; i < vc_DeviceCount; i++)
   {
     vc_DeviceList[i].filter->Release();
   }
-
   vc_DeviceCount = 0;
+}
+  
+int imVideoCaptureReloadDevices(void)
+{
+  imVideoCaptureReleaseDevices();
+
   vc_EnumerateDevices();
   return vc_DeviceCount;
 }
@@ -1291,7 +1296,7 @@ static void vc_GetFormatName(GUID subtype, char* desc)
   desc[0] = (char)(subtype.Data1);
   desc[1] = (char)(subtype.Data1 >> 8);
   desc[2] = (char)(subtype.Data1 >> 16);
-  desc[3] = (char)(subtype.Data1 >> 32);
+  desc[3] = (char)(subtype.Data1 >> 24);
   desc[4] = 0;      
 }
 

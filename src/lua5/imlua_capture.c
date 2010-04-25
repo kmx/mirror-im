@@ -68,12 +68,22 @@ static int imluaVideoCaptureDeviceDesc (lua_State *L)
 }
 
 /*****************************************************************************\
- im.VideoCaptureDeviceDesc(device)
+ im.VideoCaptureReloadDevices()
 \*****************************************************************************/
 static int imluaVideoCaptureReloadDevices (lua_State *L)
 {
   lua_pushnumber(L, imVideoCaptureReloadDevices());
   return 1;
+}
+
+/*****************************************************************************\
+ im.VideoCaptureReleaseDevices()
+\*****************************************************************************/
+static int imluaVideoCaptureReleaseDevices (lua_State *L)
+{
+  (void)L;
+  imVideoCaptureReleaseDevices();
+  return 0;
 }
 
 /*****************************************************************************\
@@ -381,6 +391,7 @@ static const luaL_reg imcapture_lib[] = {
   {"VideoCaptureDeviceCount", imluaVideoCaptureDeviceCount},
   {"VideoCaptureDeviceDesc", imluaVideoCaptureDeviceDesc},
   {"VideoCaptureReloadDevices", imluaVideoCaptureReloadDevices},
+  {"VideoCaptureReleaseDevices", imluaVideoCaptureReleaseDevices},
   {"VideoCaptureCreate", imluaVideoCaptureCreate},
   {"VideoCaptureDestroy", imluaVideoCaptureDestroy},
   {NULL, NULL}

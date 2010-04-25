@@ -68,6 +68,12 @@ const char* IM_DECL imVideoCaptureDeviceVendorInfo(int device);
  * \ingroup capture */
 int IM_DECL imVideoCaptureReloadDevices(void);
 
+/** Release the device list. Usefull is you need to track leak erros in your application.
+ *
+ * \verbatim im.imVideoCaptureReleaseDevices() [in Lua 5] \endverbatim
+ * \ingroup capture */
+void IM_DECL imVideoCaptureReleaseDevices(void);
+
 /** Creates a new imVideoCapture object. \n
  * Returns NULL if there is no capture device available. \n
  * In Windows returns NULL if DirectX version is older than 8. \n
