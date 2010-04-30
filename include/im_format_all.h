@@ -498,7 +498,7 @@ void imFormatRegisterPNM(void);
     Color Spaces: RGB, MAP and Binary (Gray saved as MAP)
     Compressions:
       NONE - no compression [default]
-    Can have more than one image. But writing is limited to 5 images,
+    Can have more than one image. But reading and writing is limited to 10 images max,
       and all images must have different sizes and bpp.
     Can have an alpha channel (only for RGB)
     Internally the components are always packed.

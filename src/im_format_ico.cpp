@@ -49,11 +49,13 @@ static const char* iICOCompTable[1] =
   "NONE"
 };
 
+#define IMICON_MAX 10
+
 class imFileFormatICO: public imFileFormatBase
 {
   imBinFile* handle;          /* the binary file handle */
   unsigned short bpp;         /* number of bits per pixel */
-  unsigned int offset[10],
+  unsigned int offset[IMICON_MAX],
                 next_offset;
   int line_raw_size;              // raw line size
 
@@ -134,7 +136,7 @@ int imFileFormatICO::Open(const char* file_name)
   /* reads the number of images */
   imBinFileRead(handle, &word, 1, 2);
 
-  this->image_count = word > 10? 10: word;
+  this->image_count = word > IMICON_MAX? IMICON_MAX: word;
   strcpy(this->compression, "NONE");
 
   for (int i = 0; i < this->image_count; i++)
@@ -170,7 +172,7 @@ int imFileFormatICO::New(const char* file_name)
   imBinFileWrite(handle, &word_value, 1, 2); /* resource type */
   imBinFileWrite(handle, &word_value, 1, 2); /* number of images, at least one, must update at close */
 
-  this->next_offset = 6 + 5 * 16;  // offset to the first image, room for 5 ICONDIRENTRY
+  this->next_offset = 6 + IMICON_MAX * 16;  // offset to the first image, room for IMICON_MAX ICONDIRENTRY
 
   return IM_ERR_NONE;
 }
@@ -285,7 +287,7 @@ int imFileFormatICO::WriteImageInfo()
   this->file_data_type = IM_BYTE;
   this->file_color_mode = imColorModeSpace(this->user_color_mode);
 
-  if (this->image_count == 5)
+  if (this->image_count == IMICON_MAX)
     return IM_ERR_DATA;
 
   if (this->width > 255 || this->height > 255)
