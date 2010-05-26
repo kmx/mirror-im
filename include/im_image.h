@@ -41,7 +41,7 @@ typedef struct _imImage
   int height;         /**< Number of lines. image:Height() -> height: number [in Lua 5]. */
   int color_space;    /**< Color space descriptor. See also \ref imColorSpace. image:ColorSpace() -> color_space: number [in Lua 5]. */
   int data_type;      /**< Data type descriptor. See also \ref imDataType. image:DataType() -> data_type: number [in Lua 5]. */
-  int has_alpha;      /**< Indicates that there is an extra channel with alpha. image:HasAlpha() -> has_alpha: number [in Lua 5]. \n
+  int has_alpha;      /**< Indicates that there is an extra channel with alpha. image:HasAlpha() -> has_alpha: boolean [in Lua 5]. \n
                            It will not affect the secondary parameters, i.e. the number of planes will be in fact depth+1. \n
                            It is always 0 unless imImageAddAlpha is called, this is done in image load functions. */
 

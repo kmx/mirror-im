@@ -674,7 +674,7 @@ static int imluaImageColorSpace(lua_State *L)
 static int imluaImageHasAlpha(lua_State *L)
 {
   imImage *im = imlua_checkimage(L, 1);
-  lua_pushnumber(L, im->has_alpha);
+  lua_pushboolean(L, im->has_alpha);
   return 1;
 }
 
@@ -785,14 +785,14 @@ static int imluaImage_tostring (lua_State *L)
   if (*image_p)
   {
     imImage *image = *image_p;
-    lua_pushfstring(L, "imImage(%p) [width=%d,height=%d,color_space=%s,data_type=%s,depth=%d,has_alpha=%d]", 
+    lua_pushfstring(L, "imImage(%p) [width=%d,height=%d,color_space=%s,data_type=%s,depth=%d,has_alpha=%s]", 
       image_p,
       image->width, 
       image->height,
       imColorModeSpaceName(image->color_space),
       imDataTypeName(image->data_type),
       image->depth,
-      image->has_alpha
+      image->has_alpha? "yes": "no"
     );
   }
   else
