@@ -63,6 +63,10 @@ image2 = im.ImageCreateBased(image, w, h)
 
 im.ProcessRotate(image, image2, math.cos(math.pi/4), math.sin(math.pi/4), 1)
 
+--image2 = image:Clone()  -- rotate and preserve size
+--im.ProcessRotateRef(image, image2, math.cos(math.pi/4), math.sin(math.pi/4), image:Width()/2, image:Height()/2, false, 1)
+
+
 canvas:Activate()
 canvas:Clear()
 
