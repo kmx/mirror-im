@@ -1,9 +1,10 @@
 PROJNAME = im
-LIBNAME = imlua_fftw51
+LIBNAME = imlua_fftw
 DEF_FILE = imlua_fftw.def
 
 OPT = YES
 
+USE_LOH_SUBDIR = Yes
 LOHDIR = lua5/loh
 SRC = lua5/imlua_fftw.c
 DEF_FILE = lua5/imlua_fftw.def
@@ -14,7 +15,13 @@ SRCLUADIR = lua5
 LIBS = im_fftw
 INCLUDES = lua5
 
+ifdef USE_LUA52
+  LIBNAME := $(LIBNAME)52
+else
+  USE_LUA51 = Yes
+  LIBNAME := $(LIBNAME)51
+endif
+
 USE_IMLUA = YES
-USE_LUA51 = YES
 NO_LUALINK = Yes
 IM = ..

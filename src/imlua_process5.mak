@@ -1,8 +1,9 @@
 PROJNAME = im
-LIBNAME = imlua_process51
+LIBNAME = imlua_process
 
 OPT = YES
 
+USE_LOH_SUBDIR = Yes
 LOHDIR = lua5/loh
 SRC = lua5/imlua_process.c lua5/imlua_kernel.c
 DEF_FILE = lua5/imlua_process.def
@@ -13,7 +14,13 @@ SRCLUADIR = lua5
 LIBS = im_process
 INCLUDES = lua5
 
+ifdef USE_LUA52
+  LIBNAME := $(LIBNAME)52
+else
+  USE_LUA51 = Yes
+  LIBNAME := $(LIBNAME)51
+endif
+
 USE_IMLUA = YES
-USE_LUA51 = YES
 NO_LUALINK = Yes
 IM = ..
