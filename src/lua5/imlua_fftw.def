@@ -1,4 +1,3 @@
 EXPORTS
   imlua_open_fftw
   luaopen_imlua_fftw
-  luaopen_imlua_fftw51

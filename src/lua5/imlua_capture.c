@@ -446,9 +446,3 @@ int luaopen_imlua_capture(lua_State *L)
 {
   return imlua_open_capture(L);
 }
-
-int luaopen_imlua_capture51(lua_State *L)
-{
-  return imlua_open_capture(L);
-}
-

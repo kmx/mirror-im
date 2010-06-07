@@ -37,8 +37,3 @@ int luaopen_imlua_avi(lua_State* L)
 {
   return imlua_avi_open(L);
 }
-
-int luaopen_imlua_avi51(lua_State* L)
-{
-  return imlua_avi_open(L);
-}

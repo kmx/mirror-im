@@ -37,8 +37,3 @@ int luaopen_imlua_wmv(lua_State* L)
 {
   return imlua_wmv_open(L);
 }
-
-int luaopen_imlua_wmv51(lua_State* L)
-{
-  return imlua_wmv_open(L);
-}

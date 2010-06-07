@@ -15,7 +15,7 @@ local function OneSourceOneDest (funcname, width, height, color_space, data_type
     local dst_image = im.ImageCreateBased(src_image, width, height, color_space, data_type)
 
     -- call previous method, repassing all parameters
-    local ret = func(src_image, dst_image, unpack(arg))
+    local ret = func(src_image, dst_image, ...)
     if (ret) then
       return ret, dst_image
     else
@@ -40,7 +40,7 @@ local function TwoSourcesOneDest (funcname, width, height, color_space, data_typ
     local dst_image = im.ImageCreateBased(src_image1, width, height, color_space, data_type)
 
     -- call previous method, repassing all parameters
-    local ret = func(src_image1, src_image2, dst_image, unpack(arg))
+    local ret = func(src_image1, src_image2, dst_image, ...)
     if (ret) then
       return ret, dst_image
     else

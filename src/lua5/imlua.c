@@ -245,8 +245,3 @@ int luaopen_imlua(lua_State *L)
 {
   return imlua_open(L);
 }
-
-int luaopen_imlua51(lua_State *L)
-{
-  return imlua_open(L);
-}

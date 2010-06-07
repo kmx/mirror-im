@@ -37,8 +37,3 @@ int luaopen_imlua_jp2(lua_State* L)
 {
   return imlua_jp2_open(L);
 }
-
-int luaopen_imlua_jp251(lua_State* L)
-{
-  return imlua_jp2_open(L);
-}

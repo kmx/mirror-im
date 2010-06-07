@@ -15,7 +15,7 @@ local function OneSourceOneDest (funcname, width, height, color_space, data_type
     local dst_image = im.ImageCreateBased(src_image, width, height, color_space, data_type)
 
     -- call previous method, repassing all parameters
-    local ret = func(src_image, dst_image, unpack(arg))
+    local ret = func(src_image, dst_image, ...)
     if (ret) then
       return ret, dst_image
     else
@@ -40,7 +40,7 @@ local function TwoSourcesOneDest (funcname, width, height, color_space, data_typ
     local dst_image = im.ImageCreateBased(src_image1, width, height, color_space, data_type)
 
     -- call previous method, repassing all parameters
-    local ret = func(src_image1, src_image2, dst_image, unpack(arg))
+    local ret = func(src_image1, src_image2, dst_image, ...)
     if (ret) then
       return ret, dst_image
     else
@@ -63,7 +63,7 @@ local function ThreeSourcesOneDest (funcname, width, height, color_space, data_t
     local dst_image = im.ImageCreateBased(src_image1, width, height, color_space, data_type)
 
     -- call previous method, repassing all parameters
-    local ret = func(src_image1, src_image2, src_image3, dst_image, unpack(arg))
+    local ret = func(src_image1, src_image2, src_image3, dst_image, ...)
     if (ret) then
       return ret, dst_image
     else
@@ -87,7 +87,7 @@ local function OneSourceTwoDests (funcname, width, height, color_space, data_typ
     local dst_image2 = im.ImageCreateBased(src_image, width, height, color_space, data_type)
 
     -- call previous method, repassing all parameters
-    local ret = func(src_image, dst_image1, dst_image2, unpack(arg))
+    local ret = func(src_image, dst_image1, dst_image2, ...)
     if (ret) then
       return ret, dst_image1, dst_image2
     else
@@ -112,7 +112,7 @@ local function OneSourceThreeDests (funcname, width, height, color_space, data_t
     local dst_image3 = im.ImageCreateBased(src_image, width, height, color_space, data_type)
 
     -- call previous method, repassing all parameters
-    local ret = func(src_image, dst_image1, dst_image2, dst_image3, unpack(arg))
+    local ret = func(src_image, dst_image1, dst_image2, dst_image3, ...)
     if (ret) then
       return ret, dst_image1, dst_image2, dst_image3
     else

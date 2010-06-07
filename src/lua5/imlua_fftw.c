@@ -131,32 +131,21 @@ static const luaL_reg imfftw_lib[] = {
 int imlua_open_fftw (lua_State *L)
 {
   luaL_register(L, "im", imfftw_lib);  /* leave "im" table at the top of the stack */
-#ifdef TEC_BIGENDIAN
-#ifdef TEC_64
-#include "loh/im_fftw_be64.loh"
+
+#ifdef IMLUA_USELOH
+#include "im_fftw.loh"
 #else
-#include "loh/im_fftw_be32.loh"
-#endif  
+#ifdef IMLUA_USELZH
+#include "im_fftw.lzh"
 #else
-#ifdef TEC_64
-#ifdef WIN64
-#include "loh/im_fftw_le64w.loh"
-#else
-#include "loh/im_fftw_le64.loh"
-#endif  
-#else
-#include "loh/im_fftw.loh"
-#endif  
-#endif  
+  luaL_dofile(L, "im_fftw.lua");
+#endif
+#endif
+
   return 1;
 }
 
 int luaopen_imlua_fftw(lua_State *L)
-{
-  return imlua_open_fftw(L);
-}
-
-int luaopen_imlua_fftw51(lua_State *L)
 {
   return imlua_open_fftw(L);
 }
