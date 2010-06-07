@@ -1,5 +1,5 @@
 PROJNAME = im
-LIBNAME = imlua_jp251
+LIBNAME = imlua_jp2
 DEF_FILE = imlua_jp2.def
 
 OPT = YES
@@ -12,7 +12,13 @@ LIBS = im_jp2
 
 INCLUDES = lua5
 
+ifdef USE_LUA52
+  LIBNAME := $(LIBNAME)52
+else
+  USE_LUA51 = Yes
+  LIBNAME := $(LIBNAME)51
+endif
+
 USE_IMLUA = Yes
-USE_LUA51 = Yes
 NO_LUALINK = Yes
 IM = ..
