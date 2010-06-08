@@ -3,7 +3,7 @@ LIBNAME = imlua_fftw
 DEF_FILE = imlua_fftw.def
 
 OPT = YES
-
+DEFINES = IMLUA_USELOH
 USE_LOH_SUBDIR = Yes
 SRC = lua5/imlua_fftw.c
 DEF_FILE = lua5/imlua_fftw.def

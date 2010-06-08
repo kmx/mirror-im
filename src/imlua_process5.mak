@@ -2,7 +2,7 @@ PROJNAME = im
 LIBNAME = imlua_process
 
 OPT = YES
-
+DEFINES = IMLUA_USELOH
 USE_LOH_SUBDIR = Yes
 SRC = lua5/imlua_process.c lua5/imlua_kernel.c
 DEF_FILE = lua5/imlua_process.def
