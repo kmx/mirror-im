@@ -1805,7 +1805,11 @@ static int imluaProcessMultipleStdDev (lua_State *L)
     luaL_argerror(L, 1, "must be a table");
 
   lua_pushstring(L, "table");
+#if LUA_VERSION_NUM > 501
+  lua_pushglobaltable(L);
+#else
   lua_gettable(L, LUA_GLOBALSINDEX);
+#endif
   lua_pushstring(L, "getn");
   lua_gettable(L, -2);
   src_image_count = luaL_checkint(L, -1);
