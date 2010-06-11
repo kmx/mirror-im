@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="imlua_fftw5"
-	ProjectGUID="{CB863607-6B6C-0000-1234-000000001234}"
+	Name="imlua51"
+	ProjectGUID="{CB863607-6B6C-0000-0000-000000001234}"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
@@ -47,7 +47,6 @@
 				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
-				PrecompiledHeaderFile="..\lib/imlua_fftw5.pch"
 				ObjectFile="$(IntDir)\"
 				ProgramDataBaseFileName="$(IntDir)\vc90.pdb"
 				WarningLevel="4"
@@ -69,7 +68,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/$(ProjectName)1.lib"
+				OutputFile="$(OutDir)/$(ProjectName).lib"
 				SuppressStartupBanner="true"
 			/>
 			<Tool
@@ -97,15 +96,64 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
-				RelativePath="..\src\lua5\im_fftw.lua"
+				RelativePath="..\src\lua5\im_convert.lua"
 				>
 			</File>
 			<File
-				RelativePath="..\src\lua5\imlua_fftw.c"
+				RelativePath="..\src\lua5\im_image.lua"
 				>
 			</File>
 			<File
-				RelativePath="..\src\lua5\imlua_fftw.def"
+				RelativePath="..\src\lua5\imlua.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua5\imlua.def"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua5\imlua_aux.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua5\imlua_convert.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua5\imlua_file.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua5\imlua_image.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua5\imlua_palette.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua5\imlua_util.c"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Header Files"
+			Filter="h;hpp;hxx;hm;inl"
+			>
+			<File
+				RelativePath="..\include\imlua.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua5\imlua_aux.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua5\imlua_image.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua5\imlua_palette.h"
 				>
 			</File>
 		</Filter>

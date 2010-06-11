@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="imlua_process5"
-	ProjectGUID="{CB863607-6B6C-0000-7689-000000001234}"
+	Name="imlua_fftw51"
+	ProjectGUID="{CB863607-6B6C-0000-1234-000000001234}"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
@@ -47,7 +47,6 @@
 				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
-				PrecompiledHeaderFile="..\lib/imlua_process5.pch"
 				ObjectFile="$(IntDir)\"
 				ProgramDataBaseFileName="$(IntDir)\vc90.pdb"
 				WarningLevel="4"
@@ -69,7 +68,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/$(ProjectName)1.lib"
+				OutputFile="$(OutDir)/$(ProjectName).lib"
 				SuppressStartupBanner="true"
 			/>
 			<Tool
@@ -97,19 +96,15 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
-				RelativePath="..\src\lua5\im_process.lua"
+				RelativePath="..\src\lua5\im_fftw.lua"
 				>
 			</File>
 			<File
-				RelativePath="..\src\lua5\imlua_kernel.c"
+				RelativePath="..\src\lua5\imlua_fftw.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\lua5\imlua_process.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\lua5\imlua_process.def"
+				RelativePath="..\src\lua5\imlua_fftw.def"
 				>
 			</File>
 		</Filter>

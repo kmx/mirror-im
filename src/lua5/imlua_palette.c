@@ -42,7 +42,7 @@ static imluaPalette* imlua_rawcheckpalette(lua_State *L, int param)
       }
     }
   }
-  luaL_typerror(L, param, "imPalette");  /* else error */
+  luaL_typeerror(L, param, "imPalette");  /* else error */
   return NULL;  /* to avoid warnings */
 }
 
