@@ -295,7 +295,7 @@ function im.ProcessSplitComponentsNew (src_image)
     table.insert(dst_images, im.ImageCreateBased(src_image, nil, nil, im.GRAY))
   end
   im.ProcessSplitComponents(src_image, dst_images)
-  return unpack(dst_images)
+  return unpack(dst_images) --must replace this by table.unpack when 5.1 is not supported
 end
 
 function im.ProcessMergeComponentsNew (src_image_list)
