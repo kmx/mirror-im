@@ -42,7 +42,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../include;../src;d:\LNG\WMFSDK9\include"
+				AdditionalIncludeDirectories="../include;../src;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;_CRT_NON_CONFORMING_SWPRINTFS"
 				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
