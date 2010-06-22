@@ -15,8 +15,8 @@ call tecmake %1 "MF=imlua_jp2" %2 %3 %4 %5 %6 %7 %8
 call tecmake %1 "MF=imlua_avi" %2 %3 %4 %5 %6 %7 %8
 call tecmake %1 "MF=imlua_fftw5" %2 %3 %4 %5 %6 %7 %8
 
-REM WMV and Capture are NOT available in some compiler
-REM so this may result in errors, just ignore them
+REM WMV and Capture are NOT available in some compilers,
+REM so this may result in errors, just ignore them.
 call tecmake %1 "MF=im_wmv" %2 %3 %4 %5 %6 %7 %8
 call tecmake %1 "MF=im_capture" %2 %3 %4 %5 %6 %7 %8
 call tecmake %1 "MF=imlua_wmv" %2 %3 %4 %5 %6 %7 %8

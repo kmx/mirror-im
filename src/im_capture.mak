@@ -41,6 +41,13 @@ ifeq ($(TEC_UNAME), dll8_64)
   LDIR = $(WINSDK)/lib/amd64
 endif
   
+ifneq ($(findstring vc10, $(TEC_UNAME)), )
+  INCLUDES += $(WINSDK)/include
+endif
+ifneq ($(findstring dll10, $(TEC_UNAME)), )
+  INCLUDES += $(WINSDK)/include
+endif
+
 ifneq ($(findstring Win, $(TEC_SYSNAME)), )
   INCLUDES += $(DXSDK)/include
   SRC = im_capture_dx.cpp
