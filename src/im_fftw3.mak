@@ -43,7 +43,7 @@ else
   ifneq ($(findstring IRIX, $(TEC_UNAME)), )
     DEFINES += HAVE_UINTPTR_T
   endif
-  ifneq ($(findstring Darwin, $(TEC_UNAME)), )
+  ifneq ($(findstring MacOS, $(TEC_UNAME)), )
     DEFINES += HAVE_UINTPTR_T
   endif
   ifneq ($(findstring FreeBSD, $(TEC_UNAME)), )
