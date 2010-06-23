@@ -43,3 +43,7 @@ endif
 ifneq ($(findstring HP-UX, $(TEC_UNAME)), )
   DEFINES += IM_DEFMATHFLOAT
 endif
+
+ifneq ($(findstring MacOS, $(TEC_UNAME)), )
+  BUILD_DYLIB=Yes
+endif

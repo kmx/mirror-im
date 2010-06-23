@@ -26,3 +26,9 @@ endif
 USE_IMLUA = YES
 NO_LUALINK = Yes
 IM = ..
+
+ifneq ($(findstring MacOS, $(TEC_UNAME)), )
+  USE_IMLUA:=
+  INCLUDES += ../include
+  LDIR = ../lib/$(TEC_UNAME)
+endif

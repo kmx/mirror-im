@@ -44,5 +44,9 @@ else
   DEFINES += HAVE_UNISTD_H JAS_TYPES
 endif
 
+ifneq ($(findstring MacOS, $(TEC_UNAME)), )
+  BUILD_DYLIB=Yes
+endif
+
 USE_IM=Yes
 IM = ..
