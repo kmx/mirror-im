@@ -44,7 +44,9 @@ else
     DEFINES += HAVE_UINTPTR_T
   endif
   ifneq ($(findstring MacOS, $(TEC_UNAME)), )
-    BUILD_DYLIB=Yes
+    ifneq ($(TEC_SYSMINOR), 4)
+      BUILD_DYLIB=Yes
+    endif
     DEFINES += HAVE_UINTPTR_T
   endif
   ifneq ($(findstring FreeBSD, $(TEC_UNAME)), )
