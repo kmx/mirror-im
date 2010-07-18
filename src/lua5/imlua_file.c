@@ -467,7 +467,7 @@ static int imluaFileGetAttributeList (lua_State *L)
 
   imFileGetAttributeList(ifile, attrib, &attrib_count);
 
-  lua_newtable(L);
+  lua_createtable(L, attrib_count, 0);
   for (i = 0; i < attrib_count; i++)
   {
     lua_pushstring(L, attrib[i]);

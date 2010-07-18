@@ -288,7 +288,7 @@ static int imluaVideoCaptureGetAttributeList (lua_State *L)
   int i;
 
   attribs = imVideoCaptureGetAttributeList(vc, &num_attrib);
-  lua_newtable(L);
+  lua_createtable(L, num_attrib, 0);
   for (i = 0; i < num_attrib; i++)
   {
     lua_pushstring(L, attribs[i]);

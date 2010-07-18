@@ -47,7 +47,7 @@ int imlua_getn (lua_State *L, int index)
 int imlua_newarrayint (lua_State *L, int *value, int count, int start)
 {
   int i;
-  lua_newtable(L);
+  lua_createtable(L, count, 0);
   for (i = 0; i < count; i++)
   {
     lua_pushinteger(L, value[i]);
@@ -62,7 +62,7 @@ int imlua_newarrayint (lua_State *L, int *value, int count, int start)
 int imlua_newarrayulong (lua_State *L, unsigned long *value, int count, int start)
 {
   int i;
-  lua_newtable(L);
+  lua_createtable(L, count, 0);
   for (i = 0; i < count; i++)
   {
     lua_pushnumber(L, value[i]);
@@ -77,7 +77,7 @@ int imlua_newarrayulong (lua_State *L, unsigned long *value, int count, int star
 int imlua_newarrayfloat (lua_State *L, float *value, int count, int start)
 {
   int i;
-  lua_newtable(L);
+  lua_createtable(L, count, 0);
   for (i = 0; i < count; i++)
   {
     lua_pushnumber(L, value[i]);

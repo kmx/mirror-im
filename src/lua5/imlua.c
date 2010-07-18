@@ -59,7 +59,7 @@ static int imluaFormatList (lua_State *L)
 
   imFormatList(format_list, &format_count);
 
-  lua_newtable(L);
+  lua_createtable(L, format_count, 0);
   for (i = 0; i < format_count; i++)
   {
     lua_pushstring(L, format_list[i]);
@@ -110,7 +110,7 @@ static int imluaFormatCompressions (lua_State *L)
   if (error)
     return 1;
 
-  lua_newtable(L);
+  lua_createtable(L, comp_count, 0);
   for (i = 0; i < comp_count; i++)
   {
     lua_pushstring(L, comp[i]);

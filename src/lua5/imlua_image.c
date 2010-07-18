@@ -444,7 +444,7 @@ static int imluaImageGetAttributeList (lua_State *L)
 
   imImageGetAttributeList(image, attrib, &attrib_count);
 
-  lua_newtable(L);
+  lua_createtable(L, attrib_count, 0);
   for (i = 0; i < attrib_count; i++)
   {
     lua_pushstring(L, attrib[i]);
