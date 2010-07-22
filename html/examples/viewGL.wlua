@@ -71,6 +71,6 @@ dlg = iup.dialog{cnv; title="LuaGL/IUP/IM Loader"}
 dlg:show()
 cnv.rastersize = nil -- reset minimum limitation
 
-if (not iup.MainLoopLevel or iup.MainLoopLevel()==0) then
+if (iup.MainLoopLevel()==0) then
   iup.MainLoop()
 end

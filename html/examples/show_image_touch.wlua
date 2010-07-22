@@ -5,10 +5,11 @@ require"iuplua"
 require"iupluacd"
 require"iupluatuio"
 
-cnv = iup.canvas{rastersize = "1024x768", border = "NO"}
+cnv = iup.canvas{rastersize = "1024x768", border = "NO", touch="Yes"}
 img_x = 0
 img_y = 0
 
+-- comment this line to NOT use the TUIO client, only Windows 7 supports multi-touch
 tuio = iup.tuioclient{}
 
 function load_image(filename)
@@ -200,8 +201,10 @@ function dlg:close_cb()
   return iup.IGNORE -- because we destroy the dialog
 end
 
-tuio.connect = "YES"
-tuio.targetcanvas = cnv
+if (tuio) then
+  tuio.connect = "YES"
+  tuio.targetcanvas = cnv
+end
 
 dlg:show()
 cnv.rastersize = nil -- remove minimum size

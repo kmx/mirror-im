@@ -4,7 +4,7 @@ require"cdluaim"
 require"iuplua"
 require"iupluacd"
 
-function PrintError(func, error)
+function PrintError(func, err)
   local msg = {}
   msg[im.ERR_OPEN] = "Error Opening File."
   msg[im.ERR_MEM] = "Insuficient memory."
@@ -13,8 +13,8 @@ function PrintError(func, error)
   msg[im.ERR_FORMAT] = "Invalid Format."
   msg[im.ERR_COMPRESS] = "Invalid or unsupported compression."
   
-  if msg[error] then
-    print(func..": "..msg[error])
+  if msg[err] then
+    print(func..": "..msg[err])
   else
     print("Unknown Error.")
   end
@@ -22,17 +22,17 @@ end
 
 function LoadImage(file_name)
   local image
-  local ifile, error = im.FileOpen(file_name)
+  local ifile, err = im.FileOpen(file_name)
   if not ifile then
-      PrintError("open", error)
+      PrintError("open", err)
       return
   end
   
   -- load the first image in the file.
   -- force the image to be converted to a bitmap
-  image, error = ifile:LoadBitmap()
+  image, err = ifile:LoadBitmap()
   if not image then
-    PrintError("load", error)
+    PrintError("load", err)
     return
   end
     
@@ -86,10 +86,10 @@ function ShowImage(file_name)
 
   function cnv:button_cb()
     local file_name = "*.*"
-    local error
+    local err
 
-    file_name, error = iup.GetFile(file_name)
-    if error ~= 0 then
+    file_name, err = iup.GetFile(file_name)
+    if err ~= 0 then
       return iup.DEFAULT
     end
     
@@ -146,12 +146,12 @@ end
 
 function main(arg)
   local file_name = "*.*"
-  local error
+  local err
   
   -- Try to get a file name from the command line.
   if (arg == nil or table.getn(arg) < 2) then
-    file_name, error = iup.GetFile(file_name)
-    if error ~= 0 then
+    file_name, err = iup.GetFile(file_name)
+    if err ~= 0 then
       return true
     end
   else   
@@ -165,8 +165,8 @@ function main(arg)
     while Try do
       file_name = "*.*"
       
-          file_name, error = iup.GetFile(file_name)
-      if error ~= 0 then
+          file_name, err = iup.GetFile(file_name)
+      if err ~= 0 then
         return true
       end
       
