@@ -72,8 +72,9 @@ function cnv:multitouch_cb(count, pid, px, py, pstatus)
     if (pstatus[1] == 68 or pstatus[2] == 68) then -- 'D' DOWN
       diff_x = math.abs(px[2]-px[1])
       diff_y = math.abs(py[2]-py[1])
-      ref_x = (px[2]+px[1])/2
-      ref_y = (py[2]+py[1])/2
+      ref_x = img_x+img_w/2 -- center of the image as reference
+      ref_y = img_y+img_h/2
+      old_angle = math.atan2(py[2]-py[1], px[2]-px[1])
       zoom = 1
     elseif (pstatus[1] == 85 or pstatus[2] == 85) then -- 'U' UP
       if (zoom == 1) then
@@ -84,6 +85,7 @@ function cnv:multitouch_cb(count, pid, px, py, pstatus)
         -- zoom
         local new_diff_x = math.abs(px[2]-px[1])
         local new_diff_y = math.abs(py[2]-py[1])
+        local angle = math.atan2(py[2]-py[1], px[2]-px[1])
       
         local abs_diff_x = new_diff_x-diff_x
         local abs_diff_y = new_diff_y-diff_y
@@ -97,6 +99,10 @@ function cnv:multitouch_cb(count, pid, px, py, pstatus)
         local prev_h = img_h
         img_w = img_w + diff
         img_h = img_h + diff
+        
+        local str = string.format("%g %d %d", -(angle-old_angle)*cd.RAD2DEG, ref_x, ref_y)
+        print("ROTATE=", str)
+        canvas:SetAttribute("ROTATE", str)
 
         -- translate to maintain fixed the reference point
         local orig_x = ref_x - img_x
