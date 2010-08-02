@@ -65,6 +65,7 @@ wb_usr.tree =
         { name= {en= "Names Convention"}, link= "guide.html#names" },
         { name= {en= "C x C++ Usage"}, link= "guide.html#cpp" },
         { link= "", name= {en= "" } },
+        { name= {en= "Building in Linux"}, link= "building.html" },
         { name= {en= "Samples"}, link= "samples.html" },
         { name= {en= "Lua Binding"}, link= "imlua.html" }
       }
