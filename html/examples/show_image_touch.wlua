@@ -48,15 +48,15 @@ end
 
 function cnv:multitouch_cb(count, pid, px, py, pstatus)
 	if (count == 1) then
-    if (pstatus[1] == 68) then -- 'D' DOWN
+    if (pstatus[1] == string.byte('D')) then -- DOWN
       old_x = px[1]
       old_y = canvas:UpdateYAxis(py[1])
       translate = 1
-    elseif (pstatus[1] == 85) then -- 'U' UP
+    elseif (pstatus[1] == string.byte('U')) then -- UP
       if (translate == 1) then
         translate = 0
       end
-    elseif (pstatus[1] == 77) then -- 'M' MOVE
+    elseif (pstatus[1] == string.byte('M')) then -- MOVE
       if (translate == 1) then
         -- translate only
         local y = canvas:UpdateYAxis(py[1])
@@ -69,18 +69,18 @@ function cnv:multitouch_cb(count, pid, px, py, pstatus)
       end
     end
   elseif (count == 2) then
-    if (pstatus[1] == 68 or pstatus[2] == 68) then -- 'D' DOWN
+    if (pstatus[1] == string.byte('D') or pstatus[2] == string.byte('D')) then -- DOWN
       diff_x = math.abs(px[2]-px[1])
       diff_y = math.abs(py[2]-py[1])
       ref_x = img_x+img_w/2 -- center of the image as reference
       ref_y = img_y+img_h/2
       old_angle = math.atan2(py[2]-py[1], px[2]-px[1])
       zoom = 1
-    elseif (pstatus[1] == 85 or pstatus[2] == 85) then -- 'U' UP
+    elseif (pstatus[1] == string.byte('U') or pstatus[2] == string.byte('U')) then -- UP
       if (zoom == 1) then
         zoom = 0
       end
-    elseif (pstatus[1] == 77 or pstatus[2] == 77) then -- 'M' MOVE
+    elseif (pstatus[1] == string.byte('M') or pstatus[2] == string.byte('M')) then -- MOVE
       if (zoom == 1) then
         -- zoom
         local new_diff_x = math.abs(px[2]-px[1])
