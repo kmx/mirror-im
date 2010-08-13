@@ -475,7 +475,14 @@ int imFileFormatTGA::WriteImageInfo()
       this->image_type = 1;
     break;
   case IM_RGB:
-    this->bpp = 24;
+    if (imColorModeHasAlpha(this->user_color_mode))
+    {
+      this->bpp = 32;
+      this->file_color_mode |= IM_ALPHA;
+    }
+    else
+      this->bpp = 24;
+
     this->file_color_mode |= IM_PACKED;
     if (imStrEqual(this->compression, "RLE"))
       this->image_type = 10;

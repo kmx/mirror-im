@@ -439,7 +439,7 @@ void imFormatRegisterPCX(void);
       NONE - no compression [default]
       RLE  - Run Lenght Encoding
     Only one image.
-    No alpha channel.
+    Can have an alpha channel (only for RGB)
     Internally the components are always packed.
     Internally the lines are arranged from bottom up to top or from top down to bottom.
 
