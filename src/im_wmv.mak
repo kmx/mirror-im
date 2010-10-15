@@ -21,13 +21,11 @@ ifndef USE_WIN_SDK
   #vc6-vc8 needs an external SDK
   ifneq ($(findstring _64, $(TEC_UNAME)), )
     WMFSDK = d:/lng/wmfsdk95
-    INCLUDES = $(WMFSDK)/include
   else
   #  WMFSDK = d:/lng/wmfsdk11
-  #  EXTRAINCS = $(WMFSDK)/include
     WMFSDK = d:/lng/wmfsdk9
-    INCLUDES = $(WMFSDK)/include
   endif
+  INCLUDES = $(WMFSDK)/include
   LDIR = $(WMFSDK)/lib
 else
   #vc9-vc10, wmf sdk is inside Windows SDK

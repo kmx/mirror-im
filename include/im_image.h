@@ -46,7 +46,7 @@ typedef struct _imImage
                            It is always 0 unless imImageAddAlpha is called, this is done in image load functions. */
 
   /* secondary parameters */
-  int depth;          /**< Number of planes                      (ColorSpaceDepth)         */
+  int depth;          /**< Number of planes                      (ColorSpaceDepth)   image:Depth() -> depth: number [in Lua 5].       */
   int line_size;      /**< Number of bytes per line in one plane (width * DataTypeSize)    */
   int plane_size;     /**< Number of bytes per plane.            (line_size * height)      */
   int size;           /**< Number of bytes occupied by the image (plane_size * depth)      */
