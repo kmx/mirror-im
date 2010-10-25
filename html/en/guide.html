@@ -56,7 +56,7 @@
   This library contains all the <b>Image Representation</b> functions and all the <b>Image Storage</b> functions (with 
   the exception of the external formats: AVI, JP2 and WMV).</p>
   <p>Each external format or processing usually needs a &lt;im_xx.h&gt; file and a &quot;im_xx.lib/libim_xx.a/libim_xx.so&quot; file.</p>
-  <p>Even if your applicattion is only in C, you must link with a C++ capable linker. Using Tecmake set &quot;LINKER := g++&quot; 
+  <p>Even if your application is only in C, you must link with a C++ capable linker. Using Tecmake set &quot;LINKER := g++&quot; 
   in your &quot;config.mak&quot; when compiling with gcc (UNIX and Windows).</p>
   <p>The download files list includes the <a href="download_tips.html">Tecgraf/PUC-Rio Library Download Tips</a> 
   document, with a description of all the available binaries.</p>
@@ -203,7 +203,7 @@ IM_FLOAT                   = GL_FLOAT</pre>
     <pre>imConvertPacking(image-&gt;data[0], gl_data, image-&gt;width, image-&gt;height, image-&gt;depth, image-&gt;data_type, 0);
 glPixelStorei(GL_UNPACK_ALIGNMENT, 1); /* data alignment must be 1 */
 
-glDrawPixels(image-&gt;width, image-&gt;height, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid*)gl_data);</pre>
+glDrawPixels(image-&gt;width, image-&gt;height, GL_RGB, GL_UNSIGNED_BYTE, gl_data);</pre>
   
   <p>When loading color image data you can use the function imConvertMapToRGB to convert in-place IM_MAP image data into 
   IM_RGB after loading it from file. For example:</p>
@@ -221,15 +221,25 @@ glDrawPixels(image-&gt;width, image-&gt;height, GL_RGB, GL_UNSIGNED_BYTE, (GLvoi
 <p>If you just want to save your OpenGL buffer then you can use:</p>
   
     <pre>glPixelStorei(GL_PACK_ALIGNMENT, 1); /* data alignment must be 1 */
-glReadPixels(x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid*)gl_data);
+glReadPixels(x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, gl_data);
 
 ifile = imFileNew(filename, format, &amp;error);
 error = imFileWriteImageInfo(ifile, width, height, IM_RGB|IM_PACKED, IM_BYTE);
 error = imFileWriteImageData(ifile, gl_data);
 imFileClose(ifile); </pre>
   
-  <p>You can also put <b>glReadPixels</b> and <b>imFileWriteImageInfo</b>/<b>imFileWriteImageData</b> 
-  inside a loop to create an animation.</p>
+  <p>And when using the <strong>imImage</strong> structure then you can 
+	instead use the function <strong>imImageCreateFromOpenGLData</strong>. For 
+	instance:</p>
+  
+    <pre>glPixelStorei(GL_PACK_ALIGNMENT, 1); /* data alignment must be 1 */
+glReadPixels(x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, gl_data);
+
+imImage* image = imImageCreateFromOpenGLData(width, height, GL_RGB, gl_data); 
+error = imFileImageSave(filename, format, image);</pre>
+  
+  <p>You can also do this 
+  inside a loop to create an animation.&nbsp;</p>
 
 <h3><a name="compat">IM 2.x Compatibility</a></h3>
 
