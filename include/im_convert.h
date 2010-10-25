@@ -105,6 +105,11 @@ int imConvertToBitmap(const imImage* src_image, imImage* dst_image, int cpx2real
  * \ingroup convert */
 void* imImageGetOpenGLData(const imImage* image, int *glformat);
 
+/** Creates an image from an OpenGL data.
+ *
+ * \verbatim im.ImageCreateFromOpenGLData(width, height, glformat: number, gldata: userdata) -> image: imImage [in Lua 5] \endverbatim
+ * \ingroup convert */
+imImage* imImageCreateFromOpenGLData(int width, int height, int glformat, const void* gldata);
 
 
 /** \defgroup cnvutil Raw Data Conversion Utilities
@@ -115,9 +120,10 @@ void* imImageGetOpenGLData(const imImage* image, int *glformat);
  * \ingroup imagerep */
 
 
-/** Changes the packing of the data buffer. Both must have the same depth.
+/** Changes the packing of the data buffer. Both must have the same width, height and data_type. \n
+ * It can be used to copy data even if depth=1.
  * \ingroup cnvutil */
-void imConvertPacking(const void* src_data, void* dst_data, int width, int height, int depth, int data_type, int src_is_packed);
+void imConvertPacking(const void* src_data, void* dst_data, int width, int height, int src_depth, int dst_depth, int data_type, int src_is_packed);
 
 /** Changes in-place a MAP data into a RGB data. The data must have room for the RGB image. \n
  * depth can be 3 or 4. count=width*height. \n

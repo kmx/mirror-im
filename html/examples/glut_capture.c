@@ -152,7 +152,7 @@ void idle(void)
       }
     }
 
-    imConvertPacking(image->data[0], gl_data, image->width, image->height, image->depth, image->data_type, 0);
+    imConvertPacking(image->data[0], gl_data, image->width, image->height, image->depth, image->depth, image->data_type, 0);
     display();
   }
 }

@@ -101,6 +101,7 @@ EXPORTS
   imImageLineSize
   imImageIsBitmap
   imImageGetOpenGLData
+  imImageCreateFromOpenGLData
   imImageMatch
   imImageMatchColor
   imImageMatchColorSpace

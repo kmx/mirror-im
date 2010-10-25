@@ -91,7 +91,7 @@ static int imluaPaletteCreate(lua_State *L)
 static int imluaPaletteFindNearest (lua_State *L)
 {
   imluaPalette *pal = imlua_checkpalette(L, 1);
-  long color = (long int) lua_touserdata(L, 1);
+  long color = (long)lua_touserdata(L, 1);
 
   lua_pushnumber(L, imPaletteFindNearest(pal->color, pal->count, color));
   return 1;
@@ -103,7 +103,7 @@ static int imluaPaletteFindNearest (lua_State *L)
 static int imluaPaletteFindColor (lua_State *L)
 {
   imluaPalette *pal = imlua_checkpalette(L, 1);
-  long color = (long) lua_touserdata(L, 2);
+  long color = (long)lua_touserdata(L, 2);
   unsigned char tol = (unsigned char)luaL_checkint(L, 3);
 
   lua_pushnumber(L, imPaletteFindColor(pal->color, pal->count, color, tol));
@@ -241,7 +241,7 @@ static int imluaPaletteUniform (lua_State *L)
 \*****************************************************************************/
 static int imluaPaletteUniformIndex (lua_State *L)
 {
-  lua_pushnumber(L, imPaletteUniformIndex((long int) lua_touserdata(L, 1)));
+  lua_pushnumber(L, imPaletteUniformIndex((long)lua_touserdata(L, 1)));
   return 1;
 }
 
@@ -250,7 +250,7 @@ static int imluaPaletteUniformIndex (lua_State *L)
 \*****************************************************************************/
 static int imluaPaletteUniformIndexHalftoned (lua_State *L)
 {
-  long color = (long) lua_touserdata(L, 1);
+  long color = (long)lua_touserdata(L, 1);
   int x = luaL_checkint(L, 2);
   int y = luaL_checkint(L, 3);
 
@@ -321,7 +321,7 @@ static int imluaPalette_newindex(lua_State *L)
   if (!lua_islightuserdata(L, 3))
     luaL_argerror(L, 3, "color must be a light user data");
 
-  color_i = (long int) lua_touserdata(L, 3);
+  color_i = (long)lua_touserdata(L, 3);
 
   pal->color[index_i] = color_i;
   return 0;

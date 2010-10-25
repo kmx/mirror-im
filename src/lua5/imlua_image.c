@@ -119,6 +119,20 @@ static int imluaImageCreate (lua_State *L)
 }
 
 /*****************************************************************************\
+ im.ImageCreateFromOpenGLData(width, height, glformat, gldata)
+\*****************************************************************************/
+static int imluaImageCreateFromOpenGLData (lua_State *L)
+{
+  int width = luaL_checkint(L, 1);
+  int height = luaL_checkint(L, 2);
+  int glformat = luaL_checkint(L, 3);
+  void* gldata = lua_touserdata(L, 4);
+  imImage *image = imImageCreateFromOpenGLData(width, height, glformat, gldata);
+  imlua_pushimage(L, image);
+  return 1;
+}
+
+/*****************************************************************************\
  image:AddAlpha()
 \*****************************************************************************/
 static int imluaImageAddAlpha (lua_State *L)
@@ -1014,6 +1028,7 @@ static int imluaImage_index (lua_State *L)
 
 static const luaL_reg imimage_lib[] = {
   {"ImageCreate", imluaImageCreate},
+  {"ImageCreateFromOpenGLData", imluaImageCreateFromOpenGLData},
   {"ImageDestroy", imluaImageDestroy},
   {"FileImageLoad", imluaFileImageLoad},
   {"FileImageLoadBitmap", imluaFileImageLoadBitmap},
