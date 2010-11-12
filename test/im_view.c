@@ -49,7 +49,7 @@ static void PrintError(int error)
   }
 }
 
-static int cbRepaint(Ihandle* iup_canvas)
+static int cbCanvasRepaint(Ihandle* iup_canvas)
 {
   cdCanvas* cd_canvas = (cdCanvas*)IupGetAttribute(iup_canvas, "cdCanvas");
   imImage* image = (imImage*)IupGetAttribute(iup_canvas, "imImage");
@@ -84,10 +84,10 @@ static void ShowImage(char* file_name, Ihandle* iup_dialog)
   IupSetAttribute(iup_dialog, "imImage", (char*)image);
   IupStoreAttribute(iup_dialog, "TITLE", file_name);
 
-  cbRepaint(iup_dialog); /* we can do this because canvas inherit attributes from the dialog */
+  cbCanvasRepaint(iup_dialog); /* we can do this because canvas inherit attributes from the dialog */
 }
 
-static int cbButton(Ihandle* iup_canvas, int but, int pressed)
+static int cbCanvasButton(Ihandle* iup_canvas, int but, int pressed)
 {
   char file_name[200] = "*.*";
 
@@ -107,7 +107,14 @@ static int cbButton(Ihandle* iup_canvas, int but, int pressed)
   return IUP_DEFAULT;
 }
 
-static int cbClose(Ihandle* iup_dialog)
+static int cbCanvasMap(Ihandle* iup_canvas)
+{
+  cdCanvas* cd_canvas = cdCreateCanvas(CD_IUP, iup_canvas);
+  IupSetAttribute(IupGetDialog(iup_canvas), "cdCanvas", (char*)cd_canvas);
+  return IUP_DEFAULT;
+}
+
+static int cbDialogClose(Ihandle* iup_dialog)
 {
   cdCanvas* cd_canvas = (cdCanvas*)IupGetAttribute(iup_dialog, "cdCanvas");
   imImage* image = (imImage*)IupGetAttribute(iup_dialog, "imImage");
@@ -123,37 +130,24 @@ static int cbClose(Ihandle* iup_dialog)
 
 static Ihandle* CreateDialog(void)
 {
-  Ihandle *iup_dialog;
-  Ihandle *iup_canvas;
-  cdCanvas* cd_canvas;
+  Ihandle *iup_dialog, *iup_canvas;
 
-  iup_canvas = IupCanvas("do_nothing");
-  IupSetAttribute(iup_canvas, IUP_BUTTON_CB, "cbButton");
-  IupSetAttribute(iup_canvas, IUP_ACTION, "cbRepaint");
+  iup_canvas = IupCanvas(NULL);
+  IupSetCallback(iup_canvas, "BUTTON_CB", (Icallback)cbCanvasButton);
+  IupSetCallback(iup_canvas, "ACTION", (Icallback)cbCanvasRepaint);
+  IupSetCallback(iup_canvas, "MAP_CB", (Icallback)cbCanvasMap);
   
   iup_dialog = IupDialog(iup_canvas);
-  IupSetAttribute(iup_dialog, IUP_CLOSE_CB, "cbClose");
-  IupSetAttribute(iup_dialog, IUP_SIZE, "HALFxHALF");
-
-  IupSetFunction("cbRepaint", (Icallback)cbRepaint);
-  IupSetFunction("cbButton", (Icallback)cbButton);
-  IupSetFunction("cbClose", (Icallback)cbClose);
-
-  IupMap(iup_dialog);
-
-  cd_canvas = cdCreateCanvas(CD_IUP, iup_canvas);
-  IupSetAttribute(iup_dialog, "cdCanvas", (char*)cd_canvas);
+  IupSetCallback(iup_dialog, "CLOSE_CB", (Icallback)cbDialogClose);
+  IupSetAttribute(iup_dialog, "SIZE", "HALFxHALF");  /* initial size */
 
   return iup_dialog;
 }
-
-//#include "im_format_avi.h"
 
 int main(int argc, char* argv[])
 {
   Ihandle* dlg;
 
-  //imFormatRegisterAVI();
   IupOpen(&argc, &argv);
 
   dlg = CreateDialog();
@@ -162,21 +156,17 @@ int main(int argc, char* argv[])
   
   /* Try to get a file name from the command line. */
   if (argc > 1)
-  {
     ShowImage(argv[1], dlg);
-  }
   else   
   {
     char file_name[1024] = "*.*";
     if (IupGetFile(file_name) == 0)
-    {
       ShowImage(file_name, dlg);
-    }
   }
                                    
   IupMainLoop();
   IupDestroy(dlg);
   IupClose();
 
-  return 1;
+  return 0;
 }
