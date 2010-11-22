@@ -24,6 +24,7 @@ endif
 
 USE_IMLUA = YES
 NO_LUALINK = Yes
+USE_BIN2C_LUA=Yes
 IM = ..
 
 ifneq ($(findstring MacOS, $(TEC_UNAME)), )

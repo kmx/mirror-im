@@ -23,4 +23,5 @@ endif
 
 USE_IM = YES
 NO_LUALINK = Yes
+USE_BIN2C_LUA=Yes
 IM = ..
