@@ -300,9 +300,13 @@ int imFileFormatSGI::ReadImageInfo(int index)
   switch (dimension)
   {
   case 1:
+    // If this value is 1, the image file consists of only 1 channel and only 1 scanline (row).
+    // Only width is valid.
     this->height = 1;
     depth = 1;
   case 2:
+    // If this value is 2, the file consists of a single channel with a number of scanlines. 
+    // Only width and height are valid.
     depth = 1;
     break;
   case 3:
@@ -318,6 +322,10 @@ int imFileFormatSGI::ReadImageInfo(int index)
     {
     case 1:
       this->file_color_mode = IM_GRAY;
+      break;
+    case 2:
+      // This is NOT mentioned by the specification, but it is used
+      this->file_color_mode = IM_GRAY | IM_ALPHA;
       break;
     case 3:
       this->file_color_mode = IM_RGB;
@@ -410,6 +418,13 @@ int imFileFormatSGI::WriteImageInfo()
     dimension = 3;
     if (imColorModeHasAlpha(this->user_color_mode))
       this->file_color_mode |= IM_ALPHA;
+  }
+  else if (this->file_color_mode == IM_GRAY &&
+           imColorModeHasAlpha(this->user_color_mode))
+  {
+    // This is NOT mentioned by the specification, but it is used
+    dimension = 3;
+    this->file_color_mode |= IM_ALPHA;
   }
 
   this->file_data_type = this->user_data_type;
