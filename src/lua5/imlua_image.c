@@ -546,6 +546,18 @@ static int imluaImageCopyAttributes (lua_State *L)
 }
 
 /*****************************************************************************\
+ image:MergeAttributes(dst_image)
+\*****************************************************************************/
+static int imluaImageMergeAttributes (lua_State *L)
+{
+  imImage *src_image = imlua_checkimage(L, 1);
+  imImage *dst_image = imlua_checkimage(L, 2);
+
+  imImageMergeAttributes(src_image, dst_image);
+  return 0;
+}
+
+/*****************************************************************************\
  image:MatchSize(image2)
 \*****************************************************************************/
 static int imluaImageMatchSize (lua_State *L)
@@ -1056,6 +1068,7 @@ static const luaL_reg imimage_metalib[] = {
   {"SetPalette", imluaImageSetPalette},
   {"GetPalette", imluaImageGetPalette},
   {"CopyAttributes", imluaImageCopyAttributes},
+  {"MergeAttributes", imluaImageMergeAttributes},
   {"MatchSize", imluaImageMatchSize},
   {"MatchColor", imluaImageMatchColor},
   {"MatchDataType", imluaImageMatchDataType},

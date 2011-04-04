@@ -424,6 +424,28 @@ void imImageCopyAttributes(const imImage* src_image, imImage* dst_image)
   iAttributeTableCopy(src_image->attrib_table, dst_image->attrib_table);
 }
 
+static void iAttributeTableMerge(const void* src_attrib_table, void* dst_attrib_table)
+{
+  const imAttribTable* src_table = (const imAttribTable*)src_attrib_table;
+  imAttribTable* dst_table = (imAttribTable*)dst_attrib_table;
+  dst_table->MergeFrom(*src_table);
+}
+
+void imImageMergeAttributes(const imImage* src_image, imImage* dst_image)
+{
+  assert(src_image);
+  assert(dst_image);
+
+  if (src_image->palette && dst_image->palette &&
+      src_image->color_space == dst_image->color_space)
+  {
+    memcpy(dst_image->palette, src_image->palette, 256*sizeof(long));
+    dst_image->palette_count = src_image->palette_count;
+  }
+
+  iAttributeTableMerge(src_image->attrib_table, dst_image->attrib_table);
+}
+
 static int iAttribCB(void* user_data, int index, const char* name, int data_type, int count, const void* data)
 {
   (void)data_type;

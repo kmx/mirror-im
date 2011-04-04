@@ -109,6 +109,7 @@ EXPORTS
   imImageMatchSize
   imImageClear
   imImageCopyAttributes
+  imImageMergeAttributes
   imImageDestroy
   imImageGetAttributeList
   imImageReshape

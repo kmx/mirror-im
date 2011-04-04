@@ -25,6 +25,7 @@ const void* imAttribTableGet(const imAttribTablePrivate* ptable, const char *nam
 void imAttribTableSet(imAttribTablePrivate* ptable, const char* name, int data_type, int count, const void* data);
 void imAttribTableUnSet(imAttribTablePrivate* ptable, const char *name);
 void imAttribTableCopyFrom(imAttribTablePrivate* ptable_dst, const imAttribTablePrivate* ptable_src);
+void imAttribTableMergeFrom(imAttribTablePrivate* ptable_dst, const imAttribTablePrivate* ptable_src);
 void imAttribTableForEach(const imAttribTablePrivate* ptable, void* user_data, imAttribTableCallback attrib_func);
 
 imAttribTablePrivate* imAttribArrayCreate(int hash_size);

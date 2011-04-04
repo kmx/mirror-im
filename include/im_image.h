@@ -136,11 +136,19 @@ void imImageCopy(const imImage* src_image, imImage* dst_image);
 void imImageCopyData(const imImage* src_image, imImage* dst_image);
 
 /** Copies the image attributes from src to dst.
- * Includes the pallete when a MAP or GRAY image.
+ * Includes the pallete if defined in both images.
  *
  * \verbatim image:CopyAttributes(dst_image: imImage) [in Lua 5] \endverbatim
  * \ingroup imgclass */
 void imImageCopyAttributes(const imImage* src_image, imImage* dst_image);
+
+/** Merges the image attributes from src to dst. \n
+ * Attributes that exist in dst are not replaced. 
+ * Doens NOT include the pallete.
+ *
+ * \verbatim image:MergeAttributes(dst_image: imImage) [in Lua 5] \endverbatim
+ * \ingroup imgclass */
+void imImageMergeAttributes(const imImage* src_image, imImage* dst_image);
 
 /** Copy one image plane fom one image to another. \n
  * Images must have the same size and type.

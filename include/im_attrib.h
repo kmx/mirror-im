@@ -45,6 +45,10 @@ public:
   void CopyFrom(const imAttribTable& table)
     { imAttribTableCopyFrom(ptable, table.ptable); }
 
+  /** Merges the contents of the given table into this table. */
+  void MergeFrom(const imAttribTable& table)
+    { imAttribTableMergeFrom(ptable, table.ptable); }
+
   /** Inserts an attribute into the table. \n 
    * If data_type is BYTE then count can be -1 to indicate a NULL terminated string.
    * Data is duplicated if not NULL, else data is initialized with zeros.
