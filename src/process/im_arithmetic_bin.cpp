@@ -580,6 +580,7 @@ void imProcessArithmeticConstOp(const imImage* src_image1, float value, imImage*
 void imProcessMultipleMean(const imImage** src_image_list, int src_image_count, imImage* dst_image)
 {
   const imImage* image1 = src_image_list[0];
+  imImage* aux_image = NULL;
 
   int data_type = image1->data_type;
   if (image1->data_type == IM_BYTE)
@@ -589,16 +590,26 @@ void imProcessMultipleMean(const imImage** src_image_list, int src_image_count, 
   if (!acum_image)
     return;
 
+  if (image1->data_type == IM_BYTE)
+    aux_image = imImageCreate(image1->width, image1->height, image1->color_space, data_type);
+
   for(int i = 0; i < src_image_count; i++)
   {
     const imImage *image = src_image_list[i];
-    imProcessArithmeticOp(image, acum_image, acum_image, IM_BIN_ADD);  /* acum_image += image */
-
+    if (aux_image)
+    {
+      imProcessUnArithmeticOp(image, aux_image, IM_UN_EQL);
+      imProcessArithmeticOp(aux_image, acum_image, acum_image, IM_BIN_ADD);  /* acum_image += image */
+    }
+    else
+      imProcessArithmeticOp(image, acum_image, acum_image, IM_BIN_ADD);  /* acum_image += image */
   }
 
   imProcessArithmeticConstOp(acum_image, float(src_image_count), dst_image, IM_BIN_DIV);
 
   imImageDestroy(acum_image);
+  if (aux_image)
+    imImageDestroy(aux_image);
 }
 
 void imProcessMultipleStdDev(const imImage** src_image_list, int src_image_count, const imImage *mean_image, imImage* dst_image)

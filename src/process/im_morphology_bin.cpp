@@ -152,8 +152,10 @@ int imProcessBinMorphOpen(const imImage* src_image, imImage* dst_image, int kern
   if (!temp)
     return 0;
 
-  if (!imProcessBinMorphErode(src_image, temp, kernel_size, iter)) {imImageDestroy(temp); return 0;}
-  if (!imProcessBinMorphDilate(temp, dst_image, kernel_size, iter)) {imImageDestroy(temp); return 0;}
+  if (!imProcessBinMorphErode(src_image, temp, kernel_size, iter)) 
+    {imImageDestroy(temp); return 0;}
+  if (!imProcessBinMorphDilate(temp, dst_image, kernel_size, iter)) 
+    {imImageDestroy(temp); return 0;}
 
   imImageDestroy(temp);
   return 1;
@@ -165,8 +167,10 @@ int imProcessBinMorphClose(const imImage* src_image, imImage* dst_image, int ker
   if (!temp)
     return 0;
 
-  if (!imProcessBinMorphDilate(src_image, temp, kernel_size, iter)) {imImageDestroy(temp); return 0;}
-  if (!imProcessBinMorphErode(temp, dst_image, kernel_size, iter)) {imImageDestroy(temp); return 0;}
+  if (!imProcessBinMorphDilate(src_image, temp, kernel_size, iter)) 
+    {imImageDestroy(temp); return 0;}
+  if (!imProcessBinMorphErode(temp, dst_image, kernel_size, iter)) 
+    {imImageDestroy(temp); return 0;}
 
   imImageDestroy(temp);
   return 1;
@@ -174,7 +178,8 @@ int imProcessBinMorphClose(const imImage* src_image, imImage* dst_image, int ker
 
 int imProcessBinMorphOutline(const imImage* src_image, imImage* dst_image, int kernel_size, int iter)
 {
-  if (!imProcessBinMorphErode(src_image, dst_image, kernel_size, iter)) return 0;
+  if (!imProcessBinMorphErode(src_image, dst_image, kernel_size, iter)) 
+    return 0;
   imProcessArithmeticOp(src_image, dst_image, dst_image, IM_BIN_DIFF);
   return 1;
 }

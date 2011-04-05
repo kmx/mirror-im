@@ -180,8 +180,10 @@ int imProcessGrayMorphOpen(const imImage* src_image, imImage* dst_image, int ker
   if (!temp)
     return 0;
 
-  if (!imProcessGrayMorphErode(src_image, temp, kernel_size)) {imImageDestroy(temp); return 0;}
-  if (!imProcessGrayMorphDilate(temp, dst_image, kernel_size)) {imImageDestroy(temp); return 0;}
+  if (!imProcessGrayMorphErode(src_image, temp, kernel_size)) 
+    {imImageDestroy(temp); return 0;}
+  if (!imProcessGrayMorphDilate(temp, dst_image, kernel_size)) 
+    {imImageDestroy(temp); return 0;}
 
   imImageDestroy(temp);
   return 1;
@@ -193,8 +195,10 @@ int imProcessGrayMorphClose(const imImage* src_image, imImage* dst_image, int ke
   if (!temp)
     return 0;
 
-  if (!imProcessGrayMorphDilate(src_image, temp, kernel_size)) {imImageDestroy(temp); return 0;}
-  if (!imProcessGrayMorphErode(temp, dst_image, kernel_size)) {imImageDestroy(temp); return 0;}
+  if (!imProcessGrayMorphDilate(src_image, temp, kernel_size)) 
+    {imImageDestroy(temp); return 0;}
+  if (!imProcessGrayMorphErode(temp, dst_image, kernel_size)) 
+    {imImageDestroy(temp); return 0;}
 
   imImageDestroy(temp);
   return 1;
@@ -202,14 +206,16 @@ int imProcessGrayMorphClose(const imImage* src_image, imImage* dst_image, int ke
 
 int imProcessGrayMorphTopHat(const imImage* src_image, imImage* dst_image, int kernel_size)
 {
-  if (!imProcessGrayMorphOpen(src_image, dst_image, kernel_size)) return 0;
+  if (!imProcessGrayMorphOpen(src_image, dst_image, kernel_size)) 
+    return 0;
   imProcessArithmeticOp(src_image, dst_image, dst_image, IM_BIN_DIFF);
   return 1;
 }
 
 int imProcessGrayMorphWell(const imImage* src_image, imImage* dst_image, int kernel_size)
 {
-  if (!imProcessGrayMorphClose(src_image, dst_image, kernel_size)) return 0;
+  if (!imProcessGrayMorphClose(src_image, dst_image, kernel_size)) 
+    return 0;
   imProcessArithmeticOp(src_image, dst_image, dst_image, IM_BIN_DIFF);
   return 1;
 }
@@ -220,8 +226,10 @@ int imProcessGrayMorphGradient(const imImage* src_image, imImage* dst_image, int
   if (!temp)
     return 0;
 
-  if (!imProcessGrayMorphDilate(src_image, temp, kernel_size)) {imImageDestroy(temp); return 0;}
-  if (!imProcessGrayMorphErode(src_image, dst_image, kernel_size)) {imImageDestroy(temp); return 0;}
+  if (!imProcessGrayMorphDilate(src_image, temp, kernel_size)) 
+    {imImageDestroy(temp); return 0;}
+  if (!imProcessGrayMorphErode(src_image, dst_image, kernel_size)) 
+    {imImageDestroy(temp); return 0;}
 
   imProcessArithmeticOp(temp, dst_image, dst_image, IM_BIN_DIFF);
 
