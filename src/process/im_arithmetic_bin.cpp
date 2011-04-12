@@ -586,12 +586,12 @@ void imProcessMultipleMean(const imImage** src_image_list, int src_image_count, 
   if (image1->data_type == IM_BYTE)
     data_type = IM_USHORT;
 
-  imImage *acum_image = imImageCreate(image1->width, image1->height, image1->color_space, data_type);
+  imImage *acum_image = imImageCreateBased(image1, -1, -1, -1, data_type);
   if (!acum_image)
     return;
 
   if (image1->data_type == IM_BYTE)
-    aux_image = imImageCreate(image1->width, image1->height, image1->color_space, data_type);
+    aux_image = imImageCreateBased(image1, -1, -1, -1, data_type);
 
   for(int i = 0; i < src_image_count; i++)
   {
