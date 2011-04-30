@@ -77,7 +77,7 @@ void imProcessCrop(const imImage* src_image, imImage* dst_image, int xmin, int y
 void imProcessInsert(const imImage* src_image, const imImage* region_image, imImage* dst_image, int xmin, int ymin);
 
 /** Increase the image size by adding pixels with zero value. \n
- * Images must be of the same type. Destiny image size must be greatter than source image width+xmin, height+ymin.
+ * Images must be of the same type. Destiny image size must be greatter or equal than source image width+xmin, height+ymin.
  *
  * \verbatim im.ProcessAddMargins(src_image: imImage, dst_image: imImage, xmin: number, ymin: number) [in Lua 5] \endverbatim
  * \verbatim im.ProcessAddMarginsNew(image: imImage, xmin: number, xmax: number, ymin: number, ymax: number) -> new_image: imImage [in Lua 5] \endverbatim
