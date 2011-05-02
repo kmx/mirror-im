@@ -665,8 +665,8 @@ static int imluaProcessAddMargins (lua_State *L)
   int ymin = luaL_checkint(L, 4);
 
   imlua_matchcolor(L, src_image, dst_image);
-  luaL_argcheck(L, dst_image->width > (src_image->width + xmin), 2, "destiny image size must be greatter than source image width+xmin, height+ymin");
-  luaL_argcheck(L, dst_image->height > (src_image->height + ymin), 2, "destiny image size must be greatter than source image width+xmin, height+ymin");
+  luaL_argcheck(L, dst_image->width >= (src_image->width + xmin), 2, "destiny image size must be greatter or equal than source image width+xmin, height+ymin");
+  luaL_argcheck(L, dst_image->height >= (src_image->height + ymin), 2, "destiny image size must be greatter or equal than source image width+xmin, height+ymin");
 
   imProcessAddMargins(src_image, dst_image, xmin, ymin);
   return 0;
