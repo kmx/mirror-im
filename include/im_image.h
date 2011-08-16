@@ -79,9 +79,12 @@ typedef struct _imImage
 imImage* imImageCreate(int width, int height, int color_space, int data_type);
 
 /** Initializes the image structure but does not allocates image data.
- * See also \ref imDataType and \ref imColorSpace.
+ * See also \ref imDataType and \ref imColorSpace. 
+ * The only addtional flag thar color_mode can has here is IM_ALPHA.
+ * To release the image structure without releasing the buffer, 
+ * set "data[0]" to NULL before calling imImageDestroy.
  * \ingroup imgclass */
-imImage* imImageInit(int width, int height, int color_space, int data_type, void* data_buffer, long* palette, int palette_count);
+imImage* imImageInit(int width, int height, int color_mode, int data_type, void* data_buffer, long* palette, int palette_count);
 
 /** Creates a new image based on an existing one. \n
  * If the addicional parameters are -1, the given image parameters are used. \n
