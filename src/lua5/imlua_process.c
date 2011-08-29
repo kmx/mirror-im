@@ -2766,7 +2766,7 @@ static int imluaProcessUniformErrThreshold (lua_State *L)
   imlua_checkcolorspace(L, 2, dst_image, IM_BINARY);
   imlua_matchsize(L, src_image, dst_image);
 
-  lua_pushboolean(L, imProcessUniformErrThreshold(src_image, dst_image));
+  lua_pushinteger(L, imProcessUniformErrThreshold(src_image, dst_image));
   return 1;
 }
 
@@ -2801,7 +2801,7 @@ static int imluaProcessPercentThreshold (lua_State *L)
   imlua_checkcolorspace(L, 2, dst_image, IM_BINARY);
   imlua_matchsize(L, src_image, dst_image);
 
-  lua_pushboolean(L, imProcessPercentThreshold(src_image, dst_image, percent));
+  lua_pushinteger(L, imProcessPercentThreshold(src_image, dst_image, percent));
   return 1;
 }
 
@@ -2817,7 +2817,7 @@ static int imluaProcessOtsuThreshold (lua_State *L)
   imlua_checkcolorspace(L, 2, dst_image, IM_BINARY);
   imlua_matchsize(L, src_image, dst_image);
 
-  lua_pushnumber(L, imProcessOtsuThreshold(src_image, dst_image));
+  lua_pushinteger(L, imProcessOtsuThreshold(src_image, dst_image));
   return 1;
 }
 
@@ -2834,7 +2834,7 @@ static int imluaProcessMinMaxThreshold (lua_State *L)
   imlua_checkcolorspace(L, 2, dst_image, IM_BINARY);
   imlua_matchsize(L, src_image, dst_image);
 
-  lua_pushboolean(L, imProcessMinMaxThreshold(src_image, dst_image));
+  lua_pushinteger(L, imProcessMinMaxThreshold(src_image, dst_image));
   return 1;
 }
 
