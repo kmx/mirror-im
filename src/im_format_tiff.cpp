@@ -496,9 +496,21 @@ static void iTIFFReadCustomTags(TIFF* tiff, imAttribTable* attrib_table)
       }
       else if (data_count == 1)
       {
-        data = malloc(imDataTypeSize(data_type));
+        int size = imDataTypeSize(data_type);
+        if (fld->field_type == TIFF_DOUBLE)
+          size *= 2;
+        data = malloc(size);
         if (TIFFGetField(tiff, tag, data) == 1)
+        {
+          if (fld->field_type == TIFF_DOUBLE)
+          {
+            double double_data = *(double*)data;
+            float* float_data = (float*)data;
+            *float_data = (float)double_data;
+          }
+
           attrib_table->Set(fld->field_name, data_type, data_count, data);
+        }
         free(data);
         data = NULL;
       }
