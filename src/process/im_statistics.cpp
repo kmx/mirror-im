@@ -157,6 +157,7 @@ void imCalcGrayHistogram(const imImage* image, unsigned long* histo, int cumulat
 template <class T>
 static void DoStats(T* data, int count, imStats* stats)
 {
+  double mean = 0, stddev = 0, dcount = (double)count;
   memset(stats, 0, sizeof(imStats));
 
   stats->min = (float)data[0];
@@ -179,12 +180,15 @@ static void DoStats(T* data, int count, imStats* stats)
     if (data[i] == 0)
       stats->zeros++;
 
-    stats->mean += (float)data[i];
-    stats->stddev += ((float)data[i])*((float)data[i]);
+    mean += (double)data[i];
+    stddev += ((double)data[i])*((double)data[i]);
   }
 
-  stats->mean /= float(count);
-  stats->stddev = (float)sqrt((stats->stddev - count * stats->mean*stats->mean)/(count-1.0));
+  mean /= dcount;
+  stddev = sqrt((stddev - dcount*mean*mean)/(dcount-1.0));
+
+  stats->mean = (float)mean;
+  stats->stddev = (float)stddev;
 }
 
 void imCalcImageStatistics(const imImage* image, imStats* stats)
@@ -297,16 +301,16 @@ float imCalcSNR(const imImage* image, const imImage* noise_image)
 template <class T> 
 static float DoRMSOp(T *map1, T *map2, int count)
 {
-  float rmserror = 0.0f;
-  float diff;
+  double rmserror = 0;
+  double diff;
 
   for (int i = 0; i < count; i++)
   {
-    diff = float(map1[i] - map2[i]);
+    diff = double(map1[i] - map2[i]);
     rmserror += diff * diff;
   }
 
-  return rmserror;
+  return (float)rmserror;
 }
   
 float imCalcRMSError(const imImage* image1, const imImage* image2)
@@ -334,7 +338,7 @@ float imCalcRMSError(const imImage* image1, const imImage* image2)
     break;
   }
 
-  rmserror = float(sqrt(rmserror / float((count * image1->depth))));
+  rmserror = float(sqrt(rmserror / double((count * image1->depth))));
 
   return rmserror;
 }
