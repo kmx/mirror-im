@@ -21,21 +21,21 @@ inline T crop_byte(const T& v)
 template <class T1, class T2>
 inline T1 add_op(const T1& v1, const T2& v2)
 {
-  return v2 + v1;
+  return v1 + v2;
 }
 
 /// Generic Subtraction with 2 template types
 template <class T1, class T2>
 inline T1 sub_op(const T1& v1, const T2& v2)
 {
-  return v2 - v1;
+  return v1 - v2;
 }
 
 /// Generic Multiplication with 2 template types
 template <class T1, class T2>
 inline T1 mul_op(const T1& v1, const T2& v2)
 {
-  return v2 * v1;
+  return v1 * v2;
 }
 
 /// Generic Division with 2 template types
