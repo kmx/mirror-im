@@ -409,7 +409,7 @@ static void iDoSwitchInt(int count, const SRC* src_data, DST* dst_data, int offs
 {
   for (int i = 0; i < count; i++)
   {
-    *dst_data++ = (DST)((int)*src_data++ + offset);
+    *dst_data++ = (DST)((int)(*src_data++) + offset);
   }
 }
 
