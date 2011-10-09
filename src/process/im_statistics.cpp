@@ -8,6 +8,7 @@
 
 #include <im.h>
 #include <im_util.h>
+#include <im_color.h>
 #include <im_math_op.h>
 
 #include "im_process_ana.h"
@@ -16,18 +17,129 @@
 #include <memory.h>
 #include <math.h>
 
+
+template <class T>
+static void DoCalcHisto(T* map, int size, unsigned long* histo, int hcount, int cumulative)
+{
+  int i;
+
+  memset(histo, 0, hcount * sizeof(unsigned long));
+
+  for (i = 0; i < size; i++)
+    histo[*map++]++;
+
+  if (cumulative)
+  {
+    /* make cumulative histogram */
+    for (i = 1; i < hcount; i++)
+      histo[i] += histo[i-1];
+  }
+}
+
+void imCalcHistogram(const imbyte* map, int size, unsigned long* histo, int cumulative)
+{
+  DoCalcHisto(map, size, histo, 256, cumulative);
+}
+
+void imCalcUShortHistogram(const imushort* map, int size, unsigned long* histo, int cumulative)
+{
+  DoCalcHisto(map, size, histo, 65536, cumulative);
+}
+
+void imCalcGrayHistogram(const imImage* image, unsigned long* histo, int cumulative)
+{
+  int hcount = 256;
+  if (image->data_type == IM_USHORT)
+    hcount = 65536;
+
+  if (image->color_space == IM_GRAY)
+  {
+    if (image->data_type == IM_USHORT)
+      DoCalcHisto((imushort*)image->data[0], image->count, histo, hcount, 0);
+    else
+      DoCalcHisto((imbyte*)image->data[0], image->count, histo, hcount, 0);
+  }
+  else 
+  {
+    int i;
+    memset(histo, 0, hcount * sizeof(unsigned long));
+
+    if (image->color_space == IM_MAP || image->color_space == IM_BINARY)
+    {
+      imbyte* map = (imbyte*)image->data[0];
+      imbyte gray_map[256], r, g, b;
+
+      for (i = 0; i < image->palette_count; i++)
+      {
+        imColorDecode(&r, &g, &b, image->palette[i]);
+        gray_map[i] = imColorRGB2Luma(r, g, b);
+      }
+
+      for (i = 0; i < image->count; i++)
+      {
+        int index = *map++;
+        histo[gray_map[index]]++;
+      }
+    }
+    else
+    {
+      if (image->data_type == IM_USHORT)
+      {
+        imushort gray;
+        imushort* r = (imushort*)image->data[0];
+        imushort* g = (imushort*)image->data[1];
+        imushort* b = (imushort*)image->data[2];
+        for (i = 0; i < image->count; i++)
+        {
+          gray = imColorRGB2Luma(*r++, *g++, *b++);
+          histo[gray]++;
+        }
+      }
+      else
+      {
+        imbyte gray;
+        imbyte* r = (imbyte*)image->data[0];
+        imbyte* g = (imbyte*)image->data[1];
+        imbyte* b = (imbyte*)image->data[2];
+        for (i = 0; i < image->count; i++)
+        {
+          gray = imColorRGB2Luma(*r++, *g++, *b++);
+          histo[gray]++;
+        }
+      }
+    }
+
+    if (cumulative)
+    {
+      /* make cumulative histogram */
+      for (i = 1; i < hcount; i++)
+        histo[i] += histo[i-1];
+    }
+  }
+}
+
 static unsigned long count_map(const imImage* image)
 {
-  unsigned long histo[256];
-  int size = image->width * image->height;
-  imCalcHistogram((imbyte*)image->data[0], size, histo, 0);
+  int hcount = 256;
+  if (image->data_type == IM_USHORT)
+    hcount = 65536;
+
+  unsigned long *histo = new unsigned long[hcount];
+
+  if (image->data_type == IM_USHORT)
+    DoCalcHisto((imushort*)image->data[0], image->count, histo, hcount, 0);
+  else
+    DoCalcHisto((imbyte*)image->data[0], image->count, histo, hcount, 0);
+
   unsigned long numcolor = 0;
 
-  for (int i = 0; i < 256; i++)
+  for (int i = 0; i < hcount; i++)
   {             
     if(histo[i] != 0)
       numcolor++;
   }
+
+  delete [] histo;
 
   return numcolor;
 }
@@ -35,11 +147,10 @@ static unsigned long count_map(const imImage* image)
 // will count also all the 3 components color spaces
 static unsigned long count_rgb(const imImage* image)
 {
-  imbyte *count = (imbyte*)calloc(sizeof(imbyte), 1 << 21 ); /* (2^24)/8=2^21 ~ 2Mb */
+  imbyte *count = (imbyte*)calloc(sizeof(imbyte), 1 << 21); /* (2^24)/8=2^21 ~ 2Mb - using a bit array */
   if (!count)
     return (unsigned long)-1;
 
-  int size = image->width * image->height;
   imbyte *red = (imbyte*)image->data[0];
   imbyte *green = (imbyte*)image->data[1];
   imbyte *blue = (imbyte*)image->data[2];
@@ -47,7 +158,7 @@ static unsigned long count_rgb(const imImage* image)
   int index;
   unsigned long numcolor = 0;
 
-  for(int i = 0; i < size; i++)
+  for(int i = 0; i < image->count; i++)
   {
     index = red[i] << 16 | green[i] << 8 | blue[i];
 
@@ -68,90 +179,6 @@ unsigned long imCalcCountColors(const imImage* image)
     return count_rgb(image);
   else
     return count_map(image);
-}
-
-void imCalcHistogram(const imbyte* map, int size, unsigned long* histo, int cumulative)
-{
-  int i;
-
-  memset(histo, 0, 256 * sizeof(unsigned long));
-
-  for (i = 0; i < size; i++)
-    histo[*map++]++;
-
-  if (cumulative)
-  {
-    /* make cumulative histogram */
-    for (i = 1; i < 256; i++)
-      histo[i] += histo[i-1];
-  }
-}
-
-void imCalcUShortHistogram(const imushort* map, int size, unsigned long* histo, int cumulative)
-{
-  int i;
-
-  memset(histo, 0, 65535 * sizeof(unsigned long));
-
-  for (i = 0; i < size; i++)
-    histo[*map++]++;
-
-  if (cumulative)
-  {
-    /* make cumulative histogram */
-    for (i = 1; i < 65535; i++)
-      histo[i] += histo[i-1];
-  }
-}
-
-void imCalcGrayHistogram(const imImage* image, unsigned long* histo, int cumulative)
-{
-  int i;
-
-  memset(histo, 0, 256 * sizeof(unsigned long));
-
-  if (image->color_space == IM_GRAY)
-  {
-    imbyte* map = (imbyte*)image->data[0];
-    for (i = 0; i < image->count; i++)
-      histo[*map++]++;
-  }
-  else if (image->color_space == IM_MAP || image->color_space == IM_BINARY)
-  {
-    imbyte* map = (imbyte*)image->data[0];
-    imbyte gray_map[256], r, g, b;
-
-    for (i = 0; i < image->palette_count; i++)
-    {
-      imColorDecode(&r, &g, &b, image->palette[i]);
-      gray_map[i] = (imbyte)((299*r + 587*g + 114*b) / 1000);
-    }
-
-    for (i = 0; i < image->count; i++)
-    {
-      int index = *map++;
-      histo[gray_map[index]]++;
-    }
-  }
-  else
-  {
-    imbyte gray;
-    imbyte* r = (imbyte*)image->data[0];
-    imbyte* g = (imbyte*)image->data[1];
-    imbyte* b = (imbyte*)image->data[2];
-    for (i = 0; i < image->count; i++)
-    {
-      gray = (imbyte)((299*(*r++) + 587*(*g++) + 114*(*b++)) / 1000);
-      histo[gray]++;
-    }
-  }
-
-  if (cumulative)
-  {
-    /* make cumulative histogram */
-    for (i = 1; i < 256; i++)
-      histo[i] += histo[i-1];
-  }
 }
 
 template <class T>
@@ -193,23 +220,21 @@ static void DoStats(T* data, int count, imStats* stats)
 
 void imCalcImageStatistics(const imImage* image, imStats* stats)
 {
-  int count = image->width * image->height;
-
   for (int i = 0; i < image->depth; i++)
   {
     switch(image->data_type)
     {
     case IM_BYTE:
-      DoStats((imbyte*)image->data[i], count, &stats[i]);
+      DoStats((imbyte*)image->data[i], image->count, &stats[i]);
       break;                                                                                
     case IM_USHORT:                                                                           
-      DoStats((imushort*)image->data[i], count, &stats[i]);
+      DoStats((imushort*)image->data[i], image->count, &stats[i]);
       break;                                                                                
     case IM_INT:                                                                           
-      DoStats((int*)image->data[i], count, &stats[i]);
+      DoStats((int*)image->data[i], image->count, &stats[i]);
       break;                                                                                
     case IM_FLOAT:                                                                           
-      DoStats((float*)image->data[i], count, &stats[i]);
+      DoStats((float*)image->data[i], image->count, &stats[i]);
       break;                                                                                
     }
   }
@@ -217,19 +242,31 @@ void imCalcImageStatistics(const imImage* image, imStats* stats)
 
 void imCalcHistogramStatistics(const imImage* image, imStats* stats)
 {
-  int image_size = image->width * image->height;
-  unsigned long histo[256];
+  int hcount = 256;
+  if (image->data_type == IM_USHORT)
+    hcount = 65536;
+
+  unsigned long *histo = new unsigned long[hcount];
 
   for (int d = 0; d < image->depth; d++)
   {
-    imCalcHistogram((imbyte*)image->data[d], image_size, histo, 0);
-    DoStats((unsigned long*)histo, 256, &stats[d]);
+    if (image->data_type == IM_USHORT)
+      DoCalcHisto((imushort*)image->data[d], image->count, histo, hcount, 0);
+    else
+      DoCalcHisto((imbyte*)image->data[d], image->count, histo, hcount, 0);
+    DoStats((unsigned long*)histo, hcount, &stats[d]);
   }
+
+  delete [] histo;
 }
 
 void imCalcHistoImageStatistics(const imImage* image, int* median, int* mode)
 {
-  unsigned long histo[256];
+  int hcount = 256;
+  if (image->data_type == IM_USHORT)
+    hcount = 65536;
+
+  unsigned long *histo = new unsigned long[hcount];
 
   for (int d = 0; d < image->depth; d++)
   {
@@ -238,7 +275,7 @@ void imCalcHistoImageStatistics(const imImage* image, int* median, int* mode)
 
     unsigned long half = image->count/2;
     unsigned long count = histo[0];
-    for (i = 1; i < 256; i++)
+    for (i = 1; i < hcount; i++)
     {
       if (count > half)
       {
@@ -250,14 +287,14 @@ void imCalcHistoImageStatistics(const imImage* image, int* median, int* mode)
     }
 
     unsigned long max = histo[0];
-    for (i = 1; i < 256; i++)
+    for (i = 1; i < hcount; i++)
     {
       if (max < histo[i])
         max = histo[i];
     }
 
     int found_mode = 0;
-    for (i = 0; i < 256; i++)
+    for (i = 0; i < hcount; i++)
     {
       if (histo[i] == max)
       {
@@ -272,6 +309,8 @@ void imCalcHistoImageStatistics(const imImage* image, int* median, int* mode)
       }
     }
   }
+
+  delete [] histo;
 }
 
 float imCalcSNR(const imImage* image, const imImage* noise_image)
@@ -299,7 +338,7 @@ float imCalcSNR(const imImage* image, const imImage* noise_image)
 }
 
 template <class T> 
-static float DoRMSOp(T *map1, T *map2, int count)
+static double DoRMSOp(T *map1, T *map2, int count)
 {
   double rmserror = 0;
   double diff;
@@ -310,12 +349,12 @@ static float DoRMSOp(T *map1, T *map2, int count)
     rmserror += diff * diff;
   }
 
-  return (float)rmserror;
+  return rmserror;
 }
   
 float imCalcRMSError(const imImage* image1, const imImage* image2)
 {
-  float rmserror = 0.0f;
+  double rmserror = 0;
 
   int count = image1->count*image1->depth;
 
@@ -338,8 +377,8 @@ float imCalcRMSError(const imImage* image1, const imImage* image2)
     break;
   }
 
-  rmserror = float(sqrt(rmserror / double((count * image1->depth))));
+  rmserror = sqrt(rmserror / double((count * image1->depth)));
 
-  return rmserror;
+  return (float)rmserror;
 }
 

@@ -62,7 +62,9 @@ static int imluaCalcCountColors (lua_State *L)
 {
   imImage* src_image = imlua_checkimage(L, 1);
 
-  imlua_checkdatatype(L, 1, src_image, IM_BYTE);
+  if (src_image->data_type != IM_BYTE && src_image->data_type != IM_USHORT)
+    luaL_argerror(L, 1, "image data type must be IM_BYTE or IM_USHORT");
+
   if (src_image->color_space >= IM_CMYK)
     luaL_argerror(L, 1, "color space can be RGB, Gray, Binary or Map only");
 
@@ -83,17 +85,17 @@ static int imluaCalcHistogram (lua_State *L)
   {
   case IM_BYTE:
     {
-      unsigned long hist[256];
-      imCalcHistogram((imbyte*) src_image->data[plane], src_image->count, hist, cumulative);
-      imlua_newarrayulong(L, hist, 256, 0);
+      unsigned long histo[256];
+      imCalcHistogram((imbyte*)src_image->data[plane], src_image->count, histo, cumulative);
+      imlua_newarrayulong(L, histo, 256, 0);
     }
     break;
 
   case IM_USHORT:
     {
-      unsigned long hist[65535];
-      imCalcUShortHistogram(src_image->data[plane], src_image->count, hist, cumulative);
-      imlua_newarrayulong(L, hist, 65535, 0);
+      unsigned long histo[65536];
+      imCalcUShortHistogram((imushort*)src_image->data[plane], src_image->count, histo, cumulative);
+      imlua_newarrayulong(L, histo, 65536, 0);
     }
     break;
 
@@ -110,16 +112,27 @@ static int imluaCalcHistogram (lua_State *L)
 \*****************************************************************************/
 static int imluaCalcGrayHistogram (lua_State *L)
 {
-  unsigned long hist[256];
+  int hcount;
+  unsigned long *histo;
   imImage* src_image = imlua_checkimage(L, 1);
   int cumulative = lua_toboolean(L, 2);
 
-  imlua_checkdatatype(L, 1, src_image, IM_BYTE);
+  if (src_image->data_type != IM_BYTE && src_image->data_type != IM_USHORT)
+    luaL_argerror(L, 1, "image data type must be IM_BYTE or IM_USHORT");
+
   if (src_image->color_space >= IM_CMYK)
     luaL_argerror(L, 1, "color space can be RGB, Gray, Binary or Map only");
 
-  imCalcGrayHistogram(src_image, hist, cumulative);
-  imlua_newarrayulong(L, hist, 256, 0);
+  hcount = 256;
+  if (src_image->data_type == IM_USHORT)
+    hcount = 65536;
+
+  histo = malloc(sizeof(unsigned long) * hcount);
+
+  imCalcGrayHistogram(src_image, histo, cumulative);
+  imlua_newarrayulong(L, histo, hcount, 0);
+
+  free(histo);
 
   return 1;
 }
@@ -156,7 +169,8 @@ static int imluaCalcHistogramStatistics (lua_State *L)
   imStats stats;
   imImage *image = imlua_checkimage(L, 1);
 
-  imlua_checkdatatype(L, 1, image, IM_BYTE);
+  if (image->data_type != IM_BYTE && image->data_type != IM_USHORT)
+    luaL_argerror(L, 1, "image data type must be IM_BYTE or IM_USHORT");
 
   imCalcHistogramStatistics(image, &stats);
 
@@ -181,7 +195,8 @@ static int imluaCalcHistoImageStatistics (lua_State *L)
 
   imImage *image = imlua_checkimage(L, 1);
 
-  imlua_checkdatatype(L, 1, image, IM_BYTE);
+  if (image->data_type != IM_BYTE && image->data_type != IM_USHORT)
+    luaL_argerror(L, 1, "image data type must be IM_BYTE or IM_USHORT");
 
   median = (int*)malloc(sizeof(int)*image->depth);
   mode = (int*)malloc(sizeof(int)*image->depth);

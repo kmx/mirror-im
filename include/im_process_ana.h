@@ -35,7 +35,8 @@ float imCalcRMSError(const imImage* image1, const imImage* image2);
 float imCalcSNR(const imImage* src_image, const imImage* noise_image);
 
 /** Count the number of different colors in an image. \n
- * Image must be IM_BYTE, but all color spaces except IM_CMYK.
+ * Image must be IM_BYTE, but can has all color spaces except IM_CMYK.
+ * Data type can be IM_USHORT if color space is IM_GRAY, IM_BINARY or IM_MAP.
  *
  * \verbatim im.CalcCountColors(image: imImage) -> count: number [in Lua 5] \endverbatim
  * \ingroup stats */
@@ -52,16 +53,16 @@ unsigned long imCalcCountColors(const imImage* image);
 void imCalcHistogram(const unsigned char* data, int count, unsigned long* histo, int cumulative);
 
 /** Calculates the histogram of a IM_USHORT data. \n
- * Histogram is always 65535 positions long. \n
+ * Histogram is always 65536 positions long. \n
  * When cumulative is different from zero it calculates the cumulative histogram. \n
  * Use \ref imCalcHistogram in Lua.
  * \ingroup stats */
 void imCalcUShortHistogram(const unsigned short* data, int count, unsigned long* histo, int cumulative);
 
 /** Calculates the gray histogram of an image. \n
- * Image must be IM_BYTE/(IM_RGB, IM_GRAY, IM_BINARY or IM_MAP). \n
+ * Image must be (IM_BYTE or IM_USHORT)/(IM_RGB, IM_GRAY, IM_BINARY or IM_MAP). \n
  * If the image is IM_RGB then the histogram of the luma component is calculated. \n
- * Histogram is always 256 positions long. \n
+ * Histogram is always 256 or 65536 positions long. \n
  * When cumulative is different from zero it calculates the cumulative histogram.
  *
  * \verbatim im.CalcGrayHistogram(image: imImage, cumulative: boolean) -> histo: table of numbers [in Lua 5] \endverbatim
@@ -93,7 +94,7 @@ void imCalcImageStatistics(const imImage* image, imStats* stats);
 
 /** Calculates the statistics about the image histogram data.\n
  * There is one stats for each depth plane. For ex: stats[0]=red stats, stats[0]=green stats, ... \n
- * Only IM_BYTE images are supported.
+ * Only IM_BYTE and IM_USHORT images are supported.
  *
  * \verbatim im.CalcHistogramStatistics(image: imImage) -> stats: table [in Lua 5] \endverbatim
  * \ingroup stats */
@@ -101,7 +102,7 @@ void imCalcHistogramStatistics(const imImage* image, imStats* stats);
 
 /** Calculates some extra statistics about the image histogram data.\n
  * There is one stats for each depth plane. \n
- * Only IM_BYTE images are supported. \n
+ * Only IM_BYTE and IM_USHORT images are supported. \n
  * mode will be -1 if more than one max is found.
  *
  * \verbatim im.CalcHistoImageStatistics(image: imImage) -> median: number, mode: number [in Lua 5] \endverbatim

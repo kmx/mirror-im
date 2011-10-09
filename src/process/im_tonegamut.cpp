@@ -138,7 +138,7 @@ static void DoNormalizedUnaryOp(T *map, T *new_map, int count, int op, float *ar
   {
   case IM_GAMUT_NORMALIZE:
     {
-      if (min >= 0 && max <= 1)
+      if (min >= 0 && max <= 1)  // Already normalized
       {
         for (i = 0; i < count; i++)
           new_map[i] = (T)map[i];

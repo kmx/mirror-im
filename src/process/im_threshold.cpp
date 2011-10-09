@@ -210,10 +210,9 @@ static void do_dither_error(imbyte* data1, imbyte* data2, int size, int t, int v
 void imProcessDifusionErrThreshold(const imImage* image, imImage* NewImage, int level)
 {
   int value = image->depth > 1? 255: 1;
-  int size = image->width * image->height;
   for (int i = 0; i < image->depth; i++)
   {
-    do_dither_error((imbyte*)image->data[i], (imbyte*)NewImage->data[i], size, level, value);
+    do_dither_error((imbyte*)image->data[i], (imbyte*)NewImage->data[i], image->count, level, value);
   }
 }
 
@@ -221,9 +220,9 @@ int imProcessPercentThreshold(const imImage* image, imImage* NewImage, float per
 {
   unsigned long histo[256], cut;
 
-  cut = (int)((image->width * image->height * percent)/100.);
+  cut = (int)((image->count * percent)/100.);
 
-  imCalcHistogram((imbyte*)image->data[0], image->width * image->height, histo, 1);
+  imCalcHistogram((imbyte*)image->data[0], image->count, histo, 1);
 
   int i;
   for (i = 0; i < 256; i++)

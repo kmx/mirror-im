@@ -7,6 +7,7 @@
 
 #include <im.h>
 #include <im_util.h>
+#include <im_color.h>
 #include <im_colorhsi.h>
 #include <im_palette.h>
 
@@ -20,7 +21,7 @@ static void rgb2yrgb(imbyte* r, imbyte* g, imbyte* b, imbyte* y)
 {
   int ri,gi,bi;
 
-  *y = (imbyte)((299*(*r) + 587*(*g) + 114*(*b)) / 1000);
+  *y = imColorRGB2Luma(*r, *g, *b);
   ri = (*r) - (*y) + 128;
   gi = (*g) - (*y) + 128;
   bi = (*b) - (*y) + 128;

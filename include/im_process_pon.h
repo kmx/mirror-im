@@ -227,7 +227,7 @@ void imProcessQuantizeGrayUniform(const imImage* src_image, imImage* dst_image, 
 /** Performs an histogram expansion based on a percentage of the number of pixels. \n
  * Percentage defines an amount of pixels to include at the lowest level and at the highest level.
  * If its is zero only empty counts of the histogram will be considered. \n
- * Images must be IM_BYTE/(IM_RGB or IM_GRAY). Can be done in place. \n
+ * Images must be (IM_BYTE or IM_USHORT)/(IM_RGB or IM_GRAY). Can be done in place. \n
  * To expand the gammut without using the histogram, by just specifing the lowest and highest levels
  * use the \ref IM_GAMUT_EXPAND tone gammut operation (\ref imProcessToneGamut).
  *
@@ -237,7 +237,7 @@ void imProcessQuantizeGrayUniform(const imImage* src_image, imImage* dst_image, 
 void imProcessExpandHistogram(const imImage* src_image, imImage* dst_image, float percent);
 
 /** Performs an histogram equalization. \n
- * Images must be IM_BYTE/(IM_RGB or IM_GRAY). Can be done in place. 
+ * Images must be (IM_BYTE or IM_USHORT)/(IM_RGB or IM_GRAY). Can be done in place. 
  *
  * \verbatim im.ProcessEqualizeHistogram(src_image: imImage, dst_image: imImage) [in Lua 5] \endverbatim
  * \verbatim im.ProcessEqualizeHistogramNew(src_image: imImage) -> new_image: imImage [in Lua 5] \endverbatim
