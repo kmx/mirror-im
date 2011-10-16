@@ -870,45 +870,46 @@ static int imluaImageRow_index (lua_State *L)
   int channel = imagerow->channel;
   int row = imagerow->row;
   int column = luaL_checkint(L, 2);
+  void* channel_buffer = image->data[channel];
 
   if (column < 0 || column >= imagerow->image->width)
     luaL_argerror(L, 2, "invalid column, out of bounds");
 
-  index = channel * image->width * image->height + row * image->width + column;
+  index = row * image->width + column;
 
   switch (image->data_type)
   {
   case IM_BYTE:
     {
-      imbyte *bdata = (imbyte*) image->data[0];
+      imbyte *bdata = (imbyte*) channel_buffer;
       lua_pushnumber(L, (lua_Number) bdata[index]);
     }
     break;
 
   case IM_USHORT:
     {
-      imushort *udata = (imushort*) image->data[0];
+      imushort *udata = (imushort*) channel_buffer;
       lua_pushnumber(L, (lua_Number) udata[index]);
     }
     break;
 
   case IM_INT:
     {
-      int *idata = (int*) image->data[0];
+      int *idata = (int*) channel_buffer;
       lua_pushnumber(L, (lua_Number) idata[index]);
     }
     break;
 
   case IM_FLOAT:
     {
-      float *fdata = (float*) image->data[0];
+      float *fdata = (float*) channel_buffer;
       lua_pushnumber(L, (lua_Number) fdata[index]);
     }
     break;
     
   case IM_CFLOAT:
     {
-      float *cdata = (float*) image->data[0];
+      float *cdata = (float*) channel_buffer;
       imlua_newarrayfloat(L, cdata + (2*index), 2, 1);
     }
     break;
@@ -928,18 +929,19 @@ static int imluaImageRow_newindex (lua_State *L)
   int channel = imagerow->channel;
   int row = imagerow->row;
   int column = luaL_checkint(L, 2);
+  void* channel_buffer = image->data[channel];
 
   if (column < 0 || column >= imagerow->image->width)
     luaL_argerror(L, 2, "invalid column, out of bounds");
 
-  index = channel * image->width * image->height + row * image->width + column;
+  index = row * image->width + column;
 
   switch (image->data_type)
   {
   case IM_BYTE:
     {
       lua_Number value = luaL_checknumber(L, 3);
-      imbyte *bdata = (imbyte*) image->data[0];
+      imbyte *bdata = (imbyte*) channel_buffer;
       bdata[index] = (imbyte) value;
     }
     break;
@@ -947,7 +949,7 @@ static int imluaImageRow_newindex (lua_State *L)
   case IM_USHORT:
     {
       lua_Number value = luaL_checknumber(L, 3);
-      imushort *udata = (imushort*) image->data[0];
+      imushort *udata = (imushort*) channel_buffer;
       udata[index] = (imushort) value;
     }
     break;
@@ -955,7 +957,7 @@ static int imluaImageRow_newindex (lua_State *L)
   case IM_INT:
     {
       lua_Number value = luaL_checknumber(L, 3);
-      int *idata = (int*) image->data[0];
+      int *idata = (int*) channel_buffer;
       idata[index] = (int) value;
     }
     break;
@@ -963,7 +965,7 @@ static int imluaImageRow_newindex (lua_State *L)
   case IM_FLOAT:
     {
       lua_Number value = luaL_checknumber(L, 3);
-      float *fdata = (float*) image->data[0];
+      float *fdata = (float*) channel_buffer;
       fdata[index] = (float) value;
     }
     break;
@@ -971,7 +973,7 @@ static int imluaImageRow_newindex (lua_State *L)
   case IM_CFLOAT:
     {
       int count;
-      float *cdata = (float*) image->data[0];
+      float *cdata = (float*) channel_buffer;
       float *value = imlua_toarrayfloat(L, 3, &count, 1);
       if (count != 2)
       {
