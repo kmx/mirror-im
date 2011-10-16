@@ -476,7 +476,7 @@ void imFileLineBufferWrite(imFile* ifile, const void* data, int line, int plane)
     line = ifile->height-1 - line;
 
   if ((ifile->file_color_mode & 0x3FF) == 
-      (ifile->user_color_mode & 0x3FF)) // compare only packing, alpha and color space
+      (ifile->user_color_mode & 0x3FF)) // compare only packing, alpha and color space, ignore bottom up.
   {
     int data_offset = line*ifile->line_buffer_size;
     if (plane != 0)
@@ -536,7 +536,8 @@ void imFileLineBufferRead(imFile* ifile, void* data, int line, int plane)
   if (ifile->switch_type)
     iFileSwitchFromType(ifile);
 
-  if ((ifile->file_color_mode & 0x3FF) == (ifile->user_color_mode & 0x3FF) && // compare only packing, alpha and color space, ignore bottom up.
+  if (((ifile->file_color_mode & 0x3FF) == 
+      (ifile->user_color_mode & 0x3FF)) && // compare only packing, alpha and color space, ignore bottom up.
       ifile->file_data_type == ifile->user_data_type) // compare data type when reading
   {
     int data_offset = line*ifile->line_buffer_size;
@@ -552,7 +553,7 @@ void imFileLineBufferRead(imFile* ifile, void* data, int line, int plane)
     // and the other to convert packing, alpha, color space and data type
     int convert2bitmap = 0;
     if (imColorModeSpace(ifile->user_color_mode) != imColorModeSpace(ifile->file_color_mode) ||
-        ifile->file_data_type != IM_BYTE)
+        (ifile->user_data_type == IM_BYTE && ifile->file_data_type != IM_BYTE))
       convert2bitmap = 1;
 
     switch(ifile->file_data_type)
@@ -655,7 +656,8 @@ void imFileLineBufferInc(imFile* ifile, int *row, int *plane)
 
 int imFileCheckConversion(imFile* ifile)
 {
-  if ((ifile->file_color_mode & 0x3FF) == (ifile->user_color_mode & 0x3FF) && // compare only packing, alpha and color space
+  if (((ifile->file_color_mode & 0x3FF) == 
+       (ifile->user_color_mode & 0x3FF)) && // compare only packing, alpha and color space, ignore bottom up.
       ifile->file_data_type == ifile->user_data_type)
     return 1;
 
