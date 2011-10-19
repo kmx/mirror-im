@@ -237,7 +237,7 @@ static int imluaImageClone (lua_State *L)
 }
 
 /*****************************************************************************\
- image:SetAttribute(attrib, data_type, count, data)
+ image:SetAttribute(attrib, data_type, data)
 \*****************************************************************************/
 static int imluaImageSetAttribute (lua_State *L)
 {

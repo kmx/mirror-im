@@ -756,6 +756,9 @@ void* imFileFormatTIFF::Handle(int index)
                 
 int imFileFormatTIFF::ReadImageInfo(int index)
 {
+  int sub_ifd = 0;
+  int switch_type_int = 1;
+
   this->cpx_int = 0;
   this->invert = 0;
   this->lab_fix = 0;
@@ -772,7 +775,10 @@ int imFileFormatTIFF::ReadImageInfo(int index)
   else
     this->start_plane = 0;
 
-  uint16* sub_ifd = (uint16*)attrib_table->Get("SubIFDSelect");
+  uint16* sub_ifd_atrib = (uint16*)attrib_table->Get("SubIFDSelect");
+  if (sub_ifd_atrib) sub_ifd = *sub_ifd_atrib;
+  int* switch_type_int_atrib = (int*)attrib_table->Get("SwitchTypeInteger");
+  if (switch_type_int_atrib) switch_type_int = *switch_type_int_atrib;
 
   /* must clear the attribute list, because it can have multiple images and 
      has many attributes that may exists only for specific images. */
@@ -795,9 +801,8 @@ int imFileFormatTIFF::ReadImageInfo(int index)
 
     if (SubFileType == FILETYPE_REDUCEDIMAGE && SubIFDsCount != 0)
     {
-      int index = sub_ifd? *sub_ifd: 0;
-      if (index >= SubIFDsCount) index = SubIFDsCount-1;
-      uint32 SubIFDOffset = SubIFDs[index];
+      if (sub_ifd >= SubIFDsCount) sub_ifd = SubIFDsCount-1;
+      uint32 SubIFDOffset = SubIFDs[sub_ifd];
 
       /* Load the main image attributes, the SubIFD contains only a few attributes. */
       iTIFFReadAttributes(this->tiff, attrib_table);
@@ -942,8 +947,11 @@ int imFileFormatTIFF::ReadImageInfo(int index)
       this->file_data_type = IM_USHORT;
     else if (BitsPerSample <= 32)
     {
-      this->switch_type = 1;
+      this->switch_type = 1;             // switch unsigned to signed
       this->file_data_type = IM_INT;
+
+      if (!switch_type_int)
+        this->switch_type = 0;
     }
     else
       return IM_ERR_DATA;
@@ -951,13 +959,19 @@ int imFileFormatTIFF::ReadImageInfo(int index)
   case SAMPLEFORMAT_INT:
     if (BitsPerSample <= 8)
     {
-      this->switch_type = 1;
+      this->switch_type = 1;             // switch signed to unsigned
       this->file_data_type = IM_BYTE;
+
+      if (!switch_type_int)
+        this->switch_type = 0;
     }
     else if (BitsPerSample <= 16)
     {
-      this->switch_type = 1;
+      this->switch_type = 1;             // switch signed to unsigned
       this->file_data_type = IM_USHORT;
+
+      if (!switch_type_int)
+        this->switch_type = 0;
     }
     else if (BitsPerSample <= 32)
       this->file_data_type = IM_INT;
@@ -969,8 +983,8 @@ int imFileFormatTIFF::ReadImageInfo(int index)
       this->file_data_type = IM_FLOAT;      
     else if (BitsPerSample == 64)
     {
-      this->switch_type = 1;
-      this->file_data_type = IM_FLOAT;
+      this->switch_type = 1;             // switch double to float
+      this->file_data_type = IM_FLOAT;   
     }
     else
       return IM_ERR_DATA;
@@ -984,7 +998,7 @@ int imFileFormatTIFF::ReadImageInfo(int index)
     else if (BitsPerSample == 64)
     {
       this->cpx_int = 2;
-      this->file_data_type = IM_CFLOAT; // convert int to float     
+      this->file_data_type = IM_CFLOAT;  // convert int to float     
     }
     else
       return IM_ERR_DATA;
@@ -994,7 +1008,7 @@ int imFileFormatTIFF::ReadImageInfo(int index)
       this->file_data_type = IM_CFLOAT;      
     else if (BitsPerSample == 128)
     {
-      this->switch_type = 1;
+      this->switch_type = 1;             // switch double to float
       this->file_data_type = IM_CFLOAT;
     }
     else

@@ -135,6 +135,8 @@ void* imFileHandle(imFile* ifile, int index)
   return ifileformat->Handle(index);
 }
 
+#include<stdio.h>
+
 void imFileSetAttribute(imFile* ifile, const char* attrib, int data_type, int count, const void* data)
 {
   assert(ifile);
