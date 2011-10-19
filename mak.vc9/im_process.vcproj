@@ -169,6 +169,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\process\im_remotesens.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\process\im_render.cpp"
 				>
 			</File>
