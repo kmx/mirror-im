@@ -109,6 +109,13 @@ void imCalcHistogramStatistics(const imImage* image, imStats* stats);
  * \ingroup stats */
 void imCalcHistoImageStatistics(const imImage* image, int* median, int* mode);
 
+/** Calculates the minimum and maximum levels 
+ * ignoring a given percentage of the histogram count.\n
+ * Only IM_BYTE and IM_USHORT images are supported. \n
+ *
+ * \verbatim im.CalcPercentMinMax(image: imImage, percent: number, ignore_zero: boolean) -> min, max: number [in Lua 5] \endverbatim
+ * \ingroup stats */
+void imCalcPercentMinMax(const imImage* image, float percent, int ignore_zero, int *min, int *max);
 
 
 /** \defgroup analyze Image Analysis

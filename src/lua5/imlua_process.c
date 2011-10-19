@@ -93,9 +93,10 @@ static int imluaCalcHistogram (lua_State *L)
 
   case IM_USHORT:
     {
-      unsigned long histo[65536];
+      unsigned long* histo = (unsigned long*)malloc(65536 * sizeof(unsigned long));
       imCalcUShortHistogram((imushort*)src_image->data[plane], src_image->count, histo, cumulative);
       imlua_newarrayulong(L, histo, 65536, 0);
+      free(histo);
     }
     break;
 
@@ -211,6 +212,25 @@ static int imluaCalcHistoImageStatistics (lua_State *L)
 
   return 2;
 }
+
+static int imluaCalcPercentMinMax(lua_State *L)
+{
+  int min, max;
+
+  imImage *image = imlua_checkimage(L, 1);
+  float percent = (float)luaL_checknumber(L, 2);
+  int ignore_zero = lua_toboolean(L, 3);
+
+  if (image->data_type != IM_BYTE && image->data_type != IM_USHORT)
+    luaL_argerror(L, 1, "image data type must be IM_BYTE or IM_USHORT");
+
+  imCalcPercentMinMax(image, percent, ignore_zero, &min, &max);
+
+  lua_pushinteger(L, min);
+  lua_pushinteger(L, max);
+  return 2;
+}
+
 
 /*****************************************************************************\
  Image Analysis
@@ -2956,6 +2976,7 @@ static const luaL_reg improcess_lib[] = {
   {"CalcImageStatistics", imluaCalcImageStatistics},
   {"CalcHistogramStatistics", imluaCalcHistogramStatistics},
   {"CalcHistoImageStatistics", imluaCalcHistoImageStatistics},
+  {"CalcPercentMinMax", imluaCalcPercentMinMax},
 
   {"AnalyzeFindRegions", imluaAnalyzeFindRegions},
   {"AnalyzeMeasureArea", imluaAnalyzeMeasureArea},

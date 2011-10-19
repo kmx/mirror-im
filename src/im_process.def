@@ -64,6 +64,7 @@ EXPORTS
   imCalcHistogramStatistics
   imCalcHistoImageStatistics
   imCalcImageStatistics
+  imCalcPercentMinMax
   imProcessPixelate
   imProcessArithmeticConstOp
   imProcessArithmeticOp

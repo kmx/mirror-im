@@ -50,44 +50,17 @@ static void DoExpandHistogram(T* src_map, T* dst_map, int size, int depth, int h
 
 void imProcessExpandHistogram(const imImage* src_image, imImage* dst_image, float percent)
 {
+  int low_level, high_level;
+  imCalcPercentMinMax(src_image, percent, 0, &low_level, &high_level);
+
   int hcount = 256;
   if (src_image->data_type == IM_USHORT)
     hcount = 65536;
-
-  unsigned long* histo = new unsigned long[hcount];
-  imCalcGrayHistogram(src_image, histo, 0);
-
-  unsigned long acum, cut = (unsigned long)((src_image->count * percent) / 100.0f);
-  int low_level, high_level;
-
-  acum = 0;
-  for (low_level = 0; low_level < hcount; low_level++)
-  {  
-    acum += histo[low_level];
-    if (acum > cut)
-      break;
-  }
-
-  acum = 0;
-  for (high_level = hcount-1; high_level > 0; high_level--)
-  {  
-    acum += histo[high_level];
-    if (acum > cut)
-      break;
-  }
-
-  if (low_level >= high_level)
-  {
-    low_level = 0;
-    high_level = hcount-1;
-  }
 
   if (src_image->data_type == IM_USHORT)
     DoExpandHistogram((imushort*)src_image->data[0], (imushort*)dst_image->data[0], src_image->count, src_image->depth, hcount, low_level, high_level);
   else
     DoExpandHistogram((imbyte*)src_image->data[0], (imbyte*)dst_image->data[0], src_image->count, src_image->depth, hcount, low_level, high_level);
-
-  delete [] histo;
 }
 
 template <class T>
