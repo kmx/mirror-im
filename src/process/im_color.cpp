@@ -208,9 +208,9 @@ void imProcessNormalizeComponents(const imImage* src_image, imImage* dst_image)
 }
 
 template <class T> 
-static void DoReplaceColor(T *src_data, T *dst_data, int width, int height, int depth, float* src_color, float* dst_color)
+static void DoReplaceColor(T *src_data, T *dst_data, int count, int depth, float* src_color, float* dst_color)
 {
-  int d, count = width*height;
+  int d;
   for (int i = 0; i < count; i++)
   {
     int equal = 1;
@@ -241,16 +241,120 @@ void imProcessReplaceColor(const imImage* src_image, imImage* dst_image, float* 
   switch(src_image->data_type)
   {
   case IM_BYTE:
-    DoReplaceColor((imbyte*)src_image->data[0],   (imbyte*)dst_image->data[0],   src_image->width, src_image->height, src_image->depth, src_color, dst_color);
-    break;                                                                                                           
-  case IM_USHORT:                                                                                                      
-    DoReplaceColor((imushort*)src_image->data[0], (imushort*)dst_image->data[0], src_image->width, src_image->height, src_image->depth, src_color, dst_color);
-    break;                                                                                                           
-  case IM_INT:                                                                                                      
-    DoReplaceColor((int*)src_image->data[0],      (int*)dst_image->data[0],      src_image->width, src_image->height, src_image->depth, src_color, dst_color);
-    break;                                                                                                           
-  case IM_FLOAT:                                                                                                      
-    DoReplaceColor((float*)src_image->data[0],    (float*)dst_image->data[0],    src_image->width, src_image->height, src_image->depth, src_color, dst_color);
+    DoReplaceColor((imbyte*)src_image->data[0],   (imbyte*)dst_image->data[0],   src_image->count, src_image->depth, src_color, dst_color);
+    break;                                                                                         
+  case IM_USHORT:                                                                                   
+    DoReplaceColor((imushort*)src_image->data[0], (imushort*)dst_image->data[0], src_image->count, src_image->depth, src_color, dst_color);
+    break;                                                                                         
+  case IM_INT:                                                                                     
+    DoReplaceColor((int*)src_image->data[0],      (int*)dst_image->data[0],      src_image->count, src_image->depth, src_color, dst_color);
+    break;                                                                                         
+  case IM_FLOAT:                                                                                   
+    DoReplaceColor((float*)src_image->data[0],    (float*)dst_image->data[0],    src_image->count, src_image->depth, src_color, dst_color);
     break;                                                                                
   }
 }
+
+template <class ST, class DT> 
+static void DoSetAlphaColor(ST *src_data, DT *dst_data, int count, int depth, float* src_color, float dst_alpha)
+{
+  int d;
+  for (int i = 0; i < count; i++)
+  {
+    int equal = 1;
+    for (d = 0; d < depth; d++)
+    {
+      if (*(src_data+d*count) != (ST)src_color[d])
+      {
+        equal = 0;
+        break;
+      }
+    }
+
+    if (equal)
+      *dst_data = (DT)dst_alpha;
+
+    src_data++;
+    dst_data++;
+  }
+}
+
+void imProcessSetAlphaColor(const imImage* src_image, imImage* dst_image, float* src_color, float dst_alpha)
+{
+  if (!dst_image->has_alpha)
+    return;
+  int a = dst_image->depth; // Index of the alpha channel
+
+  switch(src_image->data_type)
+  {
+  case IM_BYTE:
+    switch(dst_image->data_type)
+    {
+    case IM_BYTE:
+      DoSetAlphaColor((imbyte*)src_image->data[0],   (imbyte*)dst_image->data[a],   src_image->count, src_image->depth, src_color, dst_alpha);
+      break;                                                                                        
+    case IM_USHORT:                                                                                   
+      DoSetAlphaColor((imbyte*)src_image->data[0], (imushort*)dst_image->data[a], src_image->count, src_image->depth, src_color, dst_alpha);
+      break;                                                                                        
+    case IM_INT:                                                                                    
+      DoSetAlphaColor((imbyte*)src_image->data[0],      (int*)dst_image->data[a],      src_image->count, src_image->depth, src_color, dst_alpha);
+      break;                                                                                        
+    case IM_FLOAT:                                                                                   
+      DoSetAlphaColor((imbyte*)src_image->data[0],    (float*)dst_image->data[a],    src_image->count, src_image->depth, src_color, dst_alpha);
+      break;                                                                                
+    }
+    break;                                                                                        
+  case IM_USHORT:                                                                                   
+    switch(dst_image->data_type)
+    {
+    case IM_BYTE:
+      DoSetAlphaColor((imushort*)src_image->data[0],   (imbyte*)dst_image->data[a],   src_image->count, src_image->depth, src_color, dst_alpha);
+      break;                                                                                        
+    case IM_USHORT:                                                                                   
+      DoSetAlphaColor((imushort*)src_image->data[0], (imushort*)dst_image->data[a], src_image->count, src_image->depth, src_color, dst_alpha);
+      break;                                                                                        
+    case IM_INT:                                                                                    
+      DoSetAlphaColor((imushort*)src_image->data[0],      (int*)dst_image->data[a],      src_image->count, src_image->depth, src_color, dst_alpha);
+      break;                                                                                        
+    case IM_FLOAT:                                                                                   
+      DoSetAlphaColor((imushort*)src_image->data[0],    (float*)dst_image->data[a],    src_image->count, src_image->depth, src_color, dst_alpha);
+      break;                                                                                
+    }
+    break;                                                                                        
+  case IM_INT:                                                                                    
+    switch(dst_image->data_type)
+    {
+    case IM_BYTE:
+      DoSetAlphaColor((int*)src_image->data[0],   (imbyte*)dst_image->data[a],   src_image->count, src_image->depth, src_color, dst_alpha);
+      break;                                                                                        
+    case IM_USHORT:                                                                                   
+      DoSetAlphaColor((int*)src_image->data[0], (imushort*)dst_image->data[a], src_image->count, src_image->depth, src_color, dst_alpha);
+      break;                                                                                        
+    case IM_INT:                                                                                    
+      DoSetAlphaColor((int*)src_image->data[0],      (int*)dst_image->data[a],      src_image->count, src_image->depth, src_color, dst_alpha);
+      break;                                                                                        
+    case IM_FLOAT:                                                                                   
+      DoSetAlphaColor((int*)src_image->data[0],    (float*)dst_image->data[a],    src_image->count, src_image->depth, src_color, dst_alpha);
+      break;                                                                                
+    }
+    break;                                                                                        
+  case IM_FLOAT:                                                                                   
+    switch(dst_image->data_type)
+    {
+    case IM_BYTE:
+      DoSetAlphaColor((float*)src_image->data[0],   (imbyte*)dst_image->data[a],   src_image->count, src_image->depth, src_color, dst_alpha);
+      break;                                                                                        
+    case IM_USHORT:                                                                                   
+      DoSetAlphaColor((float*)src_image->data[0], (imushort*)dst_image->data[a], src_image->count, src_image->depth, src_color, dst_alpha);
+      break;                                                                                        
+    case IM_INT:                                                                                    
+      DoSetAlphaColor((float*)src_image->data[0],      (int*)dst_image->data[a],      src_image->count, src_image->depth, src_color, dst_alpha);
+      break;                                                                                        
+    case IM_FLOAT:                                                                                   
+      DoSetAlphaColor((float*)src_image->data[0],    (float*)dst_image->data[a],    src_image->count, src_image->depth, src_color, dst_alpha);
+      break;                                                                                
+    }
+    break;                                                                                
+  }
+}
+

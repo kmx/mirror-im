@@ -318,6 +318,16 @@ void imProcessNormalizeComponents(const imImage* src_image, imImage* dst_image);
  * \ingroup colorproc */
 void imProcessReplaceColor(const imImage* src_image, imImage* dst_image, float* src_color, float* dst_color);
 
+/** Sets the alpha channel in destiny where the given color occours in source,
+ * elsewhere alpha remains untouched. \n
+ * The color must have the same number of components of the source image. \n
+ * Destiny image must have an alpha channel. \n
+ * Supports all color spaces and all data types except IM_CFLOAT.
+ * Images must have the same size.
+ *
+ * \verbatim im.ProcessSetAlphaColor(src_image: imImage, dst_image: imImage, src_color: table of numbers, dst_alpha: number) [in Lua 5] \endverbatim
+ * \ingroup colorproc */
+void imProcessSetAlphaColor(const imImage* src_image, imImage* dst_image, float* src_color, float dst_alpha);
 
 
 /** \defgroup logic Logical Arithmetic Operations 

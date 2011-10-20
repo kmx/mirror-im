@@ -328,4 +328,4 @@ OneSourceOneDest("ProcessSliceThreshold", nil, nil, im.BINARY, nil)
 OneSourceOneDest("ProcessPixelate")
 OneSourceOneDest("ProcessPosterize")
 
-TwoSourcesOneDest("ProcessNDVI")
+TwoSourcesOneDest("ProcessNDVI", nil, nil, nil, im.FLOAT)

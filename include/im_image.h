@@ -43,14 +43,14 @@ typedef struct _imImage
   int data_type;      /**< Data type descriptor. See also \ref imDataType. image:DataType() -> data_type: number [in Lua 5]. */
   int has_alpha;      /**< Indicates that there is an extra channel with alpha. image:HasAlpha() -> has_alpha: boolean [in Lua 5]. \n
                            It will not affect the secondary parameters, i.e. the number of planes will be in fact depth+1. \n
-                           It is always 0 unless imImageAddAlpha is called, this is done in image load functions. */
+                           It is always 0 unless imImageAddAlpha is called. Alpha is automatically added in image loading functions. */
 
   /* secondary parameters */
   int depth;          /**< Number of planes                      (ColorSpaceDepth)   image:Depth() -> depth: number [in Lua 5].       */
   int line_size;      /**< Number of bytes per line in one plane (width * DataTypeSize)    */
   int plane_size;     /**< Number of bytes per plane.            (line_size * height)      */
   int size;           /**< Number of bytes occupied by the image (plane_size * depth)      */
-  int count;          /**< Number of pixels                      (width * height)          */
+  int count;          /**< Number of pixels per plane            (width * height)          */
 
   /* image data */
   void** data;        /**< Image data organized as a 2D matrix with several planes.   \n

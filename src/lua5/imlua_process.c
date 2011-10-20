@@ -2179,6 +2179,23 @@ static int imluaProcessReplaceColor (lua_State *L)
   return 0;
 }
 
+static int imluaProcessSetAlphaColor(lua_State *L)
+{
+  int src_count;
+  imImage *src_image = imlua_checkimage(L, 1);
+  imImage *dst_image = imlua_checkimage(L, 2);
+  float *src_color = imlua_toarrayfloat(L, 3, &src_count, 1);
+  float dst_alpha = (float)luaL_checknumber(L, 4);
+
+  imlua_checknotcfloat(L, src_image, 1);
+  imlua_checknotcfloat(L, dst_image, 2);
+  imlua_matchsize(L, src_image, dst_image);
+  luaL_argcheck(L, dst_image->has_alpha, 2, "destiny image must has an alpha channel");
+  luaL_argcheck(L, src_count == src_image->depth, 3, "the color must have the same number of components of the source image");
+
+  imProcessSetAlphaColor(src_image, dst_image, src_color, dst_alpha);
+  return 0;
+}
 
 
 /*****************************************************************************\
@@ -3084,6 +3101,7 @@ static const luaL_reg improcess_lib[] = {
   {"ProcessMergeComponents", imluaProcessMergeComponents},
   {"ProcessNormalizeComponents", imluaProcessNormalizeComponents},
   {"ProcessReplaceColor", imluaProcessReplaceColor},
+  {"ProcessSetAlphaColor", imluaProcessSetAlphaColor},
 
   {"ProcessBitwiseOp", imluaProcessBitwiseOp},
   {"ProcessBitwiseNot", imluaProcessBitwiseNot},
