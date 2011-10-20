@@ -108,6 +108,7 @@ EXPORTS
   imProcessRotateKernel
   imProcessAddMargins
   imProcessReplaceColor
+  imProcessSetAlphaColor
   imProcessPosterize
   imProcessNegative
   imProcessNDVI
