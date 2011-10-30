@@ -51,7 +51,7 @@ static int DoRenderCondOp(T *map, int width, int height, int d, imRenderCondFunc
   return 1;
 }
 
-int imProcessRenderCondOp(imImage* image, imRenderCondFunc render_func, char* render_name, float* param)
+int imProcessRenderCondOp(imImage* image, imRenderCondFunc render_func, const char* render_name, float* param)
 {
   int ret = 0;
 
@@ -117,7 +117,7 @@ static int DoRenderOp(T *map, int width, int height, int d, imRenderFunc render_
   return 1;
 }
 
-int imProcessRenderOp(imImage* image, imRenderFunc render_func, char* render_name, float* param, int plus)
+int imProcessRenderOp(imImage* image, imRenderFunc render_func, const char* render_name, float* param, int plus)
 {
   int ret = 0;
 

@@ -23,9 +23,9 @@ int imlua_getn(lua_State *L, int index);
 
 /* array */
 
-int imlua_newarrayint(lua_State *L, int *value, int count, int start);
-int imlua_newarrayulong(lua_State *L, unsigned long *value, int count, int start);
-int imlua_newarrayfloat(lua_State *L, float *value, int count, int start);
+int imlua_newarrayint(lua_State *L, const int *value, int count, int start);
+int imlua_newarrayulong(lua_State *L, const unsigned long *value, int count, int start);
+int imlua_newarrayfloat(lua_State *L, const float *value, int count, int start);
 
 int *imlua_toarrayint(lua_State *L, int index, int *count, int start);
 unsigned long *imlua_toarrayulong (lua_State *L, int index, int *count, int start);

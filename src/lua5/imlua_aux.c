@@ -44,7 +44,7 @@ int imlua_getn (lua_State *L, int index)
 /*****************************************************************************\
  Creates an int array.
 \*****************************************************************************/
-int imlua_newarrayint (lua_State *L, int *value, int count, int start)
+int imlua_newarrayint (lua_State *L, const int *value, int count, int start)
 {
   int i;
   lua_createtable(L, count, 0);
@@ -59,7 +59,7 @@ int imlua_newarrayint (lua_State *L, int *value, int count, int start)
 /*****************************************************************************\
  Creates an unsigned long array.
 \*****************************************************************************/
-int imlua_newarrayulong (lua_State *L, unsigned long *value, int count, int start)
+int imlua_newarrayulong (lua_State *L, const unsigned long *value, int count, int start)
 {
   int i;
   lua_createtable(L, count, 0);
@@ -74,7 +74,7 @@ int imlua_newarrayulong (lua_State *L, unsigned long *value, int count, int star
 /*****************************************************************************\
  Creates a float array.
 \*****************************************************************************/
-int imlua_newarrayfloat (lua_State *L, float *value, int count, int start)
+int imlua_newarrayfloat (lua_State *L, const float *value, int count, int start)
 {
   int i;
   lua_createtable(L, count, 0);
@@ -93,6 +93,8 @@ int *imlua_toarrayint (lua_State *L, int index, int *count, int start)
 {
   int i, n;
   int *value = NULL;
+
+  *count = 0;
 
   if (lua_istable(L, index))
   {
@@ -119,6 +121,8 @@ unsigned long *imlua_toarrayulong (lua_State *L, int index, int *count, int star
   int i, n;
   unsigned long *value = NULL;
 
+  *count = 0;
+
   if (lua_istable(L, index))
   {
     n = imlua_getn(L, index);
@@ -143,6 +147,8 @@ float *imlua_toarrayfloat (lua_State *L, int index, int *count, int start)
 {
   int i, n;
   float *value = NULL;
+
+  *count = 0;
 
   if (lua_istable(L, index))
   {

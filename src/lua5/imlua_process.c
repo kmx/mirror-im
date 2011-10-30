@@ -22,6 +22,9 @@
 #include "imlua_image.h"
 
 
+/* NOTE: This can breaks on multithread if using multiple states. */
+/* Used only in im.ProcessRenderOp, im.ProcessRenderCondOp and im.ProcessUnArithmeticOpFunc. */
+static lua_State *g_State = NULL;
 
 /*****************************************************************************\
  Image Statistics Calculations
@@ -1598,6 +1601,98 @@ static int imluaProcessUnArithmeticOp (lua_State *L)
   return 0;
 }
 
+static float (imluaUnOpFunc)(int x, int y, int d, float val, int *cond, float* params)
+{
+  lua_State *L = g_State;
+
+  luaL_checktype(L, 3, LUA_TFUNCTION);
+  lua_pushvalue(L, 3);
+  lua_pushinteger(L, x);
+  lua_pushinteger(L, y);
+  lua_pushinteger(L, d);
+  lua_pushnumber(L, val);
+  lua_pushvalue(L, 5); (void)params; /* params is passed in Lua */
+
+  lua_call(L, 5, 2);
+
+  *cond = lua_toboolean(L, -1);
+  return (float) luaL_checknumber(L, -2);
+}
+
+static int imluaProcessUnPontualOp(lua_State *L)
+{
+  imImage *src_image = imlua_checkimage(L, 1);
+  imImage *dst_image = imlua_checkimage(L, 2);
+  const char *op_name = luaL_checkstring(L, 4);
+
+  imlua_checknotcfloat(L, src_image, 1);
+  imlua_checknotcfloat(L, dst_image, 1);
+  imlua_matchsize(L, src_image, dst_image);
+  if (src_image->depth != dst_image->depth)
+    luaL_error(L, "images must have the same depth");
+  luaL_checktype(L, 3, LUA_TFUNCTION);
+
+  g_State = L;
+  lua_pushboolean(L, imProcessUnPontualOp(src_image, dst_image, imluaUnOpFunc, op_name, NULL));
+  g_State = NULL;
+
+  return 1;
+}
+
+static void imlua_checkarrayfloat (lua_State *L, int index, float* value, int count, int start)
+{
+  int i;
+  for (i = 0; i < count; i++)
+  {
+    lua_rawgeti(L, index, i+start);
+    value[i] = (float)luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+  }
+}
+
+static int (imluaUnColorOpFunc)(int x, int y, const float* src_value, float* dst_value, float* params)
+{
+  lua_State *L = g_State;
+  int src_depth = (int)params[0];
+  int dst_depth = (int)params[1];
+
+  luaL_checktype(L, 3, LUA_TFUNCTION);
+  lua_pushvalue(L, 3);
+  lua_pushinteger(L, x);
+  lua_pushinteger(L, y);
+  imlua_newarrayfloat(L, src_value, src_depth, 0);
+  lua_pushvalue(L, 5);  /* params is passed in Lua */
+
+  lua_call(L, 4, 2);
+
+  imlua_checkarrayfloat(L, -2, dst_value, dst_depth, 0);
+  return lua_toboolean(L, -1);
+}
+
+static int imluaProcessUnPontualColorOp(lua_State *L)
+{
+  imImage *src_image = imlua_checkimage(L, 1);
+  imImage *dst_image = imlua_checkimage(L, 2);
+  const char *op_name = luaL_checkstring(L, 4);
+  int src_depth = src_image->has_alpha? src_image->depth+1: src_image->depth;
+  int dst_depth = dst_image->has_alpha? dst_image->depth+1: dst_image->depth;
+  float params[2];
+
+  params[0] = (float)src_depth;
+  params[1] = (float)dst_depth;
+
+  imlua_checknotcfloat(L, src_image, 1);
+  imlua_checknotcfloat(L, dst_image, 1);
+  imlua_matchsize(L, src_image, dst_image);
+  luaL_checktype(L, 3, LUA_TFUNCTION);
+
+  g_State = L;
+  lua_pushboolean(L, imProcessUnPontualColorOp(src_image, dst_image, imluaUnColorOpFunc, op_name, params));
+  g_State = NULL;
+
+  return 1;
+}
+
 /*****************************************************************************\
  im.ProcessArithmeticOp
 \*****************************************************************************/
@@ -2176,6 +2271,11 @@ static int imluaProcessReplaceColor (lua_State *L)
   luaL_argcheck(L, dst_count == src_image->depth, 4, "the colors must have the same number of components of the images");
 
   imProcessReplaceColor(src_image, dst_image, src_color, dst_color);
+
+  if (src_color)
+    free(src_color);
+  if (dst_color)
+    free(dst_color);
   return 0;
 }
 
@@ -2194,6 +2294,10 @@ static int imluaProcessSetAlphaColor(lua_State *L)
   luaL_argcheck(L, src_count == src_image->depth, 3, "the color must have the same number of components of the source image");
 
   imProcessSetAlphaColor(src_image, dst_image, src_color, dst_alpha);
+
+  if (src_color)
+    free(src_color);
+
   return 0;
 }
 
@@ -2275,20 +2379,16 @@ static int imluaProcessBitPlane (lua_State *L)
  Synthetic Image Render
 \*****************************************************************************/
 
-/* NOTE: This breaks on multithread */
-static lua_State *g_renderState = NULL;
-int g_paramCount = 0;
-
-static float imluaRenderFunc (int x, int y, int d, float *param)
+static float imluaRenderFunc (int x, int y, int d, float *params)
 {
-  lua_State *L = g_renderState;
+  lua_State *L = g_State;
 
   luaL_checktype(L, 2, LUA_TFUNCTION);
   lua_pushvalue(L, 2);
-  lua_pushnumber(L, x);
-  lua_pushnumber(L, y);
-  lua_pushnumber(L, d);
-  imlua_newarrayfloat(L, param, g_paramCount, 1);
+  lua_pushinteger(L, x);
+  lua_pushinteger(L, y);
+  lua_pushinteger(L, d);
+  lua_pushvalue(L, 4); (void)params; /* params is passed in Lua */
 
   lua_call(L, 4, 1);
 
@@ -2300,33 +2400,30 @@ static float imluaRenderFunc (int x, int y, int d, float *param)
 \*****************************************************************************/
 static int imluaProcessRenderOp (lua_State *L)
 {
-  int count;
-
   imImage *image = imlua_checkimage(L, 1);
   const char *render_name = luaL_checkstring(L, 3);
-  float *param = imlua_toarrayfloat(L, 4, &count, 1);
   int plus = luaL_checkint(L, 5);
 
   imlua_checknotcfloat(L, image, 1);
-
   luaL_checktype(L, 2, LUA_TFUNCTION);
 
-  g_renderState = L;
-  g_paramCount = count;
-  lua_pushboolean(L, imProcessRenderOp(image, imluaRenderFunc, (char*) render_name, param, plus));
+  g_State = L;
+  lua_pushboolean(L, imProcessRenderOp(image, imluaRenderFunc, (char*) render_name, NULL, plus));
+  g_State = NULL;
+
   return 1;
 }
 
-static float imluaRenderCondFunc (int x, int y, int d, int *cond, float *param)
+static float imluaRenderCondFunc (int x, int y, int d, int *cond, float *params)
 {
-  lua_State *L = g_renderState;
+  lua_State *L = g_State;
 
   luaL_checktype(L, 2, LUA_TFUNCTION);
   lua_pushvalue(L, 2);
-  lua_pushnumber(L, x);
-  lua_pushnumber(L, y);
-  lua_pushnumber(L, d);
-  imlua_newarrayfloat(L, param, g_paramCount, 1);
+  lua_pushinteger(L, x);
+  lua_pushinteger(L, y);
+  lua_pushinteger(L, d);
+  lua_pushvalue(L, 4); (void)params; /* params is passed in Lua */
 
   lua_call(L, 4, 2);
 
@@ -2339,19 +2436,16 @@ static float imluaRenderCondFunc (int x, int y, int d, int *cond, float *param)
 \*****************************************************************************/
 static int imluaProcessRenderCondOp (lua_State *L)
 {
-  int count;
-
   imImage *image = imlua_checkimage(L, 1);
   const char *render_name = luaL_checkstring(L, 3);
-  float *param = imlua_toarrayfloat(L, 4, &count, 1);
 
   imlua_checknotcfloat(L, image, 1);
-
   luaL_checktype(L, 2, LUA_TFUNCTION);
 
-  g_renderState = L;
-  g_paramCount = count;
-  lua_pushboolean(L, imProcessRenderCondOp(image, imluaRenderCondFunc, (char*) render_name, param));
+  g_State = L;
+  lua_pushboolean(L, imProcessRenderCondOp(image, imluaRenderCondFunc, (char*) render_name, NULL));
+  g_State = NULL;
+
   return 1;
 }
 
@@ -3075,6 +3169,8 @@ static const luaL_reg improcess_lib[] = {
   {"GaussianKernelSize2StdDev", imluaGaussianKernelSize2StdDev},
   {"GaussianStdDev2KernelSize", imluaGaussianStdDev2KernelSize},
 
+  {"ProcessUnPontualOp", imluaProcessUnPontualOp},
+  {"ProcessUnPontualColorOp", imluaProcessUnPontualColorOp},
   {"ProcessUnArithmeticOp", imluaProcessUnArithmeticOp},
   {"ProcessArithmeticOp", imluaProcessArithmeticOp},
   {"ProcessArithmeticConstOp", imluaProcessArithmeticConstOp},

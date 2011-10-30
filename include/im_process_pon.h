@@ -13,6 +13,45 @@
 extern "C" {
 #endif
 
+/** \defgroup pontual Pontual Custom Operations 
+ * \par
+ * See \ref im_process_pon.h
+ * \ingroup process */
+
+
+/** Custom pontual unary funtion.
+ * \verbatim func(x: number, y: number, d: number, val: number, params: table of number) -> value: number, cond: boolean [in Lua 5] \endverbatim
+ * \ingroup pontual */
+typedef float (*imUnPontualOpFunc)(int x, int y, int d, float val, int *cond, float* params);
+
+/** Apply an pontual unary operation using a custom function.
+ * One pixel from the source affects the same pixel on destiny. \n
+ * Can be done in place, images must match size and depth.
+ * IM_CFLOAT data type is not supported. \n
+ * Data will be set only if cond is true.
+ * Returns zero if the counter aborted.
+ *
+ * \verbatim im.ProcessUnPontualOp(src_image: imImage, dst_image: imImage, func: function, op_name: string, params: table of number) -> counter: boolean [in Lua 5] \endverbatim
+ * \verbatim im.ProcessUnPontualOpNew(image: imImage, func: function, op_name: string, params: table of number) -> counter: boolean, new_image: imImage [in Lua 5] \endverbatim
+ * \ingroup pontual */
+int imProcessUnPontualOp(const imImage* src_image, imImage* dst_image, imUnPontualOpFunc func, const char* op_name, float* params);
+
+/** Custom pontual color unary funtion.
+ * \verbatim func(x: number, y: number, src_value: table of number, params: table of number) -> dst_value: table of number, cond: boolean [in Lua 5] \endverbatim
+ * \ingroup pontual */
+typedef int (*imUnPontualColorOpFunc)(int x, int y, const float* src_value, float* dst_value, float* params);
+
+/** Apply an pontual color unary operation using a custom function.
+ * One pixel from the source affects the same pixel on destiny. \n
+ * Can be done in place, images must match size.
+ * IM_CFLOAT data type is not supported. \n
+ * Data will be set only if cond is true.
+ * Returns zero if the counter aborted.
+ *
+ * \verbatim im.ProcessUnPontualColorOp(src_image: imImage, dst_image: imImage, func: function, op_name: string, params: table of number) -> counter: boolean [in Lua 5] \endverbatim
+ * \verbatim im.ProcessUnPontualColorOpNew(image: imImage, func: function, op_name: string, params: table of number) -> counter: boolean, new_image: imImage [in Lua 5] \endverbatim
+ * \ingroup pontual */
+int imProcessUnPontualColorOp(const imImage* src_image, imImage* dst_image, imUnPontualColorOpFunc func, const char* op_name, float* params);
 
 
 /** \defgroup arithm Arithmetic Operations 
@@ -390,31 +429,31 @@ void imProcessBitPlane(const imImage* src_image, imImage* dst_image, int plane, 
  * \ingroup process */
 
 /** Render Funtion.
- * \verbatim render_func(x: number, y: number, d: number, param: table of number) -> value: number [in Lua 5] \endverbatim
+ * \verbatim render_func(x: number, y: number, d: number, params: table of number) -> value: number [in Lua 5] \endverbatim
  * \ingroup render */
-typedef float (*imRenderFunc)(int x, int y, int d, float* param);
+typedef float (*imRenderFunc)(int x, int y, int d, float* params);
 
 /** Render Conditional Funtion.
- * \verbatim render_cond_func(x: number, y: number, d: number, param: table of number) -> value: number, cond: boolean [in Lua 5] \endverbatim
+ * \verbatim render_cond_func(x: number, y: number, d: number, params: table of number) -> value: number, cond: boolean [in Lua 5] \endverbatim
  * \ingroup render */
-typedef float (*imRenderCondFunc)(int x, int y, int d, int *cond, float* param);
+typedef float (*imRenderCondFunc)(int x, int y, int d, int *cond, float* params);
 
 /** Render a synthetic image using a render function. \n
  * plus will make the render be added to the current image data, 
  * or else all data will be replaced. All the render functions use this or the conditional function. \n
  * Returns zero if the counter aborted.
  *
- * \verbatim im.ProcessRenderOp(image: imImage, render_func: function, render_name: string, param: table of number, plus: boolean) -> counter: boolean [in Lua 5] \endverbatim
+ * \verbatim im.ProcessRenderOp(image: imImage, render_func: function, render_name: string, params: table of number, plus: boolean) -> counter: boolean [in Lua 5] \endverbatim
  * \ingroup render */
-int imProcessRenderOp(imImage* image, imRenderFunc render_func, char* render_name, float* param, int plus);
+int imProcessRenderOp(imImage* image, imRenderFunc render_func, const char* render_name, float* params, int plus);
 
 /** Render a synthetic image using a conditional render function. \n
  * Data will be rendered only if the condional param is true. \n
  * Returns zero if the counter aborted.
  *
- * \verbatim im.ProcessRenderCondOp(image: imImage, render_cond_func: function, render_name: string, param: table of number) -> counter: boolean [in Lua 5] \endverbatim
+ * \verbatim im.ProcessRenderCondOp(image: imImage, render_cond_func: function, render_name: string, params: table of number) -> counter: boolean [in Lua 5] \endverbatim
  * \ingroup render */
-int imProcessRenderCondOp(imImage* image, imRenderCondFunc render_cond_func, char* render_name, float* param);
+int imProcessRenderCondOp(imImage* image, imRenderCondFunc render_cond_func, const char* render_name, float* params);
 
 /** Render speckle noise on existing data. Can be done in place.
  *
@@ -530,24 +569,24 @@ int imProcessRenderChessboard(imImage* image, int x_space, int y_space);
 enum imToneGamut {
   IM_GAMUT_NORMALIZE, /**< normalize = (a-min) / (max-min)     (destiny image must be IM_FLOAT)   */
   IM_GAMUT_POW,       /**< pow       = ((a-min) / (max-min))^gamma * (max-min) + min                  \n
-                                       param[0]=gamma                                             */
+                                       params[0]=gamma                                             */
   IM_GAMUT_LOG,       /**< log       = log(K * (a-min) / (max-min) + 1))*(max-min)/log(K+1) + min     \n
-                                       param[0]=K     (K>0)                                       */
+                                       params[0]=K     (K>0)                                       */
   IM_GAMUT_EXP,       /**< exp       = (exp(K * (a-min) / (max-min)) - 1))*(max-min)/(exp(K)-1) + min \n
-                                       param[0]=K                                                 */
+                                       params[0]=K                                                 */
   IM_GAMUT_INVERT,    /**< invert    = max - (a-min)                                              */
   IM_GAMUT_ZEROSTART, /**< zerostart = a - min                                                    */
   IM_GAMUT_SOLARIZE,  /**< solarize  = a < level ?  a:  (level * (max-min) - a * (level-min)) / (max-level) \n
-                                       param[0]=level percentage (0-100) relative to min-max      \n
+                                       params[0]=level percentage (0-100) relative to min-max      \n
                                        photography solarization effect. */
   IM_GAMUT_SLICE,     /**< slice     = start < a || a > end ?  min:  binarize?  max: a                     \n
-                                       param[0]=start,  param[1]=end,  param[2]=binarize          */
+                                       params[0]=start,  params[1]=end,  params[2]=binarize          */
   IM_GAMUT_EXPAND,    /**< expand    = a < start ?  min: a > end ? max :  (a-start)*(max-min)/(end-start) + min  \n
-                                       param[0]=start,  param[1]=end                              */
+                                       params[0]=start,  params[1]=end                              */
   IM_GAMUT_CROP,      /**< crop      = a < start ?  start: a > end ? end : a                                        \n
-                                       param[0]=start,  param[1]=end                              */
+                                       params[0]=start,  params[1]=end                              */
   IM_GAMUT_BRIGHTCONT /**< brightcont = a < min ?  min:  a > max ?  max:  a * tan(c_a) + b_s + (max-min)*(1 - tan(c_a))/2  \n
-                                        param[0]=bright_shift (-100%..+100%),  param[1]=contrast_factor (-100%..+100%)     \n
+                                        params[0]=bright_shift (-100%..+100%),  params[1]=contrast_factor (-100%..+100%)     \n
                                         change brightness and contrast simultaneously. */
 };
 
@@ -557,10 +596,10 @@ enum imToneGamut {
  * IM_BYTE images have min=0 and max=255 always. \n
  * Can be done in place. When there is no extra params, can use NULL.
  *
- * \verbatim im.ProcessToneGamut(src_image: imImage, dst_image: imImage, op: number, param: table of number) [in Lua 5] \endverbatim
- * \verbatim im.ProcessToneGamutNew(src_image: imImage, op: number, param: table of number) -> new_image: imImage [in Lua 5] \endverbatim
+ * \verbatim im.ProcessToneGamut(src_image: imImage, dst_image: imImage, op: number, params: table of number) [in Lua 5] \endverbatim
+ * \verbatim im.ProcessToneGamutNew(src_image: imImage, op: number, params: table of number) -> new_image: imImage [in Lua 5] \endverbatim
  * \ingroup tonegamut */
-void imProcessToneGamut(const imImage* src_image, imImage* dst_image, int op, float* param);
+void imProcessToneGamut(const imImage* src_image, imImage* dst_image, int op, float* params);
 
 /** Converts from (0-1) to (0-255), crop out of bounds values. \n
  * Source image must be IM_FLOAT, and destiny image must be IM_BYTE.
