@@ -26,6 +26,29 @@
 /* Used only in im.ProcessRenderOp, im.ProcessRenderCondOp and im.ProcessUnArithmeticOpFunc. */
 static lua_State *g_State = NULL;
 
+
+/*****************************************************************************\
+ Local Utilities
+\*****************************************************************************/
+static void imlua_errorcfloat(lua_State *L, int index)
+{
+  luaL_argerror(L, index, "image data type can NOT be cfloat");
+}
+
+#define imlua_checknotcfloat(_L, _i, _a) if ((_i)->data_type != IM_CFLOAT) \
+                                           imlua_errorcfloat(_L, _a)
+
+
+static int imlua_unpacktable(lua_State *L, int index)
+{
+  int i, n = imlua_getn(L, index);
+
+  for (i = 0; i < n; i++)
+    lua_rawgeti(L, index, i);
+
+  return n;
+}
+
 /*****************************************************************************\
  Image Statistics Calculations
 \*****************************************************************************/
@@ -337,11 +360,12 @@ static int imluaAnalyzeMeasureCentroid (lua_State *L)
   int *area;
 
   imImage* image = imlua_checkimage(L, 1);
-
   imlua_checktype(L, 1, image, IM_GRAY, IM_USHORT);
 
-  area = imlua_toarrayint(L, 2, &count, 0);
   count = imlua_checkregioncount(L, 3, image);
+
+  /* minimize leak when error, checking array after other checks */
+  area = imlua_toarrayintopt(L, 2, &count, 0);
 
   cx = (float*) malloc (sizeof(float) * count);
   cy = (float*) malloc (sizeof(float) * count);
@@ -370,13 +394,14 @@ static int imluaAnalyzeMeasurePrincipalAxis (lua_State *L)
   float *major_slope, *major_length, *minor_slope, *minor_length;
 
   imImage* image = imlua_checkimage(L, 1);
-
   imlua_checktype(L, 1, image, IM_GRAY, IM_USHORT);
 
-  area = imlua_toarrayint(L, 2, &count, 0);
-  cx = imlua_toarrayfloat(L, 3, NULL, 0);
-  cy = imlua_toarrayfloat(L, 4, NULL, 0);
   count = imlua_checkregioncount(L, 5, image);
+
+  /* minimize leak when error, checking array after other checks */
+  area = imlua_toarrayintopt(L, 2, &count, 0);  
+  cx = imlua_toarrayfloatopt(L, 3, NULL, 0);
+  cy = imlua_toarrayfloatopt(L, 4, NULL, 0);
 
   major_slope = (float*) malloc (sizeof(float) * count);
   major_length = (float*) malloc (sizeof(float) * count);
@@ -891,12 +916,6 @@ static int imluaProcessSwirl(lua_State *L)
 
   lua_pushboolean(L, imProcessSwirl(src_image, dst_image, k1, order));
   return 1;
-}
-
-static void imlua_checknotcfloat(lua_State *L, imImage *image, int index)
-{
-  if (image->data_type == IM_CFLOAT)
-    luaL_argerror(L, index, "image data type can NOT be cfloat");
 }
 
 
@@ -1601,22 +1620,23 @@ static int imluaProcessUnArithmeticOp (lua_State *L)
   return 0;
 }
 
-static float (imluaUnOpFunc)(int x, int y, int d, float val, int *cond, float* params)
+static int (imluaUnOpFunc)(int x, int y, int d, float src_value, float *dst_value, float* params)
 {
+  int n;
   lua_State *L = g_State;
+  (void)params;
 
-  luaL_checktype(L, 3, LUA_TFUNCTION);
-  lua_pushvalue(L, 3);
+  lua_pushvalue(L, 3);  /* func is passed in the stack */
   lua_pushinteger(L, x);
   lua_pushinteger(L, y);
   lua_pushinteger(L, d);
-  lua_pushnumber(L, val);
-  lua_pushvalue(L, 5); (void)params; /* params is passed in Lua */
+  lua_pushnumber(L, src_value);
+  n = imlua_unpacktable(L, 5);  /* params is passed in the stack */
 
-  lua_call(L, 5, 2);
+  lua_call(L, 4+n, 2);
 
-  *cond = lua_toboolean(L, -1);
-  return (float) luaL_checknumber(L, -2);
+  *dst_value = (float)luaL_checknumber(L, -1);
+  return lua_toboolean(L, -2);
 }
 
 static int imluaProcessUnPontualOp(lua_State *L)
@@ -1631,6 +1651,7 @@ static int imluaProcessUnPontualOp(lua_State *L)
   if (src_image->depth != dst_image->depth)
     luaL_error(L, "images must have the same depth");
   luaL_checktype(L, 3, LUA_TFUNCTION);
+  luaL_checktype(L, 5, LUA_TTABLE);
 
   g_State = L;
   lua_pushboolean(L, imProcessUnPontualOp(src_image, dst_image, imluaUnOpFunc, op_name, NULL));
@@ -1639,34 +1660,25 @@ static int imluaProcessUnPontualOp(lua_State *L)
   return 1;
 }
 
-static void imlua_checkarrayfloat (lua_State *L, int index, float* value, int count, int start)
+static int imluaUnColorOpFunc(int x, int y, const float* src_value, float* dst_value, float* params)
 {
-  int i;
-  for (i = 0; i < count; i++)
-  {
-    lua_rawgeti(L, index, i+start);
-    value[i] = (float)luaL_checknumber(L, -1);
-    lua_pop(L, 1);
-  }
-}
-
-static int (imluaUnColorOpFunc)(int x, int y, const float* src_value, float* dst_value, float* params)
-{
+  int d, n;
   lua_State *L = g_State;
   int src_depth = (int)params[0];
   int dst_depth = (int)params[1];
 
-  luaL_checktype(L, 3, LUA_TFUNCTION);
-  lua_pushvalue(L, 3);
+  lua_pushvalue(L, 3);  /* func is passed in the stack */
   lua_pushinteger(L, x);
   lua_pushinteger(L, y);
-  imlua_newarrayfloat(L, src_value, src_depth, 0);
-  lua_pushvalue(L, 5);  /* params is passed in Lua */
+  for (d = 0; d < src_depth; d++)
+    lua_pushnumber(L, src_value[d]);
+  n = imlua_unpacktable(L, 5);  /* params is passed in the stack */
 
-  lua_call(L, 4, 2);
+  lua_call(L, 2+src_depth+n, 1+dst_depth);
 
-  imlua_checkarrayfloat(L, -2, dst_value, dst_depth, 0);
-  return lua_toboolean(L, -1);
+  for (d = 0; d < dst_depth; d++)
+    dst_value[d] = (float)luaL_checknumber(L, (d+1)-(1+dst_depth));
+  return lua_toboolean(L, -(1+dst_depth));
 }
 
 static int imluaProcessUnPontualColorOp(lua_State *L)
@@ -1685,10 +1697,142 @@ static int imluaProcessUnPontualColorOp(lua_State *L)
   imlua_checknotcfloat(L, dst_image, 1);
   imlua_matchsize(L, src_image, dst_image);
   luaL_checktype(L, 3, LUA_TFUNCTION);
+  luaL_checktype(L, 5, LUA_TTABLE);
 
   g_State = L;
   lua_pushboolean(L, imProcessUnPontualColorOp(src_image, dst_image, imluaUnColorOpFunc, op_name, params));
   g_State = NULL;
+
+  return 1;
+}
+
+static int imluaMultiOpFunc(int x, int y, int d, const float* src_value, float *dst_value, float* params)
+{
+  lua_State *L = g_State;
+  int n, i, src_count = (int)params[0];
+
+  lua_pushvalue(L, 3);  /* func is passed in the stack */
+  lua_pushinteger(L, x);
+  lua_pushinteger(L, y);
+  lua_pushinteger(L, d);
+  for (i = 0; i < src_count; i++)
+    lua_pushnumber(L, src_value[i]);
+  n = imlua_unpacktable(L, 5);  /* params is passed in the stack */
+
+  lua_call(L, 3+src_count+n, 2);
+
+  *dst_value = (float)luaL_checknumber(L, -1);
+  return lua_toboolean(L, -2);
+}
+
+static int imluaProcessMultiPontualOp(lua_State *L)
+{
+  int src_count;
+  imImage **src_image_list;
+  imImage *dst_image = imlua_checkimage(L, 2);
+  const char *op_name = luaL_checkstring(L, 4);
+  float params[1];
+
+  imlua_checknotcfloat(L, dst_image, 1);
+  luaL_checktype(L, 3, LUA_TFUNCTION);
+  luaL_checktype(L, 5, LUA_TTABLE);
+
+  /* minimize leak when error, checking array after other checks */
+  src_image_list = imlua_toarrayimage(L, 1, &src_count, 1);
+  if (src_image_list[0]->data_type == IM_CFLOAT)
+  {
+    free(src_image_list);
+    imlua_errorcfloat(L, 1);
+  }
+
+  if (!imImageMatchSize(src_image_list[0], dst_image))
+  {
+    free(src_image_list);
+    imlua_errormatchsize(L);  
+  }
+
+  if (src_image_list[0]->depth != dst_image->depth)
+  {
+    free(src_image_list);
+    luaL_error(L, "source and destiny images must have the same depth");
+  }
+
+  params[0] = (float)src_count;
+
+  g_State = L;
+  lua_pushboolean(L, imProcessMultiPontualOp(src_image_list, src_count, dst_image, imluaMultiOpFunc, op_name, params));
+  g_State = NULL;
+
+  free(src_image_list);
+
+  return 1;
+}
+
+static int imluaMultiColorOpFunc(int x, int y, float** src_value, float *dst_value, float* params)
+{
+  lua_State *L = g_State;
+  int n, d, i, 
+    src_count = (int)params[0],
+    src_depth = (int)params[1],
+    dst_depth = (int)params[2];
+
+  lua_pushvalue(L, 3);  /* func is passed in the stack */
+  lua_pushinteger(L, x);
+  lua_pushinteger(L, y);
+  for (i = 0; i < src_count; i++)
+  {
+    for (d = 0; d < src_depth; d++)
+    {
+      lua_pushnumber(L, (src_value[i])[d]);
+    }
+  }
+  n = imlua_unpacktable(L, 5);  /* params is passed in the stack */
+
+  lua_call(L, 2+src_depth*src_count+n, 1+dst_depth);
+
+  for (d = 0; d < dst_depth; d++)
+    dst_value[d] = (float)luaL_checknumber(L, (d+1)-(1+dst_depth));
+  return lua_toboolean(L, -(1+dst_depth));
+}
+
+static int imluaProcessMultiPontualColorOp(lua_State *L)
+{
+  int src_count, src_depth, dst_depth;
+  imImage **src_image_list;
+  imImage *dst_image = imlua_checkimage(L, 2);
+  const char *op_name = luaL_checkstring(L, 4);
+  float params[3];
+
+  imlua_checknotcfloat(L, dst_image, 1);
+  luaL_checktype(L, 3, LUA_TFUNCTION);
+  luaL_checktype(L, 5, LUA_TTABLE);
+
+  /* minimize leak when error, checking array after other checks */
+  src_image_list = imlua_toarrayimage(L, 1, &src_count, 1);
+  if (src_image_list[0]->data_type == IM_CFLOAT)
+  {
+    free(src_image_list);
+    imlua_errorcfloat(L, 1);
+  }
+
+  if (!imImageMatchSize(src_image_list[0], dst_image))
+  {
+    free(src_image_list);
+    imlua_errormatchsize(L);  
+  }
+
+  src_depth = src_image_list[0]->has_alpha? src_image_list[0]->depth+1: src_image_list[0]->depth;
+  dst_depth = dst_image->has_alpha? dst_image->depth+1: dst_image->depth;
+
+  params[0] = (float)src_count;
+  params[0] = (float)src_depth;
+  params[1] = (float)dst_depth;
+
+  g_State = L;
+  lua_pushboolean(L, imProcessMultiPontualColorOp(src_image_list, src_count, dst_image, imluaMultiColorOpFunc, op_name, params));
+  g_State = NULL;
+
+  free(src_image_list);
 
   return 1;
 }
@@ -1893,31 +2037,21 @@ static int imluaProcessMergeComplex (lua_State *L)
 \*****************************************************************************/
 static int imluaProcessMultipleMean (lua_State *L)
 {
-  int i, src_image_count;
-  imImage *dst_image;
-  imImage **src_image_list;
+  int src_image_count;
+  imImage* *src_image_list;
+  imImage* dst_image = imlua_checkimage(L, 2);
 
-  luaL_checktype(L, 1, LUA_TTABLE);
-  src_image_count = imlua_getn(L, 1);
+  /* minimize leak when error, checking array after other checks */
+  src_image_list = imlua_toarrayimage(L, 1, &src_image_count, 1);
 
-  src_image_list = (imImage**)malloc(sizeof(imImage*)*src_image_count);
-
-  for (i = 0; i < src_image_count; i++)
+  if (!imImageMatch(src_image_list[0], dst_image))
   {
-    lua_rawgeti(L, 1, i+1);
-    src_image_list[i] = imlua_checkimage(L, -1);
-  }
-
-  dst_image = imlua_checkimage(L, 2);
-
-  for (i = 0; i < src_image_count; i++)
-  {
-    int check = imImageMatchDataType(src_image_list[i], dst_image);
-    if (!check) free(src_image_list);
-    imlua_matchcheck(L, check, "images must have the same size and data type");
+    free(src_image_list);
+    imlua_errormatch(L);
   }
 
   imProcessMultipleMean((const imImage**)src_image_list, src_image_count, dst_image);
+
   free(src_image_list);
   return 0;
 }
@@ -1927,46 +2061,23 @@ static int imluaProcessMultipleMean (lua_State *L)
 \*****************************************************************************/
 static int imluaProcessMultipleStdDev (lua_State *L)
 {
-  int i, src_image_count, check;
-  imImage *dst_image, *mean_image;
-  imImage **src_image_list;
+  int src_image_count;
+  imImage* *src_image_list;
+  imImage* mean_image = imlua_checkimage(L, 2);
+  imImage* dst_image = imlua_checkimage(L, 3);
 
-  if (!lua_istable(L, 1))
-    luaL_argerror(L, 1, "must be a table");
-
-  lua_pushstring(L, "table");
-#if LUA_VERSION_NUM > 501
-  lua_pushglobaltable(L);
-#else
-  lua_gettable(L, LUA_GLOBALSINDEX);
-#endif
-  lua_pushstring(L, "getn");
-  lua_gettable(L, -2);
-  src_image_count = luaL_checkint(L, -1);
-  lua_pop(L, 1);
-
-  src_image_list = (imImage**) malloc(src_image_count * sizeof(imImage*));
-
-  for (i = 0; i < src_image_count; i++)
+  /* minimize leak when error, checking array after other checks */
+  src_image_list = imlua_toarrayimage(L, 1, &src_image_count, 1);
+  
+  if (!imImageMatch(src_image_list[0], dst_image) ||
+      !imImageMatch(mean_image, dst_image))
   {
-    lua_rawgeti(L, 1, i+1);
-    src_image_list[i] = imlua_checkimage(L, -1);
+    free(src_image_list);
+    imlua_errormatch(L);
   }
-
-  mean_image = imlua_checkimage(L, 2);
-  dst_image = imlua_checkimage(L, 3);
-
-  for (i = 0; i < src_image_count; i++)
-  {
-    check = imImageMatchDataType(src_image_list[i], dst_image);
-    if (!check) free(src_image_list);
-    imlua_matchcheck(L, check, "images must have the same size and data type");
-  }
-  check = imImageMatchDataType(mean_image, dst_image);
-  if (!check) free(src_image_list);
-  imlua_matchcheck(L, check, "images must have the same size and data type");
 
   imProcessMultipleStdDev((const imImage**)src_image_list, src_image_count, mean_image, dst_image);
+
   free(src_image_list);
   return 0;
 }
@@ -2163,32 +2274,33 @@ static int imluaProcessMergeHSI (lua_State *L)
 \*****************************************************************************/
 static int imluaProcessSplitComponents (lua_State *L)
 {
-  int i, src_depth;
-  imImage *src_image = imlua_checkimage(L, 1);
+  int i, src_depth, dst_count;
   imImage **dst_image_list;
+  imImage *src_image = imlua_checkimage(L, 1);
 
-  luaL_checktype(L, 2, LUA_TTABLE);
+  /* minimize leak when error, checking array after other checks */
+  dst_image_list = imlua_toarrayimage(L, 2, &dst_count, 1);
 
   src_depth = src_image->has_alpha? src_image->depth+1: src_image->depth;
-  if (imlua_getn(L, 2) != src_depth)
-    luaL_error(L, "number of destiny images must match the depth of the source image");
-
-  dst_image_list = (imImage**)malloc(sizeof(imImage*)*src_depth);
-
-  for (i = 0; i < src_depth; i++)
+  if (dst_count != src_depth)
   {
-    lua_pushnumber(L, i+1);
-    lua_gettable(L, 2);
-    dst_image_list[i] = imlua_checkimage(L, -1);
-    imlua_checkcolorspace(L, 2, dst_image_list[i], IM_GRAY);  /* if error here, there will be a memory leak */
-    lua_pop(L, 1);
+    free(dst_image_list);
+    luaL_error(L, "number of destiny images must match the depth of the source image");
   }
 
   for (i = 0; i < src_depth; i++)
   {
-    int check = imImageMatchDataType(src_image, dst_image_list[i]);
-    if (!check) free(dst_image_list);
-    imlua_matchcheck(L, check, "images must have the same size and data type");
+    if (dst_image_list[i]->color_space != IM_GRAY)
+    {
+      free(dst_image_list);
+      imlua_argerrorcolorspace(L, 2, IM_GRAY);
+    }
+  }
+
+  if (!imImageMatchDataType(src_image, dst_image_list[0]))
+  {
+    free(dst_image_list);
+    imlua_errormatchdatatype(L);
   }
 
   imProcessSplitComponents(src_image, dst_image_list);
@@ -2203,33 +2315,33 @@ static int imluaProcessSplitComponents (lua_State *L)
 \*****************************************************************************/
 static int imluaProcessMergeComponents (lua_State *L)
 {
-  int i, dst_depth;
-  imImage** src_image_list;
-  imImage *dst_image;
-
-  luaL_checktype(L, 1, LUA_TTABLE);
-  dst_image = imlua_checkimage(L, 2);
+  int i, dst_depth, src_count;
+  imImage **src_image_list;
+  imImage *dst_image = imlua_checkimage(L, 2);
 
   dst_depth = dst_image->has_alpha? dst_image->depth+1: dst_image->depth;
-  if (imlua_getn(L, 1) != dst_depth)
-    luaL_error(L, "number of source images must match the depth of the destination image");
 
-  src_image_list = (imImage**)malloc(sizeof(imImage*)*dst_depth);
-
-  for (i = 0; i < dst_depth; i++)
+  /* minimize leak when error, checking array after other checks */
+  src_image_list = imlua_toarrayimage(L, 1, &src_count, 1);
+  if (src_count != dst_depth)
   {
-    lua_pushnumber(L, i+1);
-    lua_gettable(L, 1);
-    src_image_list[i] = imlua_checkimage(L, -1);
-    imlua_checkcolorspace(L, 1, src_image_list[i], IM_GRAY);
-    lua_pop(L, 1);
+    free(src_image_list);
+    luaL_error(L, "number of source images must match the depth of the destination image");
   }
 
   for (i = 0; i < dst_depth; i++)
   {
-    int check = imImageMatchDataType(src_image_list[i], dst_image);
-    if (!check) free(src_image_list);
-    imlua_matchcheck(L, check, "images must have the same size and data type");
+    if (src_image_list[i]->color_space != IM_GRAY)
+    {
+      free(src_image_list);
+      imlua_argerrorcolorspace(L, 2, IM_GRAY);
+    }
+  }
+
+  if (!imImageMatchDataType(src_image_list[0], dst_image))
+  {
+    free(src_image_list);
+    imlua_errormatchdatatype(L);
   }
 
   imProcessMergeComponents((const imImage**)src_image_list, dst_image);
@@ -2260,44 +2372,60 @@ static int imluaProcessNormalizeComponents (lua_State *L)
 static int imluaProcessReplaceColor (lua_State *L)
 {
   int src_count, dst_count;
+  float *src_color, *dst_color;
   imImage *src_image = imlua_checkimage(L, 1);
   imImage *dst_image = imlua_checkimage(L, 2);
-  float *src_color = imlua_toarrayfloat(L, 3, &src_count, 1);
-  float *dst_color = imlua_toarrayfloat(L, 4, &dst_count, 1);
 
   imlua_checknotcfloat(L, src_image, 1);
   imlua_match(L, src_image, dst_image);
-  luaL_argcheck(L, src_count == src_image->depth, 3, "the colors must have the same number of components of the images");
-  luaL_argcheck(L, dst_count == src_image->depth, 4, "the colors must have the same number of components of the images");
+
+  /* minimize leak when error, checking array after other checks */
+  src_color = imlua_toarrayfloat(L, 3, &src_count, 1);
+  if (src_count != src_image->depth)
+  {
+    free(src_color);
+    luaL_argerror(L, 3, "the colors must have the same number of components of the images");
+  }
+
+  dst_color = imlua_toarrayfloat(L, 4, &dst_count, 1);
+  if (dst_count != src_image->depth)
+  {
+    free(src_color);
+    free(dst_color);
+    luaL_argerror(L, 4, "the colors must have the same number of components of the images");
+  }
 
   imProcessReplaceColor(src_image, dst_image, src_color, dst_color);
 
-  if (src_color)
-    free(src_color);
-  if (dst_color)
-    free(dst_color);
+  free(src_color);
+  free(dst_color);
   return 0;
 }
 
 static int imluaProcessSetAlphaColor(lua_State *L)
 {
   int src_count;
+  float *src_color;
   imImage *src_image = imlua_checkimage(L, 1);
   imImage *dst_image = imlua_checkimage(L, 2);
-  float *src_color = imlua_toarrayfloat(L, 3, &src_count, 1);
   float dst_alpha = (float)luaL_checknumber(L, 4);
 
   imlua_checknotcfloat(L, src_image, 1);
   imlua_checknotcfloat(L, dst_image, 2);
   imlua_matchsize(L, src_image, dst_image);
   luaL_argcheck(L, dst_image->has_alpha, 2, "destiny image must has an alpha channel");
-  luaL_argcheck(L, src_count == src_image->depth, 3, "the color must have the same number of components of the source image");
+
+  /* minimize leak when error, checking array after other checks */
+  src_color = imlua_toarrayfloat(L, 3, &src_count, 1);
+  if (src_count != src_image->depth)
+  {
+    free(src_color);
+    luaL_argerror(L, 3, "the color must have the same number of components of the source image");
+  }
 
   imProcessSetAlphaColor(src_image, dst_image, src_color, dst_alpha);
 
-  if (src_color)
-    free(src_color);
-
+  free(src_color);
   return 0;
 }
 
@@ -2382,13 +2510,13 @@ static int imluaProcessBitPlane (lua_State *L)
 static float imluaRenderFunc (int x, int y, int d, float *params)
 {
   lua_State *L = g_State;
+  (void)params; 
 
-  luaL_checktype(L, 2, LUA_TFUNCTION);
-  lua_pushvalue(L, 2);
+  lua_pushvalue(L, 2);  /* func is passed in the stack */
   lua_pushinteger(L, x);
   lua_pushinteger(L, y);
   lua_pushinteger(L, d);
-  lua_pushvalue(L, 4); (void)params; /* params is passed in Lua */
+  lua_pushvalue(L, 4);  /* params is passed in the stack */
 
   lua_call(L, 4, 1);
 
@@ -2406,6 +2534,7 @@ static int imluaProcessRenderOp (lua_State *L)
 
   imlua_checknotcfloat(L, image, 1);
   luaL_checktype(L, 2, LUA_TFUNCTION);
+  luaL_checktype(L, 4, LUA_TTABLE);
 
   g_State = L;
   lua_pushboolean(L, imProcessRenderOp(image, imluaRenderFunc, (char*) render_name, NULL, plus));
@@ -2417,13 +2546,13 @@ static int imluaProcessRenderOp (lua_State *L)
 static float imluaRenderCondFunc (int x, int y, int d, int *cond, float *params)
 {
   lua_State *L = g_State;
+  (void)params;
 
-  luaL_checktype(L, 2, LUA_TFUNCTION);
-  lua_pushvalue(L, 2);
+  lua_pushvalue(L, 2);  /* func is passed in the stack */
   lua_pushinteger(L, x);
   lua_pushinteger(L, y);
   lua_pushinteger(L, d);
-  lua_pushvalue(L, 4); (void)params; /* params is passed in Lua */
+  lua_pushvalue(L, 4);  /* params is passed in the stack */
 
   lua_call(L, 4, 2);
 
@@ -2441,6 +2570,7 @@ static int imluaProcessRenderCondOp (lua_State *L)
 
   imlua_checknotcfloat(L, image, 1);
   luaL_checktype(L, 2, LUA_TFUNCTION);
+  luaL_checktype(L, 4, LUA_TTABLE);
 
   g_State = L;
   lua_pushboolean(L, imProcessRenderCondOp(image, imluaRenderCondFunc, (char*) render_name, NULL));
@@ -2511,35 +2641,26 @@ static int imluaProcessRenderRandomNoise (lua_State *L)
 }
 
 /*****************************************************************************\
- im.ProcessRenderConstant(image, [count])
+ im.ProcessRenderConstant(image, value)
 \*****************************************************************************/
 static int imluaProcessRenderConstant (lua_State *L)
 {
-  int i;
-  float *value = NULL;
-
+  int count;
+  float *value;
   imImage *image = imlua_checkimage(L, 1);
-  int count = image->depth;
-
   imlua_checknotcfloat(L, image, 1);
 
-  if (lua_istable(L, 2))
+  /* minimize leak when error, checking array after other checks */
+  value = imlua_toarrayfloat (L, 2, &count, 1);
+  if (count != image->depth)
   {
-    value = (float*) malloc (sizeof(float) * count);
-
-    for (i = 0; i < count; i++)
-    {
-      lua_rawgeti(L, 2, i+1);
-      value[i] = (float) lua_tonumber(L, -1);
-      lua_pop(L, 1);
-    }
+    free(value);
+    luaL_argerror(L, 2, "invalid number of planes");
   }
 
   lua_pushboolean(L, imProcessRenderConstant(image, value));
 
-  if (value)
-    free(value);
-
+  free(value);
   return 1;
 }
 
@@ -2725,7 +2846,8 @@ static int imluaProcessToneGamut (lua_State *L)
   imlua_checknotcfloat(L, src_image, 1);
   imlua_match(L, src_image, dst_image);
 
-  param = imlua_toarrayfloat(L, 4, NULL, 1);
+  /* minimize leak when error, checking array after other checks */
+  param = imlua_toarrayfloatopt(L, 4, NULL, 1);
 
   imProcessToneGamut(src_image, dst_image, op, param);
 
@@ -3171,6 +3293,8 @@ static const luaL_reg improcess_lib[] = {
 
   {"ProcessUnPontualOp", imluaProcessUnPontualOp},
   {"ProcessUnPontualColorOp", imluaProcessUnPontualColorOp},
+  {"ProcessMultiPontualOp", imluaProcessMultiPontualOp},
+  {"ProcessMultiPontualColorOp", imluaProcessMultiPontualColorOp},
   {"ProcessUnArithmeticOp", imluaProcessUnArithmeticOp},
   {"ProcessArithmeticOp", imluaProcessArithmeticOp},
   {"ProcessArithmeticConstOp", imluaProcessArithmeticConstOp},

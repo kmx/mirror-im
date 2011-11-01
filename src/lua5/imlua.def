@@ -5,19 +5,20 @@ EXPORTS
   imlua_newarrayulong
   imlua_newarrayint
   imlua_newarrayfloat
-  imlua_checkdatatype
-  imlua_checkcolorspace
+  imlua_errorcolorspace
+  imlua_argerrordatatype
   imlua_toarrayint
+  imlua_toarrayintopt
+  imlua_toarrayulong
+  imlua_toarrayulongopt
   imlua_toarrayfloat
-  imlua_toarrayulong 
-  imlua_getn
-  imlua_checktype
+  imlua_toarrayfloatopt
+  imlua_toarrayimage 
   imlua_checkmask
   imlua_regconstants
   imlua_pushimage
-  imlua_matchcolor
-  imlua_matchsize
-  imlua_matchdatatype
-  imlua_matchcolorspace
-  imlua_match
-  
+  imlua_errormatchsize
+  imlua_errormatchcolor
+  imlua_errormatchdatatype
+  imlua_errormatchcolorspace
+  imlua_errormatch

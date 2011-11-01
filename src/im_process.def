@@ -105,6 +105,8 @@ EXPORTS
   imProcessUnArithmeticOp
   imProcessUnPontualOp
   imProcessUnPontualColorOp
+  imProcessMultiPontualOp
+  imProcessMultiPontualColorOp
   imProcessUnNormalize
   imProcessZeroCrossing
   imProcessRotateKernel

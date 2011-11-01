@@ -44,8 +44,9 @@
             style="color: #000000"> 
 	</span></span></strong><span style="color: #008000"><span
             style="color: #000000"> 
-	functions <strong>imProcessUnPontualColorOp</strong></span></span> and 
-	<strong>imProcessUnPontualOp</strong>.</li>
+	functions <strong>imProcessUnPontualColorOp</strong></span></span>, 
+	<strong>imProcessUnPontualOp</strong>, <strong>imProcessMultiPontualOp</strong> 
+	and <strong>imProcessMultiPontualColorOp</strong>.</li>
 	<li dir="ltr">
 		<span class="hist_changed">Changed:</span> <strong>imImageInit</strong> 
 	now accepts also the IM_ALPHA flag.</li>
@@ -102,6 +103,11 @@
             style="color: #000000"> 
 		<span class="hist_fixed">Fixed:</span> loading RGB images with non byte 
 	data type, when data planes in file are packed.</span></span></li>
+	<li dir="ltr"><span style="color: #008000">
+	<span
+            style="color: #000000"> 
+		<span class="hist_fixed">Fixed:</span> memory leaks when parameter test 
+	fails in functions that receive an array in Lua.</span></span></li>
 </ul>
 <h3 dir="ltr">
     <a href="http://sourceforge.net/projects/imtoolkit/files/3.6.3/">Version 

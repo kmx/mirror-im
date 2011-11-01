@@ -19,39 +19,90 @@ extern "C" {
  * \ingroup process */
 
 
-/** Custom pontual unary funtion.
- * \verbatim func(x: number, y: number, d: number, val: number, params: table of number) -> value: number, cond: boolean [in Lua 5] \endverbatim
+/** Custom unary pontual funtion.
+ * \verbatim func(x: number, y: number, d: number, src_value: number, params1, param2, ...) -> cond: boolean, dst_value: number  [in Lua 5] \endverbatim
+ * In Lua, the params table is unpacked.
  * \ingroup pontual */
-typedef float (*imUnPontualOpFunc)(int x, int y, int d, float val, int *cond, float* params);
+typedef int (*imUnPontualOpFunc)(int x, int y, int d, float src_value, float *dst_value, float* params);
 
-/** Apply an pontual unary operation using a custom function.
+/** Apply an unary pontual operation using a custom function.
  * One pixel from the source affects the same pixel on destiny. \n
- * Can be done in place, images must match size and depth.
- * IM_CFLOAT data type is not supported. \n
+ * Can be done in place, images must match size and depth. 
+ * Data type can be different, but IM_CFLOAT is not supported. \n
  * Data will be set only if cond is true.
  * Returns zero if the counter aborted.
  *
- * \verbatim im.ProcessUnPontualOp(src_image: imImage, dst_image: imImage, func: function, op_name: string, params: table of number) -> counter: boolean [in Lua 5] \endverbatim
- * \verbatim im.ProcessUnPontualOpNew(image: imImage, func: function, op_name: string, params: table of number) -> counter: boolean, new_image: imImage [in Lua 5] \endverbatim
+ * \verbatim im.ProcessUnPontualOp(src_image: imImage, dst_image: imImage, func: function, op_name: string, params: table) -> counter: boolean [in Lua 5] \endverbatim
+ * \verbatim im.ProcessUnPontualOpNew(image: imImage, func: function, op_name: string, params: table) -> counter: boolean, new_image: imImage [in Lua 5] \endverbatim
+ * In Lua, the params table is passed to the function by using the Lua stack, 
+ * so its table can contain any type of objects, but they all must be unnamed.
  * \ingroup pontual */
 int imProcessUnPontualOp(const imImage* src_image, imImage* dst_image, imUnPontualOpFunc func, const char* op_name, float* params);
 
-/** Custom pontual color unary funtion.
- * \verbatim func(x: number, y: number, src_value: table of number, params: table of number) -> dst_value: table of number, cond: boolean [in Lua 5] \endverbatim
+/** Custom unary pontual color funtion.
+ * \verbatim func(x: number, y: number, src_value_plane0: number, src_value_plane1: number, ... , params1, param2, ...) -> cond: boolean, dst_value_plane0: number, dst_value_plane1: number, ...  [in Lua 5] \endverbatim
+ * In Lua, the params table is unpacked.
+ * Also in Lua each color plane is passed as a separe value, instead of inside an array.
  * \ingroup pontual */
 typedef int (*imUnPontualColorOpFunc)(int x, int y, const float* src_value, float* dst_value, float* params);
 
-/** Apply an pontual color unary operation using a custom function.
+/** Apply an unary pontual color operation using a custom function.
  * One pixel from the source affects the same pixel on destiny. \n
- * Can be done in place, images must match size.
- * IM_CFLOAT data type is not supported. \n
+ * Can be done in place, images must match size, depth can be different.
+ * Data type can be different, but IM_CFLOAT is not supported. \n
  * Data will be set only if cond is true.
  * Returns zero if the counter aborted.
  *
- * \verbatim im.ProcessUnPontualColorOp(src_image: imImage, dst_image: imImage, func: function, op_name: string, params: table of number) -> counter: boolean [in Lua 5] \endverbatim
- * \verbatim im.ProcessUnPontualColorOpNew(image: imImage, func: function, op_name: string, params: table of number) -> counter: boolean, new_image: imImage [in Lua 5] \endverbatim
+ * \verbatim im.ProcessUnPontualColorOp(src_image: imImage, dst_image: imImage, func: function, op_name: string, params: table) -> counter: boolean [in Lua 5] \endverbatim
+ * \verbatim im.ProcessUnPontualColorOpNew(image: imImage, func: function, op_name: string, params: table) -> counter: boolean, new_image: imImage [in Lua 5] \endverbatim
+ * In Lua, the params table is passed to the function by using the Lua stack, 
+ * so its table can contain any type of objects, but they all must be unnamed.
  * \ingroup pontual */
 int imProcessUnPontualColorOp(const imImage* src_image, imImage* dst_image, imUnPontualColorOpFunc func, const char* op_name, float* params);
+
+/** Custom multiple pontual funtion.
+ * \verbatim func(x: number, y: number, d: number, src_value1: number, src_value2: number, ... , params1, param2, ...) -> cond: boolean, dst_value: number  [in Lua 5] \endverbatim
+ * In Lua, the source images data and the params table are unpacked.
+ * \ingroup pontual */
+typedef int (*imMultiPontualOpFunc)(int x, int y, int d, const float* src_value, float *dst_value, float* params);
+
+/** Apply an multiple pontual operation using a custom function.
+ * One pixel from each source affects the same pixel on destiny. \n
+ * All source images must match in size, depth and data type.
+ * Can be done in place, source and destiny must match size and depth.
+ * Data type can be different between sources and destiny, but IM_CFLOAT is not supported. \n
+ * Data will be set only if cond is true.
+ * Returns zero if the counter aborted.
+ *
+ * \verbatim im.ProcessMultiPontualOp(src_image: table of imImage, dst_image: imImage, func: function, op_name: string, params: table) -> counter: boolean [in Lua 5] \endverbatim
+ * \verbatim im.ProcessMultiPontualOpNew(src_image: table of imImage, func: function, op_name: string, params: table) -> counter: boolean, new_image: imImage [in Lua 5] \endverbatim
+ * In Lua, the params table is passed to the function by using the Lua stack, 
+ * so its table can contain any type of objects, but they all must be unnamed.
+ * \ingroup pontual */
+int imProcessMultiPontualOp(const imImage** src_image, int src_count, imImage* dst_image, imMultiPontualOpFunc func, const char* op_name, float* params);
+
+/** Custom multiple pontual color funtion.
+ * \verbatim func(x: number, y: number, d: number, src_value1_plane0: number, src_value1_plane1: number, ..., src_value2_plane0: number, src_value2_plane1: number, ... , params1, param2, ...) -> cond: boolean, dst_value_plane0: number, dst_value_plane1: number, ...  [in Lua 5] \endverbatim
+ * In Lua, the source images data and the params table are unpacked.
+ * Also in Lua each color plane is passed as a separe value, instead of inside an array.
+ * \ingroup pontual */
+typedef int (*imMultiPontualColorOpFunc)(int x, int y, float** src_value, float* dst_value, float* params);
+
+/** Apply an multiple pontual color operation using a custom function.
+ * One pixel from each source affects the same pixel on destiny. \n
+ * All source images must match in size, depth and data type.
+ * Can be done in place, source and destiny must match size, depth can be different.
+ * Data type can be different between sources and destiny, but IM_CFLOAT is not supported. \n
+ * Data will be set only if cond is true.
+ * Returns zero if the counter aborted.
+ *
+ * \verbatim im.ProcessMultiPontualColorOp(src_image: table of imImage, dst_image: imImage, func: function, op_name: string, params: table) -> counter: boolean [in Lua 5] \endverbatim
+ * \verbatim im.ProcessMultiPontualColorOpNew(src_image: table of imImage, func: function, op_name: string, params: table) -> counter: boolean, new_image: imImage [in Lua 5] \endverbatim
+ * In Lua, the params table is passed to the function by using the Lua stack, 
+ * so its table can contain any type of objects, but they all must be unnamed.
+ * \ingroup pontual */
+int imProcessMultiPontualColorOp(const imImage** src_image, int src_count, imImage* dst_image, imMultiPontualColorOpFunc func, const char* op_name, float* params);
+
 
 
 /** \defgroup arithm Arithmetic Operations 
@@ -429,12 +480,12 @@ void imProcessBitPlane(const imImage* src_image, imImage* dst_image, int plane, 
  * \ingroup process */
 
 /** Render Funtion.
- * \verbatim render_func(x: number, y: number, d: number, params: table of number) -> value: number [in Lua 5] \endverbatim
+ * \verbatim render_func(x: number, y: number, d: number, params: table) -> value: number [in Lua 5] \endverbatim
  * \ingroup render */
 typedef float (*imRenderFunc)(int x, int y, int d, float* params);
 
 /** Render Conditional Funtion.
- * \verbatim render_cond_func(x: number, y: number, d: number, params: table of number) -> value: number, cond: boolean [in Lua 5] \endverbatim
+ * \verbatim render_cond_func(x: number, y: number, d: number, params: table) -> value: number, cond: boolean [in Lua 5] \endverbatim
  * \ingroup render */
 typedef float (*imRenderCondFunc)(int x, int y, int d, int *cond, float* params);
 
@@ -443,15 +494,15 @@ typedef float (*imRenderCondFunc)(int x, int y, int d, int *cond, float* params)
  * or else all data will be replaced. All the render functions use this or the conditional function. \n
  * Returns zero if the counter aborted.
  *
- * \verbatim im.ProcessRenderOp(image: imImage, render_func: function, render_name: string, params: table of number, plus: boolean) -> counter: boolean [in Lua 5] \endverbatim
+ * \verbatim im.ProcessRenderOp(image: imImage, render_func: function, render_name: string, params: table, plus: boolean) -> counter: boolean [in Lua 5] \endverbatim
  * \ingroup render */
 int imProcessRenderOp(imImage* image, imRenderFunc render_func, const char* render_name, float* params, int plus);
 
 /** Render a synthetic image using a conditional render function. \n
- * Data will be rendered only if the condional param is true. \n
+ * Data will be rendered only if the condional parameter is true. \n
  * Returns zero if the counter aborted.
  *
- * \verbatim im.ProcessRenderCondOp(image: imImage, render_cond_func: function, render_name: string, params: table of number) -> counter: boolean [in Lua 5] \endverbatim
+ * \verbatim im.ProcessRenderCondOp(image: imImage, render_cond_func: function, render_name: string, params: table) -> counter: boolean [in Lua 5] \endverbatim
  * \ingroup render */
 int imProcessRenderCondOp(imImage* image, imRenderCondFunc render_cond_func, const char* render_name, float* params);
 

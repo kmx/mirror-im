@@ -161,6 +161,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\process\im_pontual.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\im_process.def"
 				>
 			</File>

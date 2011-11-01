@@ -22,26 +22,6 @@
 
 
 /*****************************************************************************\
-\*****************************************************************************/
-int imlua_getn (lua_State *L, int index)
-{
-  int n;
-  lua_pushstring(L, "table");
-#if LUA_VERSION_NUM > 501
-  lua_pushglobaltable(L);
-#else
-  lua_gettable(L, LUA_GLOBALSINDEX);
-#endif
-  lua_pushstring(L, "getn");
-  lua_gettable(L, -2);
-  lua_pushvalue(L, index);
-  lua_call(L, 1, 1);
-  n = luaL_checkint(L, -1);
-  lua_pop(L, 2);
-  return n;
-}
-
-/*****************************************************************************\
  Creates an int array.
 \*****************************************************************************/
 int imlua_newarrayint (lua_State *L, const int *value, int count, int start)
@@ -89,7 +69,13 @@ int imlua_newarrayfloat (lua_State *L, const float *value, int count, int start)
 /*****************************************************************************\
  Retrieve an int array.
 \*****************************************************************************/
-int *imlua_toarrayint (lua_State *L, int index, int *count, int start)
+int *imlua_toarrayint(lua_State *L, int index, int *count, int start)
+{
+  luaL_checktype(L, index, LUA_TTABLE);
+  return imlua_toarrayintopt(L, index, count, start);
+}
+
+int *imlua_toarrayintopt(lua_State *L, int index, int *count, int start)
 {
   int i, n;
   int *value = NULL;
@@ -110,13 +96,22 @@ int *imlua_toarrayint (lua_State *L, int index, int *count, int start)
       lua_pop(L, 1);
     }
   }
+  else if (!lua_isnil(L, index))
+    luaL_argerror(L, index, "must be a table or nil");
+
   return value;
 }
 
 /*****************************************************************************\
  Retrieve an ulong array.
 \*****************************************************************************/
-unsigned long *imlua_toarrayulong (lua_State *L, int index, int *count, int start)
+unsigned long *imlua_toarrayulong(lua_State *L, int index, int *count, int start)
+{
+  luaL_checktype(L, index, LUA_TTABLE);
+  return imlua_toarrayulongopt(L, index, count, start);
+}
+
+unsigned long *imlua_toarrayulongopt(lua_State *L, int index, int *count, int start)
 {
   int i, n;
   unsigned long *value = NULL;
@@ -137,13 +132,22 @@ unsigned long *imlua_toarrayulong (lua_State *L, int index, int *count, int star
       lua_pop(L, 1);
     }
   }
+  else if (!lua_isnil(L, index))
+    luaL_argerror(L, index, "must be a table or nil");
+
   return value;
 }
 
 /*****************************************************************************\
  Retrieve a float array.
 \*****************************************************************************/
-float *imlua_toarrayfloat (lua_State *L, int index, int *count, int start)
+float *imlua_toarrayfloat(lua_State *L, int index, int *count, int start)
+{
+  luaL_checktype(L, index, LUA_TTABLE);
+  return imlua_toarrayfloatopt(L, index, count, start);
+}
+
+float *imlua_toarrayfloatopt(lua_State *L, int index, int *count, int start)
 {
   int i, n;
   float *value = NULL;
@@ -164,9 +168,42 @@ float *imlua_toarrayfloat (lua_State *L, int index, int *count, int start)
       lua_pop(L, 1);
     }
   }
+  else if (!lua_isnil(L, index))
+    luaL_argerror(L, index, "must be a table or nil");
+
   return value;
 }
 
+imImage* *imlua_toarrayimage(lua_State *L, int index, int *count, int start)
+{
+  int i, n;
+  imImage* *value = NULL;
+
+  *count = 0;
+
+  luaL_checktype(L, index, LUA_TTABLE);
+
+  n = imlua_getn(L, index);
+  if (start == 0) n++;
+  if (count) *count = n;
+
+  value = (imImage**) malloc (sizeof(imImage*) * n);
+  for (i = 0; i < n; i++)
+  {
+    lua_rawgeti(L, index, i+start);
+    value[i] = imlua_checkimage(L, -1);
+    lua_pop(L, 1);
+  }
+
+  for (i = 1; i < n; i++)
+  {
+    int check = imImageMatch(value[0], value[i]);
+    if (!check) free(value);
+    imlua_matchcheck(L, check, "images must have the same size and data type");
+  }
+
+  return value;
+}
 
 /*****************************************************************************\
  Creates a bit mask based on a string formatted as "11000110".
@@ -192,75 +229,43 @@ unsigned char imlua_checkmask (lua_State *L, int index)
 }
 
 /*****************************************************************************\
- Checks data_type and color_space of an image. If it doesn't match throw a lua error.
 \*****************************************************************************/
-void imlua_checktype (lua_State *L, int index, imImage *image, int color_space, int data_type)
-{
-  if (image->data_type != data_type)
-  {
-    char msg[100] = "image data type must be ";
-    strcat(msg, imDataTypeName(data_type));
-    luaL_argerror(L, index, msg);
-  }
 
-  if (image->color_space != color_space)
-  {
-    char msg[100] = "image color space must be ";
-    strcat(msg, imColorModeSpaceName(color_space));
-    luaL_argerror(L, index, msg);
-  }
+void imlua_argerrorcolorspace (lua_State *L, int index, int color_space)
+{
+  char msg[100] = "color space must be ";
+  strcat(msg, imColorModeSpaceName(color_space));
+  luaL_argerror(L, index, msg);
 }
 
-/*****************************************************************************\
- Checks color_space of an image. If it doesn't match throw a lua error.
-\*****************************************************************************/
-void imlua_checkcolorspace (lua_State *L, int index, imImage *image, int color_space)
+void imlua_argerrordatatype (lua_State *L, int index, int data_type)
 {
-  if (image->color_space != color_space)
-  {
-    char msg[100] = "image color space must be ";
-    strcat(msg, imColorModeSpaceName(color_space));
-    luaL_argerror(L, index, msg);
-  }
+  char msg[100] = "data type must be ";
+  strcat(msg, imDataTypeName(data_type));
+  luaL_argerror(L, index, msg);
 }
 
-/*****************************************************************************\
- Checks a data_type of an image. If it doesn't match throw a lua error.
-\*****************************************************************************/
-void imlua_checkdatatype (lua_State *L, int index, imImage *image, int data_type)
+void imlua_errormatchsize(lua_State *L)
 {
-  if (image->data_type != data_type)
-  {
-    char msg[100] = "image data type must be ";
-    strcat(msg, imDataTypeName(data_type));
-    luaL_argerror(L, index, msg);
-  }
+  luaL_error(L, "images must have the same size");
 }
 
-/*****************************************************************************\
- Checks if the size of the two images are equal. If it doesn't match throw a lua error.
-\*****************************************************************************/
-void imlua_matchsize(lua_State *L, imImage *image1, imImage *image2)
+void imlua_errormatchcolor(lua_State *L)
 {
-  imlua_matchcheck(L, imImageMatchSize(image1, image2), "images must have the same size");
+  luaL_error(L, "images must have the same data type and color space");
 }
 
-void imlua_matchcolor(lua_State *L, imImage *image1, imImage *image2)
+void imlua_errormatchdatatype(lua_State *L)
 {
-  imlua_matchcheck(L, imImageMatchColor(image1, image2), "images must have the same data type and color space");
+  luaL_error(L, "images must have the same size and data type");
 }
 
-void imlua_matchdatatype(lua_State *L, imImage *image1, imImage *image2)
+void imlua_errormatchcolorspace(lua_State *L)
 {
-  imlua_matchcheck(L, imImageMatchDataType(image1, image2), "images must have the same size and data type");
+  luaL_error(L, "images must have the same size and color space");
 }
 
-void imlua_matchcolorspace(lua_State *L, imImage *image1, imImage *image2)
+void imlua_errormatch(lua_State *L)
 {
-  imlua_matchcheck(L, imImageMatchColorSpace(image1, image2), "images must have the same size and color space");
-}
-
-void imlua_match(lua_State *L, imImage *image1, imImage *image2)
-{
-  imlua_matchcheck(L, imImageMatch(image1, image2), "images must have the same size, data type and color space");
+  luaL_error(L, "images must have the same size, data type and color space");
 }
