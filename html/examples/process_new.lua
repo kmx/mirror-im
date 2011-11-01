@@ -24,10 +24,10 @@ local filename = "lena.jpg"
 
 local image = im.FileImageLoad(filename)
 
-save_histogram(im.CalcHistogram(image, 0, 0), "lena_histogram_R.gif", "GIF")
-save_histogram(im.CalcHistogram(image, 1, 0), "lena_histogram_G.gif", "GIF")
-save_histogram(im.CalcHistogram(image, 2, 0), "lena_histogram_B.gif", "GIF")
-save_histogram(im.CalcGrayHistogram(image, 0), "lena_histogram_gray.gif", "GIF")
+save_histogram(im.CalcHistogram(image, 0, false), "lena_histogram_R.gif", "GIF")
+save_histogram(im.CalcHistogram(image, 1, false), "lena_histogram_G.gif", "GIF")
+save_histogram(im.CalcHistogram(image, 2, false), "lena_histogram_B.gif", "GIF")
+save_histogram(im.CalcGrayHistogram(image, false), "lena_histogram_gray.gif", "GIF")
 
 local r, g, b = im.ProcessSplitComponentsNew(image)
 r:Save("lena_r.jpg", "JPEG")
@@ -37,7 +37,7 @@ b:Save("lena_b.jpg", "JPEG")
 local rgb = im.ProcessMergeComponentsNew({r, g, b})
 rgb:Save("lena_rgb.jpg", "JPEG")
 
-local replace = im.ProcessReplaceColorNew(image, { 146, 93, 145 }, { 255, 0, 255 })
+local replace = im.ProcessReplaceColorNew(image, { 253, 189, 177 }, { 255, 0, 255 })
 replace:Save("lena_replace.jpg", "JPEG")
 
 local bitmask = im.ProcessBitMaskNew(image, "01111010", im.BIT_XOR)

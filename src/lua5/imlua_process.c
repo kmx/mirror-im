@@ -35,7 +35,7 @@ static void imlua_errorcfloat(lua_State *L, int index)
   luaL_argerror(L, index, "image data type can NOT be cfloat");
 }
 
-#define imlua_checknotcfloat(_L, _i, _a) if ((_i)->data_type != IM_CFLOAT) \
+#define imlua_checknotcfloat(_L, _i, _a) if ((_i)->data_type == IM_CFLOAT) \
                                            imlua_errorcfloat(_L, _a)
 
 

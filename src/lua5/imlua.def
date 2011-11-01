@@ -5,7 +5,7 @@ EXPORTS
   imlua_newarrayulong
   imlua_newarrayint
   imlua_newarrayfloat
-  imlua_errorcolorspace
+  imlua_argerrorcolorspace
   imlua_argerrordatatype
   imlua_toarrayint
   imlua_toarrayintopt
@@ -22,3 +22,4 @@ EXPORTS
   imlua_errormatchdatatype
   imlua_errormatchcolorspace
   imlua_errormatch
+
