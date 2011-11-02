@@ -80,7 +80,7 @@ int *imlua_toarrayintopt(lua_State *L, int index, int *count, int start)
   int i, n;
   int *value = NULL;
 
-  *count = 0;
+  if (count) *count = 0;
 
   if (lua_istable(L, index))
   {
@@ -116,7 +116,7 @@ unsigned long *imlua_toarrayulongopt(lua_State *L, int index, int *count, int st
   int i, n;
   unsigned long *value = NULL;
 
-  *count = 0;
+  if (count) *count = 0;
 
   if (lua_istable(L, index))
   {
@@ -152,7 +152,7 @@ float *imlua_toarrayfloatopt(lua_State *L, int index, int *count, int start)
   int i, n;
   float *value = NULL;
 
-  *count = 0;
+  if (count) *count = 0;
 
   if (lua_istable(L, index))
   {

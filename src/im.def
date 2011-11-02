@@ -115,6 +115,8 @@ EXPORTS
   imImageReshape
   imImageSetAttribute
   imImageSetBinary
+  imImageSetGray
+  imImageSetMap
   imImageMakeBinary
   imImageMakeGray
   imImageSetPalette

@@ -19,24 +19,47 @@
 #include <math.h>
 
 
-void imProcessSliceThreshold(const imImage* src_image, imImage* dst_image, int start_level, int end_level)
+template <class T> 
+static void doThresholdSlice(T *src_map, imbyte *dst_map, int count, T start_level, T end_level)
 {
-  float params[3];
-  params[0] = (float)start_level;
-  params[1] = (float)end_level;
-  params[2] = (float)1; /* binarize 0-255 */
-  imProcessToneGamut(src_image, dst_image, IM_GAMUT_SLICE, params);
-  imImageMakeBinary(dst_image); /* this compensates the returned values in IM_GAMUT_SLICE */
+  for (int i = 0; i < count; i++)
+  {
+    if (*src_map < start_level || *src_map > end_level)
+      *dst_map++ = 0;
+    else
+      *dst_map++ = 1;
+
+    src_map++;
+  }
 }
 
-void imProcessThresholdByDiff(const imImage* image1, const imImage* image2, imImage* NewImage)
+void imProcessSliceThreshold(const imImage* src_image, imImage* dst_image, float start_level, float end_level)
 {
-  imbyte *src_map1 = (imbyte*)image1->data[0];
-  imbyte *src_map2 = (imbyte*)image2->data[0];
-  imbyte *dst_map = (imbyte*)NewImage->data[0];
-  int size = image1->count;
+  switch(src_image->data_type)
+  {
+  case IM_BYTE:
+    doThresholdSlice((imbyte*)src_image->data[0], (imbyte*)dst_image->data[0], 
+                             src_image->count, (imbyte)start_level, (imbyte)end_level);
+    break;                                                                                
+  case IM_USHORT:                                                                           
+    doThresholdSlice((imushort*)src_image->data[0], (imbyte*)dst_image->data[0], 
+                             src_image->count, (imushort)start_level, (imushort)end_level);
+    break;                                                                                
+  case IM_INT:                                                                           
+    doThresholdSlice((int*)src_image->data[0], (imbyte*)dst_image->data[0], 
+                             src_image->count, (int)start_level, (int)end_level);
+    break;                                                                                
+  case IM_FLOAT:
+    doThresholdSlice((float*)src_image->data[0], (imbyte*)dst_image->data[0], 
+                             src_image->count, (float)start_level, (float)end_level);
+    break;                                                                                
+  }
+}
 
-  for (int i = 0; i < size; i++)
+template <class T> 
+static void doThresholdByDiff(T *src_map1, T *src_map2, imbyte *dst_map, int count)
+{
+  for (int i = 0; i < count; i++)
   {
     if (*src_map1++ <= *src_map2++)
       *dst_map++ = 0;
@@ -45,8 +68,27 @@ void imProcessThresholdByDiff(const imImage* image1, const imImage* image2, imIm
   }
 }
 
+void imProcessThresholdByDiff(const imImage* src_image1, const imImage* src_image2, imImage* dst_image)
+{
+  switch(src_image1->data_type)
+  {
+  case IM_BYTE:
+    doThresholdByDiff((imbyte*)src_image1->data[0], (imbyte*)src_image2->data[0], (imbyte*)dst_image->data[0], src_image1->count);
+    break;                                                                                
+  case IM_USHORT:                                                                           
+    doThresholdByDiff((imushort*)src_image1->data[0], (imushort*)src_image2->data[0], (imbyte*)dst_image->data[0], src_image1->count);
+    break;                                                                                
+  case IM_INT:                                                                           
+    doThresholdByDiff((int*)src_image1->data[0], (int*)src_image2->data[0], (imbyte*)dst_image->data[0], src_image1->count);
+    break;                                                                                
+  case IM_FLOAT:
+    doThresholdByDiff((float*)src_image1->data[0], (float*)src_image2->data[0], (imbyte*)dst_image->data[0], src_image1->count);
+    break;                                                                                
+  }
+}
+
 template <class T> 
-static void doThreshold(T *src_map, imbyte *dst_map, int count, int level, int value)
+static void doThreshold(T *src_map, imbyte *dst_map, int count, T level, int value)
 {
   for (int i = 0; i < count; i++)
   {
@@ -57,21 +99,25 @@ static void doThreshold(T *src_map, imbyte *dst_map, int count, int level, int v
   }
 }
 
-void imProcessThreshold(const imImage* src_image, imImage* dst_image, int level, int value)
+void imProcessThreshold(const imImage* src_image, imImage* dst_image, float level, int value)
 {
   switch(src_image->data_type)
   {
   case IM_BYTE:
     doThreshold((imbyte*)src_image->data[0], (imbyte*)dst_image->data[0], 
-                             src_image->count, level, value);
+                             src_image->count, (imbyte)level, value);
     break;                                                                                
   case IM_USHORT:                                                                           
     doThreshold((imushort*)src_image->data[0], (imbyte*)dst_image->data[0], 
-                             src_image->count, level, value);
+                             src_image->count, (imushort)level, value);
     break;                                                                                
   case IM_INT:                                                                           
     doThreshold((int*)src_image->data[0], (imbyte*)dst_image->data[0], 
-                             src_image->count, level, value);
+                             src_image->count, (int)level, value);
+    break;                                                                                
+  case IM_FLOAT:
+    doThreshold((float*)src_image->data[0], (imbyte*)dst_image->data[0], 
+                             src_image->count, (float)level, value);
     break;                                                                                
   }
 }
@@ -181,7 +227,7 @@ static int thresUniErr(unsigned char* band, int width, int height)
 int imProcessUniformErrThreshold(const imImage* image, imImage* NewImage)
 {
   int level = thresUniErr((imbyte*)image->data[0], image->width, image->height);
-  imProcessThreshold(image, NewImage, level, 1);
+  imProcessThreshold(image, NewImage, (float)level, 1);
   return level;
 }
 
@@ -233,7 +279,7 @@ int imProcessPercentThreshold(const imImage* image, imImage* NewImage, float per
 
   int level = (i==0? 0: i==256? 254: i-1);
 
-  imProcessThreshold(image, NewImage, level, 1);
+  imProcessThreshold(image, NewImage, (float)level, 1);
   return level;
 }
 
@@ -280,15 +326,15 @@ static unsigned char Otsu(const imImage *image)
 int imProcessOtsuThreshold(const imImage* image, imImage* NewImage)
 {
   int level = Otsu(image);
-  imProcessThreshold(image, NewImage, level, 1);
+  imProcessThreshold(image, NewImage, (float)level, 1);
   return level;
 }
 
-int imProcessMinMaxThreshold(const imImage* image, imImage* NewImage)
+float imProcessMinMaxThreshold(const imImage* image, imImage* NewImage)
 {
   imStats stats;
   imCalcImageStatistics(image, &stats);
-  int level = (int)((stats.max - stats.min)/2.0f);
+  float level = (stats.max - stats.min)/2.0f;
   imProcessThreshold(image, NewImage, level, 1);
   return level;
 }

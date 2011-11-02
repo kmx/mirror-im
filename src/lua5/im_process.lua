@@ -255,6 +255,18 @@ function im.ProcessArithmeticConstOpNew (src_image, src_const, op)
   return dst_image
 end
 
+function im.ProcessMultiPontualOpNew (src_image_list, dst_image, func, op_name, params)
+  local dst_image = im.ImageCreateBased(src_image_list[1])
+  local counter = im.ProcessMultiPontualOpNew(src_image_list, dst_image, func, op_name, params)
+  return counter, dst_image
+end
+
+function im.ProcessMultiPontualColorOpNew (src_image_list, dst_image, func, op_name, params)
+  local dst_image = im.ImageCreateBased(src_image_list[1])
+  local counter = im.ProcessMultiPontualColorOpNew(src_image_list, dst_image, func, op_name, params)
+  return counter, dst_image
+end
+
 TwoSourcesOneDest("ProcessBlendConst")
 ThreeSourcesOneDest("ProcessBlend")
 TwoSourcesOneDest("ProcessCompose")

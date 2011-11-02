@@ -7,8 +7,12 @@ function im.ImageCreateBased(image, width, height, color_space, data_type)
   -- default values are those of the source image                                 
   width       = width       or image:Width()                                      
   height      = height      or image:Height()                                     
-  color_space = color_space or image:ColorSpace()                                 
-  data_type   = data_type   or image:DataType()                                   
+  color_space = color_space or image:ColorSpace()  
+  if ((color_space == im.MAP or color_space == im.BINARY) and (not data_type)) then
+    data_type = im.BYTE
+  else
+    data_type   = data_type   or image:DataType()                                   
+  end
                                                                                   
   -- callback to calculate parameters based on source image                       
   if type(width)       == "function" then       width = width(image) end        

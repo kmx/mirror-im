@@ -60,7 +60,7 @@ typedef struct _imImage
 
   /* image attributes */
   long *palette;      /**< Color palette. image:GetPalette() -> palette: imPalette [in Lua 5]. \n
-                           Used when depth=1. Otherwise is NULL. */
+                           Used only when depth=1. Otherwise is NULL. */
   int palette_count;  /**< The palette is always 256 colors allocated, but can have less colors used. */
 
   void* attrib_table; /**< in fact is an imAttribTable, but we hide this here */
@@ -251,19 +251,39 @@ int imImageMatchColorSpace(const imImage* image1, const imImage* image2);
  * \ingroup imgclass */
 int imImageMatch(const imImage* image1, const imImage* image2);
 
-/** Changes the image color space from gray to binary by just changing color_space and the palette.
+/** Changes the image color space to map
+ * by just changing color_space. \n
+ * Image must be BINARY or GRAY/BYTE.
+ *
+ * \verbatim image:SetMap() [in Lua 5] \endverbatim
+ * \ingroup imgclass */
+void imImageSetMap(imImage* image);
+
+/** Changes the image color space to binary 
+ * by just changing color_space and the palette.
+ * Image must be MAP or GRAY/BYTE.
  *
  * \verbatim image:SetBinary() [in Lua 5] \endverbatim
  * \ingroup imgclass */
 void imImageSetBinary(imImage* image);
 
-/** Changes a gray BYTE data (0,255) into a binary data (0,1), done in-place. Color space is not changed.
+/** Changes the image color space to gray
+ * by just changing color_space and the palette.
+ * Image must be BINARY or MAP. Palette is changed only if image was BINARY.
+ *
+ * \verbatim image:SetGray() [in Lua 5] \endverbatim
+ * \ingroup imgclass */
+void imImageSetGray(imImage* image);
+
+/** Changes a gray BYTE data (0,255) into a binary data (0,1), done in-place. 
+ * Color space is not changed. Data type must be IM_BYTE.
  *
  * \verbatim image:MakeBinary() [in Lua 5] \endverbatim
  * \ingroup imgclass */
 void imImageMakeBinary(imImage *image);
 
-/** Changes a binary data (0,1) into a gray BYTE data (0,255), done in-place. Color space is not changed.
+/** Changes a binary data (0,1) into a gray BYTE data (0,255), done in-place. 
+ * Color space is not changed. Data type must be IM_BYTE.
  *
  * \verbatim image:MakeGray() [in Lua 5] \endverbatim
  * \ingroup imgclass */

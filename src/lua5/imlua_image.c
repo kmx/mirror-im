@@ -622,25 +622,50 @@ static int imluaImageMatch (lua_State *L)
 \*****************************************************************************/
 static int imluaImageSetBinary (lua_State *L)
 {
-  imImageSetBinary(imlua_checkimage(L, 1));
+  imImage *image = imlua_checkimage(L, 1);
+  if (image->color_space != IM_MAP && 
+      image->color_space != IM_GRAY)
+      luaL_argerror(L, 1, "color space must be Map or Gray");
+  imlua_checkdatatype(L, 1, image, IM_BYTE);
+  imImageSetBinary(image);
   return 0;
 }
 
-/*****************************************************************************\
- image:MakeBinary()
-\*****************************************************************************/
+static int imluaImageSetMap(lua_State *L)
+{
+  imImage *image = imlua_checkimage(L, 1);
+  if (image->color_space != IM_GRAY &&
+      image->color_space != IM_BINARY)
+      luaL_argerror(L, 1, "color space must be Binary or Gray");
+  imlua_checkdatatype(L, 1, image, IM_BYTE);
+  imImageSetMap(image);
+  return 0;
+}
+
+static int imluaImageSetGray(lua_State *L)
+{
+  imImage *image = imlua_checkimage(L, 1);
+  if (image->color_space != IM_MAP && 
+      image->color_space != IM_BINARY)
+      luaL_argerror(L, 1, "color space must be Map or Binary");
+  imlua_checkdatatype(L, 1, image, IM_BYTE);
+  imImageSetGray(image);
+  return 0;
+}
+
 static int imluaImageMakeBinary (lua_State *L)
 {
-  imImageMakeBinary(imlua_checkimage(L, 1));
+  imImage *image = imlua_checkimage(L, 1);
+  imlua_checkdatatype(L, 1, image, IM_BYTE);
+  imImageMakeBinary(image);
   return 0;
 }
 
-/*****************************************************************************\
- image:MakeGray()
-\*****************************************************************************/
 static int imluaImageMakeGray (lua_State *L)
 {
-  imImageMakeGray(imlua_checkimage(L, 1));
+  imImage *image = imlua_checkimage(L, 1);
+  imlua_checkdatatype(L, 1, image, IM_BYTE);
+  imImageMakeGray(image);
   return 0;
 }
 
@@ -1077,6 +1102,8 @@ static const luaL_reg imimage_metalib[] = {
   {"MatchColorSpace", imluaImageMatchColorSpace},
   {"Match", imluaImageMatch},
   {"SetBinary", imluaImageSetBinary},
+  {"SetMap", imluaImageSetMap},
+  {"SetGray", imluaImageSetGray},
   {"MakeBinary", imluaImageMakeBinary},
   {"MakeGray", imluaImageMakeGray},
   {"Width", imluaImageWidth},

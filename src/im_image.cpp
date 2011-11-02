@@ -104,6 +104,7 @@ imImage* imImageInit(int width, int height, int color_mode, int data_type, void*
       image->data[d] = (imbyte*)data_buffer + d*image->plane_size;
   }
 
+  // MAP, GRAY or BINARY always have a palette
   if (imColorModeDepth(imColorModeSpace(color_mode)) == 1)
   {
     image->palette = palette;
@@ -529,11 +530,35 @@ int imImageMatch(const imImage* image1, const imImage* image2)
           image1->color_space == image2->color_space);
 }
 
+void imImageSetMap(imImage* image)
+{
+  assert(image);
+
+  if (image->palette && image->data_type == IM_BYTE)
+    image->color_space = IM_MAP;
+}
+
+void imImageSetGray(imImage* image)
+{
+  assert(image);
+
+  if (image->palette && image->data_type == IM_BYTE)
+  {
+    if (image->color_space == IM_BINARY)
+    {
+      image->palette_count = 256;
+      for (int i = 0; i < 256; i++)
+        image->palette[i] = imColorEncode((imbyte)i, (imbyte)i, (imbyte)i);
+    }
+    image->color_space = IM_GRAY;
+  }
+}
+
 void imImageSetBinary(imImage* image)
 {
   assert(image);
 
-  if (image->palette)
+  if (image->palette && image->data_type == IM_BYTE)
   {
     image->color_space = IM_BINARY;
     image->palette_count = 2;

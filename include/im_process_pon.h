@@ -411,8 +411,8 @@ void imProcessReplaceColor(const imImage* src_image, imImage* dst_image, float* 
 /** Sets the alpha channel in destiny where the given color occours in source,
  * elsewhere alpha remains untouched. \n
  * The color must have the same number of components of the source image. \n
- * Destiny image must have an alpha channel. \n
- * Supports all color spaces and all data types except IM_CFLOAT.
+ * If destiny does not have an alpha channel, then its plane=0 is used. \n
+ * Supports all color spaces for source and all data types except IM_CFLOAT.
  * Images must have the same size.
  *
  * \verbatim im.ProcessSetAlphaColor(src_image: imImage, dst_image: imImage, src_color: table of numbers, dst_alpha: number) [in Lua 5] \endverbatim
@@ -689,16 +689,18 @@ void imProcessNegative(const imImage* src_image, imImage* dst_image);
 /** Apply a manual threshold. \n
  * threshold = a <= level ? 0: value \n
  * Normal value is 1 but another common value is 255. Can be done in place for IM_BYTE source. \n
- * Supports all integer IM_GRAY images as source, and IM_BINARY as destiny.
+ * Source color space must be IM_GRAY, and destiny color space must be IM_BINARY.
+ * IM_CFLOAT is not supported. \n
  *
  * \verbatim im.ProcessThreshold(src_image: imImage, dst_image: imImage, level: number, value: number) [in Lua 5] \endverbatim
  * \verbatim im.ProcessThresholdNew(src_image: imImage, level: number, value: number) -> new_image: imImage [in Lua 5] \endverbatim
  * \ingroup threshold */
-void imProcessThreshold(const imImage* src_image, imImage* dst_image, int level, int value);
+void imProcessThreshold(const imImage* src_image, imImage* dst_image, float level, int value);
 
 /** Apply a threshold by the difference of two images. \n
  * threshold = a1 <= a2 ? 0: 1   \n
- * Can be done in place. 
+ * Source color space must be IM_GRAY, and destiny color space must be IM_BINARY.
+ * IM_CFLOAT is not supported. Can be done in place for IM_BYTE source. \n
  *
  * \verbatim im.ProcessThresholdByDiff(src_image1: imImage, src_image2: imImage, dst_image: imImage) [in Lua 5] \endverbatim
  * \verbatim im.ProcessThresholdByDiffNew(src_image1: imImage, src_image2: imImage) -> new_image: imImage [in Lua 5] \endverbatim
@@ -776,12 +778,13 @@ int imProcessOtsuThreshold(const imImage* src_image, imImage* dst_image);
 
 /** Calculates the threshold level for manual threshold using (max-min)/2. \n
  * Returns the used level. \n
- * Supports all integer IM_GRAY images as source, and IM_BINARY as destiny.
+ * Source color space must be IM_GRAY, and destiny color space must be IM_BINARY.
+ * IM_CFLOAT is not supported. Can be done in place for IM_BYTE source. \n
  *
  * \verbatim im.ProcessMinMaxThreshold(src_image: imImage, dst_image: imImage) -> level: number [in Lua 5] \endverbatim
  * \verbatim im.ProcessMinMaxThresholdNew(src_image: imImage) -> level: number, new_image: imImage [in Lua 5] \endverbatim
  * \ingroup threshold */
-int imProcessMinMaxThreshold(const imImage* src_image, imImage* dst_image);
+float imProcessMinMaxThreshold(const imImage* src_image, imImage* dst_image);
 
 /** Estimates Local Max threshold level for IM_BYTE images.
  *
@@ -791,13 +794,14 @@ void imProcessLocalMaxThresEstimate(const imImage* image, int *level);
 
 /** Apply a manual threshold using an interval. \n
  * threshold = start_level <= a <= end_level ? 1: 0 \n
- * Normal value is 1 but another common value is 255. Can be done in place for IM_BYTE source. \n
- * Supports all integer IM_GRAY images as source, and IM_BINARY as destiny.
+ * Normal value is 1 but another common value is 255. \n
+ * Source color space must be IM_GRAY, and destiny color space must be IM_BINARY.
+ * IM_CFLOAT is not supported. Can be done in place for IM_BYTE source. \n
  *
  * \verbatim im.ProcessSliceThreshold(src_image: imImage, dst_image: imImage, start_level: number, end_level: number) [in Lua 5] \endverbatim
  * \verbatim im.ProcessSliceThresholdNew(src_image: imImage, start_level: number, end_level: number) -> new_image: imImage [in Lua 5] \endverbatim
  * \ingroup threshold */
-void imProcessSliceThreshold(const imImage* src_image, imImage* dst_image, int start_level, int end_level);
+void imProcessSliceThreshold(const imImage* src_image, imImage* dst_image, float start_level, float end_level);
 
 
 /** \defgroup effects Special Effects
