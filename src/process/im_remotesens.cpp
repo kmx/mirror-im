@@ -16,13 +16,13 @@
 
 
 template <class T> 
-static void DoNDVI(T *nir_map, T *vis_map, float *new_map, int count)
+static void DoNormDiffRatio(T *map1, T *map2, float *new_map, int count)
 {
   int i;
   for (i = 0; i < count; i++)
   {
-    float num   = (float)(nir_map[i] - vis_map[i]);
-    float denom = (float)(nir_map[i] + vis_map[i]);
+    float num   = (float)(map1[i] - map2[i]);
+    float denom = (float)(map1[i] + map2[i]);
 
     if (denom == 0) 
       new_map[i] = 0;
@@ -31,23 +31,23 @@ static void DoNDVI(T *nir_map, T *vis_map, float *new_map, int count)
   }
 }
 
-void imProcessNDVI(const imImage* nir_image, const imImage* vis_image, imImage* dst_image)
+void imProcessNormDiffRatio(const imImage* image1, const imImage* image2, imImage* dst_image)
 {
-  int count = nir_image->count;
+  int count = image1->count;
 
-  switch(nir_image->data_type)
+  switch(image1->data_type)
   {
   case IM_BYTE:
-    DoNDVI((imbyte*)nir_image->data[0], (imbyte*)vis_image->data[0], (float*)dst_image->data[0], count);
+    DoNormDiffRatio((imbyte*)image1->data[0], (imbyte*)image2->data[0], (float*)dst_image->data[0], count);
     break;                                                                                
   case IM_USHORT:                                                                           
-    DoNDVI((imushort*)nir_image->data[0], (imushort*)vis_image->data[0], (float*)dst_image->data[0], count);
+    DoNormDiffRatio((imushort*)image1->data[0], (imushort*)image2->data[0], (float*)dst_image->data[0], count);
     break;                                                                                
   case IM_INT:                                                                           
-    DoNDVI((int*)nir_image->data[0], (int*)vis_image->data[0], (float*)dst_image->data[0], count);
+    DoNormDiffRatio((int*)image1->data[0], (int*)image2->data[0], (float*)dst_image->data[0], count);
     break;                                                                                
   case IM_FLOAT:                                                                           
-    DoNDVI((float*)nir_image->data[0], (float*)vis_image->data[0], (float*)dst_image->data[0], count);
+    DoNormDiffRatio((float*)image1->data[0], (float*)image2->data[0], (float*)dst_image->data[0], count);
     break;                                                                                
   }
 }

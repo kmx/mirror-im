@@ -3207,7 +3207,7 @@ static int imluaProcessPosterize (lua_State *L)
   return 0;
 }
 
-static int imluaProcessNDVI(lua_State *L)
+static int imluaProcessNormDiffRatio(lua_State *L)
 {
   imImage *src_image1 = imlua_checkimage(L, 1);
   imImage *src_image2 = imlua_checkimage(L, 2);
@@ -3217,7 +3217,7 @@ static int imluaProcessNDVI(lua_State *L)
   imlua_matchcolorspace(L, src_image1, dst_image);
   imlua_checkdatatype(L, 3, dst_image, IM_FLOAT);
 
-  imProcessNDVI(src_image1, src_image2, dst_image);
+  imProcessNormDiffRatio(src_image1, src_image2, dst_image);
   return 0;
 }
 
@@ -3391,7 +3391,7 @@ static const luaL_reg improcess_lib[] = {
 
   {"ProcessPixelate", imluaProcessPixelate},
   {"ProcessPosterize", imluaProcessPosterize},
-  {"ProcessNDVI", imluaProcessNDVI},
+  {"ProcessNormDiffRatio", imluaProcessNormDiffRatio},
 
   {NULL, NULL}
 };

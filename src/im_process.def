@@ -115,7 +115,7 @@ EXPORTS
   imProcessSetAlphaColor
   imProcessPosterize
   imProcessNegative
-  imProcessNDVI
+  imProcessNormDiffRatio
   imProcessCanny
   imProcessMultiplyConj
   imProcessNormalizeComponents

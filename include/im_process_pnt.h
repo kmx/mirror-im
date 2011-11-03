@@ -842,17 +842,15 @@ void imProcessPosterize(const imImage* src_image, imImage* dst_image, int level)
  * \ingroup process */
 
 
-/** Calculates the Normalized Difference Vegetation Index. \n
- * Uses the formula NDVI = (NIR-VIS)/(NIR+VIS),            \n
- * where VIS = spectral reflectance measurements acquired in the visible (red) region  \n
- * and NIR = spectral reflectance measurements acquired in the near-infrared region. \n
+/** Calculates the Normalized Difference Ratio. \n
+ * Uses the formula NormDiffRatio = (a-b)/(a+b), \n
  * The result image has [-1,1] interval. \n
  * Images must be IM_GRAY, and the destiny image must be IM_FLOAT.
  *
- * \verbatim im.ProcessNDVI(nir_image: imImage, vis_image: imImage, dst_image: imImage) [in Lua 5] \endverbatim
- * \verbatim im.ProcessNDVINew(nir_image: imImage, vis_image: imImage) -> new_image: imImage [in Lua 5] \endverbatim
+ * \verbatim im.ProcessNormDiffRatio(image1: imImage, image2: imImage, dst_image: imImage) [in Lua 5] \endverbatim
+ * \verbatim im.ProcessNormDiffRatioNew(image1: imImage, image2: imImage) -> new_image: imImage [in Lua 5] \endverbatim
  * \ingroup remotesens */
-void imProcessNDVI(const imImage* nir_image, const imImage* vis_image, imImage* dst_image);
+void imProcessNormDiffRatio(const imImage* image1, const imImage* image2, imImage* dst_image);
 
 
 
