@@ -2,7 +2,6 @@
  * \brief Video Capture Using Direct Show 9
  *
  * See Copyright Notice in im.h
- * $Id$
  */
 
 /*

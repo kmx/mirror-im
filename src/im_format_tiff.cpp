@@ -3,7 +3,6 @@
  *
  * See Copyright Notice in im_lib.h
  * See libTIFF Copyright Notice in tiff.h
- * $Id$
  */
 
 #include "im_format.h"

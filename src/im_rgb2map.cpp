@@ -9,7 +9,6 @@
  * This file doen not follows the IM library nomenclature convention.
  *
  * See Copyright Notice in im_lib.h
- * $Id$
  */
 
 

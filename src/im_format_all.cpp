@@ -2,7 +2,6 @@
  * \brief Register all the internal File Format Classes
  *
  * See Copyright Notice in im_lib.h
- * $Id$
  */
 
 

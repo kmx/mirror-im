@@ -2,7 +2,6 @@
  * \brief Data Type Utilities
  *
  * See Copyright Notice in im_lib.h
- * $Id$
  */
 
 

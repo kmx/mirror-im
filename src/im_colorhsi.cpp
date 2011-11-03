@@ -2,7 +2,6 @@
  * \brief HSI Color Manipulation
  *
  * See Copyright Notice in im_lib.h
- * $Id$
  */
 
 

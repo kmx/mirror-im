@@ -2,7 +2,6 @@
  * \brief System Dependent Binary File Access.
  *
  * See Copyright Notice in im_lib.h
- * $Id$
  */
 
 #include <windows.h>

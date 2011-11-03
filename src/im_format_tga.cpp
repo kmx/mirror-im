@@ -2,7 +2,6 @@
  * \brief TGA - Truevision Graphics Adapter File
  *
  * See Copyright Notice in im_lib.h
- * $Id$
  */
 
 #include "im_format.h"

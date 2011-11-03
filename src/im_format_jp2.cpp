@@ -3,7 +3,6 @@
  *
  * See Copyright Notice in im_lib.h
  * See libJaper Copyright Notice in jasper.h
- * $Id$
  */
 
 #include "im_format.h"

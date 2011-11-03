@@ -7,7 +7,7 @@
 #ifndef __IM_PROCESS_H
 #define __IM_PROCESS_H
 
-#include "im_process_pon.h"
+#include "im_process_pnt.h"
 #include "im_process_loc.h"
 #include "im_process_glo.h"
 #include "im_process_ana.h"

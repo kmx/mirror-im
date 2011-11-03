@@ -3,7 +3,6 @@
  *
  * See Copyright Notice in im_lib.h
  * See libPNG Copyright Notice in png.h
- * $Id$
  */
 
 #include "im_format.h"

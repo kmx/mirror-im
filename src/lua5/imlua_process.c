@@ -2,7 +2,6 @@
  * \brief IM Lua 5 Binding
  *
  * See Copyright Notice in im_lib.h
- * $Id$
  */
 
 #include <memory.h>
@@ -1642,7 +1641,7 @@ static int (imluaUnOpFunc)(int x, int y, int d, float src_value, float *dst_valu
   return ret;
 }
 
-static int imluaProcessUnPontualOp(lua_State *L)
+static int imluaProcessUnaryPointOp(lua_State *L)
 {
   imImage *src_image = imlua_checkimage(L, 1);
   imImage *dst_image = imlua_checkimage(L, 2);
@@ -1657,7 +1656,7 @@ static int imluaProcessUnPontualOp(lua_State *L)
   luaL_checktype(L, 5, LUA_TTABLE);
 
   g_State = L;
-  lua_pushboolean(L, imProcessUnPontualOp(src_image, dst_image, imluaUnOpFunc, op_name, NULL));
+  lua_pushboolean(L, imProcessUnaryPointOp(src_image, dst_image, imluaUnOpFunc, op_name, NULL));
   g_State = NULL;
 
   return 1;
@@ -1689,7 +1688,7 @@ static int imluaUnColorOpFunc(int x, int y, const float* src_value, float* dst_v
   return ret;
 }
 
-static int imluaProcessUnPontualColorOp(lua_State *L)
+static int imluaProcessUnaryPointColorOp(lua_State *L)
 {
   imImage *src_image = imlua_checkimage(L, 1);
   imImage *dst_image = imlua_checkimage(L, 2);
@@ -1708,7 +1707,7 @@ static int imluaProcessUnPontualColorOp(lua_State *L)
   luaL_checktype(L, 5, LUA_TTABLE);
 
   g_State = L;
-  lua_pushboolean(L, imProcessUnPontualColorOp(src_image, dst_image, imluaUnColorOpFunc, op_name, params));
+  lua_pushboolean(L, imProcessUnaryPointColorOp(src_image, dst_image, imluaUnColorOpFunc, op_name, params));
   g_State = NULL;
 
   return 1;
@@ -1737,7 +1736,7 @@ static int imluaMultiOpFunc(int x, int y, int d, const float* src_value, float *
   return ret;
 }
 
-static int imluaProcessMultiPontualOp(lua_State *L)
+static int imluaProcessMultiPointOp(lua_State *L)
 {
   int src_count;
   imImage **src_image_list;
@@ -1772,7 +1771,7 @@ static int imluaProcessMultiPontualOp(lua_State *L)
   params[0] = (float)src_count;
 
   g_State = L;
-  lua_pushboolean(L, imProcessMultiPontualOp(src_image_list, src_count, dst_image, imluaMultiOpFunc, op_name, params));
+  lua_pushboolean(L, imProcessMultiPointOp(src_image_list, src_count, dst_image, imluaMultiOpFunc, op_name, params));
   g_State = NULL;
 
   free(src_image_list);
@@ -1812,7 +1811,7 @@ static int imluaMultiColorOpFunc(int x, int y, float** src_value, float *dst_val
   return ret;
 }
 
-static int imluaProcessMultiPontualColorOp(lua_State *L)
+static int imluaProcessMultiPointColorOp(lua_State *L)
 {
   int src_count, src_depth, dst_depth;
   imImage **src_image_list;
@@ -1846,7 +1845,7 @@ static int imluaProcessMultiPontualColorOp(lua_State *L)
   params[2] = (float)dst_depth;
 
   g_State = L;
-  lua_pushboolean(L, imProcessMultiPontualColorOp(src_image_list, src_count, dst_image, imluaMultiColorOpFunc, op_name, params));
+  lua_pushboolean(L, imProcessMultiPointColorOp(src_image_list, src_count, dst_image, imluaMultiColorOpFunc, op_name, params));
   g_State = NULL;
 
   free(src_image_list);
@@ -3313,10 +3312,10 @@ static const luaL_reg improcess_lib[] = {
   {"GaussianKernelSize2StdDev", imluaGaussianKernelSize2StdDev},
   {"GaussianStdDev2KernelSize", imluaGaussianStdDev2KernelSize},
 
-  {"ProcessUnPontualOp", imluaProcessUnPontualOp},
-  {"ProcessUnPontualColorOp", imluaProcessUnPontualColorOp},
-  {"ProcessMultiPontualOp", imluaProcessMultiPontualOp},
-  {"ProcessMultiPontualColorOp", imluaProcessMultiPontualColorOp},
+  {"ProcessUnaryPointOp", imluaProcessUnaryPointOp},
+  {"ProcessUnaryPointColorOp", imluaProcessUnaryPointColorOp},
+  {"ProcessMultiPointOp", imluaProcessMultiPointOp},
+  {"ProcessMultiPointColorOp", imluaProcessMultiPointColorOp},
   {"ProcessUnArithmeticOp", imluaProcessUnArithmeticOp},
   {"ProcessArithmeticOp", imluaProcessArithmeticOp},
   {"ProcessArithmeticConstOp", imluaProcessArithmeticConstOp},

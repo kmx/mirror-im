@@ -2,7 +2,6 @@
  * \brief Image Resize
  *
  * See Copyright Notice in im_lib.h
- * $Id$
  */
 
 

@@ -2,7 +2,6 @@
  * \brief ICO - Windows Icon
  *
  * See Copyright Notice in im_lib.h
- * $Id$
  */
 
 #include "im_format.h"

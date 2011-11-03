@@ -2,7 +2,6 @@
  * \brief Tone Gamut Operations
  *
  * See Copyright Notice in im_lib.h
- * $Id$
  */
 
 
@@ -10,7 +9,7 @@
 #include <im_util.h>
 #include <im_math.h>
 
-#include "im_process_pon.h"
+#include "im_process_pnt.h"
 
 #include <stdlib.h>
 #include <stdio.h>

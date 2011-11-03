@@ -2,7 +2,6 @@
  * \brief Image Statistics Calculations
  *
  * See Copyright Notice in im_lib.h
- * $Id$
  */
 
 

@@ -2,7 +2,6 @@
  * \brief Color Mode Utilities
  *
  * See Copyright Notice in im_lib.h
- * $Id$
  */
 
 

@@ -241,8 +241,8 @@ OneSourceOneDest("ProcessSplineEdgeConvolve")
 OneSourceOneDest("ProcessPrewittConvolve")
 OneSourceOneDest("ProcessZeroCrossing")
 OneSourceOneDest("ProcessCanny")
-OneSourceOneDest("ProcessUnPontualOp")
-OneSourceOneDest("ProcessUnPontualColorOp")
+OneSourceOneDest("ProcessUnaryPointOp")
+OneSourceOneDest("ProcessUnaryPointColorOp")
 OneSourceOneDest("ProcessUnArithmeticOp")
 TwoSourcesOneDest("ProcessArithmeticOp")
 OneSourceOneDest("ProcessUnsharp")
@@ -255,15 +255,15 @@ function im.ProcessArithmeticConstOpNew (src_image, src_const, op)
   return dst_image
 end
 
-function im.ProcessMultiPontualOpNew (src_image_list, dst_image, func, op_name, params)
+function im.ProcessMultiPointOpNew (src_image_list, dst_image, func, op_name, params)
   local dst_image = im.ImageCreateBased(src_image_list[1])
-  local counter = im.ProcessMultiPontualOpNew(src_image_list, dst_image, func, op_name, params)
+  local counter = im.ProcessMultiPointOp(src_image_list, dst_image, func, op_name, params)
   return counter, dst_image
 end
 
-function im.ProcessMultiPontualColorOpNew (src_image_list, dst_image, func, op_name, params)
+function im.ProcessMultiPointColorOpNew (src_image_list, dst_image, func, op_name, params)
   local dst_image = im.ImageCreateBased(src_image_list[1])
-  local counter = im.ProcessMultiPontualColorOpNew(src_image_list, dst_image, func, op_name, params)
+  local counter = im.ProcessMultiPointColorOp(src_image_list, dst_image, func, op_name, params)
   return counter, dst_image
 end
 

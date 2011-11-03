@@ -161,7 +161,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\process\im_pontual.cpp"
+				RelativePath="..\src\process\im_point.cpp"
 				>
 			</File>
 			<File
@@ -222,7 +222,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\include\im_process_pon.h"
+				RelativePath="..\include\im_process_pnt.h"
 				>
 			</File>
 		</Filter>

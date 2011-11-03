@@ -2,7 +2,6 @@
  * \brief File Access
  *
  * See Copyright Notice in im_lib.h
- * $Id$
  */
 
 #include <stdlib.h>

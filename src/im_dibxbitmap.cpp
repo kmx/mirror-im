@@ -2,7 +2,6 @@
  * \brief Conversion between imDib and imImage
  *
  * See Copyright Notice in im_lib.h
- * $Id$
  */
 
 

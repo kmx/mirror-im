@@ -3,7 +3,6 @@
  * I/O uses imBinFile instead of libTIFF original handlers.
  *
  * See Copyright Notice in im_lib.h
- * $Id$
  */
 
 #include "tiffiop.h"

@@ -2,7 +2,6 @@
  * \brief IM Lua 5 Binding
  *
  * See Copyright Notice in im_lib.h
- * $Id$
  */
 
 #ifndef __IMLUA_PALETTE_H

@@ -2,7 +2,6 @@
  * \brief Binary Data Utilities
  *
  * See Copyright Notice in im_lib.h
- * $Id$
  */
 
 #include <assert.h>

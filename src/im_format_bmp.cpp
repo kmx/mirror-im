@@ -2,7 +2,6 @@
  * \brief BMP - Windows Device Independent Bitmap
  *
  * See Copyright Notice in im_lib.h
- * $Id$
  */
 
 #include "im_format.h"

@@ -103,10 +103,10 @@ EXPORTS
   imProcessThresholdByDiff
   imProcessToneGamut
   imProcessUnArithmeticOp
-  imProcessUnPontualOp
-  imProcessUnPontualColorOp
-  imProcessMultiPontualOp
-  imProcessMultiPontualColorOp
+  imProcessUnaryPointOp
+  imProcessUnaryPointColorOp
+  imProcessMultiPointOp
+  imProcessMultiPointColorOp
   imProcessUnNormalize
   imProcessZeroCrossing
   imProcessRotateKernel

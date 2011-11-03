@@ -2,7 +2,6 @@
  * \brief Processing Counter
  *
  * See Copyright Notice in im_lib.h
- * $Id$
  */
 
 #include "im_counter.h"

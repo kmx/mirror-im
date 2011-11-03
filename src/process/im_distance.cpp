@@ -2,7 +2,6 @@
  * \brief Distance Transform
  *
  * See Copyright Notice in im_lib.h
- * $Id$
  */
 
 #include <im.h>

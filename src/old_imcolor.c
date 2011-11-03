@@ -2,7 +2,6 @@
  * \brief Old resize/stretch functions
  *
  * See Copyright Notice in im_lib.h
- * $Id$
  */
 
 #include "old_im.h"

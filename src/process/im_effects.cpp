@@ -2,7 +2,6 @@
  * \brief Effects
  *
  * See Copyright Notice in im_lib.h
- * $Id$
  */
 
 
@@ -11,7 +10,7 @@
 #include <im_math.h>
 #include <im_complex.h>
 
-#include "im_process_pon.h"
+#include "im_process_pnt.h"
 #include "im_math_op.h"
 
 #include <stdlib.h>

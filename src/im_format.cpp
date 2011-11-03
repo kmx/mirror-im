@@ -2,7 +2,6 @@
  * \brief File Format Access
  *
  * See Copyright Notice in im_lib.h
- * $Id$
  */
 
 

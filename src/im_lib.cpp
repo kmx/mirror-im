@@ -2,7 +2,6 @@
  * \brief Library Management
  *
  * See Copyright Notice in im_lib.h
- * $Id$
  */
 
 #include <stdlib.h>

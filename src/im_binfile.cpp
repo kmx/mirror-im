@@ -2,7 +2,6 @@
  * \brief Binary File Access
  *
  * See Copyright Notice in im_lib.h
- * $Id$
  */
 
 

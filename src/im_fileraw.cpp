@@ -2,7 +2,6 @@
  * \brief RAW File Format Open/New Functions
  *
  * See Copyright Notice in im_lib.h
- * $Id$
  */
 
 #include "im.h"

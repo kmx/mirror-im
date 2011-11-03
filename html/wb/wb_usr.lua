@@ -356,7 +356,7 @@ wb_usr.tree =
             { link= "doxygen/im__process__ana_8h.html", name= {en= "im_process_ana.h" } },
             { link= "doxygen/im__process__glo_8h.html", name= {en= "im_process_glo.h" } },
             { link= "doxygen/im__process__loc_8h.html", name= {en= "im_process_loc.h" } },
-            { link= "doxygen/im__process__pon_8h.html", name= {en= "im_process_pon.h" } },
+            { link= "doxygen/im__process__pnt_8h.html", name= {en= "im_process_pnt.h" } },
             { link= "doxygen/im__raw_8h.html", name= {en= "im_raw.h" } },
             { link= "doxygen/im__util_8h.html", name= {en= "im_util.h" } },
             { link= "doxygen/imlua_8h.html", name= {en= "imlua.h" } },
