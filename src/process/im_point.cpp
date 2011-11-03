@@ -30,7 +30,7 @@ static int DoUnaryPointOp(T1 *src_map, T2 *dst_map, int width, int height, int d
 
     for(int x = 0; x < width; x++)
     {
-      if (func(x, y, d, (float)src_map[offset + x], &dst_value, params)) 
+      if (func((float)src_map[offset + x], &dst_value, params, x, y, d)) 
         dst_map[offset + x] = (T2)dst_value;
     }
   
@@ -41,7 +41,7 @@ static int DoUnaryPointOp(T1 *src_map, T2 *dst_map, int width, int height, int d
   return 1;
 }
 
-int imProcessUnaryPointOp(const imImage* src_image, imImage* dst_image, imUnaryPointOpFunc func, const char* op_name, float* params)
+int imProcessUnaryPointOp(const imImage* src_image, imImage* dst_image, imUnaryPointOpFunc func, float* params, const char* op_name)
 {
   int ret = 0;
   int depth = src_image->has_alpha? src_image->depth+1: src_image->depth;
@@ -117,7 +117,7 @@ static int DoUnaryPointColorOp(T1 **src_map, T2 **dst_map, int width, int height
       for(d = 0; d < src_depth; d++)
         src_value[d] = (float)(src_map[d])[offset + x];
 
-      if (func(x, y, src_value, dst_value, params))
+      if (func(src_value, dst_value, params, x, y))
       {
         for(d = 0; d < dst_depth; d++)
           (dst_map[d])[offset + x] = (T2)dst_value[d];
@@ -137,7 +137,7 @@ static int DoUnaryPointColorOp(T1 **src_map, T2 **dst_map, int width, int height
   return 1;
 }
 
-int imProcessUnaryPointColorOp(const imImage* src_image, imImage* dst_image, imUnaryPointColorOpFunc func, const char* op_name, float* params)
+int imProcessUnaryPointColorOp(const imImage* src_image, imImage* dst_image, imUnaryPointColorOpFunc func, float* params, const char* op_name)
 {
   int ret = 0;
   int src_depth = src_image->has_alpha? src_image->depth+1: src_image->depth;
@@ -211,7 +211,7 @@ static int DoMultiPointOp(T1 **src_map, T2 *dst_map, int width, int height, int 
       for(i = 0; i < src_count; i++)
         src_value[i] = (float)(src_map[i])[offset + x];
 
-      if (func(x, y, d, src_value, &dst_value, params))
+      if (func(src_value, &dst_value, params, x, y, d))
         dst_map[offset + x] = (T2)dst_value;
     }
   
@@ -226,7 +226,7 @@ static int DoMultiPointOp(T1 **src_map, T2 *dst_map, int width, int height, int 
   return 1;
 }
 
-int imProcessMultiPointOp(const imImage** src_image, int src_count, imImage* dst_image, imMultiPointOpFunc func, const char* op_name, float* params)
+int imProcessMultiPointOp(const imImage** src_image, int src_count, imImage* dst_image, imMultiPointOpFunc func, float* params, const char* op_name)
 {
   int ret = 0;
   int depth = src_image[0]->has_alpha? src_image[0]->depth+1: src_image[0]->depth;
@@ -314,7 +314,7 @@ static int DoMultiPointColorOp(T1 ***src_map, T2 **dst_map, int width, int heigh
           (src_value[i])[d] = (float)((src_map[i])[d])[offset + x];
       }
 
-      if (func(x, y, src_value, dst_value, params))
+      if (func(src_value, dst_value, params, x, y))
       {
         for(d = 0; d < dst_depth; d++)
           (dst_map[d])[offset + x] = (T2)dst_value[d];
@@ -338,7 +338,7 @@ static int DoMultiPointColorOp(T1 ***src_map, T2 **dst_map, int width, int heigh
   return 1;
 }
 
-int imProcessMultiPointColorOp(const imImage** src_image, int src_count, imImage* dst_image, imMultiPointColorOpFunc func, const char* op_name, float* params)
+int imProcessMultiPointColorOp(const imImage** src_image, int src_count, imImage* dst_image, imMultiPointColorOpFunc func, float* params, const char* op_name)
 {
   int ret = 0;
   int src_depth = src_image[0]->has_alpha? src_image[0]->depth+1: src_image[0]->depth;

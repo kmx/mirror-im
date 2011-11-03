@@ -20,88 +20,92 @@ extern "C" {
 
 
 /** Custom unary point funtion.
- * \verbatim func(x: number, y: number, d: number, src_value: number, params1, param2, ...) -> cond: boolean, dst_value: number  [in Lua 5] \endverbatim
+ * \verbatim func(src_value: number, params1, param2, ..., x: number, y: number, d: number) -> dst_value: number  [in Lua 5] \endverbatim
  * In Lua, the params table is unpacked.
+ * And the returned value contains only the destiny values to update, or nil (also no return value) to leave destiny intact.
  * \ingroup point */
-typedef int (*imUnaryPointOpFunc)(int x, int y, int d, float src_value, float *dst_value, float* params);
+typedef int (*imUnaryPointOpFunc)(float src_value, float *dst_value, float* params, int x, int y, int d);
 
 /** Apply an unary point operation using a custom function.
  * One pixel from the source affects the same pixel on destiny. \n
  * Can be done in place, images must match size and depth. 
  * Data type can be different, but IM_CFLOAT is not supported. \n
- * op_name can be NULL. Data will be set only if cond is true. 
+ * op_name is used only by the counter and can be NULL. Data will be set only if cond is true. 
  * Returns zero if the counter aborted.
  *
- * \verbatim im.ProcessUnaryPointOp(src_image: imImage, dst_image: imImage, func: function, op_name: string, params: table) -> counter: boolean [in Lua 5] \endverbatim
- * \verbatim im.ProcessUnaryPointOpNew(image: imImage, func: function, op_name: string, params: table) -> counter: boolean, new_image: imImage [in Lua 5] \endverbatim
+ * \verbatim im.ProcessUnaryPointOp(src_image: imImage, dst_image: imImage, func: function, params: table, [op_name: string]) -> counter: boolean [in Lua 5] \endverbatim
+ * \verbatim im.ProcessUnaryPointOpNew(image: imImage, func: function, params: table, [op_name: string]) -> counter: boolean, new_image: imImage [in Lua 5] \endverbatim
  * In Lua, the params table is passed to the function by using the Lua stack, 
  * so its table can contain any type of objects, but they all must be unnamed.
  * \ingroup point */
-int imProcessUnaryPointOp(const imImage* src_image, imImage* dst_image, imUnaryPointOpFunc func, const char* op_name, float* params);
+int imProcessUnaryPointOp(const imImage* src_image, imImage* dst_image, imUnaryPointOpFunc func, float* params, const char* op_name);
 
 /** Custom unary point color funtion.
- * \verbatim func(x: number, y: number, src_value_plane0: number, src_value_plane1: number, ... , params1, param2, ...) -> cond: boolean, dst_value_plane0: number, dst_value_plane1: number, ...  [in Lua 5] \endverbatim
+ * \verbatim func(src_value_plane0: number, src_value_plane1: number, ... , params1, param2, ..., x: number, y: number) -> dst_value_plane0: number, dst_value_plane1: number, ...  [in Lua 5] \endverbatim
  * In Lua, the params table is unpacked.
- * Also in Lua each color plane is passed as a separe value, instead of inside an array.
+ * Also each color plane is passed as a separe value, instead of inside an array.
+ * And the returned value contains only the destiny values to update, or nil (also no return value) to leave destiny intact.
  * \ingroup point */
-typedef int (*imUnaryPointColorOpFunc)(int x, int y, const float* src_value, float* dst_value, float* params);
+typedef int (*imUnaryPointColorOpFunc)(const float* src_value, float* dst_value, float* params, int x, int y);
 
 /** Apply an unary point color operation using a custom function.
  * One pixel from the source affects the same pixel on destiny. \n
  * Can be done in place, images must match size, depth can be different.
  * Data type can be different, but IM_CFLOAT is not supported. \n
- * op_name can be NULL. Data will be set only if cond is true. 
+ * op_name is used only by the counter and can be NULL. Data will be set only if cond is true. 
  * Returns zero if the counter aborted.
  *
- * \verbatim im.ProcessUnaryPointColorOp(src_image: imImage, dst_image: imImage, func: function, op_name: string, params: table) -> counter: boolean [in Lua 5] \endverbatim
- * \verbatim im.ProcessUnaryPointColorOpNew(image: imImage, func: function, op_name: string, params: table) -> counter: boolean, new_image: imImage [in Lua 5] \endverbatim
+ * \verbatim im.ProcessUnaryPointColorOp(src_image: imImage, dst_image: imImage, func: function, params: table, [op_name: string]) -> counter: boolean [in Lua 5] \endverbatim
+ * \verbatim im.ProcessUnaryPointColorOpNew(image: imImage, func: function, params: table, [op_name: string]) -> counter: boolean, new_image: imImage [in Lua 5] \endverbatim
  * In Lua, the params table is passed to the function by using the Lua stack, 
  * so its table can contain any type of objects, but they all must be unnamed.
  * \ingroup point */
-int imProcessUnaryPointColorOp(const imImage* src_image, imImage* dst_image, imUnaryPointColorOpFunc func, const char* op_name, float* params);
+int imProcessUnaryPointColorOp(const imImage* src_image, imImage* dst_image, imUnaryPointColorOpFunc func, float* params, const char* op_name);
 
 /** Custom multiple point funtion.
- * \verbatim func(x: number, y: number, d: number, src_value1: number, src_value2: number, ... , params1, param2, ...) -> cond: boolean, dst_value: number  [in Lua 5] \endverbatim
+ * \verbatim func(src_value1: number, src_value2: number, ... , params1, param2, ..., x: number, y: number, d: number) -> dst_value: number  [in Lua 5] \endverbatim
  * In Lua, the source images data and the params table are unpacked.
+ * And the returned value contains only the destiny values to update, or nil (also no return value) to leave destiny intact.
  * \ingroup point */
-typedef int (*imMultiPointOpFunc)(int x, int y, int d, const float* src_value, float *dst_value, float* params);
+typedef int (*imMultiPointOpFunc)(const float* src_value, float *dst_value, float* params, int x, int y, int d);
 
 /** Apply an multiple point operation using a custom function.
  * One pixel from each source affects the same pixel on destiny. \n
  * All source images must match in size, depth and data type.
  * Can be done in place, source and destiny must match size and depth.
  * Data type can be different between sources and destiny, but IM_CFLOAT is not supported. \n
- * op_name can be NULL. Data will be set only if cond is true. 
+ * op_name is used only by the counter and can be NULL. Data will be set only if cond is true. 
  * Returns zero if the counter aborted.
  *
- * \verbatim im.ProcessMultiPointOp(src_image: table of imImage, dst_image: imImage, func: function, op_name: string, params: table) -> counter: boolean [in Lua 5] \endverbatim
- * \verbatim im.ProcessMultiPointOpNew(src_image: table of imImage, func: function, op_name: string, params: table) -> counter: boolean, new_image: imImage [in Lua 5] \endverbatim
+ * \verbatim im.ProcessMultiPointOp(src_image: table of imImage, dst_image: imImage, func: function, params: table, [op_name: string]) -> counter: boolean [in Lua 5] \endverbatim
+ * \verbatim im.ProcessMultiPointOpNew(src_image: table of imImage, func: function, params: table, [op_name: string]) -> counter: boolean, new_image: imImage [in Lua 5] \endverbatim
  * In Lua, the params table is passed to the function by using the Lua stack, 
  * so its table can contain any type of objects, but they all must be unnamed.
  * \ingroup point */
-int imProcessMultiPointOp(const imImage** src_image, int src_count, imImage* dst_image, imMultiPointOpFunc func, const char* op_name, float* params);
+int imProcessMultiPointOp(const imImage** src_image, int src_count, imImage* dst_image, imMultiPointOpFunc func, float* params, const char* op_name);
 
 /** Custom multiple point color funtion.
- * \verbatim func(x: number, y: number, d: number, src_value1_plane0: number, src_value1_plane1: number, ..., src_value2_plane0: number, src_value2_plane1: number, ... , params1, param2, ...) -> cond: boolean, dst_value_plane0: number, dst_value_plane1: number, ...  [in Lua 5] \endverbatim
+ * \verbatim func(src_value1_plane0: number, src_value1_plane1: number, ..., src_value2_plane0: number, src_value2_plane1: number, ... , params1, param2, ..., x: number, y: number) -> dst_value_plane0: number, dst_value_plane1: number, ...  [in Lua 5] \endverbatim
  * In Lua, the source images data and the params table are unpacked.
- * Also in Lua each color plane is passed as a separe value, instead of inside an array.
+ * Also each color plane is passed as a separe value, instead of inside an array.
+ * And the returned value contains only the destiny values to update, or nil (also no return value) to leave destiny intact.
  * \ingroup point */
-typedef int (*imMultiPointColorOpFunc)(int x, int y, float** src_value, float* dst_value, float* params);
+typedef int (*imMultiPointColorOpFunc)(float** src_value, float* dst_value, float* params, int x, int y);
 
 /** Apply an multiple point color operation using a custom function.
  * One pixel from each source affects the same pixel on destiny. \n
  * All source images must match in size, depth and data type.
  * Can be done in place, source and destiny must match size, depth can be different.
  * Data type can be different between sources and destiny, but IM_CFLOAT is not supported. \n
- * op_name can be NULL. Data will be set only if cond is true. 
+ * op_name is used only by the counter and can be NULL. Data will be set only if cond is true. 
  * Returns zero if the counter aborted.
  *
- * \verbatim im.ProcessMultiPointColorOp(src_image: table of imImage, dst_image: imImage, func: function, op_name: string, params: table) -> counter: boolean [in Lua 5] \endverbatim
- * \verbatim im.ProcessMultiPointColorOpNew(src_image: table of imImage, func: function, op_name: string, params: table) -> counter: boolean, new_image: imImage [in Lua 5] \endverbatim
+ * \verbatim im.ProcessMultiPointColorOp(src_image: table of imImage, dst_image: imImage, func: function, params: table, [op_name: string]) -> counter: boolean [in Lua 5] \endverbatim
+ * \verbatim im.ProcessMultiPointColorOpNew(src_image: table of imImage, func: function, params: table, [op_name: string]) -> counter: boolean, new_image: imImage [in Lua 5] \endverbatim
  * In Lua, the params table is passed to the function by using the Lua stack, 
  * so its table can contain any type of objects, but they all must be unnamed.
  * \ingroup point */
-int imProcessMultiPointColorOp(const imImage** src_image, int src_count, imImage* dst_image, imMultiPointColorOpFunc func, const char* op_name, float* params);
+int imProcessMultiPointColorOp(const imImage** src_image, int src_count, imImage* dst_image, imMultiPointColorOpFunc func, float* params, const char* op_name);
 
 
 

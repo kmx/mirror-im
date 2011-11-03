@@ -1619,25 +1619,27 @@ static int imluaProcessUnArithmeticOp (lua_State *L)
   return 0;
 }
 
-static int (imluaUnOpFunc)(int x, int y, int d, float src_value, float *dst_value, float* params)
+static int (imluaUnOpFunc)(float src_value, float *dst_value, float* params, int x, int y, int d)
 {
-  int n, ret;
+  int n, ret = 0;
   lua_State *L = g_State;
   (void)params;
 
   lua_pushvalue(L, 3);  /* func is passed in the stack */
+  lua_pushnumber(L, src_value);
+  n = imlua_unpacktable(L, 4);  /* params is passed in the stack */
   lua_pushinteger(L, x);
   lua_pushinteger(L, y);
   lua_pushinteger(L, d);
-  lua_pushnumber(L, src_value);
-  n = imlua_unpacktable(L, 5);  /* params is passed in the stack */
 
-  lua_call(L, 4+n, 2);
+  lua_call(L, 1+n+3, 1);
 
   if (!lua_isnil(L, -1))
+  {
     *dst_value = (float)luaL_checknumber(L, -1);
-  ret = lua_toboolean(L, -2);
-  lua_pop(L, 2);
+    ret = 1;
+  }
+  lua_pop(L, 1);
   return ret;
 }
 
@@ -1645,7 +1647,7 @@ static int imluaProcessUnaryPointOp(lua_State *L)
 {
   imImage *src_image = imlua_checkimage(L, 1);
   imImage *dst_image = imlua_checkimage(L, 2);
-  const char *op_name = luaL_optstring(L, 4, NULL);
+  const char *op_name = luaL_optstring(L, 5, NULL);
 
   imlua_checknotcfloat(L, 1, src_image);
   imlua_checknotcfloat(L, 1, dst_image);
@@ -1653,38 +1655,38 @@ static int imluaProcessUnaryPointOp(lua_State *L)
   if (src_image->depth != dst_image->depth)
     luaL_error(L, "images must have the same depth");
   luaL_checktype(L, 3, LUA_TFUNCTION);
-  luaL_checktype(L, 5, LUA_TTABLE);
+  luaL_checktype(L, 4, LUA_TTABLE);
 
   g_State = L;
-  lua_pushboolean(L, imProcessUnaryPointOp(src_image, dst_image, imluaUnOpFunc, op_name, NULL));
+  lua_pushboolean(L, imProcessUnaryPointOp(src_image, dst_image, imluaUnOpFunc, NULL, op_name));
   g_State = NULL;
 
   return 1;
 }
 
-static int imluaUnColorOpFunc(int x, int y, const float* src_value, float* dst_value, float* params)
+static int imluaUnColorOpFunc(const float* src_value, float* dst_value, float* params, int x, int y)
 {
-  int d, n, ret;
+  int d, n, ret = 0;
   lua_State *L = g_State;
   int src_depth = (int)params[0];
   int dst_depth = (int)params[1];
 
   lua_pushvalue(L, 3);  /* func is passed in the stack */
-  lua_pushinteger(L, x);
-  lua_pushinteger(L, y);
   for (d = 0; d < src_depth; d++)
     lua_pushnumber(L, src_value[d]);
-  n = imlua_unpacktable(L, 5);  /* params is passed in the stack */
+  n = imlua_unpacktable(L, 4);  /* params is passed in the stack */
+  lua_pushinteger(L, x);
+  lua_pushinteger(L, y);
 
-  lua_call(L, 2+src_depth+n, 1+dst_depth);
+  lua_call(L, src_depth+n+2, dst_depth);
 
-  if (!lua_isnil(L, (0+1)-(1+dst_depth)))
+  if (!lua_isnil(L, -dst_depth))
   {
     for (d = 0; d < dst_depth; d++)
-      dst_value[d] = (float)luaL_checknumber(L, (d+1)-(1+dst_depth));
+      dst_value[d] = (float)luaL_checknumber(L, d-dst_depth);
+    ret = 1;
   }
-  ret = lua_toboolean(L, -(1+dst_depth));
-  lua_pop(L, 1+dst_depth);
+  lua_pop(L, dst_depth);
   return ret;
 }
 
@@ -1692,7 +1694,7 @@ static int imluaProcessUnaryPointColorOp(lua_State *L)
 {
   imImage *src_image = imlua_checkimage(L, 1);
   imImage *dst_image = imlua_checkimage(L, 2);
-  const char *op_name = luaL_optstring(L, 4, NULL);
+  const char *op_name = luaL_optstring(L, 5, NULL);
   int src_depth = src_image->has_alpha? src_image->depth+1: src_image->depth;
   int dst_depth = dst_image->has_alpha? dst_image->depth+1: dst_image->depth;
   float params[2];
@@ -1704,35 +1706,37 @@ static int imluaProcessUnaryPointColorOp(lua_State *L)
   imlua_checknotcfloat(L, 1, dst_image);
   imlua_matchsize(L, src_image, dst_image);
   luaL_checktype(L, 3, LUA_TFUNCTION);
-  luaL_checktype(L, 5, LUA_TTABLE);
+  luaL_checktype(L, 4, LUA_TTABLE);
 
   g_State = L;
-  lua_pushboolean(L, imProcessUnaryPointColorOp(src_image, dst_image, imluaUnColorOpFunc, op_name, params));
+  lua_pushboolean(L, imProcessUnaryPointColorOp(src_image, dst_image, imluaUnColorOpFunc, params, op_name));
   g_State = NULL;
 
   return 1;
 }
 
-static int imluaMultiOpFunc(int x, int y, int d, const float* src_value, float *dst_value, float* params)
+static int imluaMultiOpFunc(const float* src_value, float *dst_value, float* params, int x, int y, int d)
 {
   lua_State *L = g_State;
-  int ret, n, i, 
+  int ret = 0, n, i, 
     src_count = (int)params[0];
 
   lua_pushvalue(L, 3);  /* func is passed in the stack */
+  for (i = 0; i < src_count; i++)
+    lua_pushnumber(L, src_value[i]);
+  n = imlua_unpacktable(L, 4);  /* params is passed in the stack */
   lua_pushinteger(L, x);
   lua_pushinteger(L, y);
   lua_pushinteger(L, d);
-  for (i = 0; i < src_count; i++)
-    lua_pushnumber(L, src_value[i]);
-  n = imlua_unpacktable(L, 5);  /* params is passed in the stack */
 
-  lua_call(L, 3+src_count+n, 2);
+  lua_call(L, src_count+n+3, 1);
 
   if (!lua_isnil(L, -1))
+  {
     *dst_value = (float)luaL_checknumber(L, -1);
-  ret = lua_toboolean(L, -2);
-  lua_pop(L, 2);
+    ret = 1;
+  }
+  lua_pop(L, 1);
   return ret;
 }
 
@@ -1741,12 +1745,12 @@ static int imluaProcessMultiPointOp(lua_State *L)
   int src_count;
   imImage **src_image_list;
   imImage *dst_image = imlua_checkimage(L, 2);
-  const char *op_name = luaL_optstring(L, 4, NULL);
+  const char *op_name = luaL_optstring(L, 5, NULL);
   float params[1];
 
   imlua_checknotcfloat(L, 1, dst_image);
   luaL_checktype(L, 3, LUA_TFUNCTION);
-  luaL_checktype(L, 5, LUA_TTABLE);
+  luaL_checktype(L, 4, LUA_TTABLE);
 
   /* minimize leak when error, checking array after other checks */
   src_image_list = imlua_toarrayimage(L, 1, &src_count, 1);
@@ -1771,7 +1775,7 @@ static int imluaProcessMultiPointOp(lua_State *L)
   params[0] = (float)src_count;
 
   g_State = L;
-  lua_pushboolean(L, imProcessMultiPointOp(src_image_list, src_count, dst_image, imluaMultiOpFunc, op_name, params));
+  lua_pushboolean(L, imProcessMultiPointOp(src_image_list, src_count, dst_image, imluaMultiOpFunc, params, op_name));
   g_State = NULL;
 
   free(src_image_list);
@@ -1779,35 +1783,33 @@ static int imluaProcessMultiPointOp(lua_State *L)
   return 1;
 }
 
-static int imluaMultiColorOpFunc(int x, int y, float** src_value, float *dst_value, float* params)
+static int imluaMultiColorOpFunc(float** src_value, float *dst_value, float* params, int x, int y)
 {
   lua_State *L = g_State;
-  int n, d, i, ret, 
+  int n, d, i, ret = 0, 
     src_count = (int)params[0],
     src_depth = (int)params[1],
     dst_depth = (int)params[2];
 
   lua_pushvalue(L, 3);  /* func is passed in the stack */
-  lua_pushinteger(L, x);
-  lua_pushinteger(L, y);
   for (i = 0; i < src_count; i++)
   {
     for (d = 0; d < src_depth; d++)
-    {
       lua_pushnumber(L, (src_value[i])[d]);
-    }
   }
-  n = imlua_unpacktable(L, 5);  /* params is passed in the stack */
+  n = imlua_unpacktable(L, 4);  /* params is passed in the stack */
+  lua_pushinteger(L, x);
+  lua_pushinteger(L, y);
 
-  lua_call(L, 2+src_depth*src_count+n, 1+dst_depth);
+  lua_call(L, src_depth*src_count+n+2, dst_depth);
 
-  if (!lua_isnil(L, (0+1)-(1+dst_depth)))
+  if (!lua_isnil(L, -dst_depth))
   {
     for (d = 0; d < dst_depth; d++)
-      dst_value[d] = (float)luaL_checknumber(L, (d+1)-(1+dst_depth));
+      dst_value[d] = (float)luaL_checknumber(L, d-dst_depth);
+    ret = 1;
   }
-  ret = lua_toboolean(L, -(1+dst_depth));
-  lua_pop(L, 1+dst_depth);
+  lua_pop(L, dst_depth);
   return ret;
 }
 
@@ -1816,12 +1818,12 @@ static int imluaProcessMultiPointColorOp(lua_State *L)
   int src_count, src_depth, dst_depth;
   imImage **src_image_list;
   imImage *dst_image = imlua_checkimage(L, 2);
-  const char *op_name = luaL_optstring(L, 4, NULL);
+  const char *op_name = luaL_optstring(L, 5, NULL);
   float params[3];
 
   imlua_checknotcfloat(L, 1, dst_image);
   luaL_checktype(L, 3, LUA_TFUNCTION);
-  luaL_checktype(L, 5, LUA_TTABLE);
+  luaL_checktype(L, 4, LUA_TTABLE);
 
   /* minimize leak when error, checking array after other checks */
   src_image_list = imlua_toarrayimage(L, 1, &src_count, 1);
@@ -1845,7 +1847,7 @@ static int imluaProcessMultiPointColorOp(lua_State *L)
   params[2] = (float)dst_depth;
 
   g_State = L;
-  lua_pushboolean(L, imProcessMultiPointColorOp(src_image_list, src_count, dst_image, imluaMultiColorOpFunc, op_name, params));
+  lua_pushboolean(L, imProcessMultiPointColorOp(src_image_list, src_count, dst_image, imluaMultiColorOpFunc, params, op_name));
   g_State = NULL;
 
   free(src_image_list);

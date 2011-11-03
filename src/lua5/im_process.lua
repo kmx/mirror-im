@@ -255,15 +255,15 @@ function im.ProcessArithmeticConstOpNew (src_image, src_const, op)
   return dst_image
 end
 
-function im.ProcessMultiPointOpNew (src_image_list, dst_image, func, op_name, params)
+function im.ProcessMultiPointOpNew (src_image_list, dst_image, func, params, op_name)
   local dst_image = im.ImageCreateBased(src_image_list[1])
-  local counter = im.ProcessMultiPointOp(src_image_list, dst_image, func, op_name, params)
+  local counter = im.ProcessMultiPointOp(src_image_list, dst_image, func, params, op_name)
   return counter, dst_image
 end
 
-function im.ProcessMultiPointColorOpNew (src_image_list, dst_image, func, op_name, params)
+function im.ProcessMultiPointColorOpNew (src_image_list, dst_image, func, params, op_name)
   local dst_image = im.ImageCreateBased(src_image_list[1])
-  local counter = im.ProcessMultiPointColorOp(src_image_list, dst_image, func, op_name, params)
+  local counter = im.ProcessMultiPointColorOp(src_image_list, dst_image, func, params, op_name)
   return counter, dst_image
 end
 
