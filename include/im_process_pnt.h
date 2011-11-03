@@ -29,7 +29,7 @@ typedef int (*imUnaryPointOpFunc)(int x, int y, int d, float src_value, float *d
  * One pixel from the source affects the same pixel on destiny. \n
  * Can be done in place, images must match size and depth. 
  * Data type can be different, but IM_CFLOAT is not supported. \n
- * Data will be set only if cond is true.
+ * op_name can be NULL. Data will be set only if cond is true. 
  * Returns zero if the counter aborted.
  *
  * \verbatim im.ProcessUnaryPointOp(src_image: imImage, dst_image: imImage, func: function, op_name: string, params: table) -> counter: boolean [in Lua 5] \endverbatim
@@ -50,7 +50,7 @@ typedef int (*imUnaryPointColorOpFunc)(int x, int y, const float* src_value, flo
  * One pixel from the source affects the same pixel on destiny. \n
  * Can be done in place, images must match size, depth can be different.
  * Data type can be different, but IM_CFLOAT is not supported. \n
- * Data will be set only if cond is true.
+ * op_name can be NULL. Data will be set only if cond is true. 
  * Returns zero if the counter aborted.
  *
  * \verbatim im.ProcessUnaryPointColorOp(src_image: imImage, dst_image: imImage, func: function, op_name: string, params: table) -> counter: boolean [in Lua 5] \endverbatim
@@ -71,7 +71,7 @@ typedef int (*imMultiPointOpFunc)(int x, int y, int d, const float* src_value, f
  * All source images must match in size, depth and data type.
  * Can be done in place, source and destiny must match size and depth.
  * Data type can be different between sources and destiny, but IM_CFLOAT is not supported. \n
- * Data will be set only if cond is true.
+ * op_name can be NULL. Data will be set only if cond is true. 
  * Returns zero if the counter aborted.
  *
  * \verbatim im.ProcessMultiPointOp(src_image: table of imImage, dst_image: imImage, func: function, op_name: string, params: table) -> counter: boolean [in Lua 5] \endverbatim
@@ -93,7 +93,7 @@ typedef int (*imMultiPointColorOpFunc)(int x, int y, float** src_value, float* d
  * All source images must match in size, depth and data type.
  * Can be done in place, source and destiny must match size, depth can be different.
  * Data type can be different between sources and destiny, but IM_CFLOAT is not supported. \n
- * Data will be set only if cond is true.
+ * op_name can be NULL. Data will be set only if cond is true. 
  * Returns zero if the counter aborted.
  *
  * \verbatim im.ProcessMultiPointColorOp(src_image: table of imImage, dst_image: imImage, func: function, op_name: string, params: table) -> counter: boolean [in Lua 5] \endverbatim

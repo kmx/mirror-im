@@ -1645,7 +1645,7 @@ static int imluaProcessUnaryPointOp(lua_State *L)
 {
   imImage *src_image = imlua_checkimage(L, 1);
   imImage *dst_image = imlua_checkimage(L, 2);
-  const char *op_name = luaL_checkstring(L, 4);
+  const char *op_name = luaL_optstring(L, 4, NULL);
 
   imlua_checknotcfloat(L, 1, src_image);
   imlua_checknotcfloat(L, 1, dst_image);
@@ -1692,7 +1692,7 @@ static int imluaProcessUnaryPointColorOp(lua_State *L)
 {
   imImage *src_image = imlua_checkimage(L, 1);
   imImage *dst_image = imlua_checkimage(L, 2);
-  const char *op_name = luaL_checkstring(L, 4);
+  const char *op_name = luaL_optstring(L, 4, NULL);
   int src_depth = src_image->has_alpha? src_image->depth+1: src_image->depth;
   int dst_depth = dst_image->has_alpha? dst_image->depth+1: dst_image->depth;
   float params[2];
@@ -1741,7 +1741,7 @@ static int imluaProcessMultiPointOp(lua_State *L)
   int src_count;
   imImage **src_image_list;
   imImage *dst_image = imlua_checkimage(L, 2);
-  const char *op_name = luaL_checkstring(L, 4);
+  const char *op_name = luaL_optstring(L, 4, NULL);
   float params[1];
 
   imlua_checknotcfloat(L, 1, dst_image);
@@ -1816,7 +1816,7 @@ static int imluaProcessMultiPointColorOp(lua_State *L)
   int src_count, src_depth, dst_depth;
   imImage **src_image_list;
   imImage *dst_image = imlua_checkimage(L, 2);
-  const char *op_name = luaL_checkstring(L, 4);
+  const char *op_name = luaL_optstring(L, 4, NULL);
   float params[3];
 
   imlua_checknotcfloat(L, 1, dst_image);

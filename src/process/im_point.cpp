@@ -11,7 +11,7 @@
 #include <im_complex.h>
 #include <im_counter.h>
 
-#include "im_process_pon.h"
+#include "im_process_pnt.h"
 #include "im_math_op.h"
 
 #include <stdlib.h>
@@ -46,7 +46,7 @@ int imProcessUnaryPointOp(const imImage* src_image, imImage* dst_image, imUnaryP
   int ret = 0;
   int depth = src_image->has_alpha? src_image->depth+1: src_image->depth;
 
-  int counter = imCounterBegin(op_name);
+  int counter = imCounterBegin(op_name? op_name: "UnaryPointOp");
   imCounterTotal(counter, src_image->depth*src_image->height, "Processing...");
 
   for (int d = 0; d < depth; d++)
@@ -143,7 +143,7 @@ int imProcessUnaryPointColorOp(const imImage* src_image, imImage* dst_image, imU
   int src_depth = src_image->has_alpha? src_image->depth+1: src_image->depth;
   int dst_depth = dst_image->has_alpha? dst_image->depth+1: dst_image->depth;
 
-  int counter = imCounterBegin(op_name);
+  int counter = imCounterBegin(op_name? op_name: "UnaryPointColorOp");
   imCounterTotal(counter, src_image->depth*src_image->height, "Processing...");
 
   switch(src_image->data_type)
@@ -232,7 +232,7 @@ int imProcessMultiPointOp(const imImage** src_image, int src_count, imImage* dst
   int depth = src_image[0]->has_alpha? src_image[0]->depth+1: src_image[0]->depth;
   void** src_map = new void* [src_count];
 
-  int counter = imCounterBegin(op_name);
+  int counter = imCounterBegin(op_name? op_name: "MultiPointOp");
   imCounterTotal(counter, src_image[0]->depth*src_image[0]->height, "Processing...");
 
   for (int d = 0; d < depth; d++)
@@ -345,7 +345,7 @@ int imProcessMultiPointColorOp(const imImage** src_image, int src_count, imImage
   int dst_depth = dst_image->has_alpha? dst_image->depth+1: dst_image->depth;
   void*** src_map = new void** [src_count];
 
-  int counter = imCounterBegin(op_name);
+  int counter = imCounterBegin(op_name? op_name: "MultiPointColorOp");
   imCounterTotal(counter, src_image[0]->depth*src_image[0]->height, "Processing...");
 
   for(int i = 0; i < src_count; i++)
