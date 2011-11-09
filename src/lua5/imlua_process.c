@@ -43,7 +43,7 @@ static int imlua_unpacktable(lua_State *L, int index)
   int i, n = imlua_getn(L, index);
 
   for (i = 0; i < n; i++)
-    lua_rawgeti(L, index, i);
+    lua_rawgeti(L, index, i+1);
 
   return n;
 }
