@@ -13,6 +13,11 @@ SRCLUADIR = lua5
 LIBS = im_process
 INCLUDES = lua5
 
+ifdef USE_OPENMP
+  LIBNAME := $(LIBNAME)_omp
+  LIBS := im_process_omp
+endif
+
 ifdef USE_LUA52
   LIBNAME := $(LIBNAME)52
   LOHDIR = lua5/loh52

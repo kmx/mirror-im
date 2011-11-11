@@ -46,7 +46,7 @@ int imProcessUnaryPointOp(const imImage* src_image, imImage* dst_image, imUnaryP
  * Also each color plane is passed as a separe value, instead of inside an array.
  * And the returned value contains only the destiny values to update, or nil (also no return value) to leave destiny intact.
  * \ingroup point */
-typedef int (*imUnaryPointColorOpFunc)(const float* src_value, float* dst_value, float* params, int x, int y);
+typedef int (*imUnaryPointColorOpFunc)(const float* src_value, float *dst_value, float* params, int x, int y);
 
 /** Apply an unary point color operation using a custom function.
  * One pixel from the source affects the same pixel on destiny. \n
@@ -90,7 +90,7 @@ int imProcessMultiPointOp(const imImage** src_image, int src_count, imImage* dst
  * Also each color plane is passed as a separe value, instead of inside an array.
  * And the returned value contains only the destiny values to update, or nil (also no return value) to leave destiny intact.
  * \ingroup point */
-typedef int (*imMultiPointColorOpFunc)(float** src_value, float* dst_value, float* params, int x, int y);
+typedef int (*imMultiPointColorOpFunc)(float* src_value, float* dst_value, float* params, int x, int y);
 
 /** Apply an multiple point color operation using a custom function.
  * One pixel from each source affects the same pixel on destiny. \n

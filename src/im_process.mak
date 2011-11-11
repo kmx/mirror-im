@@ -16,6 +16,11 @@ SRC  := $(addprefix process/, $(SRC))
 USE_IM = Yes
 IM = ..
 
+ifdef USE_OPENMP
+  DEF_FILE := $(LIBNAME).def
+  LIBNAME := $(LIBNAME)_omp
+endif
+
 ifneq ($(findstring Win, $(TEC_SYSNAME)), )
     ifneq ($(findstring ow, $(TEC_UNAME)), )
       DEFINES += IM_DEFMATHFLOAT

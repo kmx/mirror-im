@@ -1783,25 +1783,23 @@ static int imluaProcessMultiPointOp(lua_State *L)
   return 1;
 }
 
-static int imluaMultiColorOpFunc(float** src_value, float *dst_value, float* params, int x, int y)
+static int imluaMultiColorOpFunc(float* src_value, float *dst_value, float* params, int x, int y)
 {
   lua_State *L = g_State;
-  int n, d, i, ret = 0, 
+  int n, d, m, i, ret = 0, 
     src_count = (int)params[0],
     src_depth = (int)params[1],
     dst_depth = (int)params[2];
 
   lua_pushvalue(L, 3);  /* func is passed in the stack */
-  for (i = 0; i < src_count; i++)
-  {
-    for (d = 0; d < src_depth; d++)
-      lua_pushnumber(L, (src_value[i])[d]);
-  }
+  m = src_depth*src_count;
+  for (i = 0; i < m; i++)
+    lua_pushnumber(L, src_value[i]);
   n = imlua_unpacktable(L, 4);  /* params is passed in the stack */
   lua_pushinteger(L, x);
   lua_pushinteger(L, y);
 
-  lua_call(L, src_depth*src_count+n+2, dst_depth);
+  lua_call(L, m+n+2, dst_depth);
 
   if (!lua_isnil(L, -dst_depth))
   {
@@ -3465,6 +3463,11 @@ int imlua_open_process(lua_State *L)
 }
 
 int luaopen_imlua_process(lua_State *L)
+{
+  return imlua_open_process(L);
+}
+
+int luaopen_imlua_process_omp(lua_State *L)
 {
   return imlua_open_process(L);
 }
