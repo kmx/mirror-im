@@ -34,6 +34,11 @@ typedef int (*imCounterCallback)(int counter, void* user_data, const char* text,
  * \ingroup counter */
 imCounterCallback imCounterSetCallback(void* user_data, imCounterCallback counter_func);
 
+/** Returns true if the counter callback is set.
+ * When the callback is NULL the counter is inactive and all functions do nothing.
+ * \ingroup counter */
+int imCounterHasCallback(void);
+
 /** Begins a new count, or a partial-count in a sequence. \n
  * Calls the callback with "-1" and text=title, if it is at the top level. \n     
  * This is to be used by the operations. Returns a counter Id.

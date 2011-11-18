@@ -21,8 +21,8 @@
 #include <omp.h>
 #endif
 
-#define IM_MAXDEPTH 5   // Max depth is 4+1  (cmyk+alpha)
 
+#define IM_MAXDEPTH 5   // Max depth is 4+1  (cmyk+alpha)
 
 template <class T1, class T2> 
 static int DoUnaryPointOp(T1 *src_map, T2 *dst_map, int width, int height, int depth, imUnaryPointOpFunc func, float* params, int counter)
@@ -51,27 +51,36 @@ static int DoUnaryPointOp(T1 *src_map, T2 *dst_map, int width, int height, int d
   }
 #else
   int size = count * depth;
-  (void)counter;
+  bool abort = false;
 
 #pragma omp parallel for
   for(int i = 0; i < size; i++)
   {
-    float dst_value;
-    int d = i%count;
-    int y = (i - d*count)%width;
-    int x = i - d*count - y*width;
-
-    if (func((float)src_map[i], &dst_value, params, x, y, d)) 
-      dst_map[i] = (T2)dst_value;
-
-//    if (x == width-1)
+    #pragma omp flush (abort)
+    if (!abort) 
     {
-      //omp_set_lock(&lck);
-      //imCounterInc(counter);
-      //omp_unset_lock(&lck);
+      float dst_value;
+      int d = i%count;
+      int y = (i - d*count)%width;
+      int x = i - d*count - y*width;
+
+      if (func((float)src_map[i], &dst_value, params, x, y, d)) 
+        dst_map[i] = (T2)dst_value;
+
+      if (x == width-1 && imCounterHasCallback())
+      {
+        #pragma omp critical(CounterUpdate)
+        if (!imCounterInc(counter))
+        {
+          abort = true;
+          #pragma omp flush (abort)
+        }
+      }
     }
   }
-  //omp_destroy_lock(&lck);
+
+  if (abort)
+    return 0;
 #endif
 
   return 1;
@@ -165,27 +174,44 @@ static int DoUnaryPointColorOp(T1 **src_map, T2 **dst_map, int width, int height
 
 #else
   int count = width * height;
-  (void)counter;
+  bool abort = false;
 
 #pragma omp parallel for
   for(int i = 0; i < count; i++)
   {
-    int y = i%width;
-    int x = i - y*width;
-
-    int d;
-    float src_value[IM_MAXDEPTH];
-    float dst_value[IM_MAXDEPTH];
-
-    for(d = 0; d < src_depth; d++)
-      src_value[d] = (float)(src_map[d])[i];
-
-    if (func(src_value, dst_value, params, x, y))
+    #pragma omp flush (abort)
+    if (!abort) 
     {
-      for(d = 0; d < dst_depth; d++)
-        (dst_map[d])[i] = (T2)dst_value[d];
+      int y = i%width;
+      int x = i - y*width;
+
+      int d;
+      float src_value[IM_MAXDEPTH];
+      float dst_value[IM_MAXDEPTH];
+
+      for(d = 0; d < src_depth; d++)
+        src_value[d] = (float)(src_map[d])[i];
+
+      if (func(src_value, dst_value, params, x, y))
+      {
+        for(d = 0; d < dst_depth; d++)
+          (dst_map[d])[i] = (T2)dst_value[d];
+      }
+
+      if (x == width-1 && imCounterHasCallback())
+      {
+        #pragma omp critical(CounterUpdate)
+        if (!imCounterInc(counter))
+        {
+          abort = true;
+          #pragma omp flush (abort)
+        }
+      }
     }
   }
+
+  if (abort)
+    return 0;
 #endif
 
   return 1;
@@ -198,7 +224,7 @@ int imProcessUnaryPointColorOp(const imImage* src_image, imImage* dst_image, imU
   int dst_depth = dst_image->has_alpha? dst_image->depth+1: dst_image->depth;
 
   int counter = imCounterBegin(op_name? op_name: "UnaryPointColorOp");
-  imCounterTotal(counter, src_image->depth*src_image->height, "Processing...");
+  imCounterTotal(counter, src_image->height, "Processing...");
 
   switch(src_image->data_type)
   {
@@ -288,22 +314,42 @@ static int DoMultiPointOp(T1 **src_map, T2 *dst_map, int width, int height, int 
   int size = count * depth;
   int tcount = omp_get_max_threads();
   float* src_value = new float [src_count*tcount];
-  (void)counter;
+  bool abort = false;
 
 #pragma omp parallel for
   for(int i = 0; i < size; i++)
   {
-    float dst_value;
-    int d = i%count;
-    int y = (i - d*count)%width;
-    int x = i - d*count - y*width;
-    int tpos = omp_get_thread_num()*src_count;
+    #pragma omp flush (abort)
+    if (!abort) 
+    {
+      float dst_value;
+      int d = i%count;
+      int y = (i - d*count)%width;
+      int x = i - d*count - y*width;
+      int tpos = omp_get_thread_num()*src_count;
 
-    for(int j = 0; j < src_count; j++)
-      src_value[tpos + j] = (float)(src_map[j])[i];
+      for(int j = 0; j < src_count; j++)
+        src_value[tpos + j] = (float)(src_map[j])[i];
 
-    if (func(src_value + tpos, &dst_value, params, x, y, d))
-      dst_map[i] = (T2)dst_value;
+      if (func(src_value + tpos, &dst_value, params, x, y, d))
+        dst_map[i] = (T2)dst_value;
+
+      if (x == width-1 && imCounterHasCallback())
+      {
+        #pragma omp critical(CounterUpdate)
+        if (!imCounterInc(counter))
+        {
+          abort = true;
+          #pragma omp flush (abort)
+        }
+      }
+    }
+  }
+
+  if (abort)
+  {
+    delete[] src_value;
+    return 0;
   }
 #endif
 
@@ -412,31 +458,50 @@ static int DoMultiPointColorOp(T1 ***src_map, T2 **dst_map, int width, int heigh
   int count = width * height;
   int tcount = omp_get_max_threads();
   float* src_value = new float [src_count*src_depth*tcount];
-  (void)counter;
+  bool abort = false;
 
 #pragma omp parallel for
   for(int i = 0; i < count; i++)
   {
-    float dst_value[IM_MAXDEPTH];
-    int y = i%width;
-    int x = i - y*width;
-    int tpos = omp_get_thread_num()*src_count;
-
-    for(int j = 0; j < src_count; j++)
+    #pragma omp flush (abort)
+    if (!abort) 
     {
-      for(int d = 0; d < src_depth; d++)
-        src_value[tpos + j*src_depth + d] = (float)((src_map[j])[d])[i];
-    }
+      float dst_value[IM_MAXDEPTH];
+      int y = i%width;
+      int x = i - y*width;
+      int tpos = omp_get_thread_num()*src_count;
 
-    if (func(src_value + tpos, dst_value, params, x, y))
-    {
-      for(int d = 0; d < dst_depth; d++)
-        (dst_map[d])[i] = (T2)dst_value[d];
+      for(int j = 0; j < src_count; j++)
+      {
+        for(int d = 0; d < src_depth; d++)
+          src_value[tpos + j*src_depth + d] = (float)((src_map[j])[d])[i];
+      }
+
+      if (func(src_value + tpos, dst_value, params, x, y))
+      {
+        for(int d = 0; d < dst_depth; d++)
+          (dst_map[d])[i] = (T2)dst_value[d];
+      }
+
+      if (x == width-1 && imCounterHasCallback())
+      {
+        #pragma omp critical(CounterUpdate)
+        if (!imCounterInc(counter))
+        {
+          abort = true;
+          #pragma omp flush (abort)
+        }
+      }
     }
+  }
+
+  if (abort)
+  {
+    delete[] src_value;
+    return 0;
   }
 #endif
 
-  delete[] src_value;
   return 1;
 }
 
@@ -448,7 +513,7 @@ int imProcessMultiPointColorOp(const imImage** src_image, int src_count, imImage
   void*** src_map = new void** [src_count];
 
   int counter = imCounterBegin(op_name? op_name: "MultiPointColorOp");
-  imCounterTotal(counter, src_image[0]->depth*src_image[0]->height, "Processing...");
+  imCounterTotal(counter, src_image[0]->height, "Processing...");
 
   for(int i = 0; i < src_count; i++)
     src_map[i] = src_image[i]->data;

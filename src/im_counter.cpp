@@ -22,6 +22,11 @@ imCounterCallback imCounterSetCallback(void* user_data, imCounterCallback counte
   return old_counter_func;
 }
 
+int imCounterHasCallback(void)
+{
+  return iCounterFunc!=NULL;
+}
+
 struct iCounter
 {
   int total;

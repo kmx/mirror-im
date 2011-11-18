@@ -76,6 +76,7 @@ EXPORTS
   imBinSwapBytes8
   imColorDecode
   imCounterSetCallback
+  imCounterHasCallback
   imCounterBegin
   imCounterInc
   imCounterIncTo
