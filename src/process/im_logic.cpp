@@ -21,14 +21,17 @@ static void DoBitwiseOp(T *map1, T *map2, T *map, int count, int op)
   switch(op)
   {
   case IM_BIT_AND:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = map1[i] & map2[i];
     break;
   case IM_BIT_OR:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = map1[i] | map2[i];
     break;
   case IM_BIT_XOR:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = (T)~(map1[i] | map2[i]);
     break;
@@ -56,12 +59,14 @@ void imProcessBitwiseOp(const imImage* src_image1, const imImage* src_image2, im
 template <class T> 
 static void DoBitwiseNot(T *map1, T *map, int count)
 {
+#pragma omp parallel for
   for (int i = 0; i < count; i++)
     map[i] = ~map1[i];
 }
 
 static void DoBitwiseNotBin(imbyte *map1, imbyte *map, int count)
 {
+#pragma omp parallel for
   for (int i = 0; i < count; i++)
     map[i] = map1[i]? 0: 1;
 }
@@ -99,16 +104,19 @@ void imProcessBitMask(const imImage* src_image, imImage* dst_image, unsigned cha
   switch(op)
   {
   case IM_BIT_AND:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
-      *dst_map++ = *src_map++ & mask;
+      dst_map[i] = src_map[i] & mask;
     break;
   case IM_BIT_OR:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
-      *dst_map++ = *src_map++ | mask;
+      dst_map[i] = src_map[i] | mask;
     break;
   case IM_BIT_XOR:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
-      *dst_map++ = (imbyte)~(*src_map++ | mask);
+      dst_map[i] = (imbyte)~(src_map[i] | mask);
     break;
   }
 
@@ -123,13 +131,12 @@ void imProcessBitPlane(const imImage* src_image, imImage* dst_image, int plane, 
   imbyte* src_map = (imbyte*)src_image->data[0];
   imbyte* dst_map = (imbyte*)dst_image->data[0];
   int count = dst_image->count * dst_image->depth;
+#pragma omp parallel for
   for (int i = 0; i < count; i++)
   {
     if (reset) 
-      *dst_map++ = *src_map & mask;
+      dst_map[i] = src_map[i] & mask;
     else
-      *dst_map++ = (*src_map & mask)? 1: 0;
-
-    src_map++;
+      dst_map[i] = (src_map[i] & mask)? 1: 0;
   }
 }

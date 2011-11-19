@@ -139,21 +139,25 @@ static void DoNormalizedUnaryOp(T *map, T *new_map, int count, int op, float *ar
     {
       if (min >= 0 && max <= 1)  // Already normalized
       {
+#pragma omp parallel for
         for (i = 0; i < count; i++)
           new_map[i] = (T)map[i];
       }
       else
       {
+#pragma omp parallel for
         for (i = 0; i < count; i++)
           new_map[i] = normal_op(map[i], min, range);
       }
       break;
     }
   case IM_GAMUT_INVERT:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       new_map[i] = (T)(invert_op(map[i], min, range)*range + min);
     break;
   case IM_GAMUT_ZEROSTART:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       new_map[i] = (T)zerostart_op(map[i], min);
     break;
@@ -162,17 +166,20 @@ static void DoNormalizedUnaryOp(T *map, T *new_map, int count, int op, float *ar
       T level =  (T)(((100 - args[0]) * range) / 100.0f + min);
       float A = float(level - min) / float(level - max);
       float B = float(level * range) / float(max - level);
+#pragma omp parallel for
       for (i = 0; i < count; i++)
         new_map[i] = solarize_op(map[i], level, A, B);
       break;
     }
   case IM_GAMUT_POW:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       new_map[i] = (T)(norm_pow_op(map[i], min, range, args[0])*range + min);
     break;
   case IM_GAMUT_LOG:
     {
       float norm = float(log(args[0] + 1));
+#pragma omp parallel for
       for (i = 0; i < count; i++)
         new_map[i] = (T)(norm_log_op(map[i], min, range, norm, args[0])*range + min);
       break;
@@ -180,6 +187,7 @@ static void DoNormalizedUnaryOp(T *map, T *new_map, int count, int op, float *ar
   case IM_GAMUT_EXP:
     {
       float norm = float(exp(args[0]) - 1);
+#pragma omp parallel for
       for (i = 0; i < count; i++)
         new_map[i] = (T)(norm_exp_op(map[i], min, range, norm, args[0])*range + min);
       break;
@@ -189,6 +197,7 @@ static void DoNormalizedUnaryOp(T *map, T *new_map, int count, int op, float *ar
       if (args[0] > args[1]) { float tmp = args[1]; args[1] = args[0]; args[0] = tmp; }
       if (args[1] > max) args[1] = (float)max;
       if (args[0] < min) args[0] = (float)min;
+#pragma omp parallel for
       for (i = 0; i < count; i++)
         new_map[i] = slice_op(map[i], min, max, (T)args[0], (T)args[1], (int)args[2]);
       break;
@@ -198,6 +207,7 @@ static void DoNormalizedUnaryOp(T *map, T *new_map, int count, int op, float *ar
       if (args[0] > args[1]) { float tmp = args[1]; args[1] = args[0]; args[0] = tmp; }
       if (args[1] > max) args[1] = (float)max;
       if (args[0] < min) args[0] = (float)min;
+#pragma omp parallel for
       for (i = 0; i < count; i++)
         new_map[i] = tonecrop_op(map[i], (T)args[0], (T)args[1]);
       break;
@@ -208,6 +218,7 @@ static void DoNormalizedUnaryOp(T *map, T *new_map, int count, int op, float *ar
       if (args[1] > max) args[1] = (float)max;
       if (args[0] < min) args[0] = (float)min;
       float norm = float(max - min)/(args[1] - args[0]);
+#pragma omp parallel for
       for (i = 0; i < count; i++)
         new_map[i] = expand_op(map[i], min, max, (T)args[0], norm);
       break;
@@ -217,6 +228,7 @@ static void DoNormalizedUnaryOp(T *map, T *new_map, int count, int op, float *ar
       float bs = (args[0] * range) / 100.0f;
       float a = (float)tan((45+args[1]*0.449999)/57.2957795);
       float b = bs + (float)range*(1.0f - a)/2.0f;
+#pragma omp parallel for
       for (i = 0; i < count; i++)
         new_map[i] = line_op(map[i], min, max, a, b);
       break;
@@ -252,6 +264,7 @@ void imProcessUnNormalize(const imImage* image, imImage* NewImage)
   float* map = (float*)image->data[0];
   imbyte* new_map = (imbyte*)NewImage->data[0];
 
+#pragma omp parallel for
   for (int i = 0; i < count; i++)
   {
     if (map[i] > 1)
@@ -266,6 +279,7 @@ void imProcessUnNormalize(const imImage* image, imImage* NewImage)
 template <class T> 
 static void DoDirectConv(T* map, imbyte* new_map, int count)
 {
+#pragma omp parallel for
   for (int i = 0; i < count; i++)
   {
     if (map[i] > 255)
@@ -313,6 +327,7 @@ void imProcessNegative(const imImage* src_image, imImage* dst_image)
   {
     imbyte* map1 = (imbyte*)src_image->data[0];
     imbyte* map = (imbyte*)dst_image->data[0];
+#pragma omp parallel for
     for (int i = 0; i < src_image->count; i++)
       map[i] = map1[i]? 0: 1;
   }

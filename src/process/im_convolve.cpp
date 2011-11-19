@@ -1581,7 +1581,7 @@ static int iProcessCheckKernelType(const imImage* kernel)
         return 0;
     }
   }
-  return 1;  /* default is kernel is a smooth filter */
+  return 1;  /* default kernel is a smooth filter */
 }
 
 int imProcessSharpKernel(const imImage* src_image, const imImage* kernel, imImage* dst_image, float amount, float threshold)

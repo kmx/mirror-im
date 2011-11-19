@@ -18,8 +18,8 @@
 template <class T> 
 static void DoNormDiffRatio(T *map1, T *map2, float *new_map, int count)
 {
-  int i;
-  for (i = 0; i < count; i++)
+#pragma omp parallel for
+  for (int i = 0; i < count; i++)
   {
     float num   = (float)(map1[i] - map2[i]);
     float denom = (float)(map1[i] + map2[i]);

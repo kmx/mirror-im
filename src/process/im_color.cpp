@@ -36,7 +36,7 @@ static void rgb2yrgb(imbyte* r, imbyte* g, imbyte* b, imbyte* y)
 
 void imProcessSplitYChroma(const imImage* src_image, imImage* y_image, imImage* chroma_image)
 {
-  imbyte Y,
+  imbyte 
     *red=(imbyte*)src_image->data[0],
     *green=(imbyte*)src_image->data[1],
     *blue=(imbyte*)src_image->data[2],
@@ -45,11 +45,13 @@ void imProcessSplitYChroma(const imImage* src_image, imImage* y_image, imImage* 
     *blue2=(imbyte*)chroma_image->data[2],
     *map1=(imbyte*)y_image->data[0];
 
+#pragma omp parallel for
   for (int i = 0; i < src_image->count; i++)
   {
     imbyte R = red[i];
     imbyte G = green[i];
     imbyte B = blue[i];
+    imbyte Y;
 
     rgb2yrgb(&R, &G, &B, &Y);
 
@@ -67,6 +69,7 @@ static void DoSplitHSIFloat(float** data, float* hue, float* saturation, float* 
       *green=data[1],
        *blue=data[2];
 
+#pragma omp parallel for
   for (int i = 0; i < count; i++)
   {
     imColorRGB2HSI(red[i], green[i], blue[i], &hue[i], &saturation[i], &intensity[i]);
@@ -79,6 +82,7 @@ static void DoSplitHSIByte(imbyte** data, float* hue, float* saturation, float* 
        *green=data[1],
         *blue=data[2];
 
+#pragma omp parallel for
   for (int i = 0; i < count; i++)
   {
     imColorRGB2HSIbyte(red[i], green[i], blue[i], &hue[i], &saturation[i], &intensity[i]);
@@ -106,6 +110,7 @@ static void DoMergeHSIFloat(float** data, float* hue, float* saturation, float* 
       *green=data[1],
        *blue=data[2];
 
+#pragma omp parallel for
   for (int i = 0; i < count; i++)
   {
     imColorHSI2RGB(hue[i], saturation[i], intensity[i], &red[i], &green[i], &blue[i]);
@@ -118,6 +123,7 @@ static void DoMergeHSIByte(imbyte** data, float* hue, float* saturation, float* 
        *green=data[1],
         *blue=data[2];
 
+#pragma omp parallel for
   for (int i = 0; i < count; i++)
   {
     imColorHSI2RGBbyte(hue[i], saturation[i], intensity[i], &red[i], &green[i], &blue[i]);
@@ -158,18 +164,20 @@ void imProcessMergeComponents(const imImage** src_image, imImage* dst_image)
 template <class T> 
 static void DoNormalizeComp(T** src_data, float** dst_data, int count, int depth)
 {
-  int d;
-  T* src_pdata[4];
-  float* dst_pdata[4];
+  T* src_pdata[IM_MAXDEPTH];
+  float* dst_pdata[IM_MAXDEPTH];
 
-  for(d = 0; d < depth; d++)
+  for(int dt = 0; dt < depth; dt++)
   {
-    dst_pdata[d] = dst_data[d];
-    src_pdata[d] = src_data[d];
+    dst_pdata[dt] = dst_data[dt];
+    src_pdata[dt] = src_data[dt];
   }
 
+#pragma omp parallel for
   for (int i = 0; i < count; i++)
   {
+    int d;
+
     float sum = 0;
     for(d = 0; d < depth; d++)
       sum += (float)*(src_pdata[d]);
@@ -177,12 +185,9 @@ static void DoNormalizeComp(T** src_data, float** dst_data, int count, int depth
     for(d = 0; d < depth; d++)
     {
       if (sum == 0)
-        *(dst_pdata[d]) = 0;
+        dst_pdata[d][i] = 0;
       else
-        *(dst_pdata[d]) = (float)*(src_pdata[d]) / sum;
-
-      dst_pdata[d]++;
-      src_pdata[d]++;
+        dst_pdata[d][i] = (float)*(src_pdata[d]) / sum;
     }
   }
 }
@@ -209,13 +214,13 @@ void imProcessNormalizeComponents(const imImage* src_image, imImage* dst_image)
 template <class T> 
 static void DoReplaceColor(T *src_data, T *dst_data, int count, int depth, float* src_color, float* dst_color)
 {
-  int d;
+#pragma omp parallel for
   for (int i = 0; i < count; i++)
   {
-    int equal = 1;
+    int d, equal = 1;
     for (d = 0; d < depth; d++)
     {
-      if (*(src_data+d*count) != (T)src_color[d])
+      if (src_data[i+d*count] != (T)src_color[d])
       {
         equal = 0;
         break;
@@ -225,13 +230,10 @@ static void DoReplaceColor(T *src_data, T *dst_data, int count, int depth, float
     for (d = 0; d < depth; d++)
     {
       if (equal)
-        *(dst_data+d*count) = (T)dst_color[d];
+        dst_data[i+d*count] = (T)dst_color[d];
       else
-        *(dst_data+d*count) = *(src_data+d*count);
+        dst_data[i+d*count] = src_data[i+d*count];
     }
-
-    src_data++;
-    dst_data++;
   }
 }
 
@@ -257,13 +259,13 @@ void imProcessReplaceColor(const imImage* src_image, imImage* dst_image, float* 
 template <class ST, class DT> 
 static void DoSetAlphaColor(ST *src_data, DT *dst_data, int count, int depth, float* src_color, float dst_alpha)
 {
-  int d;
+#pragma omp parallel for
   for (int i = 0; i < count; i++)
   {
     int equal = 1;
-    for (d = 0; d < depth; d++)
+    for (int d = 0; d < depth; d++)
     {
-      if (*(src_data+d*count) != (ST)src_color[d])
+      if (src_data[d*count + i] != (ST)src_color[d])
       {
         equal = 0;
         break;
@@ -271,10 +273,7 @@ static void DoSetAlphaColor(ST *src_data, DT *dst_data, int count, int depth, fl
     }
 
     if (equal)
-      *dst_data = (DT)dst_alpha;
-
-    src_data++;
-    dst_data++;
+      dst_data[i] = (DT)dst_alpha;
   }
 }
 

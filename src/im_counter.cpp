@@ -47,8 +47,8 @@ int imCounterBegin(const char* title)
     first = 0;
   }
 
-  if (!iCounterFunc) // counter management is useless
-    return -1;
+  if (!iCounterFunc) 
+    return -1;             // counter management is useless
 
   int counter = -1;
   for (int i = 0; i < MAX_COUNTERS; i++)
@@ -61,13 +61,14 @@ int imCounterBegin(const char* title)
     }
   }
 
-  if (counter == -1) return -1; // too many counters
+  if (counter == -1) 
+    return -1;             // too many counters
 
   iCounter *ct = &iCounterList[counter];
 
   ct->sequence++;
 
-  if (ct->sequence == 1) // top level counter
+  if (ct->sequence == 1)   // top level counter
     iCounterFunc(counter, iCounterUserData, title, -1);
 
   return counter;
@@ -75,11 +76,15 @@ int imCounterBegin(const char* title)
 
 void imCounterEnd(int counter)
 {
-  if (counter == -1 || !iCounterFunc) return;               // invalid counter
+  if (counter == -1 || !iCounterFunc) 
+    return;                // invalid counter
 
   iCounter *ct = &iCounterList[counter];
+  if (ct->sequence == 0 || // counter with no begin or no total
+      ct->total == 0)
+    return;
 
-  if (ct->sequence == 1) // top level counter
+  if (ct->sequence == 1)   // top level counter
   {
     iCounterFunc(counter, iCounterUserData, NULL, 1001);
     memset(ct, 0, sizeof(iCounter));
@@ -90,11 +95,10 @@ void imCounterEnd(int counter)
 
 int imCounterInc(int counter)
 {
-  if (counter == -1 || !iCounterFunc)                       // invalid counter
-    return 1;
+  if (counter == -1 || !iCounterFunc)                       
+    return 1;              // invalid counter
 
   iCounter *ct = &iCounterList[counter];
-
   if (ct->sequence == 0 || // counter with no begin or no total
       ct->total == 0)
     return 1;
@@ -115,11 +119,10 @@ int imCounterInc(int counter)
 
 int imCounterIncTo(int counter, int count)
 {
-  if (counter == -1 || !iCounterFunc)                       // invalid counter
-    return 1;
+  if (counter == -1 || !iCounterFunc)        
+    return 1;              // invalid counter
 
   iCounter *ct = &iCounterList[counter];
-
   if (ct->sequence == 0 || // counter with no begin or no total
       ct->total == 0)
     return 1;
@@ -143,11 +146,12 @@ int imCounterIncTo(int counter, int count)
 
 void imCounterTotal(int counter, int total, const char* message)
 {
-  if (counter == -1 || !iCounterFunc) return;               // invalid counter
+  if (counter == -1 || !iCounterFunc) 
+    return;                // invalid counter
 
   iCounter *ct = &iCounterList[counter];
-
-  if (ct->sequence == 0) return; // counter with no begin
+  if (ct->sequence == 0) 
+    return;                // counter with no begin
 
   ct->message = message;
   ct->total = total;

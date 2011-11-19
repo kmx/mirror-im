@@ -23,7 +23,8 @@ extern "C" {
  * Text contains a constant string that is NULL during normal counting, a title in the begining of a sequence 
  * and a message in the begining of a count.
  * Counter id identifies diferrent counters. \n
- * Progress in a count reports a value from 0 to 1000. If -1 indicates the start of a sequence of operations, 1001 ends the sequence. \n
+ * Progress in a count reports a value from 0 to 1000. 
+ * If -1 indicates the start of a sequence of operations, 1001 ends the sequence. \n
  * If returns 0 the client should abort the operation. \n
  * If the counter is aborted, the callback will be called one last time at 1001.
  * \ingroup counter */

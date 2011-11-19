@@ -157,6 +157,10 @@ int imColorModeToBitmap(int color_mode);
  * \ingroup colormodeutl */
 int imColorModeIsBitmap(int color_mode, int data_type);
 
+/** Max depth is 4+1  (cmyk+alpha)
+ * \ingroup colormodeutl */
+#define IM_MAXDEPTH 5   
+
 
 
 /** \defgroup datatypeutl Data Type Utilities

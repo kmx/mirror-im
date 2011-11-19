@@ -26,7 +26,8 @@
 
 
 /* NOTE: This can breaks on multithread ONLY if using multiple states. */
-/* Used only in im.ProcessRenderOp, im.ProcessRenderCondOp and im.ProcessUnArithmeticOpFunc. */
+/* Used only in im.ProcessRenderOp, im.ProcessRenderCondOp and 
+                im.ProcessUnaryPointOp, im.ProcessUnaryPointColorOp, im.ProcessMultiPointOp, im.ProcessMultiPointColorOp. */
 static lua_State *g_State = NULL;
 
 
@@ -2610,7 +2611,11 @@ static float imluaRenderFunc (int x, int y, int d, float *params)
 {
   float ret;
   lua_State *L = g_State;
-  (void)params; 
+
+#ifdef _OPENMP
+  omp_lock_t lck = lua_touserdata(L, -1);
+  omp_set_lock(&lck);
+#endif
 
   lua_pushvalue(L, 2);  /* func is passed in the stack */
   lua_pushinteger(L, x);
@@ -2622,6 +2627,12 @@ static float imluaRenderFunc (int x, int y, int d, float *params)
 
   ret = (float) luaL_checknumber(L, -1);
   lua_pop(L, 1);
+
+#ifdef _OPENMP
+  omp_unset_lock(&lck);
+#endif
+
+  (void)params; 
   return ret;
 }
 
@@ -2634,6 +2645,12 @@ static int imluaProcessRenderOp (lua_State *L)
   const char *render_name = luaL_checkstring(L, 3);
   int plus = luaL_checkint(L, 5);
 
+#ifdef _OPENMP
+  omp_lock_t lck;
+  omp_init_lock(&lck);
+  lua_pushlightuserdata(L, lck);
+#endif
+
   imlua_checknotcfloat(L, 1, image);
   luaL_checktype(L, 2, LUA_TFUNCTION);
   luaL_checktype(L, 4, LUA_TTABLE);
@@ -2642,6 +2659,10 @@ static int imluaProcessRenderOp (lua_State *L)
   lua_pushboolean(L, imProcessRenderOp(image, imluaRenderFunc, (char*) render_name, NULL, plus));
   g_State = NULL;
 
+#ifdef _OPENMP
+  omp_destroy_lock(&lck);
+#endif
+
   return 1;
 }
 
@@ -2649,7 +2670,11 @@ static float imluaRenderCondFunc (int x, int y, int d, int *cond, float *params)
 {
   float ret;
   lua_State *L = g_State;
-  (void)params;
+
+#ifdef _OPENMP
+  omp_lock_t lck = lua_touserdata(L, -1);
+  omp_set_lock(&lck);
+#endif
 
   lua_pushvalue(L, 2);  /* func is passed in the stack */
   lua_pushinteger(L, x);
@@ -2662,6 +2687,12 @@ static float imluaRenderCondFunc (int x, int y, int d, int *cond, float *params)
   *cond = lua_toboolean(L, -1);
   ret = (float) luaL_checknumber(L, -2);
   lua_pop(L, 2);
+
+#ifdef _OPENMP
+  omp_unset_lock(&lck);
+#endif
+
+  (void)params;
   return ret;
 }
 
@@ -2673,6 +2704,12 @@ static int imluaProcessRenderCondOp (lua_State *L)
   imImage *image = imlua_checkimage(L, 1);
   const char *render_name = luaL_checkstring(L, 3);
 
+#ifdef _OPENMP
+  omp_lock_t lck;
+  omp_init_lock(&lck);
+  lua_pushlightuserdata(L, lck);
+#endif
+
   imlua_checknotcfloat(L, 1, image);
   luaL_checktype(L, 2, LUA_TFUNCTION);
   luaL_checktype(L, 4, LUA_TTABLE);
@@ -2680,6 +2717,10 @@ static int imluaProcessRenderCondOp (lua_State *L)
   g_State = L;
   lua_pushboolean(L, imProcessRenderCondOp(image, imluaRenderCondFunc, (char*) render_name, NULL));
   g_State = NULL;
+
+#ifdef _OPENMP
+  omp_destroy_lock(&lck);
+#endif
 
   return 1;
 }

@@ -271,6 +271,7 @@ void imProcessMultipleStdDev(const imImage** src_image_list, int src_image_count
 /** Calculates the auto-covariance of an image with the mean of a set of images. \n
  * Images must match size and type. Returns zero if the counter aborted. \n
  * Destiny is IM_FLOAT.
+ * Returns zero if the counter aborted.
  *
  * \verbatim im.ProcessAutoCovariance(src_image: imImage, mean_image: imImage, dst_image: imImage) -> counter: boolean [in Lua 5] \endverbatim
  * \verbatim im.ProcessAutoCovarianceNew(src_image: imImage, mean_image: imImage) -> counter: boolean, new_image: imImage [in Lua 5] \endverbatim
@@ -395,6 +396,7 @@ void imProcessSplitComponents(const imImage* src_image, imImage** dst_image_list
 void imProcessMergeComponents(const imImage** src_image_list, imImage* dst_image);
 
 /** Normalize the color components by their sum. Example: c1 = c1/(c1+c2+c3). \n
+ * It will not change the alpha channel if any.
  * Destiny image must be IM_FLOAT. 
  *
  * \verbatim im.ProcessNormalizeComponents(src_image: imImage, dst_image: imImage) [in Lua 5] \endverbatim

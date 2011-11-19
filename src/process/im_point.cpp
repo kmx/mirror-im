@@ -22,8 +22,6 @@
 #endif
 
 
-#define IM_MAXDEPTH 5   // Max depth is 4+1  (cmyk+alpha)
-
 template <class T1, class T2> 
 static int DoUnaryPointOp(T1 *src_map, T2 *dst_map, int width, int height, int depth, imUnaryPointOpFunc func, float* params, int counter)
 {
