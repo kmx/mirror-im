@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <memory.h>
 
+
 static unsigned char BoxMean(imbyte *map, int offset, int shift, int hbox_size, int vbox_size)
 {
   map += offset;
@@ -49,8 +50,8 @@ static void BoxSet(imbyte *map, int offset, int shift, int hbox_size, int vbox_s
 
 void imProcessPixelate(const imImage* src_image, imImage* dst_image, int box_size)
 {
-  int hbox = ((src_image->width + box_size-1)/ box_size);
-  int vbox = ((src_image->height + box_size-1)/ box_size);
+  int hbox = (src_image->width  + box_size-1) / box_size;
+  int vbox = (src_image->height + box_size-1) / box_size;
 
   for (int i = 0; i < src_image->depth; i++)
   {
@@ -58,6 +59,7 @@ void imProcessPixelate(const imImage* src_image, imImage* dst_image, int box_siz
     imbyte *dst_map=(imbyte*)dst_image->data[i];
     int vbox_size = box_size;
 
+#pragma omp parallel for
     for (int bv = 0; bv < vbox; bv++)
     {
       int bv_pos = bv*box_size;

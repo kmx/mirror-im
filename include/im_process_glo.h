@@ -34,7 +34,8 @@ extern "C" {
  * So do not confuse theta with the line angle, they are perpendicular. \n
  * Returns zero if the counter aborted. \n
  * Inspired from ideas in XITE, Copyright 1991, Blab, UiO \n
- * http://www.ifi.uio.no/~blab/Software/Xite/
+ * http://www.ifi.uio.no/~blab/Software/Xite/  \n
+ * Not using OpenMP when enabled.
  *
  * \verbatim im.ProcessHoughLines(src_image: imImage, dst_image: imImage) -> counter: boolean [in Lua 5] \endverbatim
  * \verbatim im.ProcessHoughLinesNew(image: imImage) -> counter: boolean, new_image: imImage [in Lua 5] \endverbatim
@@ -51,7 +52,8 @@ int imProcessHoughLines(const imImage* src_image, imImage* dst_image);
  * The hough points image is a hough transform image that was thresholded to a IM_BINARY image, 
  * usually using a Local Max threshold operation (see \ref imProcessLocalMaxThreshold). Again the better the threshold the better the results. \n
  * The destiny image will be set to IM_MAP, and the detected lines will be drawn using a red color. \n
- * Returns the number of detected lines.
+ * Returns the number of detected lines. \n
+ * Not using OpenMP when enabled.
  *
  * \verbatim im.ProcessHoughLinesDraw(src_image: imImage, hough: imImage, hough_points: imImage, dst_image: imImage) -> lines: number [in Lua 5] \endverbatim
  * \verbatim im.ProcessHoughLinesDrawNew(image: imImage, hough: imImage, hough_points: imImage) -> lines: number, new_image: imImage [in Lua 5] \endverbatim

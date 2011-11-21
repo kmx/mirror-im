@@ -16,6 +16,17 @@
 #include <assert.h>
 #include <memory.h>
 
+/* IMPORTANT: leave template functions not "static" 
+   because of some weird compiler bizarre errors. 
+   Report on AIX C++.
+*/
+#ifdef AIX
+#define IM_STATIC 
+#else
+#define IM_STATIC static
+#endif
+
+
 void imConvertMapToRGB(unsigned char* data, int count, int depth, int packed, long* palette, int palette_count)
 {
   int c, i, delta;
@@ -107,7 +118,7 @@ static void iConvertSetTranspColor(imbyte **dst_data, int count, imbyte r, imbyt
 }
 
 // convert bin2gray and gray2bin
-inline void iConvertBinary(imbyte* map, int count, imbyte value)
+static void iConvertBinary(imbyte* map, int count, imbyte value)
 {
   imbyte thres = (value == 255)? 1: 128;
 
@@ -173,7 +184,7 @@ static void iConvertMapToRGB(const imbyte* src_map, imbyte* red, imbyte* green, 
 }
 
 template <class T> 
-int iDoConvert2Gray(int count, int data_type, 
+IM_STATIC int iDoConvert2Gray(int count, int data_type, 
                     const T** src_data, int src_color_space, T** dst_data, int counter)
 {
   int i;
@@ -250,7 +261,7 @@ int iDoConvert2Gray(int count, int data_type,
 }
 
 template <class T> 
-int iDoConvert2RGB(int count, int data_type, 
+IM_STATIC int iDoConvert2RGB(int count, int data_type, 
                    const T** src_data, int src_color_space, T** dst_data, int counter)
 {
   int i;
@@ -352,7 +363,7 @@ int iDoConvert2RGB(int count, int data_type,
 }
 
 template <class T> 
-int iDoConvert2YCbCr(int count, int data_type, 
+IM_STATIC int iDoConvert2YCbCr(int count, int data_type, 
                      const T** src_data, int src_color_space, T** dst_data, int counter)
 {
   int i;
@@ -388,7 +399,7 @@ int iDoConvert2YCbCr(int count, int data_type,
 }
 
 template <class T> 
-int iDoConvert2XYZ(int count, int data_type, 
+IM_STATIC int iDoConvert2XYZ(int count, int data_type, 
                    const T** src_data, int src_color_space, T** dst_data, int counter)
 {
   int i;
@@ -488,7 +499,7 @@ int iDoConvert2XYZ(int count, int data_type,
 }
 
 template <class T> 
-int iDoConvert2Lab(int count, int data_type, 
+IM_STATIC int iDoConvert2Lab(int count, int data_type, 
                    const T** src_data, int src_color_space, T** dst_data, int counter)
 {
   int i;
@@ -610,7 +621,7 @@ int iDoConvert2Lab(int count, int data_type,
 }
 
 template <class T> 
-int iDoConvert2Luv(int count, int data_type, 
+IM_STATIC int iDoConvert2Luv(int count, int data_type, 
                    const T** src_data, int src_color_space, T** dst_data, int counter)
 {
   int i;
@@ -732,7 +743,7 @@ int iDoConvert2Luv(int count, int data_type,
 }
 
 template <class T> 
-int iDoConvertColorSpace(int count, int data_type, 
+IM_STATIC int iDoConvertColorSpace(int count, int data_type, 
                                  const T** src_data, int src_color_space, 
                                        T** dst_data, int dst_color_space)
 {

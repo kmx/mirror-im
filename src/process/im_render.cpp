@@ -7,15 +7,16 @@
 
 #include <im.h>
 #include <im_util.h>
-#include <im_counter.h>
 #include <im_math.h>
 
+#include "im_process_counter.h"
 #include "im_process_pnt.h"
 
 #include <stdlib.h>
 #include <memory.h>
 #include <math.h>
 #include <time.h>
+
 
 static float iGetFactor(int data_type)
 {
@@ -30,31 +31,36 @@ static float iGetFactor(int data_type)
 template <class T> 
 static int DoRenderCondOp(T *map, int width, int height, int d, imRenderCondFunc render_func, float* param, int counter)
 {
-  int offset, cond = 1;
-  T Value;
+  IM_INT_PROCESSING;
 
+#pragma omp parallel for
   for(int y = 0; y < height; y++)
   {
-    offset = y * width;
+    #pragma omp flush (processing)
+    IM_BEGIN_PROCESSING;
+
+    int offset = y * width;
 
     for(int x = 0; x < width; x++)
     {
-      Value = (T)(render_func(x, y, d, &cond, param));
+      int cond = 1;
+      T Value = (T)(render_func(x, y, d, &cond, param));
       if (cond) map[offset + x] = Value;
     }
   
-    if (!imCounterInc(counter))
-      return 0;
+    IM_COUNT_PROCESSING;
+    #pragma omp flush (processing)
+    IM_END_PROCESSING;
   }
 
-  return 1;
+  return processing;
 }
 
 int imProcessRenderCondOp(imImage* image, imRenderCondFunc render_func, const char* render_name, float* param)
 {
   int ret = 0;
 
-  int counter = imCounterBegin(render_name);
+  int counter = imProcessCounterBegin(render_name);
   imCounterTotal(counter, image->depth*image->height, "Rendering...");
 
   for (int d = 0; d < image->depth; d++)
@@ -79,7 +85,7 @@ int imProcessRenderCondOp(imImage* image, imRenderCondFunc render_func, const ch
       break;
   }
 
-  imCounterEnd(counter);
+  imProcessCounterEnd(counter);
 
   return ret;
 }
@@ -87,11 +93,15 @@ int imProcessRenderCondOp(imImage* image, imRenderCondFunc render_func, const ch
 template <class T> 
 static int DoRenderOp(T *map, int width, int height, int d, imRenderFunc render_func, float* param, int counter, int plus)
 {
-  int offset;
+  IM_INT_PROCESSING;
 
+#pragma omp parallel for
   for(int y = 0; y < height; y++)
   {
-    offset = y * width;
+    #pragma omp flush (processing)
+    IM_BEGIN_PROCESSING;
+
+    int offset = y * width;
 
     for(int x = 0; x < width; x++)
     {
@@ -109,18 +119,19 @@ static int DoRenderOp(T *map, int width, int height, int d, imRenderFunc render_
         map[offset + x] = (T)render_func(x, y, d, param);
     }
   
-    if (!imCounterInc(counter))
-      return 0;
+    IM_COUNT_PROCESSING;
+    #pragma omp flush (processing)
+    IM_END_PROCESSING;
   }
 
-  return 1;
+  return processing;
 }
 
 int imProcessRenderOp(imImage* image, imRenderFunc render_func, const char* render_name, float* param, int plus)
 {
   int ret = 0;
 
-  int counter = imCounterBegin(render_name);
+  int counter = imProcessCounterBegin(render_name);
   imCounterTotal(counter, image->depth*image->height, "Rendering...");
 
   for (int d = 0; d < image->depth; d++)
@@ -145,7 +156,7 @@ int imProcessRenderOp(imImage* image, imRenderFunc render_func, const char* rend
       break;
   }
 
-  imCounterEnd(counter);
+  imProcessCounterEnd(counter);
 
   return ret;
 }

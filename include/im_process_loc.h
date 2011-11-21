@@ -312,7 +312,8 @@ int imProcessBinMorphOutline(const imImage* src_image, imImage* dst_image, int k
  * Reference: \n
  * "Efficient Binary Image Thinning using Neighborhood Maps" \n
  * by Joseph M. Cychosz, 3ksnn64@ecn.purdue.edu              \n
- * in "Graphics Gems IV", Academic Press, 1994
+ * in "Graphics Gems IV", Academic Press, 1994               \n
+ * Not using OpenMP when enabled.
  *
  * \verbatim im.ProcessBinMorphThin(src_image: imImage, dst_image: imImage) [in Lua 5] \endverbatim
  * \verbatim im.ProcessBinMorphThinNew(image: imImage) -> new_image: imImage [in Lua 5] \endverbatim

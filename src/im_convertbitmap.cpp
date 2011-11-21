@@ -63,9 +63,8 @@ int imConvertToBitmap(const imImage* src_image, imImage* dst_image, int cpx2real
   return ret;
 }
 
-
 template <class T>
-void iDoChangePacking(const T* src_data, T* dst_data, int width, int height, int src_depth, int dst_depth,
+static void iDoChangePacking(const T* src_data, T* dst_data, int width, int height, int src_depth, int dst_depth,
                              int src_is_packed)
 {
   int count = width*height;

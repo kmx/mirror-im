@@ -736,7 +736,7 @@ int imProcessAutoCovariance(const imImage* image, const imImage* mean_image, imI
 {
   int ret = 0;
 
-  int counter = imCounterBegin("Auto Convariance");
+  int counter = imProcessCounterBegin("Auto Convariance");
   imCounterTotal(counter, image->depth*image->height, "Processing...");
 
   for (int i = 0; i < image->depth; i++)
@@ -761,7 +761,7 @@ int imProcessAutoCovariance(const imImage* image, const imImage* mean_image, imI
       break;
   }
 
-  imCounterEnd(counter);
+  imProcessCounterEnd(counter);
 
   return ret;
 }

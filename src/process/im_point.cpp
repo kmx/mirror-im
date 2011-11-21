@@ -55,7 +55,7 @@ int imProcessUnaryPointOp(const imImage* src_image, imImage* dst_image, imUnaryP
   int ret = 0;
   int depth = src_image->has_alpha? src_image->depth+1: src_image->depth;
 
-  int counter = imCounterBegin(op_name? op_name: "UnaryPointOp");
+  int counter = imProcessCounterBegin(op_name? op_name: "UnaryPointOp");
   imCounterTotal(counter, depth*src_image->height, "Processing...");
 
   switch(src_image->data_type)
@@ -102,7 +102,7 @@ int imProcessUnaryPointOp(const imImage* src_image, imImage* dst_image, imUnaryP
     break;                                                                                
   }
 
-  imCounterEnd(counter);
+  imProcessCounterEnd(counter);
 
   return ret;
 }
@@ -152,7 +152,7 @@ int imProcessUnaryPointColorOp(const imImage* src_image, imImage* dst_image, imU
   int src_depth = src_image->has_alpha? src_image->depth+1: src_image->depth;
   int dst_depth = dst_image->has_alpha? dst_image->depth+1: dst_image->depth;
 
-  int counter = imCounterBegin(op_name? op_name: "UnaryPointColorOp");
+  int counter = imProcessCounterBegin(op_name? op_name: "UnaryPointColorOp");
   imCounterTotal(counter, src_image->height, "Processing...");
 
   switch(src_image->data_type)
@@ -199,7 +199,7 @@ int imProcessUnaryPointColorOp(const imImage* src_image, imImage* dst_image, imU
     break;                                                                                
   }
 
-  imCounterEnd(counter);
+  imProcessCounterEnd(counter);
 
   return ret;
 }
@@ -249,7 +249,7 @@ int imProcessMultiPointOp(const imImage** src_image, int src_count, imImage* dst
   int depth = src_image[0]->has_alpha? src_image[0]->depth+1: src_image[0]->depth;
   void** src_map = new void* [src_count];
 
-  int counter = imCounterBegin(op_name? op_name: "MultiPointOp");
+  int counter = imProcessCounterBegin(op_name? op_name: "MultiPointOp");
   imCounterTotal(counter, src_image[0]->depth*src_image[0]->height, "Processing...");
 
   for(int i = 0; i < src_count; i++)
@@ -301,7 +301,7 @@ int imProcessMultiPointOp(const imImage** src_image, int src_count, imImage* dst
 
   delete [] src_map;
 
-  imCounterEnd(counter);
+  imProcessCounterEnd(counter);
 
   return ret;
 }
@@ -356,7 +356,7 @@ int imProcessMultiPointColorOp(const imImage** src_image, int src_count, imImage
   int dst_depth = dst_image->has_alpha? dst_image->depth+1: dst_image->depth;
   void*** src_map = new void** [src_count];
 
-  int counter = imCounterBegin(op_name? op_name: "MultiPointColorOp");
+  int counter = imProcessCounterBegin(op_name? op_name: "MultiPointColorOp");
   imCounterTotal(counter, src_image[0]->height, "Processing...");
 
   for(int i = 0; i < src_count; i++)
@@ -408,7 +408,7 @@ int imProcessMultiPointColorOp(const imImage** src_image, int src_count, imImage
 
   delete [] src_map;
 
-  imCounterEnd(counter);
+  imProcessCounterEnd(counter);
 
   return ret;
 }

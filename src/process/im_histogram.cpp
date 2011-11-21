@@ -19,7 +19,7 @@
 template <class T>
 static void DoExpandHistogram(T* src_map, T* dst_map, int size, int depth, int hcount, int low_level, int high_level)
 {
-  int i, value;
+  int i;
 
   T* re_map = new T [hcount];
   memset(re_map, 0, hcount*sizeof(T));
@@ -27,6 +27,7 @@ static void DoExpandHistogram(T* src_map, T* dst_map, int size, int depth, int h
   int range = high_level-low_level+1;
   float factor = (float)hcount / (float)range;
 
+#pragma omp parallel for
   for (i = 0; i < hcount; i++)
   {             
     if (i < low_level)
@@ -35,12 +36,13 @@ static void DoExpandHistogram(T* src_map, T* dst_map, int size, int depth, int h
       re_map[i] = (T)(hcount-1);
     else
     {
-      value = imResample(i - low_level, factor);
+      int value = imResample(i - low_level, factor);
       re_map[i] = (T)IM_CROPMAX(value, hcount-1);
     }
   }
 
   int total_count = size*depth;
+#pragma omp parallel for
   for (i = 0; i < total_count; i++)
     dst_map[i] = re_map[src_map[i]];
 
@@ -65,20 +67,22 @@ void imProcessExpandHistogram(const imImage* src_image, imImage* dst_image, floa
 template <class T>
 static void DoEqualizeHistogram(T* src_map, T* dst_map, int size, int depth, int hcount, unsigned long* histo)
 {
-  int i, value;
+  int i;
 
   T* re_map = new T [hcount];
   memset(re_map, 0, hcount*sizeof(T));
 
   float factor = (float)hcount / (float)size;
 
+#pragma omp parallel for
   for (i = 0; i < hcount; i++)
   {             
-    value = imResample(histo[i], factor);
+    int value = imResample(histo[i], factor);
     re_map[i] = (T)IM_CROPMAX(value, hcount-1);
   }
 
   int total_count = size*depth;
+#pragma omp parallel for
   for (i = 0; i < total_count; i++)
     dst_map[i] = re_map[src_map[i]];
 

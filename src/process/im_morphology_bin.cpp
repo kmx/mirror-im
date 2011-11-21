@@ -7,8 +7,8 @@
 
 #include <im.h>
 #include <im_util.h>
-#include <im_counter.h>
 
+#include "im_process_counter.h"
 #include "im_process_loc.h"
 #include "im_process_pnt.h"
 
@@ -18,30 +18,32 @@
 #include <string.h>
 #include <math.h>
 
+
 static int DoBinMorphConvolve(imbyte *map, imbyte* new_map, int width, int height, const imImage* kernel, int counter, int hit_value, int miss_value)
 {
-  int *kernel_line;
-  int offset, new_offset, i, j, x, y;
-  int kh, kw, kh2, kw2, hit;
-
-  kh = kernel->height;
-  kw = kernel->width;
-  kh2 = kernel->height/2;
-  kw2 = kernel->width/2;
+  int kh2 = kernel->height/2;
+  int kw2 = kernel->width/2;
 
   int* kernel_data = (int*)kernel->data[0];
 
-  for(j = 0; j < height; j++)
-  {
-    new_offset = j * width;
+  IM_INT_PROCESSING;
 
-    for(i = 0; i < width; i++)
+#pragma omp parallel for
+  for(int j = 0; j < height; j++)
+  {
+    #pragma omp flush (processing)
+    IM_BEGIN_PROCESSING;
+
+    int new_offset = j * width;
+
+    for(int i = 0; i < width; i++)
     {
-      hit = 1;
+      int hit = 1;
     
-      for(y = -kh2; y <= kh2 && hit; y++)
+      for(int y = -kh2; y <= kh2 && hit; y++)
       {
-        kernel_line = kernel_data + (y+kh2)*kernel->width;
+        int offset;
+        int* kernel_line = kernel_data + (y+kh2)*kernel->width;
 
         if ((j + y < 0) ||       // pass the bottom border
             (j + y >= height))   // pass the top border
@@ -49,7 +51,7 @@ static int DoBinMorphConvolve(imbyte *map, imbyte* new_map, int width, int heigh
         else
           offset = (j + y) * width;
 
-        for(x = -kw2; x <= kw2; x++)
+        for(int x = -kw2; x <= kw2; x++)
         {
           if ((offset == -1) ||
               (i + x < 0) ||     // pass the left border
@@ -69,11 +71,12 @@ static int DoBinMorphConvolve(imbyte *map, imbyte* new_map, int width, int heigh
       new_map[new_offset + i] = (imbyte)(hit? hit_value: miss_value);
     }    
 
-    if (!imCounterInc(counter))
-      return 0;
+    IM_COUNT_PROCESSING;
+    #pragma omp flush (processing)
+    IM_END_PROCESSING;
   }
 
-  return 1;
+  return processing;
 }
 
 int imProcessBinMorphConvolve(const imImage* src_image, imImage* dst_image, const imImage *kernel, int hit_white, int iter)
@@ -93,7 +96,7 @@ int imProcessBinMorphConvolve(const imImage* src_image, imImage* dst_image, cons
     miss_value = 1;
   }
 
-  counter = imCounterBegin("Binary Morphological Convolution");
+  counter = imProcessCounterBegin("Binary Morphological Convolution");
   const char* msg = (const char*)imImageGetAttribute(kernel, "Description", NULL, NULL);
   if (!msg) msg = "Processing...";
   imCounterTotal(counter, src_image->height*iter, msg);
@@ -116,7 +119,7 @@ int imProcessBinMorphConvolve(const imImage* src_image, imImage* dst_image, cons
   }
 
   if (tmp) free(tmp);
-  imCounterEnd(counter);
+  imProcessCounterEnd(counter);
 
   return ret;
 }

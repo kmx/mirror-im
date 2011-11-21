@@ -22,6 +22,11 @@
    because of some weird compiler bizarre errors. 
    Report on AIX C++.
 */
+#ifdef AIX
+#define IM_STATIC 
+#else
+#define IM_STATIC static
+#endif
 
 /* if gamma is applied then factor contains two conversions
    one for applying gamma,
@@ -119,7 +124,7 @@ inline void iMinMaxAbs(int count, const T *map, T& min, T& max, int abssolute)
 }
 
 template <class SRCT, class DSTT> 
-int iCopy(int count, const SRCT *src_map, DSTT *dst_map)
+IM_STATIC int iCopy(int count, const SRCT *src_map, DSTT *dst_map)
 {
   for (int i = 0; i < count; i++)
   {
@@ -130,7 +135,7 @@ int iCopy(int count, const SRCT *src_map, DSTT *dst_map)
 }
   
 template <class SRCT, class DSTT> 
-int iCopyCrop(int count, const SRCT *src_map, DSTT *dst_map, int abssolute)
+IM_STATIC int iCopyCrop(int count, const SRCT *src_map, DSTT *dst_map, int abssolute)
 {
   SRCT value;
   DSTT dst_max;
@@ -156,7 +161,7 @@ int iCopyCrop(int count, const SRCT *src_map, DSTT *dst_map, int abssolute)
 }
 
 template <class SRCT> 
-int iPromote2Cpx(int count, const SRCT *src_map, imcfloat *dst_map)
+IM_STATIC int iPromote2Cpx(int count, const SRCT *src_map, imcfloat *dst_map)
 {
   for (int i = 0; i < count; i++)
   {
@@ -168,7 +173,7 @@ int iPromote2Cpx(int count, const SRCT *src_map, imcfloat *dst_map)
 }
 
 template <class SRCT, class DSTT> 
-int iConvertInt2Int(int count, const SRCT *src_map, DSTT *dst_map, int abssolute, int cast_mode, int counter)
+IM_STATIC int iConvertInt2Int(int count, const SRCT *src_map, DSTT *dst_map, int abssolute, int cast_mode, int counter)
 {
   SRCT min, max;
 
@@ -216,7 +221,7 @@ int iConvertInt2Int(int count, const SRCT *src_map, DSTT *dst_map, int abssolute
 }
 
 template <class SRCT> 
-int iPromoteInt2Real(int count, const SRCT *src_map, float *dst_map, float gamma, int abssolute, int cast_mode, int counter)
+IM_STATIC int iPromoteInt2Real(int count, const SRCT *src_map, float *dst_map, float gamma, int abssolute, int cast_mode, int counter)
 {
   SRCT min, max;
 
@@ -280,7 +285,7 @@ int iPromoteInt2Real(int count, const SRCT *src_map, float *dst_map, float gamma
 }
 
 template <class DSTT> 
-int iDemoteReal2Int(int count, const float *src_map, DSTT *dst_map, float gamma, int abssolute, int cast_mode, int counter)
+IM_STATIC int iDemoteReal2Int(int count, const float *src_map, DSTT *dst_map, float gamma, int abssolute, int cast_mode, int counter)
 {
   float min, max;
 
@@ -341,7 +346,7 @@ int iDemoteReal2Int(int count, const float *src_map, DSTT *dst_map, float gamma,
   return IM_ERR_NONE;
 }
 
-int iDemoteCpx2Real(int count, const imcfloat* src_map, float *dst_map, int cpx2real)
+static int iDemoteCpx2Real(int count, const imcfloat* src_map, float *dst_map, int cpx2real)
 {
   float (*CpxCnv)(const imcfloat& cpx) = NULL;
 
@@ -355,14 +360,14 @@ int iDemoteCpx2Real(int count, const imcfloat* src_map, float *dst_map, int cpx2
 
   for (int i = 0; i < count; i++)
   {
-    *dst_map++ = CpxCnv(*src_map++);
+    dst_map[i] = CpxCnv(src_map[i]);
   }
 
   return IM_ERR_NONE;
 }
                                                                      
 template <class DSTT> 
-int iDemoteCpx2Int(int count, const imcfloat* src_map, DSTT *dst_map, int cpx2real, float gamma, int abssolute, int cast_mode, int counter)
+IM_STATIC int iDemoteCpx2Int(int count, const imcfloat* src_map, DSTT *dst_map, int cpx2real, float gamma, int abssolute, int cast_mode, int counter)
 {
   float* real_map = (float*)malloc(count*sizeof(float));
   if (!real_map) return IM_ERR_MEM;
@@ -380,7 +385,7 @@ int iDemoteCpx2Int(int count, const imcfloat* src_map, DSTT *dst_map, int cpx2re
 }
 
 template <class SRCT> 
-int iPromoteInt2Cpx(int count, const SRCT* src_map, imcfloat *dst_map, float gamma, int abssolute, int cast_mode, int counter)
+IM_STATIC int iPromoteInt2Cpx(int count, const SRCT* src_map, imcfloat *dst_map, float gamma, int abssolute, int cast_mode, int counter)
 {
   float* real_map = (float*)malloc(count*sizeof(float));
   if (!real_map) return IM_ERR_MEM;

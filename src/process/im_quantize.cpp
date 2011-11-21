@@ -25,21 +25,24 @@ void imProcessQuantizeRGBUniform(const imImage* src_image, imImage* dst_image, i
 
   imImageSetPalette(dst_image, imPaletteUniform(), 256);
 
+#pragma omp parallel for
   for (int y = 0; y < src_image->height; y++)
   {
+    int line_offset = y*src_image->width;
     for (int x = 0; x < src_image->width; x++)
-    {
+    {                         
+      int offset = line_offset+x;
       if (dither)
-        *dst_map++ = (imbyte)imPaletteUniformIndexHalftoned(imColorEncode(*red_map++, *green_map++, *blue_map++), x, y);
+        dst_map[offset] = (imbyte)imPaletteUniformIndexHalftoned(imColorEncode(red_map[offset], green_map[offset], blue_map[offset]), x, y);
       else
-        *dst_map++ = (imbyte)imPaletteUniformIndex(imColorEncode(*red_map++, *green_map++, *blue_map++));
+        dst_map[offset] = (imbyte)imPaletteUniformIndex(imColorEncode(red_map[offset], green_map[offset], blue_map[offset]));
     }
   }
 }
 
 void imProcessQuantizeGrayUniform(const imImage* src_image, imImage* dst_image, int grays)
 {
-  int i, value;
+  int i;
 
   imbyte *dst_map=(imbyte*)dst_image->data[0], 
          *src_map=(imbyte*)src_image->data[0];
@@ -50,14 +53,16 @@ void imProcessQuantizeGrayUniform(const imImage* src_image, imImage* dst_image, 
   float factor = (float)grays/256.0f;
   float factor256 = 256.0f/(float)grays;
 
+#pragma omp parallel for
   for (i = 0; i < 256; i++)
   {             
-    value = imResample(i, factor);
+    int value = imResample(i, factor);
     value = imResample(value, factor256);
     re_map[i] = (imbyte)IM_BYTECROP(value);
   }
 
   int total_count = src_image->count*src_image->depth;
+#pragma omp parallel for
   for (i = 0; i < total_count; i++)
     dst_map[i] = re_map[src_map[i]];
 }

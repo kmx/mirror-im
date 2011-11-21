@@ -98,10 +98,6 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
-				RelativePath="..\src\process\im_analyze.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\src\process\im_arithmetic_bin.cpp"
 				>
 			</File>
@@ -110,31 +106,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\process\im_canny.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\src\process\im_color.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\src\process\im_convolve.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\process\im_convolve_rank.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\process\im_distance.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\src\process\im_effects.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\process\im_geometric.cpp"
 				>
 			</File>
 			<File
@@ -186,21 +162,49 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\process\im_resize.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\process\im_statistics.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\process\im_threshold.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\src\process\im_tonegamut.cpp"
 				>
 			</File>
+			<Filter
+				Name="TO_DO"
+				>
+				<File
+					RelativePath="..\src\process\im_analyze.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\process\im_canny.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\process\im_convolve.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\process\im_convolve_rank.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\process\im_distance.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\process\im_geometric.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\process\im_resize.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\process\im_statistics.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\process\im_threshold.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
