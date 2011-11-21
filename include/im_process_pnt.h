@@ -173,6 +173,7 @@ enum imBinaryOp {
  * \li complex -> complex
  * One exception is that you can combine complex with float resulting complex.
  * If destiny is byte, then the result is cropped to 0-255.
+ * Alpha channel is not included.
  *
  * \verbatim im.ProcessArithmeticOp(src_image1: imImage, src_image2: imImage, dst_image: imImage, op: number) [in Lua 5] \endverbatim
  * \verbatim im.ProcessArithmeticOpNew(image1: imImage, image2: imImage, op: number) -> new_image: imImage [in Lua 5] \endverbatim

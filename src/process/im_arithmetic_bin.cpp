@@ -9,8 +9,8 @@
 #include <im_util.h>
 #include <im_math.h>
 #include <im_complex.h>
-#include <im_counter.h>
 
+#include "im_process_counter.h"
 #include "im_process_pnt.h"
 #include "im_math_op.h"
 
@@ -26,34 +26,42 @@ static void DoBinaryOp(T1 *map1, T2 *map2, T3 *map, int count, int op)
   switch(op)
   {
   case IM_BIN_ADD:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = add_op((T3)map1[i], (T3)map2[i]);
     break;
   case IM_BIN_SUB:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = sub_op((T3)map1[i], (T3)map2[i]);
     break;
   case IM_BIN_MUL:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = mul_op((T3)map1[i], (T3)map2[i]);
     break;
   case IM_BIN_DIV:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = div_op((T3)map1[i], (T3)map2[i]);
     break;
   case IM_BIN_DIFF:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = diff_op((T3)map1[i], (T3)map2[i]);
     break;
   case IM_BIN_MIN:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = min_op((T3)map1[i], (T3)map2[i]);
     break;
   case IM_BIN_MAX:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = max_op((T3)map1[i], (T3)map2[i]);
     break;
   case IM_BIN_POW:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = pow_op((T3)map1[i], (T3)map2[i]);
     break;
@@ -67,34 +75,42 @@ static void DoBinaryOpByte(imbyte *map1, imbyte *map2, imbyte *map, int count, i
   switch(op)
   {
   case IM_BIN_ADD:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(add_op((int)map1[i], (int)map2[i]));
     break;
   case IM_BIN_SUB:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(sub_op((int)map1[i], (int)map2[i]));
     break;
   case IM_BIN_MUL:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(mul_op((int)map1[i], (int)map2[i]));
     break;
   case IM_BIN_DIV:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(div_op((int)map1[i], (int)map2[i]));
     break;
   case IM_BIN_DIFF:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(diff_op((int)map1[i], (int)map2[i]));
     break;
   case IM_BIN_MIN:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(min_op((int)map1[i], (int)map2[i]));
     break;
   case IM_BIN_MAX:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(max_op((int)map1[i], (int)map2[i]));
     break;
   case IM_BIN_POW:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(pow_op((int)map1[i], (int)map2[i]));
     break;
@@ -108,34 +124,42 @@ static void DoBinaryOpCpxReal(imcfloat *map1, float *map2, imcfloat *map, int co
   switch(op)
   {
   case IM_BIN_ADD:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = add_op(map1[i], map2[i]);
     break;
   case IM_BIN_SUB:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = sub_op(map1[i], map2[i]);
     break;
   case IM_BIN_MUL:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = mul_op(map1[i], map2[i]);
     break;
   case IM_BIN_DIV:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = div_op(map1[i], (imcfloat)map2[i]);
     break;
   case IM_BIN_DIFF:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = diff_op(map1[i], map2[i]);
     break;
   case IM_BIN_MIN:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = min_op(map1[i], map2[i]);
     break;
   case IM_BIN_MAX:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = max_op(map1[i], map2[i]);
     break;
   case IM_BIN_POW:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = pow_op(map1[i], map2[i]);
     break;
@@ -144,46 +168,43 @@ static void DoBinaryOpCpxReal(imcfloat *map1, float *map2, imcfloat *map, int co
 
 void imProcessArithmeticOp(const imImage* src_image1, const imImage* src_image2, imImage* dst_image, int op)
 {
-  int count = src_image1->count;
+  int count = src_image1->count*src_image1->depth;
 
-  for (int i = 0; i < src_image1->depth; i++)
+  switch(src_image1->data_type)
   {
-    switch(src_image1->data_type)
-    {
-    case IM_BYTE:
-      if (dst_image->data_type == IM_FLOAT)
-        DoBinaryOp((imbyte*)src_image1->data[i], (imbyte*)src_image2->data[i], (float*)dst_image->data[i], count, op);
-      else if (dst_image->data_type == IM_USHORT)
-        DoBinaryOp((imbyte*)src_image1->data[i], (imbyte*)src_image2->data[i], (imushort*)dst_image->data[i], count, op);
-      else if (dst_image->data_type == IM_INT)
-        DoBinaryOp((imbyte*)src_image1->data[i], (imbyte*)src_image2->data[i], (int*)dst_image->data[i], count, op);
-      else
-        DoBinaryOpByte((imbyte*)src_image1->data[i], (imbyte*)src_image2->data[i], (imbyte*)dst_image->data[i], count, op);
-      break;
-    case IM_USHORT:
-      if (dst_image->data_type == IM_FLOAT)
-        DoBinaryOp((imushort*)src_image1->data[i], (imushort*)src_image2->data[i], (float*)dst_image->data[i], count, op);
-      else if (dst_image->data_type == IM_INT)
-        DoBinaryOp((imushort*)src_image1->data[i], (imushort*)src_image2->data[i], (int*)dst_image->data[i], count, op);
-      else
-        DoBinaryOp((imushort*)src_image1->data[i], (imushort*)src_image2->data[i], (imushort*)dst_image->data[i], count, op);
-      break;
-    case IM_INT:
-      if (dst_image->data_type == IM_FLOAT)
-        DoBinaryOp((int*)src_image1->data[i], (int*)src_image2->data[i], (float*)dst_image->data[i], count, op);
-      else
-        DoBinaryOp((int*)src_image1->data[i], (int*)src_image2->data[i], (int*)dst_image->data[i], count, op);
-      break;
-    case IM_FLOAT:
-      DoBinaryOp((float*)src_image1->data[i], (float*)src_image2->data[i], (float*)dst_image->data[i], count, op);
-      break;
-    case IM_CFLOAT:
-      if (src_image2->data_type == IM_FLOAT)
-        DoBinaryOpCpxReal((imcfloat*)src_image1->data[i], (float*)src_image2->data[i], (imcfloat*)dst_image->data[i], count, op);
-      else
-        DoBinaryOp((imcfloat*)src_image1->data[i], (imcfloat*)src_image2->data[i], (imcfloat*)dst_image->data[i], count, op);
-      break;
-    }
+  case IM_BYTE:
+    if (dst_image->data_type == IM_FLOAT)
+      DoBinaryOp((imbyte*)src_image1->data[0], (imbyte*)src_image2->data[0], (float*)dst_image->data[0], count, op);
+    else if (dst_image->data_type == IM_USHORT)
+      DoBinaryOp((imbyte*)src_image1->data[0], (imbyte*)src_image2->data[0], (imushort*)dst_image->data[0], count, op);
+    else if (dst_image->data_type == IM_INT)
+      DoBinaryOp((imbyte*)src_image1->data[0], (imbyte*)src_image2->data[0], (int*)dst_image->data[0], count, op);
+    else
+      DoBinaryOpByte((imbyte*)src_image1->data[0], (imbyte*)src_image2->data[0], (imbyte*)dst_image->data[0], count, op);
+    break;
+  case IM_USHORT:
+    if (dst_image->data_type == IM_FLOAT)
+      DoBinaryOp((imushort*)src_image1->data[0], (imushort*)src_image2->data[0], (float*)dst_image->data[0], count, op);
+    else if (dst_image->data_type == IM_INT)
+      DoBinaryOp((imushort*)src_image1->data[0], (imushort*)src_image2->data[0], (int*)dst_image->data[0], count, op);
+    else
+      DoBinaryOp((imushort*)src_image1->data[0], (imushort*)src_image2->data[0], (imushort*)dst_image->data[0], count, op);
+    break;
+  case IM_INT:
+    if (dst_image->data_type == IM_FLOAT)
+      DoBinaryOp((int*)src_image1->data[0], (int*)src_image2->data[0], (float*)dst_image->data[0], count, op);
+    else
+      DoBinaryOp((int*)src_image1->data[0], (int*)src_image2->data[0], (int*)dst_image->data[0], count, op);
+    break;
+  case IM_FLOAT:
+    DoBinaryOp((float*)src_image1->data[0], (float*)src_image2->data[0], (float*)dst_image->data[0], count, op);
+    break;
+  case IM_CFLOAT:
+    if (src_image2->data_type == IM_FLOAT)
+      DoBinaryOpCpxReal((imcfloat*)src_image1->data[0], (float*)src_image2->data[0], (imcfloat*)dst_image->data[0], count, op);
+    else
+      DoBinaryOp((imcfloat*)src_image1->data[0], (imcfloat*)src_image2->data[0], (imcfloat*)dst_image->data[0], count, op);
+    break;
   }
 }
 
@@ -196,68 +217,64 @@ static inline T blend_op(const T& v1, const T& v2, const float& alpha)
 template <class T> 
 static void DoBlendConst(T *map1, T *map2, T *map, int count, float alpha)
 {
+#pragma omp parallel for
   for (int i = 0; i < count; i++)
     map[i] = blend_op(map1[i], map2[i], alpha);
 }
 
 void imProcessBlendConst(const imImage* src_image1, const imImage* src_image2, imImage* dst_image, float alpha)
 {
-  int count = src_image1->count;
+  int count = src_image1->count*src_image1->depth;
 
-  for (int i = 0; i < src_image1->depth; i++)
+  switch(src_image1->data_type)
   {
-    switch(src_image1->data_type)
-    {
-    case IM_BYTE:
-      DoBlendConst((imbyte*)src_image1->data[i], (imbyte*)src_image2->data[i], (imbyte*)dst_image->data[i], count, alpha);
-      break;
-    case IM_USHORT:
-      DoBlendConst((imushort*)src_image1->data[i], (imushort*)src_image2->data[i], (imushort*)dst_image->data[i], count, alpha);
-      break;
-    case IM_INT:
-      DoBlendConst((int*)src_image1->data[i], (int*)src_image2->data[i], (int*)dst_image->data[i], count, alpha);
-      break;
-    case IM_FLOAT:
-      DoBlendConst((float*)src_image1->data[i], (float*)src_image2->data[i], (float*)dst_image->data[i], count, alpha);
-      break;
-    case IM_CFLOAT:
-      DoBlendConst((imcfloat*)src_image1->data[i], (imcfloat*)src_image2->data[i], (imcfloat*)dst_image->data[i], count, alpha);
-      break;
-    }
+  case IM_BYTE:
+    DoBlendConst((imbyte*)src_image1->data[0], (imbyte*)src_image2->data[0], (imbyte*)dst_image->data[0], count, alpha);
+    break;
+  case IM_USHORT:
+    DoBlendConst((imushort*)src_image1->data[0], (imushort*)src_image2->data[0], (imushort*)dst_image->data[0], count, alpha);
+    break;
+  case IM_INT:
+    DoBlendConst((int*)src_image1->data[0], (int*)src_image2->data[0], (int*)dst_image->data[0], count, alpha);
+    break;
+  case IM_FLOAT:
+    DoBlendConst((float*)src_image1->data[0], (float*)src_image2->data[0], (float*)dst_image->data[0], count, alpha);
+    break;
+  case IM_CFLOAT:
+    DoBlendConst((imcfloat*)src_image1->data[0], (imcfloat*)src_image2->data[0], (imcfloat*)dst_image->data[0], count, alpha);
+    break;
   }
 }
 
 template <class T, class TA> 
 static void DoBlend(T *map1, T *map2, TA *alpha, T *map, int count, TA max)
 {
+#pragma omp parallel for
   for (int i = 0; i < count; i++)
     map[i] = blend_op(map1[i], map2[i], ((float)alpha[i])/max);
 }
 
 void imProcessBlend(const imImage* src_image1, const imImage* src_image2, const imImage* alpha, imImage* dst_image)
 {
-  int count = src_image1->count;
+  int count = src_image1->count*src_image1->depth;
 
-  for (int i = 0; i < src_image1->depth; i++)
+  switch(src_image1->data_type)
   {
-    switch(src_image1->data_type)
-    {
-    case IM_BYTE:
-      DoBlend((imbyte*)src_image1->data[i], (imbyte*)src_image2->data[i], (imbyte*)alpha->data[0], (imbyte*)dst_image->data[i], count, (imbyte)255);
-      break;
-    case IM_USHORT:
-      DoBlend((imushort*)src_image1->data[i], (imushort*)src_image2->data[i], (imushort*)alpha->data[0], (imushort*)dst_image->data[i], count, (imushort)65535);
-      break;
-    case IM_INT:
-      DoBlend((int*)src_image1->data[i], (int*)src_image2->data[i], (int*)alpha->data[0], (int*)dst_image->data[i], count, (int)2147483647);
-      break;
-    case IM_FLOAT:
-      DoBlend((float*)src_image1->data[i], (float*)src_image2->data[i], (float*)alpha->data[0], (float*)dst_image->data[i], count, 1.0f);
-      break;
-    case IM_CFLOAT:
-      DoBlend((imcfloat*)src_image1->data[i], (imcfloat*)src_image2->data[i], (float*)alpha->data[0], (imcfloat*)dst_image->data[i], count, 1.0f);
-      break;
-    }
+  case IM_BYTE:
+    DoBlend((imbyte*)src_image1->data[0], (imbyte*)src_image2->data[0], (imbyte*)alpha->data[0], (imbyte*)dst_image->data[0], count, (imbyte)255);
+    break;
+  case IM_USHORT:
+    DoBlend((imushort*)src_image1->data[0], (imushort*)src_image2->data[0], (imushort*)alpha->data[0], (imushort*)dst_image->data[0], count, (imushort)65535);
+    break;
+  case IM_INT:
+    DoBlend((int*)src_image1->data[0], (int*)src_image2->data[0], (int*)alpha->data[0], (int*)dst_image->data[0], count, (int)2147483647);
+    break;
+  case IM_FLOAT:
+    DoBlend((float*)src_image1->data[0], (float*)src_image2->data[0], (float*)alpha->data[0], (float*)dst_image->data[0], count, 1.0f);
+    break;
+  case IM_CFLOAT:
+    DoBlend((imcfloat*)src_image1->data[0], (imcfloat*)src_image2->data[0], (float*)alpha->data[0], (imcfloat*)dst_image->data[0], count, 1.0f);
+    break;
   }
 }
 
@@ -347,6 +364,7 @@ static inline T compose_alpha_op(const T& alpha1, const T& alpha2, const TA& max
 template <class T, class TA> 
 static void DoCompose(T *map1, T *map2, T *alpha1, T *alpha2, T *map, int count, TA max)
 {
+#pragma omp parallel for
   for (int i = 0; i < count; i++)
     map[i] = compose_op(map1[i], map2[i], alpha1[i], alpha2[i], max);
 }
@@ -354,6 +372,7 @@ static void DoCompose(T *map1, T *map2, T *alpha1, T *alpha2, T *map, int count,
 template <class T, class TA> 
 static void DoComposeAlpha(T *alpha1, T *alpha2, T *dst_alpha, int count, TA max)
 {
+#pragma omp parallel for
   for (int i = 0; i < count; i++)
     dst_alpha[i] = compose_alpha_op(alpha1[i], alpha2[i], max);
 }
@@ -410,34 +429,42 @@ static void DoBinaryConstOpCpxReal(imcfloat *map1, float value, imcfloat *map, i
   switch(op)
   {
   case IM_BIN_ADD:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = add_op(map1[i], value);
     break;
   case IM_BIN_SUB:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = sub_op(map1[i], value);
     break;
   case IM_BIN_MUL:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = mul_op(map1[i], value);
     break;
   case IM_BIN_DIV:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = div_op(map1[i], (imcfloat)value);
     break;
   case IM_BIN_DIFF:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = diff_op(map1[i], value);
     break;
   case IM_BIN_MIN:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = min_op(map1[i], value);
     break;
   case IM_BIN_MAX:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = max_op(map1[i], value);
     break;
   case IM_BIN_POW:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = pow_op(map1[i], value);
     break;
@@ -452,34 +479,42 @@ static void DoBinaryConstOp(T1 *map1, T2 value, T3 *map, int count, int op)
   switch(op)
   {
   case IM_BIN_ADD:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = (T3)add_op((T2)map1[i], value);
     break;
   case IM_BIN_SUB:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = (T3)sub_op((T2)map1[i], value);
     break;
   case IM_BIN_MUL:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = (T3)mul_op((T2)map1[i], value);
     break;
   case IM_BIN_DIV:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = (T3)div_op((T2)map1[i], value);
     break;
   case IM_BIN_DIFF:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = (T3)diff_op((T2)map1[i], value);
     break;
   case IM_BIN_MIN:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = (T3)min_op((T2)map1[i], value);
     break;
   case IM_BIN_MAX:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = (T3)max_op((T2)map1[i], value);
     break;
   case IM_BIN_POW:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = (T3)pow_op((T2)map1[i], value);
     break;
@@ -494,34 +529,42 @@ static void DoBinaryConstOpByte(T1 *map1, int value, imbyte *map, int count, int
   switch(op)
   {
   case IM_BIN_ADD:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(add_op((int)map1[i], value));
     break;
   case IM_BIN_SUB:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(sub_op((int)map1[i], value));
     break;
   case IM_BIN_MUL:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(mul_op((int)map1[i], value));
     break;
   case IM_BIN_DIV:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(div_op((int)map1[i], value));
     break;
   case IM_BIN_DIFF:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(diff_op((int)map1[i], value));
     break;
   case IM_BIN_MIN:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(min_op((int)map1[i], value));
     break;
   case IM_BIN_MAX:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(max_op((int)map1[i], value));
     break;
   case IM_BIN_POW:
+#pragma omp parallel for
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(pow_op((int)map1[i], value));
     break;
@@ -530,49 +573,46 @@ static void DoBinaryConstOpByte(T1 *map1, int value, imbyte *map, int count, int
 
 void imProcessArithmeticConstOp(const imImage* src_image1, float value, imImage* dst_image, int op)
 {
-  int count = src_image1->count;
+  int count = src_image1->count*src_image1->depth;
 
-  for (int i = 0; i < src_image1->depth; i++)
+  switch(src_image1->data_type)
   {
-    switch(src_image1->data_type)
-    {
-    case IM_BYTE:
-      if (dst_image->data_type == IM_FLOAT)
-        DoBinaryConstOp((imbyte*)src_image1->data[i], (float)value, (float*)dst_image->data[i], count, op);
-      else if (dst_image->data_type == IM_USHORT)
-        DoBinaryConstOp((imbyte*)src_image1->data[i], (imushort)value, (imushort*)dst_image->data[i], count, op);
-      else if (dst_image->data_type == IM_INT)
-        DoBinaryConstOp((imbyte*)src_image1->data[i], (int)value, (int*)dst_image->data[i], count, op);
-      else
-        DoBinaryConstOpByte((imbyte*)src_image1->data[i], (int)value, (imbyte*)dst_image->data[i], count, op);
-      break;
-    case IM_USHORT:
-      if (dst_image->data_type == IM_FLOAT)
-        DoBinaryConstOp((imushort*)src_image1->data[i], (float)value, (float*)dst_image->data[i], count, op);
-      else if (dst_image->data_type == IM_INT)
-        DoBinaryConstOp((imushort*)src_image1->data[i], (int)value, (int*)dst_image->data[i], count, op);
-      else if (dst_image->data_type == IM_BYTE)
-        DoBinaryConstOpByte((imushort*)src_image1->data[i], (int)value, (imbyte*)dst_image->data[i], count, op);
-      else
-        DoBinaryConstOp((imushort*)src_image1->data[i], (imushort)value, (imushort*)dst_image->data[i], count, op);
-      break;
-    case IM_INT:
-      if (dst_image->data_type == IM_FLOAT)
-        DoBinaryConstOp((int*)src_image1->data[i], (float)value, (float*)dst_image->data[i], count, op);
-      else if (dst_image->data_type == IM_USHORT)
-        DoBinaryConstOp((int*)src_image1->data[i], (int)value, (imushort*)dst_image->data[i], count, op);
-      else if (dst_image->data_type == IM_BYTE)
-        DoBinaryConstOpByte((int*)src_image1->data[i], (int)value, (imbyte*)dst_image->data[i], count, op);
-      else
-        DoBinaryConstOp((int*)src_image1->data[i], (int)value, (int*)dst_image->data[i], count, op);
-      break;
-    case IM_FLOAT:
-      DoBinaryConstOp((float*)src_image1->data[i], (float)value, (float*)dst_image->data[i], count, op);
-      break;
-    case IM_CFLOAT:
-      DoBinaryConstOpCpxReal((imcfloat*)src_image1->data[i], (float)value, (imcfloat*)dst_image->data[i], count, op);
-      break;
-    }
+  case IM_BYTE:
+    if (dst_image->data_type == IM_FLOAT)
+      DoBinaryConstOp((imbyte*)src_image1->data[0], (float)value, (float*)dst_image->data[0], count, op);
+    else if (dst_image->data_type == IM_USHORT)
+      DoBinaryConstOp((imbyte*)src_image1->data[0], (imushort)value, (imushort*)dst_image->data[0], count, op);
+    else if (dst_image->data_type == IM_INT)
+      DoBinaryConstOp((imbyte*)src_image1->data[0], (int)value, (int*)dst_image->data[0], count, op);
+    else
+      DoBinaryConstOpByte((imbyte*)src_image1->data[0], (int)value, (imbyte*)dst_image->data[0], count, op);
+    break;
+  case IM_USHORT:
+    if (dst_image->data_type == IM_FLOAT)
+      DoBinaryConstOp((imushort*)src_image1->data[0], (float)value, (float*)dst_image->data[0], count, op);
+    else if (dst_image->data_type == IM_INT)
+      DoBinaryConstOp((imushort*)src_image1->data[0], (int)value, (int*)dst_image->data[0], count, op);
+    else if (dst_image->data_type == IM_BYTE)
+      DoBinaryConstOpByte((imushort*)src_image1->data[0], (int)value, (imbyte*)dst_image->data[0], count, op);
+    else
+      DoBinaryConstOp((imushort*)src_image1->data[0], (imushort)value, (imushort*)dst_image->data[0], count, op);
+    break;
+  case IM_INT:
+    if (dst_image->data_type == IM_FLOAT)
+      DoBinaryConstOp((int*)src_image1->data[0], (float)value, (float*)dst_image->data[0], count, op);
+    else if (dst_image->data_type == IM_USHORT)
+      DoBinaryConstOp((int*)src_image1->data[0], (int)value, (imushort*)dst_image->data[0], count, op);
+    else if (dst_image->data_type == IM_BYTE)
+      DoBinaryConstOpByte((int*)src_image1->data[0], (int)value, (imbyte*)dst_image->data[0], count, op);
+    else
+      DoBinaryConstOp((int*)src_image1->data[0], (int)value, (int*)dst_image->data[0], count, op);
+    break;
+  case IM_FLOAT:
+    DoBinaryConstOp((float*)src_image1->data[0], (float)value, (float*)dst_image->data[0], count, op);
+    break;
+  case IM_CFLOAT:
+    DoBinaryConstOpCpxReal((imcfloat*)src_image1->data[0], (float)value, (imcfloat*)dst_image->data[0], count, op);
+    break;
   }
 }
 
@@ -642,45 +682,54 @@ void imProcessMultipleStdDev(const imImage** src_image_list, int src_image_count
 }
 
 template <class DT> 
-static float AutoCovCalc(int width, int height, DT *src_map, DT *mean_map, int x, int y, float count)
+static float AutoCovCalc(int width, int height, DT *src_map, DT *mean_map, int x, int y, int count)
 {
-  float value = 0;
-  int ni = height - y;
-  int nj = width - x;
-  int offset, offset1;
-  int next = width*y + x;
+  double value = 0;
+  int Ny = height - y;
+  int Nx = width - x;
+  int offset, offset1, line_offset, line_offset1;
 
-  for (int i = 0; i < ni; i++)
+  for (int i = 0; i < Ny; i++)
   {
-    for (int j = 0; j < nj; j++)
+    line_offset = width*i;
+    line_offset1 = width*(i + y);
+
+    for (int j = 0; j < Nx; j++)
     {
-      offset = width*i + j;
-      offset1 = offset + next;
-      value += float(src_map[offset] - mean_map[offset]) * float(src_map[offset1] - mean_map[offset1]);
+      offset = line_offset + j;
+      offset1 = line_offset1 + (j + x);
+      value += double(src_map[offset] - mean_map[offset]) * 
+               double(src_map[offset1] - mean_map[offset1]);
     }
   }
 
-  return (value/count);
+  return (float)(value/(double)count);
 }
 
 template <class DT> 
-static int AutoCov(int width, int height, DT *src_map, DT *mean_map, float *dst_map, int counter)
+static int doAutoCov(int width, int height, DT *src_map, DT *mean_map, float *dst_map, int counter)
 {
   int count = width*height;
+  IM_INT_PROCESSING;
 
+#pragma omp parallel for
   for (int y = 0; y < height; y++)
   {
+    #pragma omp flush (processing)
+    IM_BEGIN_PROCESSING;
+
+    int line_offset = y*width;
     for (int x = 0; x < width; x++)
     {
-      *dst_map = AutoCovCalc(width, height, src_map, mean_map, x, y, (float)count);
-      dst_map++;
+      dst_map[line_offset + x] = AutoCovCalc(width, height, src_map, mean_map, x, y, count);
     }
 
-    if (!imCounterInc(counter))
-      return 0;
+    IM_COUNT_PROCESSING;
+    #pragma omp flush (processing)
+    IM_END_PROCESSING;
   }
 
-  return 1;
+  return processing;
 }
 
 int imProcessAutoCovariance(const imImage* image, const imImage* mean_image, imImage* dst_image)
@@ -695,16 +744,16 @@ int imProcessAutoCovariance(const imImage* image, const imImage* mean_image, imI
     switch(image->data_type)
     {
     case IM_BYTE:
-      ret = AutoCov(image->width, image->height, (imbyte*)image->data[i], (imbyte*)mean_image->data[i], (float*)dst_image->data[i], counter);
+      ret = doAutoCov(image->width, image->height, (imbyte*)image->data[i], (imbyte*)mean_image->data[i], (float*)dst_image->data[i], counter);
       break;
     case IM_USHORT:
-      ret = AutoCov(image->width, image->height, (imushort*)image->data[i], (imushort*)mean_image->data[i], (float*)dst_image->data[i], counter);
+      ret = doAutoCov(image->width, image->height, (imushort*)image->data[i], (imushort*)mean_image->data[i], (float*)dst_image->data[i], counter);
       break;
     case IM_INT:
-      ret = AutoCov(image->width, image->height, (int*)image->data[i], (int*)mean_image->data[i], (float*)dst_image->data[i], counter);
+      ret = doAutoCov(image->width, image->height, (int*)image->data[i], (int*)mean_image->data[i], (float*)dst_image->data[i], counter);
       break;
     case IM_FLOAT:
-      ret = AutoCov(image->width, image->height, (float*)image->data[i], (float*)mean_image->data[i], (float*)dst_image->data[i], counter);
+      ret = doAutoCov(image->width, image->height, (float*)image->data[i], (float*)mean_image->data[i], (float*)dst_image->data[i], counter);
       break;
     }
 
@@ -724,16 +773,13 @@ void imProcessMultiplyConj(const imImage* image1, const imImage* image2, imImage
   imcfloat* map = (imcfloat*)NewImage->data[0];
   imcfloat* map1 = (imcfloat*)image1->data[0];
   imcfloat* map2 = (imcfloat*)image2->data[0];
-  imcfloat tmp; // this will allow an in-place operation
 
+#pragma omp parallel for
   for (int i = 0; i < total_count; i++)
   {
-    tmp.real = map1->real * map2->real + map1->imag * map2->imag; 
-    tmp.imag = map1->real * map2->imag - map1->imag * map2->real;
-    *map = tmp;
-
-    map++;
-    map1++;
-    map2++;
+    imcfloat tmp; // this will allow an in-place operation
+    tmp.real = map1[i].real * map2[i].real + map1[i].imag * map2[i].imag; 
+    tmp.imag = map1[i].real * map2[i].imag - map1[i].imag * map2[i].real;
+    map[i] = tmp;
   }
 }

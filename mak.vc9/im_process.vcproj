@@ -170,6 +170,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\process\im_process_counter.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\process\im_quantize.cpp"
 				>
 			</File>
@@ -212,6 +216,10 @@
 			</File>
 			<File
 				RelativePath="..\include\im_process_ana.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\process\im_process_counter.h"
 				>
 			</File>
 			<File

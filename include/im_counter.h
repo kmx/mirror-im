@@ -67,6 +67,15 @@ int imCounterIncTo(int counter, int count);
  * \ingroup counter */
 void imCounterTotal(int counter, int total, const char* message);
 
+/** Sets an additional user data in the counter.
+ * Used to save the lock in multi-threaded configurations.
+ * \ingroup counter */
+void* imCounterGetUserData(int counter);
+
+/** Returns the additional user data in the counter.
+ * \ingroup counter */
+void imCounterSetUserData(int counter, void* userdata);
+
 
 #if defined(__cplusplus)
 }

@@ -9,79 +9,45 @@
 #include <im_util.h>
 #include <im_math.h>
 #include <im_complex.h>
-#include <im_counter.h>
 
+#include "im_process_counter.h"
 #include "im_process_pnt.h"
 #include "im_math_op.h"
 
 #include <stdlib.h>
 #include <memory.h>
 
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
 
 template <class T1, class T2> 
 static int DoUnaryPointOp(T1 *src_map, T2 *dst_map, int width, int height, int depth, imUnaryPointOpFunc func, float* params, int counter)
 {
   int count = width * height;
-
-#ifndef _OPENMP
-  for (int d = 0; d < depth; d++)
-  {
-    int plane_offset = d*count;
-
-    for(int y = 0; y < height; y++)
-    {
-      int line_offset = plane_offset + y * width;
-
-      for(int x = 0; x < width; x++)
-      {
-        float dst_value;
-        if (func((float)src_map[line_offset + x], &dst_value, params, x, y, d)) 
-          dst_map[line_offset + x] = (T2)dst_value;
-      }
-    
-      if (!imCounterInc(counter))
-        return 0;
-    }
-  }
-#else
   int size = count * depth;
-  bool abort = false;
+  IM_INT_PROCESSING;
 
 #pragma omp parallel for
   for(int i = 0; i < size; i++)
   {
-    #pragma omp flush (abort)
-    if (!abort) 
+    #pragma omp flush (processing)
+    IM_BEGIN_PROCESSING; 
+    
+    float dst_value;
+    int d = i%count;
+    int y = (i - d*count)%width;
+    int x = i - d*count - y*width;
+
+    if (func((float)src_map[i], &dst_value, params, x, y, d)) 
+      dst_map[i] = (T2)dst_value;
+
+    if (x == width-1)
     {
-      float dst_value;
-      int d = i%count;
-      int y = (i - d*count)%width;
-      int x = i - d*count - y*width;
-
-      if (func((float)src_map[i], &dst_value, params, x, y, d)) 
-        dst_map[i] = (T2)dst_value;
-
-      if (x == width-1 && imCounterHasCallback())
-      {
-        #pragma omp critical(CounterUpdate)
-        if (!imCounterInc(counter))
-        {
-          abort = true;
-          #pragma omp flush (abort)
-        }
-      }
+      IM_COUNT_PROCESSING;
+      #pragma omp flush (processing)
+      IM_END_PROCESSING;
     }
   }
 
-  if (abort)
-    return 0;
-#endif
-
-  return 1;
+  return processing;
 }
 
 int imProcessUnaryPointOp(const imImage* src_image, imImage* dst_image, imUnaryPointOpFunc func, float* params, const char* op_name)
@@ -144,75 +110,40 @@ int imProcessUnaryPointOp(const imImage* src_image, imImage* dst_image, imUnaryP
 template <class T1, class T2> 
 static int DoUnaryPointColorOp(T1 **src_map, T2 **dst_map, int width, int height, int src_depth, int dst_depth, imUnaryPointColorOpFunc func, float* params, int counter)
 {
-#ifndef _OPENMP
-  float src_value[IM_MAXDEPTH];
-  float dst_value[IM_MAXDEPTH];
-
-  for(int y = 0; y < height; y++)
-  {
-    int line_offset = y * width;
-
-    for(int x = 0; x < width; x++)
-    {
-      int d;
-
-      for(d = 0; d < src_depth; d++)
-        src_value[d] = (float)(src_map[d])[line_offset + x];
-
-      if (func(src_value, dst_value, params, x, y))
-      {
-        for(d = 0; d < dst_depth; d++)
-          (dst_map[d])[line_offset + x] = (T2)dst_value[d];
-      }
-    }
-  
-    if (!imCounterInc(counter))
-      return 0;
-  }
-
-#else
   int count = width * height;
-  bool abort = false;
+  IM_INT_PROCESSING;
 
 #pragma omp parallel for
   for(int i = 0; i < count; i++)
   {
-    #pragma omp flush (abort)
-    if (!abort) 
+    #pragma omp flush (processing)
+    IM_BEGIN_PROCESSING; 
+    
+    int y = i%width;
+    int x = i - y*width;
+
+    int d;
+    float src_value[IM_MAXDEPTH];
+    float dst_value[IM_MAXDEPTH];
+
+    for(d = 0; d < src_depth; d++)
+      src_value[d] = (float)(src_map[d])[i];
+
+    if (func(src_value, dst_value, params, x, y))
     {
-      int y = i%width;
-      int x = i - y*width;
+      for(d = 0; d < dst_depth; d++)
+        (dst_map[d])[i] = (T2)dst_value[d];
+    }
 
-      int d;
-      float src_value[IM_MAXDEPTH];
-      float dst_value[IM_MAXDEPTH];
-
-      for(d = 0; d < src_depth; d++)
-        src_value[d] = (float)(src_map[d])[i];
-
-      if (func(src_value, dst_value, params, x, y))
-      {
-        for(d = 0; d < dst_depth; d++)
-          (dst_map[d])[i] = (T2)dst_value[d];
-      }
-
-      if (x == width-1 && imCounterHasCallback())
-      {
-        #pragma omp critical(CounterUpdate)
-        if (!imCounterInc(counter))
-        {
-          abort = true;
-          #pragma omp flush (abort)
-        }
-      }
+    if (x == width-1)
+    {
+      IM_COUNT_PROCESSING;
+      #pragma omp flush (processing)
+      IM_END_PROCESSING;
     }
   }
 
-  if (abort)
-    return 0;
-#endif
-
-  return 1;
+  return processing;
 }
 
 int imProcessUnaryPointColorOp(const imImage* src_image, imImage* dst_image, imUnaryPointColorOpFunc func, float* params, const char* op_name)
@@ -277,82 +208,39 @@ template <class T1, class T2>
 static int DoMultiPointOp(T1 **src_map, T2 *dst_map, int width, int height, int depth, int src_count, imMultiPointOpFunc func, float* params, int counter)
 {
   int count = width * height;
-
-#ifndef _OPENMP
-  float* src_value = new float [src_count];
-
-  for (int d = 0; d < depth; d++)
-  {
-    int plane_offset = d*count;
-
-    for(int y = 0; y < height; y++)
-    {
-      int line_offset = plane_offset + y * width;
-
-      for(int x = 0; x < width; x++)
-      {
-        float dst_value;
-
-        for(int i = 0; i < src_count; i++)
-          src_value[i] = (float)(src_map[i])[line_offset + x];
-
-        if (func(src_value, &dst_value, params, x, y, d))
-          dst_map[line_offset + x] = (T2)dst_value;
-      }
-    
-      if (!imCounterInc(counter))
-      {
-        delete[] src_value;
-        return 0;
-      }
-    }
-  }
-
-#else
   int size = count * depth;
-  int tcount = omp_get_max_threads();
+  int tcount = IM_MAX_THREADS;
   float* src_value = new float [src_count*tcount];
-  bool abort = false;
+  IM_INT_PROCESSING;
 
 #pragma omp parallel for
   for(int i = 0; i < size; i++)
   {
-    #pragma omp flush (abort)
-    if (!abort) 
+    #pragma omp flush (processing)
+    IM_BEGIN_PROCESSING; 
+    
+    float dst_value;
+    int d = i%count;
+    int y = (i - d*count)%width;
+    int x = i - d*count - y*width;
+    int tpos = IM_THREAD_NUM*src_count;
+
+    for(int j = 0; j < src_count; j++)
+      src_value[tpos + j] = (float)(src_map[j])[i];
+
+    if (func(src_value + tpos, &dst_value, params, x, y, d))
+      dst_map[i] = (T2)dst_value;
+
+    if (x == width-1)
     {
-      float dst_value;
-      int d = i%count;
-      int y = (i - d*count)%width;
-      int x = i - d*count - y*width;
-      int tpos = omp_get_thread_num()*src_count;
-
-      for(int j = 0; j < src_count; j++)
-        src_value[tpos + j] = (float)(src_map[j])[i];
-
-      if (func(src_value + tpos, &dst_value, params, x, y, d))
-        dst_map[i] = (T2)dst_value;
-
-      if (x == width-1 && imCounterHasCallback())
-      {
-        #pragma omp critical(CounterUpdate)
-        if (!imCounterInc(counter))
-        {
-          abort = true;
-          #pragma omp flush (abort)
-        }
-      }
+      IM_COUNT_PROCESSING;
+      #pragma omp flush (processing)
+      IM_END_PROCESSING;
     }
   }
 
-  if (abort)
-  {
-    delete[] src_value;
-    return 0;
-  }
-#endif
-
   delete[] src_value;
-  return 1;
+  return processing;
 }
 
 int imProcessMultiPointOp(const imImage** src_image, int src_count, imImage* dst_image, imMultiPointOpFunc func, float* params, const char* op_name)
@@ -421,86 +309,44 @@ int imProcessMultiPointOp(const imImage** src_image, int src_count, imImage* dst
 template <class T1, class T2> 
 static int DoMultiPointColorOp(T1 ***src_map, T2 **dst_map, int width, int height, int src_depth, int dst_depth, int src_count, imMultiPointColorOpFunc func, float* params, int counter)
 {
-#ifndef _OPENMP
-  float* src_value = new float [src_count*src_depth];
-
-  for(int y = 0; y < height; y++)
-  {
-    int line_offset = y * width;
-
-    for(int x = 0; x < width; x++)
-    {
-      float dst_value[IM_MAXDEPTH];
-
-      for(int i = 0; i < src_count; i++)
-      {
-        for(int d = 0; d < src_depth; d++)
-          src_value[i*src_depth + d] = (float)((src_map[i])[d])[line_offset + x];
-      }
-
-      if (func(src_value, dst_value, params, x, y))
-      {
-        for(int d = 0; d < dst_depth; d++)
-          (dst_map[d])[line_offset + x] = (T2)dst_value[d];
-      }
-    }
-  
-    if (!imCounterInc(counter))
-    {
-      delete[] src_value;
-      return 0;
-    }
-  }
-
-#else
   int count = width * height;
-  int tcount = omp_get_max_threads();
+  int tcount = IM_MAX_THREADS;
   float* src_value = new float [src_count*src_depth*tcount];
-  bool abort = false;
+  IM_INT_PROCESSING;
 
 #pragma omp parallel for
   for(int i = 0; i < count; i++)
   {
-    #pragma omp flush (abort)
-    if (!abort) 
+    #pragma omp flush (processing)
+    IM_BEGIN_PROCESSING; 
+    
+    float dst_value[IM_MAXDEPTH];
+    int y = i%width;
+    int x = i - y*width;
+    int tpos = IM_THREAD_NUM*src_count;
+
+    for(int j = 0; j < src_count; j++)
     {
-      float dst_value[IM_MAXDEPTH];
-      int y = i%width;
-      int x = i - y*width;
-      int tpos = omp_get_thread_num()*src_count;
+      for(int d = 0; d < src_depth; d++)
+        src_value[tpos + j*src_depth + d] = (float)((src_map[j])[d])[i];
+    }
 
-      for(int j = 0; j < src_count; j++)
-      {
-        for(int d = 0; d < src_depth; d++)
-          src_value[tpos + j*src_depth + d] = (float)((src_map[j])[d])[i];
-      }
+    if (func(src_value + tpos, dst_value, params, x, y))
+    {
+      for(int d = 0; d < dst_depth; d++)
+        (dst_map[d])[i] = (T2)dst_value[d];
+    }
 
-      if (func(src_value + tpos, dst_value, params, x, y))
-      {
-        for(int d = 0; d < dst_depth; d++)
-          (dst_map[d])[i] = (T2)dst_value[d];
-      }
-
-      if (x == width-1 && imCounterHasCallback())
-      {
-        #pragma omp critical(CounterUpdate)
-        if (!imCounterInc(counter))
-        {
-          abort = true;
-          #pragma omp flush (abort)
-        }
-      }
+    if (x == width-1)
+    {
+      IM_COUNT_PROCESSING;
+      #pragma omp flush (processing)
+      IM_END_PROCESSING;
     }
   }
 
-  if (abort)
-  {
-    delete[] src_value;
-    return 0;
-  }
-#endif
-
-  return 1;
+  delete[] src_value;
+  return processing;
 }
 
 int imProcessMultiPointColorOp(const imImage** src_image, int src_count, imImage* dst_image, imMultiPointColorOpFunc func, float* params, const char* op_name)

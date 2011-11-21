@@ -10,7 +10,8 @@ SRC = \
     im_convolve_rank.cpp   im_logic.cpp            im_threshold.cpp  \
     im_effects.cpp         im_morphology_bin.cpp   im_tonegamut.cpp  \
     im_canny.cpp           im_distance.cpp         im_analyze.cpp    \
-    im_kernel.cpp          im_remotesens.cpp       im_point.cpp
+    im_kernel.cpp          im_remotesens.cpp       im_point.cpp      \
+    im_process_counter.cpp
 SRC  := $(addprefix process/, $(SRC))
                                        
 USE_IM = Yes

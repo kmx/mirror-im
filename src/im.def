@@ -77,6 +77,8 @@ EXPORTS
   imColorDecode
   imCounterSetCallback
   imCounterHasCallback
+  imCounterSetUserData
+  imCounterGetUserData
   imCounterBegin
   imCounterInc
   imCounterIncTo

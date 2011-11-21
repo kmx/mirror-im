@@ -33,6 +33,7 @@ struct iCounter
   int current;
   int sequence;
   const char* message;
+  void* userdata;
 };
 
 #define MAX_COUNTERS 10
@@ -91,6 +92,24 @@ void imCounterEnd(int counter)
   }
   else
     ct->sequence--;
+}
+
+void* imCounterGetUserData(int counter)
+{
+  if (counter == -1 || !iCounterFunc) 
+    return NULL;            // invalid counter
+
+  iCounter *ct = &iCounterList[counter];
+  return ct->userdata;
+}
+
+void imCounterSetUserData(int counter, void* userdata)
+{
+  if (counter == -1 || !iCounterFunc) 
+    return;                // invalid counter
+
+  iCounter *ct = &iCounterList[counter];
+  ct->userdata = userdata;
 }
 
 int imCounterInc(int counter)
