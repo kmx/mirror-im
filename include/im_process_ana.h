@@ -37,6 +37,7 @@ float imCalcSNR(const imImage* src_image, const imImage* noise_image);
 /** Count the number of different colors in an image. \n
  * Image must be IM_BYTE, but can has all color spaces except IM_CMYK.
  * Data type can be IM_USHORT if color space is IM_GRAY, IM_BINARY or IM_MAP.
+ * Not using OpenMP when enabled, when color space depth is greater than 1.
  *
  * \verbatim im.CalcCountColors(image: imImage) -> count: number [in Lua 5] \endverbatim
  * \ingroup stats */

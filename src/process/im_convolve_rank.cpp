@@ -7,9 +7,9 @@
 
 #include <im.h>
 #include <im_util.h>
-#include <im_counter.h>
 #include <im_math.h>
 
+#include "im_process_counter.h"
 #include "im_process_loc.h"
 
 #include <stdlib.h>
@@ -22,34 +22,41 @@
 template <class T, class DT> 
 static int DoConvolveRankFunc(T *map, DT* new_map, int width, int height, int kw, int kh, T (*func)(T* value, int count, int center), int counter)
 {
-  T* value = new T[kw*kh];
-  int offset, new_offset, i, j, x, y, v, c;
-  int kh1, kw1, kh2, kw2;
+  int tcount = IM_MAX_THREADS;
+  T* value = new T[kw*kh*tcount];
 
-  kh2 = kh/2;
-  kw2 = kw/2;
-  kh1 = -kh2;
-  kw1 = -kw2;
+  int kh2 = kh/2;
+  int kw2 = kw/2;
+  int kh1 = -kh2;
+  int kw1 = -kw2;
   if (kh%2==0) kh2--;  // if not odd decrease 1
   if (kw%2==0) kw2--;
 
-  for(j = 0; j < height; j++)
-  {
-    new_offset = j * width;
+  IM_INT_PROCESSING;
 
-    for(i = 0; i < width; i++)
+#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
+  for(int j = 0; j < height; j++)
+  {
+    #pragma omp flush (processing)
+    IM_BEGIN_PROCESSING;
+
+    int new_offset = j * width;
+    int toffset = IM_THREAD_NUM*(kw*kh);
+
+    for(int i = 0; i < width; i++)
     {
-      v = 0; c = 0;
+      int v = 0; 
+      int c = 0;
     
-      for(y = kh1; y <= kh2; y++)
+      for(int y = kh1; y <= kh2; y++)
       {
         if ((j + y < 0) ||        // pass the bottom border
             (j + y >= height))    // pass the top border
           continue;
 
-        offset = (j + y) * width;
+        int offset = (j + y) * width;
 
-        for(x = kw1; x <= kw2; x++)
+        for(int x = kw1; x <= kw2; x++)
         {
           if ((i + x < 0) ||      // pass the left border
               (i + x >= width))   // pass the right border
@@ -58,23 +65,21 @@ static int DoConvolveRankFunc(T *map, DT* new_map, int width, int height, int kw
           if (x == 0 && y == 0)
             c = v;
 
-          value[v] = map[offset + (i + x)];
+          value[toffset + v] = map[offset + (i + x)];
           v++;
         }
       }
       
-      new_map[new_offset + i] = (DT)func(value, v, c);
+      new_map[new_offset + i] = (DT)func(value + toffset, v, c);
     }    
 
-    if (!imCounterInc(counter))
-    {
-      delete[] value;
-      return 0;
-    }
+    IM_COUNT_PROCESSING;
+    #pragma omp flush (processing)
+    IM_END_PROCESSING;
   }
 
   delete[] value;
-  return 1;
+  return processing;
 }
 
 static int compare_imReal(const void *elem1, const void *elem2) 
@@ -166,7 +171,7 @@ int imProcessMedianConvolve(const imImage* src_image, imImage* dst_image, int ks
   int i, ret = 0;
   int counter;
 
-  counter = imCounterBegin("Median Filter");
+  counter = imProcessCounterBegin("Median Filter");
   imCounterTotal(counter, src_image->depth*src_image->height, "Filtering...");
 
   for (i = 0; i < src_image->depth; i++)
@@ -195,7 +200,7 @@ int imProcessMedianConvolve(const imImage* src_image, imImage* dst_image, int ks
       break;
   }
 
-  imCounterEnd(counter);
+  imProcessCounterEnd(counter);
 
   return ret;
 }
@@ -237,7 +242,7 @@ int imProcessRangeConvolve(const imImage* src_image, imImage* dst_image, int ks)
   int i, ret = 0;
   int counter;
 
-  counter = imCounterBegin("Range Filter");
+  counter = imProcessCounterBegin("Range Filter");
   imCounterTotal(counter, src_image->depth*src_image->height, "Filtering...");
 
   for (i = 0; i < src_image->depth; i++)
@@ -266,7 +271,7 @@ int imProcessRangeConvolve(const imImage* src_image, imImage* dst_image, int ks)
       break;
   }
 
-  imCounterEnd(counter);
+  imProcessCounterEnd(counter);
 
   return ret;
 }
@@ -365,7 +370,7 @@ static int contrast_thres_op_int(int* value, int count, int center)
 int imProcessRangeContrastThreshold(const imImage* src_image, imImage* dst_image, int ks, int min_range)
 {
   int ret = 0;
-  int counter = imCounterBegin("Range Contrast Threshold");
+  int counter = imProcessCounterBegin("Range Contrast Threshold");
   imCounterTotal(counter, src_image->depth*src_image->height, "Filtering...");
 
   thresAux = min_range;
@@ -386,7 +391,7 @@ int imProcessRangeContrastThreshold(const imImage* src_image, imImage* dst_image
     break;                                                                                
   }
 
-  imCounterEnd(counter);
+  imProcessCounterEnd(counter);
 
   return ret;
 }
@@ -439,7 +444,7 @@ static int max_thres_op_int(int* value, int count, int center)
 int imProcessLocalMaxThreshold(const imImage* src_image, imImage* dst_image, int ks, int min_thres)
 {
   int ret = 0;
-  int counter = imCounterBegin("Local Max Threshold");
+  int counter = imProcessCounterBegin("Local Max Threshold");
   imCounterTotal(counter, src_image->depth*src_image->height, "Filtering...");
 
   thresAux = min_thres;
@@ -460,7 +465,7 @@ int imProcessLocalMaxThreshold(const imImage* src_image, imImage* dst_image, int
     break;                                                                                
   }
 
-  imCounterEnd(counter);
+  imProcessCounterEnd(counter);
 
   return ret;
 }
@@ -523,7 +528,7 @@ int imProcessRankClosestConvolve(const imImage* src_image, imImage* dst_image, i
   int i, ret = 0;
   int counter;
 
-  counter = imCounterBegin("Rank Closest");
+  counter = imProcessCounterBegin("Rank Closest");
   imCounterTotal(counter, src_image->depth*src_image->height, "Filtering...");
 
   for (i = 0; i < src_image->depth; i++)
@@ -552,7 +557,7 @@ int imProcessRankClosestConvolve(const imImage* src_image, imImage* dst_image, i
       break;
   }
 
-  imCounterEnd(counter);
+  imProcessCounterEnd(counter);
 
   return ret;
 }
@@ -594,7 +599,7 @@ int imProcessRankMaxConvolve(const imImage* src_image, imImage* dst_image, int k
   int i, ret = 0;
   int counter;
 
-  counter = imCounterBegin("Rank Max");
+  counter = imProcessCounterBegin("Rank Max");
   imCounterTotal(counter, src_image->depth*src_image->height, "Filtering...");
 
   for (i = 0; i < src_image->depth; i++)
@@ -623,7 +628,7 @@ int imProcessRankMaxConvolve(const imImage* src_image, imImage* dst_image, int k
       break;
   }
 
-  imCounterEnd(counter);
+  imProcessCounterEnd(counter);
 
   return ret;
 }
@@ -665,7 +670,7 @@ int imProcessRankMinConvolve(const imImage* src_image, imImage* dst_image, int k
   int i, ret = 0;
   int counter;
 
-  counter = imCounterBegin("Rank Min");
+  counter = imProcessCounterBegin("Rank Min");
   imCounterTotal(counter, src_image->depth*src_image->height, "Filtering...");
 
   for (i = 0; i < src_image->depth; i++)
@@ -694,7 +699,7 @@ int imProcessRankMinConvolve(const imImage* src_image, imImage* dst_image, int k
       break;
   }
 
-  imCounterEnd(counter);
+  imProcessCounterEnd(counter);
 
   return ret;
 }

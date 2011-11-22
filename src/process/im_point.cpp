@@ -223,12 +223,12 @@ static int DoMultiPointOp(T1 **src_map, T2 *dst_map, int width, int height, int 
     int d = i%count;
     int y = (i - d*count)%width;
     int x = i - d*count - y*width;
-    int tpos = IM_THREAD_NUM*src_count;
+    int toffset = IM_THREAD_NUM*src_count;
 
     for(int j = 0; j < src_count; j++)
-      src_value[tpos + j] = (float)(src_map[j])[i];
+      src_value[toffset + j] = (float)(src_map[j])[i];
 
-    if (func(src_value + tpos, &dst_value, params, x, y, d))
+    if (func(src_value + toffset, &dst_value, params, x, y, d))
       dst_map[i] = (T2)dst_value;
 
     if (x == width-1)
@@ -323,15 +323,15 @@ static int DoMultiPointColorOp(T1 ***src_map, T2 **dst_map, int width, int heigh
     float dst_value[IM_MAXDEPTH];
     int y = i%width;
     int x = i - y*width;
-    int tpos = IM_THREAD_NUM*src_count;
+    int toffset = IM_THREAD_NUM*(src_count*src_depth);
 
     for(int j = 0; j < src_count; j++)
     {
       for(int d = 0; d < src_depth; d++)
-        src_value[tpos + j*src_depth + d] = (float)((src_map[j])[d])[i];
+        src_value[toffset + j*src_depth + d] = (float)((src_map[j])[d])[i];
     }
 
-    if (func(src_value + tpos, dst_value, params, x, y))
+    if (func(src_value + toffset, dst_value, params, x, y))
     {
       for(int d = 0; d < dst_depth; d++)
         (dst_map[d])[i] = (T2)dst_value[d];

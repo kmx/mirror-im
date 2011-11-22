@@ -28,7 +28,6 @@ static void DoExpandHistogram(T* src_map, T* dst_map, int size, int depth, int h
   int range = high_level-low_level+1;
   float factor = (float)hcount / (float)range;
 
-#pragma omp parallel for if (hcount > 256)
   for (i = 0; i < hcount; i++)
   {             
     if (i < low_level)
@@ -75,7 +74,6 @@ static void DoEqualizeHistogram(T* src_map, T* dst_map, int size, int depth, int
 
   float factor = (float)hcount / (float)size;
 
-#pragma omp parallel for if (hcount > 256)
   for (i = 0; i < hcount; i++)
   {             
     int value = imResample(histo[i], factor);

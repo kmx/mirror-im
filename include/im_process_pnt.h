@@ -757,6 +757,7 @@ int imProcessUniformErrThreshold(const imImage* src_image, imImage* dst_image);
 /** Apply a dithering on each image channel by using a difusion error method. \n
  * It can be applied on any IM_BYTE images. It will "threshold" each channel indivudually, so
  * source and destiny must be of the same depth.
+ * Not using OpenMP when enabled.
  *
  * \verbatim im.ProcessDifusionErrThreshold(src_image: imImage, dst_image: imImage, level: number) [in Lua 5] \endverbatim
  * \verbatim im.ProcessDifusionErrThresholdNew(src_image: imImage, level: number) -> new_image: imImage [in Lua 5] \endverbatim
