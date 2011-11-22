@@ -10,6 +10,7 @@
 #include <im_colorhsi.h>
 #include <im_palette.h>
 
+#include "im_process_counter.h"
 #include "im_process_pnt.h"
 
 #include <stdlib.h>
@@ -45,7 +46,7 @@ void imProcessSplitYChroma(const imImage* src_image, imImage* y_image, imImage* 
     *blue2=(imbyte*)chroma_image->data[2],
     *map1=(imbyte*)y_image->data[0];
 
-#pragma omp parallel for
+#pragma omp parallel for if (src_image->count > IM_OMP_MINCOUNT)
   for (int i = 0; i < src_image->count; i++)
   {
     imbyte R = red[i];
@@ -69,7 +70,7 @@ static void DoSplitHSIFloat(float** data, float* hue, float* saturation, float* 
       *green=data[1],
        *blue=data[2];
 
-#pragma omp parallel for
+#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
   for (int i = 0; i < count; i++)
   {
     imColorRGB2HSI(red[i], green[i], blue[i], &hue[i], &saturation[i], &intensity[i]);
@@ -82,7 +83,7 @@ static void DoSplitHSIByte(imbyte** data, float* hue, float* saturation, float* 
        *green=data[1],
         *blue=data[2];
 
-#pragma omp parallel for
+#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
   for (int i = 0; i < count; i++)
   {
     imColorRGB2HSIbyte(red[i], green[i], blue[i], &hue[i], &saturation[i], &intensity[i]);
@@ -110,7 +111,7 @@ static void DoMergeHSIFloat(float** data, float* hue, float* saturation, float* 
       *green=data[1],
        *blue=data[2];
 
-#pragma omp parallel for
+#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
   for (int i = 0; i < count; i++)
   {
     imColorHSI2RGB(hue[i], saturation[i], intensity[i], &red[i], &green[i], &blue[i]);
@@ -123,7 +124,7 @@ static void DoMergeHSIByte(imbyte** data, float* hue, float* saturation, float* 
        *green=data[1],
         *blue=data[2];
 
-#pragma omp parallel for
+#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
   for (int i = 0; i < count; i++)
   {
     imColorHSI2RGBbyte(hue[i], saturation[i], intensity[i], &red[i], &green[i], &blue[i]);
@@ -173,7 +174,7 @@ static void DoNormalizeComp(T** src_data, float** dst_data, int count, int depth
     src_pdata[dt] = src_data[dt];
   }
 
-#pragma omp parallel for
+#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
   for (int i = 0; i < count; i++)
   {
     int d;
@@ -214,7 +215,7 @@ void imProcessNormalizeComponents(const imImage* src_image, imImage* dst_image)
 template <class T> 
 static void DoReplaceColor(T *src_data, T *dst_data, int count, int depth, float* src_color, float* dst_color)
 {
-#pragma omp parallel for
+#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
   for (int i = 0; i < count; i++)
   {
     int d, equal = 1;
@@ -259,7 +260,7 @@ void imProcessReplaceColor(const imImage* src_image, imImage* dst_image, float* 
 template <class ST, class DT> 
 static void DoSetAlphaColor(ST *src_data, DT *dst_data, int count, int depth, float* src_color, float dst_alpha)
 {
-#pragma omp parallel for
+#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
   for (int i = 0; i < count; i++)
   {
     int equal = 1;

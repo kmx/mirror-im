@@ -106,7 +106,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\process\im_canny.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\process\im_color.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\process\im_convolve.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\process\im_distance.cpp"
 				>
 			</File>
 			<File
@@ -162,6 +174,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\process\im_resize.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\process\im_tonegamut.cpp"
 				>
 			</File>
@@ -173,27 +189,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\src\process\im_canny.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\src\process\im_convolve.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\src\process\im_convolve_rank.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\src\process\im_distance.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\src\process\im_geometric.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\src\process\im_resize.cpp"
 					>
 				</File>
 				<File

@@ -9,6 +9,7 @@
 #include <im_util.h>
 #include <im_math.h>
 
+#include "im_process_counter.h"
 #include "im_process_pnt.h"
 #include "im_process_ana.h"
 
@@ -27,7 +28,7 @@ static void DoExpandHistogram(T* src_map, T* dst_map, int size, int depth, int h
   int range = high_level-low_level+1;
   float factor = (float)hcount / (float)range;
 
-#pragma omp parallel for
+#pragma omp parallel for if (hcount > 256)
   for (i = 0; i < hcount; i++)
   {             
     if (i < low_level)
@@ -42,7 +43,7 @@ static void DoExpandHistogram(T* src_map, T* dst_map, int size, int depth, int h
   }
 
   int total_count = size*depth;
-#pragma omp parallel for
+#pragma omp parallel for if (total_count > IM_OMP_MINCOUNT)
   for (i = 0; i < total_count; i++)
     dst_map[i] = re_map[src_map[i]];
 
@@ -74,7 +75,7 @@ static void DoEqualizeHistogram(T* src_map, T* dst_map, int size, int depth, int
 
   float factor = (float)hcount / (float)size;
 
-#pragma omp parallel for
+#pragma omp parallel for if (hcount > 256)
   for (i = 0; i < hcount; i++)
   {             
     int value = imResample(histo[i], factor);
@@ -82,7 +83,7 @@ static void DoEqualizeHistogram(T* src_map, T* dst_map, int size, int depth, int
   }
 
   int total_count = size*depth;
-#pragma omp parallel for
+#pragma omp parallel for if (total_count > IM_OMP_MINCOUNT)
   for (i = 0; i < total_count; i++)
     dst_map[i] = re_map[src_map[i]];
 

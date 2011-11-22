@@ -28,7 +28,7 @@ static int DoBinMorphConvolve(imbyte *map, imbyte* new_map, int width, int heigh
 
   IM_INT_PROCESSING;
 
-#pragma omp parallel for
+#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
   for(int j = 0; j < height; j++)
   {
     #pragma omp flush (processing)

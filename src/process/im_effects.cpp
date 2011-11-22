@@ -10,6 +10,7 @@
 #include <im_math.h>
 #include <im_complex.h>
 
+#include "im_process_counter.h"
 #include "im_process_pnt.h"
 #include "im_math_op.h"
 
@@ -59,7 +60,7 @@ void imProcessPixelate(const imImage* src_image, imImage* dst_image, int box_siz
     imbyte *dst_map=(imbyte*)dst_image->data[i];
     int vbox_size = box_size;
 
-#pragma omp parallel for
+#pragma omp parallel for if (vbox > IM_OMP_MINCOUNT)
     for (int bv = 0; bv < vbox; bv++)
     {
       int bv_pos = bv*box_size;

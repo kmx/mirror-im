@@ -9,6 +9,7 @@
 #include <im_util.h>
 #include <im_math.h>
 
+#include "im_process_counter.h"
 #include "im_process_pnt.h"
 
 #include <stdlib.h>
@@ -18,7 +19,7 @@
 template <class T> 
 static void DoNormDiffRatio(T *map1, T *map2, float *new_map, int count)
 {
-#pragma omp parallel for
+#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
   for (int i = 0; i < count; i++)
   {
     float num   = (float)(map1[i] - map2[i]);

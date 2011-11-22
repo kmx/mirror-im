@@ -7,12 +7,12 @@
 
 #include <im.h>
 #include <im_util.h>
-#include <im_counter.h>
 #include <im_complex.h>
 #include <im_math_op.h>
 #include <im_image.h>
 #include <im_kernel.h>
 
+#include "im_process_counter.h"
 #include "im_process_loc.h"
 #include "im_process_pnt.h"
 
@@ -177,18 +177,16 @@ void imProcessRotateKernel(imImage* kernel)
 template <class T, class KT, class CT> 
 static int DoCompassConvolve(T* map, T* new_map, int width, int height, KT* orig_kernel_map, int kernel_size, int counter, CT)
 {
-  CT value;
   KT total, *kernel_line, kvalue;
-  int offset, new_offset, i, j, x, y, kcount;
 
   // duplicate the kernel data so we can rotate it
-  kcount = kernel_size*kernel_size;
+  int kcount = kernel_size*kernel_size;
   KT* kernel_map = (KT*)malloc(kcount*sizeof(KT));
 
   int ks2 = kernel_size/2;
 
   total = 0;
-  for(j = 0; j < kcount; j++) 
+  for(int j = 0; j < kcount; j++) 
   {
     kvalue = orig_kernel_map[j];
     kernel_map[j] = kvalue;
@@ -198,20 +196,28 @@ static int DoCompassConvolve(T* map, T* new_map, int width, int height, KT* orig
   if (total == 0)
     total = 1;
 
-  for(j = 0; j < height; j++)
-  {
-    new_offset = j * width;
+  IM_INT_PROCESSING;
 
-    for(i = 0; i < width; i++)
+#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
+  for(int j = 0; j < height; j++)
+  {
+    #pragma omp flush (processing)
+    IM_BEGIN_PROCESSING;
+
+    int new_offset = j * width;
+
+    for(int i = 0; i < width; i++)
     {
       CT max_value = 0;
 
       for(int k = 0; k < 8; k++) // Rotate 8 times
       {
-        value = 0;
+        CT value = 0;
       
-        for(y = -ks2; y <= ks2; y++)
+        for(int y = -ks2; y <= ks2; y++)
         {
+          int offset;
+
           kernel_line = kernel_map + (y+ks2)*kernel_size;
 
           if (j + y < 0)             // pass the bottom border
@@ -221,7 +227,7 @@ static int DoCompassConvolve(T* map, T* new_map, int width, int height, KT* orig
           else
             offset = (j + y) * width;
 
-          for(x = -ks2; x <= ks2; x++)
+          for(int x = -ks2; x <= ks2; x++)
           {
             if (i + x < 0)            // pass the left border
               value += kernel_line[x+ks2] * map[offset - (i + x + 1)];
@@ -247,22 +253,20 @@ static int DoCompassConvolve(T* map, T* new_map, int width, int height, KT* orig
         new_map[new_offset + i] = (T)max_value;
     }    
 
-    if (!imCounterInc(counter))
-    {
-      free(kernel_map);
-      return 0;
-    }
+    IM_COUNT_PROCESSING;
+    #pragma omp flush (processing)
+    IM_END_PROCESSING;
   }
 
   free(kernel_map);
-  return 1;
+  return processing;
 }
 
 int imProcessCompassConvolve(const imImage* src_image, imImage* dst_image, imImage *kernel)
 {
   int ret = 0;
 
-  int counter = imCounterBegin("Compass Convolution");
+  int counter = imProcessCounterBegin("Compass Convolution");
   const char* msg = (const char*)imImageGetAttribute(kernel, "Description", NULL, NULL);
   if (!msg) msg = "Filtering...";
   imCounterTotal(counter, src_image->depth*src_image->height, msg);
@@ -301,7 +305,7 @@ int imProcessCompassConvolve(const imImage* src_image, imImage* dst_image, imIma
       break;
   }
 
-  imCounterEnd(counter);
+  imProcessCounterEnd(counter);
 
   return ret;
 }
@@ -309,9 +313,7 @@ int imProcessCompassConvolve(const imImage* src_image, imImage* dst_image, imIma
 template <class T, class KT, class CT> 
 static int DoConvolveDual(T* map, T* new_map, int width, int height, KT* kernel_map1, KT* kernel_map2, int kernel_width, int kernel_height, int counter, CT)
 {
-  CT value1, value2, value;
   KT total1, total2, *kernel_line;
-  int offset, new_offset, i, j, x, y;
 
   int kh2 = kernel_height/2;
   int kw2 = kernel_width/2;
@@ -320,9 +322,9 @@ static int DoConvolveDual(T* map, T* new_map, int width, int height, KT* kernel_
   if (kernel_width % 2 == 0) kw2--;
 
   total1 = 0;
-  for(j = 0; j < kernel_height; j++) 
+  for(int j = 0; j < kernel_height; j++) 
   {
-    for(i = 0; i < kernel_width; i++)
+    for(int i = 0; i < kernel_width; i++)
       total1 += kernel_map1[j*kernel_width + i];
   }
 
@@ -330,26 +332,34 @@ static int DoConvolveDual(T* map, T* new_map, int width, int height, KT* kernel_
     total1 = 1;
 
   total2 = 0;
-  for(j = 0; j < kernel_height; j++) 
+  for(int j = 0; j < kernel_height; j++) 
   {
-    for(i = 0; i < kernel_width; i++)
+    for(int i = 0; i < kernel_width; i++)
       total2 += kernel_map2[j*kernel_width + i];
   }
 
   if (total2 == 0)
     total2 = 1;
 
-  for(j = 0; j < height; j++)
-  {
-    new_offset = j * width;
+  IM_INT_PROCESSING;
 
-    for(i = 0; i < width; i++)
+#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
+  for(int j = 0; j < height; j++)
+  {
+    #pragma omp flush (processing)
+    IM_BEGIN_PROCESSING;
+
+    int new_offset = j * width;
+
+    for(int i = 0; i < width; i++)
     {
-      value1 = 0;
-      value2 = 0;
+      CT value1 = 0;
+      CT value2 = 0;
     
-      for(y = -kh2; y <= kh2; y++)
+      for(int y = -kh2; y <= kh2; y++)
       {
+        int offset;
+
         if (j + y < 0)             // pass the bottom border
           offset = -(y + j + 1) * width;
         else if (j + y >= height)  // pass the top border
@@ -358,7 +368,7 @@ static int DoConvolveDual(T* map, T* new_map, int width, int height, KT* kernel_
           offset = (j + y) * width;
 
         kernel_line = kernel_map1 + (y+kh2)*kernel_width;
-        for(x = -kw2; x <= kw2; x++)
+        for(int x = -kw2; x <= kw2; x++)
         {
           if (i + x < 0)            // pass the left border
             value1 += kernel_line[x+kw2] * map[offset - (i + x + 1)];
@@ -369,7 +379,7 @@ static int DoConvolveDual(T* map, T* new_map, int width, int height, KT* kernel_
         }
 
         kernel_line = kernel_map2 + (y+kh2)*kernel_width;
-        for(x = -kw2; x <= kw2; x++)
+        for(int x = -kw2; x <= kw2; x++)
         {
           if (i + x < 0)            // pass the left border
             value2 += kernel_line[x+kw2] * map[offset - (i + x + 1)];
@@ -383,7 +393,7 @@ static int DoConvolveDual(T* map, T* new_map, int width, int height, KT* kernel_
       value1 /= total1;
       value2 /= total2;
 
-      value = (CT)sqrt((double)(value1*value1 + value2*value2));
+      CT value = (CT)sqrt((double)(value1*value1 + value2*value2));
 
       int size_of = sizeof(imbyte);
       if (sizeof(T) == size_of)
@@ -392,19 +402,18 @@ static int DoConvolveDual(T* map, T* new_map, int width, int height, KT* kernel_
         new_map[new_offset + i] = (T)value;
     }    
 
-    if (!imCounterInc(counter))
-      return 0;
+    IM_COUNT_PROCESSING;
+    #pragma omp flush (processing)
+    IM_END_PROCESSING;
   }
 
-  return 1;
+  return processing;
 }
 
 template <class KT> 
 static int DoConvolveDualCpx(imcfloat* map, imcfloat* new_map, int width, int height, KT* kernel_map1, KT* kernel_map2, int kernel_width, int kernel_height, int counter)
 {
-  imcfloat value1, value2;
   KT total1, total2, *kernel_line;
-  int offset, new_offset, i, j, x, y;
 
   int kh2 = kernel_height/2;
   int kw2 = kernel_width/2;
@@ -413,9 +422,9 @@ static int DoConvolveDualCpx(imcfloat* map, imcfloat* new_map, int width, int he
   if (kernel_width % 2 == 0) kw2--;
 
   total1 = 0;
-  for(j = 0; j < kernel_height; j++) 
+  for(int j = 0; j < kernel_height; j++) 
   {
-    for(i = 0; i < kernel_width; i++)
+    for(int i = 0; i < kernel_width; i++)
       total1 += kernel_map1[j*kernel_width + i];
   }
 
@@ -423,26 +432,34 @@ static int DoConvolveDualCpx(imcfloat* map, imcfloat* new_map, int width, int he
     total1 = 1;
 
   total2 = 0;
-  for(j = 0; j < kernel_height; j++) 
+  for(int j = 0; j < kernel_height; j++) 
   {
-    for(i = 0; i < kernel_width; i++)
+    for(int i = 0; i < kernel_width; i++)
       total2 += kernel_map1[j*kernel_width + i];
   }
 
   if (total2 == 0)
     total2 = 1;
 
-  for(j = 0; j < height; j++)
-  {
-    new_offset = j * width;
+  IM_INT_PROCESSING;
 
-    for(i = 0; i < width; i++)
+#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
+  for(int j = 0; j < height; j++)
+  {
+    #pragma omp flush (processing)
+    IM_BEGIN_PROCESSING;
+
+    int new_offset = j * width;
+
+    for(int i = 0; i < width; i++)
     {
-      value1 = 0;
-      value2 = 0;
+      imcfloat value1 = 0;
+      imcfloat value2 = 0;
     
-      for(y = -kh2; y <= kh2; y++)
+      for(int y = -kh2; y <= kh2; y++)
       {
+        int offset;
+
         if (j + y < 0)             // pass the bottom border
           offset = -(y + j + 1) * width;
         else if (j + y >= height)  // pass the top border
@@ -451,7 +468,7 @@ static int DoConvolveDualCpx(imcfloat* map, imcfloat* new_map, int width, int he
           offset = (j + y) * width;
 
         kernel_line = kernel_map1 + (y+kh2)*kernel_width;
-        for(x = -kw2; x <= kw2; x++)
+        for(int x = -kw2; x <= kw2; x++)
         {
           if (i + x < 0)            // pass the left border
             value1 += map[offset - (i + x + 1)] * (float)kernel_line[x+kw2];
@@ -462,7 +479,7 @@ static int DoConvolveDualCpx(imcfloat* map, imcfloat* new_map, int width, int he
         }
 
         kernel_line = kernel_map2 + (y+kh2)*kernel_width;
-        for(x = -kw2; x <= kw2; x++)
+        for(int x = -kw2; x <= kw2; x++)
         {
           if (i + x < 0)            // pass the left border
             value2 += map[offset - (i + x + 1)] * (float)kernel_line[x+kw2];
@@ -479,16 +496,17 @@ static int DoConvolveDualCpx(imcfloat* map, imcfloat* new_map, int width, int he
       new_map[new_offset + i] = sqrt(value1*value1 + value2*value2);
     }    
 
-    if (!imCounterInc(counter))
-      return 0;
+    IM_COUNT_PROCESSING;
+    #pragma omp flush (processing)
+    IM_END_PROCESSING;
   }
 
-  return 1;
+  return processing;
 }
 
 int imProcessConvolveDual(const imImage* src_image, imImage* dst_image, const imImage *kernel1, const imImage *kernel2)
 {
-  int counter = imCounterBegin("Convolution");
+  int counter = imProcessCounterBegin("Convolution");
   const char* msg = (const char*)imImageGetAttribute(kernel1, "Description", NULL, NULL);
   if (!msg) msg = "Filtering...";
   imCounterTotal(counter, src_image->depth*src_image->height, msg);
@@ -535,7 +553,7 @@ int imProcessConvolveDual(const imImage* src_image, imImage* dst_image, const im
       break;
   }
 
-  imCounterEnd(counter);
+  imProcessCounterEnd(counter);
 
   return ret;
 }
@@ -543,9 +561,7 @@ int imProcessConvolveDual(const imImage* src_image, imImage* dst_image, const im
 template <class T, class KT, class CT> 
 static int DoConvolve(T* map, T* new_map, int width, int height, KT* kernel_map, int kernel_width, int kernel_height, int counter, CT)
 {
-  CT value;
   KT total, *kernel_line;
-  int offset, new_offset, i, j, x, y;
 
   int kh2 = kernel_height/2;
   int kw2 = kernel_width/2;
@@ -554,25 +570,33 @@ static int DoConvolve(T* map, T* new_map, int width, int height, KT* kernel_map,
   if (kernel_width % 2 == 0) kw2--;
 
   total = 0;
-  for(j = 0; j < kernel_height; j++) 
+  for(int j = 0; j < kernel_height; j++) 
   {
-    for(i = 0; i < kernel_width; i++)
+    for(int i = 0; i < kernel_width; i++)
       total += kernel_map[j*kernel_width + i];
   }
 
   if (total == 0)
     total = 1;
 
-  for(j = 0; j < height; j++)
-  {
-    new_offset = j * width;
+  IM_INT_PROCESSING;
 
-    for(i = 0; i < width; i++)
+#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
+  for(int j = 0; j < height; j++)
+  {
+    #pragma omp flush (processing)
+    IM_BEGIN_PROCESSING;
+
+    int new_offset = j * width;
+
+    for(int i = 0; i < width; i++)
     {
-      value = 0;
+      CT value = 0;
     
-      for(y = -kh2; y <= kh2; y++)
+      for(int y = -kh2; y <= kh2; y++)
       {
+        int offset;
+
         kernel_line = kernel_map + (y+kh2)*kernel_width;
 
         if (j + y < 0)             // pass the bottom border
@@ -582,7 +606,7 @@ static int DoConvolve(T* map, T* new_map, int width, int height, KT* kernel_map,
         else
           offset = (j + y) * width;
 
-        for(x = -kw2; x <= kw2; x++)
+        for(int x = -kw2; x <= kw2; x++)
         {
           if (i + x < 0)            // pass the left border
             value += kernel_line[x+kw2] * map[offset - (i + x + 1)];
@@ -602,19 +626,18 @@ static int DoConvolve(T* map, T* new_map, int width, int height, KT* kernel_map,
         new_map[new_offset + i] = (T)value;
     }    
 
-    if (!imCounterInc(counter))
-      return 0;
+    IM_COUNT_PROCESSING;
+    #pragma omp flush (processing)
+    IM_END_PROCESSING;
   }
 
-  return 1;
+  return processing;
 }
 
 template <class KT> 
 static int DoConvolveCpx(imcfloat* map, imcfloat* new_map, int width, int height, KT* kernel_map, int kernel_width, int kernel_height, int counter)
 {
-  imcfloat value;
   KT total, *kernel_line;
-  int offset, new_offset, i, j, x, y;
 
   int kh2 = kernel_height/2;
   int kw2 = kernel_width/2;
@@ -623,25 +646,33 @@ static int DoConvolveCpx(imcfloat* map, imcfloat* new_map, int width, int height
   if (kernel_width % 2 == 0) kw2--;
 
   total = 0;
-  for(j = 0; j < kernel_height; j++) 
+  for(int j = 0; j < kernel_height; j++) 
   {
-    for(i = 0; i < kernel_width; i++)
+    for(int i = 0; i < kernel_width; i++)
       total += kernel_map[j*kernel_width + i];
   }
 
   if (total == 0)
     total = 1;
 
-  for(j = 0; j < height; j++)
-  {
-    new_offset = j * width;
+  IM_INT_PROCESSING;
 
-    for(i = 0; i < width; i++)
+#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
+  for(int j = 0; j < height; j++)
+  {
+    #pragma omp flush (processing)
+    IM_BEGIN_PROCESSING;
+
+    int new_offset = j * width;
+
+    for(int i = 0; i < width; i++)
     {
-      value = 0;
+      imcfloat value = 0;
     
-      for(y = -kh2; y <= kh2; y++)
+      for(int y = -kh2; y <= kh2; y++)
       {
+        int offset;
+
         kernel_line = kernel_map + (y+kh2)*kernel_width;
 
         if (j + y < 0)             // pass the bottom border
@@ -651,7 +682,7 @@ static int DoConvolveCpx(imcfloat* map, imcfloat* new_map, int width, int height
         else
           offset = (j + y) * width;
 
-        for(x = -kw2; x <= kw2; x++)
+        for(int x = -kw2; x <= kw2; x++)
         {
           if (i + x < 0)            // pass the left border
             value += map[offset - (i + x + 1)] * (float)kernel_line[x+kw2];
@@ -667,11 +698,12 @@ static int DoConvolveCpx(imcfloat* map, imcfloat* new_map, int width, int height
       new_map[new_offset + i] = value;
     }    
 
-    if (!imCounterInc(counter))
-      return 0;
+    IM_COUNT_PROCESSING;
+    #pragma omp flush (processing)
+    IM_END_PROCESSING;
   }
 
-  return 1;
+  return processing;
 }
 
 static int DoConvolveStep(const imImage* src_image, imImage* dst_image, const imImage *kernel, int counter)
@@ -723,14 +755,14 @@ static int DoConvolveStep(const imImage* src_image, imImage* dst_image, const im
 
 int imProcessConvolve(const imImage* src_image, imImage* dst_image, const imImage *kernel)
 {
-  int counter = imCounterBegin("Convolution");
+  int counter = imProcessCounterBegin("Convolution");
   const char* msg = (const char*)imImageGetAttribute(kernel, "Description", NULL, NULL);
   if (!msg) msg = "Filtering...";
   imCounterTotal(counter, src_image->depth*src_image->height, msg);
 
   int ret = DoConvolveStep(src_image, dst_image, kernel, counter);
 
-  imCounterEnd(counter);
+  imProcessCounterEnd(counter);
 
   return ret;
 }
@@ -741,7 +773,7 @@ int imProcessConvolveRep(const imImage* src_image, imImage* dst_image, const imI
   if (!AuxImage)
     return 0;
 
-  int counter = imCounterBegin("Repeated Convolution");
+  int counter = imProcessCounterBegin("Repeated Convolution");
   const char* msg = (const char*)imImageGetAttribute(kernel, "Description", NULL, NULL);
   if (!msg) msg = "Filtering...";
   imCounterTotal(counter, src_image->depth*src_image->height*ntimes, msg);
@@ -753,7 +785,7 @@ int imProcessConvolveRep(const imImage* src_image, imImage* dst_image, const imI
   {
     if (!DoConvolveStep(image1, image2, kernel, counter))
     {
-      imCounterEnd(counter);
+      imProcessCounterEnd(counter);
       imImageDestroy(AuxImage);
       return 0;
     }
@@ -774,7 +806,7 @@ int imProcessConvolveRep(const imImage* src_image, imImage* dst_image, const imI
     AuxImage->data = (void**)temp;
   }
 
-  imCounterEnd(counter);
+  imProcessCounterEnd(counter);
   imImageDestroy(AuxImage);
 
   return 1;
@@ -783,10 +815,8 @@ int imProcessConvolveRep(const imImage* src_image, imImage* dst_image, const imI
 template <class T, class KT, class CT> 
 static int DoConvolveSep(T* map, T* new_map, int width, int height, KT* kernel_map, int kernel_width, int kernel_height, int counter, CT)
 {
-  CT value;
   KT totalV, totalH, *kernel_line;
   T* aux_line;
-  int offset, new_offset, i, j;
 
   int kh2 = kernel_height/2;
   int kw2 = kernel_width/2;
@@ -797,14 +827,14 @@ static int DoConvolveSep(T* map, T* new_map, int width, int height, KT* kernel_m
   // use only the first line and the first column of the kernel
 
   totalV = 0;
-  for(j = 0; j < kernel_height; j++) 
+  for(int j = 0; j < kernel_height; j++) 
     totalV += kernel_map[j*kernel_width];
 
   if (totalV == 0)
     totalV = 1;
 
   totalH = 0;
-  for(i = 0; i < kernel_width; i++)
+  for(int i = 0; i < kernel_width; i++)
     totalH += kernel_map[i];
 
   if (totalH == 0)
@@ -812,19 +842,26 @@ static int DoConvolveSep(T* map, T* new_map, int width, int height, KT* kernel_m
 
   aux_line = (T*)malloc(width*sizeof(T));
 
-  for(j = 0; j < height; j++)
-  {
-    new_offset = j * width;
+  IM_INT_PROCESSING;
 
-    for(i = 0; i < width; i++)
+#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
+  for(int j = 0; j < height; j++)
+  {
+    #pragma omp flush (processing)
+    IM_BEGIN_PROCESSING;
+
+    int new_offset = j * width;
+
+    for(int i = 0; i < width; i++)
     {
-      int y;
-      value = 0;
+      CT value = 0;
 
       // first pass, only for columns
     
-      for(y = -kh2; y <= kh2; y++)
+      for(int y = -kh2; y <= kh2; y++)
       {
+        int offset;
+
         kernel_line = kernel_map + (y+kh2)*kernel_width;
 
         if (j + y < 0)             // pass the bottom border
@@ -847,27 +884,35 @@ static int DoConvolveSep(T* map, T* new_map, int width, int height, KT* kernel_m
         new_map[new_offset + i] = (T)value;
     }    
 
-    if (!imCounterInc(counter))
-    {
-      free(aux_line);
-      return 0;
-    }
+    IM_COUNT_PROCESSING;
+    #pragma omp flush (processing)
+    IM_END_PROCESSING;
   }
 
-  for(j = 0; j < height; j++)
+  if (!processing)
   {
-    offset = new_offset = j * width;
+    free(aux_line);
+    return 0;
+  }
 
-    for(i = 0; i < width; i++)
+#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
+  for(int j = 0; j < height; j++)
+  {
+    #pragma omp flush (processing)
+    IM_BEGIN_PROCESSING;
+
+    int offset = j * width;
+    int new_offset = offset;
+
+    for(int i = 0; i < width; i++)
     {
-      int x;
-      value = 0;
+      CT value = 0;
 
       // second pass, only for lines, but has to use an auxiliar buffer
     
       kernel_line = kernel_map;
 
-      for(x = -kw2; x <= kw2; x++)
+      for(int x = -kw2; x <= kw2; x++)
       {
         if (i + x < 0)            // pass the left border
           value += kernel_line[x+kw2] * new_map[offset - (i + x + 1)];
@@ -888,25 +933,21 @@ static int DoConvolveSep(T* map, T* new_map, int width, int height, KT* kernel_m
 
     memcpy(new_map + new_offset, aux_line, width*sizeof(T));
 
-    if (!imCounterInc(counter))
-    {
-      free(aux_line);
-      return 0;
-    }
+    IM_COUNT_PROCESSING;
+    #pragma omp flush (processing)
+    IM_END_PROCESSING;
   }
 
   free(aux_line);
-  return 1;
+  return processing;
 }
 
 
 template <class KT> 
 static int DoConvolveSepCpx(imcfloat* map, imcfloat* new_map, int width, int height, KT* kernel_map, int kernel_width, int kernel_height, int counter)
 {
-  imcfloat value;
   KT totalV, totalH, *kernel_line;
   imcfloat* aux_line;
-  int offset, new_offset, i, j;
 
   int kh2 = kernel_height/2;
   int kw2 = kernel_width/2;
@@ -917,14 +958,14 @@ static int DoConvolveSepCpx(imcfloat* map, imcfloat* new_map, int width, int hei
   // use only the first line and the first column of the kernel
 
   totalV = 0;
-  for(j = 0; j < kernel_height; j++) 
+  for(int j = 0; j < kernel_height; j++) 
     totalV += kernel_map[j*kernel_width];
 
   if (totalV == 0)
     totalV = 1;
 
   totalH = 0;
-  for(i = 0; i < kernel_width; i++)
+  for(int i = 0; i < kernel_width; i++)
     totalH += kernel_map[i];
 
   if (totalH == 0)
@@ -932,19 +973,26 @@ static int DoConvolveSepCpx(imcfloat* map, imcfloat* new_map, int width, int hei
 
   aux_line = (imcfloat*)malloc(width*sizeof(imcfloat));
 
-  for(j = 0; j < height; j++)
-  {
-    new_offset = j * width;
+  IM_INT_PROCESSING;
 
-    for(i = 0; i < width; i++)
+#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
+  for(int j = 0; j < height; j++)
+  {
+    #pragma omp flush (processing)
+    IM_BEGIN_PROCESSING;
+
+    int new_offset = j * width;
+
+    for(int i = 0; i < width; i++)
     {
-      int y;
-      value = 0;
+      imcfloat value = 0;
 
       // first pass, only for columns
     
-      for(y = -kh2; y <= kh2; y++)
+      for(int y = -kh2; y <= kh2; y++)
       {
+        int offset;
+
         kernel_line = kernel_map + (y+kh2)*kernel_width;
 
         if (j + y < 0)             // pass the bottom border
@@ -963,21 +1011,30 @@ static int DoConvolveSepCpx(imcfloat* map, imcfloat* new_map, int width, int hei
       new_map[new_offset + i] = value;
     }    
 
-    if (!imCounterInc(counter))
-    {
-      free(aux_line);
-      return 0;
-    }
+    IM_COUNT_PROCESSING;
+    #pragma omp flush (processing)
+    IM_END_PROCESSING;
   }
 
-  for(j = 0; j < height; j++)
+  if (!processing)
   {
-    offset = new_offset = j * width;
+    free(aux_line);
+    return 0;
+  }
 
-    for(i = 0; i < width; i++)
+#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
+  for(int j = 0; j < height; j++)
+  {
+    #pragma omp flush (processing)
+    IM_BEGIN_PROCESSING;
+
+    int offset = j * width;
+    int new_offset = offset;
+
+    for(int i = 0; i < width; i++)
     {
       int x;
-      value = 0;
+      imcfloat value = 0;
 
       // second pass, only for lines, but has to use an auxiliar buffer
     
@@ -1000,20 +1057,18 @@ static int DoConvolveSepCpx(imcfloat* map, imcfloat* new_map, int width, int hei
 
     memcpy(new_map + new_offset, aux_line, width*sizeof(imcfloat));
 
-    if (!imCounterInc(counter))
-    {
-      free(aux_line);
-      return 0;
-    }
+    IM_COUNT_PROCESSING;
+    #pragma omp flush (processing)
+    IM_END_PROCESSING;
   }
 
   free(aux_line);
-  return 1;
+  return processing;
 }
 
 int imProcessConvolveSep(const imImage* src_image, imImage* dst_image, const imImage *kernel)
 {
-  int counter = imCounterBegin("Separable Convolution");
+  int counter = imProcessCounterBegin("Separable Convolution");
   const char* msg = (const char*)imImageGetAttribute(kernel, "Description", NULL, NULL);
   if (!msg) msg = "Filtering...";
   imCounterTotal(counter, 2*src_image->depth*src_image->height, msg);
@@ -1060,7 +1115,7 @@ int imProcessConvolveSep(const imImage* src_image, imImage* dst_image, const imI
       break;
   }
 
-  imCounterEnd(counter);
+  imProcessCounterEnd(counter);
 
   return ret;
 }
@@ -1090,18 +1145,16 @@ University of Oslo
 template <class T> 
 static void do_crossing(T* iband, T* oband, int width, int height, T t)
 {
-  int x, y, offset00 = 0, offset10 = 0, offset01 = 0;
-  T v, diff;
-
-  for (y=0; y < height-1; y++)
+#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
+  for (int y=0; y < height-1; y++)
   {
-    offset00 = y*width;
-    offset10 = (y+1)*width;
-    offset01 = offset00 + 1;
+    int offset00 = y*width;
+    int offset10 = (y+1)*width;
+    int offset01 = offset00 + 1;
 
-    for (x=0; x < width-1; x++)
+    for (int x=0; x < width-1; x++)
     {
-      v = 0;
+      T v = 0;
 
       if (iband[offset00] <= t)
       {
@@ -1110,7 +1163,7 @@ static void do_crossing(T* iband, T* oband, int width, int height, T t)
 
 	      if (iband[offset01] > t) 
         {
-          diff = iband[offset01]-iband[offset00];
+          T diff = iband[offset01]-iband[offset00];
           if (diff > v) v = diff;
         }
       }
@@ -1121,7 +1174,7 @@ static void do_crossing(T* iband, T* oband, int width, int height, T t)
 
 	      if (iband[offset01] <= t) 
         {
-          diff = iband[offset00]-iband[offset01];
+          T diff = iband[offset00]-iband[offset01];
           if (diff > v) v = diff;
         }
       }
@@ -1137,7 +1190,7 @@ static void do_crossing(T* iband, T* oband, int width, int height, T t)
     offset00++;
     offset10++;
 
-    v = 0;
+    T v = 0;
 
     if (iband[offset00] <= t)
     {
@@ -1154,12 +1207,12 @@ static void do_crossing(T* iband, T* oband, int width, int height, T t)
   }
 
   /* last line */
-  offset00 = y*width;
-  offset01 = offset00 + 1;
+  int offset00 = (height-1)*width;
+  int offset01 = offset00 + 1;
 
-  for (x=0; x < width-1; x++)
+  for (int x=0; x < width-1; x++)
   {
-    v = 0;
+    T v = 0;
 
     if (iband[offset00] <= t)
     {
@@ -1427,7 +1480,7 @@ int imProcessDiffOfGaussianConvolve(const imImage* src_image, imImage* dst_image
 
 int imProcessMeanConvolve(const imImage* src_image, imImage* dst_image, int ks)
 {
-  int counter = imCounterBegin("Mean Convolve");
+  int counter = imProcessCounterBegin("Mean Convolve");
   imCounterTotal(counter, src_image->depth*src_image->height, "Filtering...");
 
   imImage* kernel = imImageCreate(ks, ks, IM_GRAY, IM_INT);
@@ -1452,7 +1505,7 @@ int imProcessMeanConvolve(const imImage* src_image, imImage* dst_image, int ks)
   int ret = DoConvolveStep(src_image, dst_image, kernel, counter);
 
   imImageDestroy(kernel);
-  imCounterEnd(counter);
+  imProcessCounterEnd(counter);
 
   return ret;
 }
@@ -1460,7 +1513,6 @@ int imProcessMeanConvolve(const imImage* src_image, imImage* dst_image, int ks)
 template <class T1, class T2> 
 static void DoSharpOp(T1 *src_map, T1 *dst_map, int count, float amount, T2 threshold, int gauss)
 {
-  int i;
   T1 min, max;
 
   int size_of = sizeof(imbyte);
@@ -1482,7 +1534,8 @@ static void DoSharpOp(T1 *src_map, T1 *dst_map, int count, float amount, T2 thre
     }
   }
 
-  for (i = 0; i < count; i++)
+#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+  for (int i = 0; i < count; i++)
   {
     T2 diff;
     

@@ -6,6 +6,7 @@
 
 #include <im.h>
 
+#include "im_process_counter.h"
 #include "im_process_loc.h"
 
 #include <math.h>
@@ -122,50 +123,55 @@ static float dGauss (float x, float sigma)
 
 static void seperable_convolution (const imImage* im, float *gau, int width, float **smx, float **smy)
 {
-  int i,j,k, I1, I2, nr, nc;
-  float x, y;
   unsigned char* im_data = (unsigned char*)im->data[0];
+  int nr = im->height;
+  int nc = im->width;
 
-  nr = im->height;
-  nc = im->width;
-
-  for (i=0; i<nr; i++)
+#pragma omp parallel for if (nr > IM_OMP_MINCOUNT)
+  for (int i=0; i<nr; i++)
   {
-    for (j=0; j<nc; j++)
+    for (int j=0; j<nc; j++)
     {
-      x = gau[0] * im_data[i*im->width + j]; y = gau[0] * im_data[i*im->width + j];
-      for (k=1; k<width; k++)
+      float x = gau[0] * im_data[i*im->width + j]; 
+      float y = gau[0] * im_data[i*im->width + j];
+
+      for (int k=1; k<width; k++)
       {
-        I1 = (i+k)%nr; I2 = (i-k+nr)%nr;
+        int I1 = (i+k)%nr; 
+        int I2 = (i-k+nr)%nr;
         y += gau[k]*im_data[I1*im->width + j] + gau[k]*im_data[I2*im->width + j];
-        I1 = (j+k)%nc; I2 = (j-k+nc)%nc;
+
+        I1 = (j+k)%nc; 
+        I2 = (j-k+nc)%nc;
         x += gau[k]*im_data[i*im->width + I1] + gau[k]*im_data[i*im->width + I2];
       }
-      smx[i][j] = x; smy[i][j] = y;
+
+      smx[i][j] = x; 
+      smy[i][j] = y;
     }
   }
 }
 
 static void dxy_seperable_convolution (float** im, int nr, int nc,  float *gau, int width, float **sm, int which)
 {
-  int i,j,k, I1, I2;
-  float x;
-
-  for (i=0; i<nr; i++)
+#pragma omp parallel for if (nr > IM_OMP_MINCOUNT)
+  for (int i=0; i<nr; i++)
   {
-    for (j=0; j<nc; j++)
+    for (int j=0; j<nc; j++)
     {
-      x = 0.0;
-      for (k=1; k<width; k++)
+      float x = 0.0;
+      for (int k=1; k<width; k++)
       {
         if (which == 0)
         {
-          I1 = (i+k)%nr; I2 = (i-k+nr)%nr;
+          int I1 = (i+k)%nr; 
+          int I2 = (i-k+nr)%nr;
           x += -gau[k]*im[I1][j] + gau[k]*im[I2][j];
         }
         else
         {
-          I1 = (j+k)%nc; I2 = (j-k+nc)%nc;
+          int I1 = (j+k)%nc; 
+          int I2 = (j-k+nc)%nc;
           x += -gau[k]*im[i][I1] + gau[k]*im[i][I2];
         }
       }
@@ -185,14 +191,15 @@ static unsigned char tobyte(float x)
 
 static void nonmax_suppress (float **dx, float **dy, imImage* mag)
 {
-  int i,j;
-  float xx, yy, g2, g1, g3, g4, g, xc, yc;
   unsigned char* mag_data = (unsigned char*)mag->data[0];
 
-  for (i=1; i<mag->height-1; i++)
+#pragma omp parallel for if (mag->height > IM_OMP_MINCOUNT)
+  for (int i=1; i<mag->height-1; i++)
   {
-    for (j=1; j<mag->width-1; j++)
+    for (int j=1; j<mag->width-1; j++)
     {
+      float xx, yy, g2, g1, g3, g4, g, xc, yc;
+
       /* Treat the x and y derivatives as components of a vector */
       xc = dx[i][j];
       yc = dy[i][j];

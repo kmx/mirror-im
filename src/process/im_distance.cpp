@@ -7,6 +7,7 @@
 #include <im.h>
 #include <im_util.h>
 
+#include "im_process_counter.h"
 #include "im_process_glo.h"
 
 #include <stdlib.h>
@@ -237,17 +238,16 @@ static inline void setValueBackwardEdge(int r, int r1, int r2, int width, int he
 
 void imProcessDistanceTransform(const imImage* src_image, imImage* dst_image)
 {
-  int i, x, y, 
-    offset, offset1, offset2, offset3, offset4,
-    width = src_image->width,
-    height = src_image->height;
+  int width = src_image->width,
+     height = src_image->height;
 
   imbyte* src_data = (imbyte*)src_image->data[0];
   float* dst_data = (float*)dst_image->data[0];
 
   float max_dist = (float)sqrt(double(width*width + height*height));
 
-  for (i = 0; i < src_image->count; i++)
+#pragma omp parallel for if (src_image->count > IM_OMP_MINCOUNT)
+  for (int i = 0; i < src_image->count; i++)
   {
     // if pixel is background, then distance is zero.
     if (src_data[i])
@@ -255,15 +255,16 @@ void imProcessDistanceTransform(const imImage* src_image, imImage* dst_image)
   }
 
   /* down->top, left->right */
-  for (y = 0; y < height; y++) 
+#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
+  for (int y = 0; y < height; y++) 
   {
-    offset = y * width;
-    offset1 = offset - width;
-    offset2 = offset - 2*width;
-    offset3 = offset - 3*width;
-    offset4 = offset - 4*width;
+    int offset = y * width;
+    int offset1 = offset - width;
+    int offset2 = offset - 2*width;
+    int offset3 = offset - 3*width;
+    int offset4 = offset - 4*width;
 
-    for (x = 0; x < width; x++) 
+    for (int x = 0; x < width; x++) 
     {
       if (src_data[offset])
       {
@@ -282,15 +283,16 @@ void imProcessDistanceTransform(const imImage* src_image, imImage* dst_image)
   }
 
   /* top->down, right->left */
-  for (y = height-1; y >= 0; y--) 
+#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
+  for (int y = height-1; y >= 0; y--) 
   {
-    offset = y * width + width-1;
-    offset1 = offset + width;
-    offset2 = offset + 2*width;
-    offset3 = offset + 3*width;
-    offset4 = offset + 4*width;
+    int offset = y * width + width-1;
+    int offset1 = offset + width;
+    int offset2 = offset + 2*width;
+    int offset3 = offset + 3*width;
+    int offset4 = offset + 4*width;
 
-    for (x = width-1; x >= 0; x--) 
+    for (int x = width-1; x >= 0; x--) 
     {
       if (src_data[offset]) 
       {
@@ -457,20 +459,20 @@ static inline void iCheckMaximum(int r, int r1a, int r1b, float *src_data, imbyt
 
 void imProcessRegionalMaximum(const imImage* src_image, imImage* dst_image)
 {
-  int i, x, y, offset, offsetA, offsetB,
-    width = src_image->width,
-    height = src_image->height;
+  int width = src_image->width,
+     height = src_image->height;
 
   float* src_data = (float*)src_image->data[0];
   imbyte* dst_data = (imbyte*)dst_image->data[0];
 
-  for (y = 1; y < height-1; y++) 
+#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
+  for (int y = 1; y < height-1; y++) 
   {
-    offset = y * width + 1;
-    offsetA = offset - width;
-    offsetB = offset + width;
+    int offset = y * width + 1;
+    int offsetA = offset - width;
+    int offsetB = offset + width;
 
-    for (x = 1; x < width-1; x++) 
+    for (int x = 1; x < width-1; x++) 
     {
       if (src_data[offset]) 
         iCheckMaximum(offset, offsetA, offsetB, src_data, dst_data);
@@ -482,13 +484,14 @@ void imProcessRegionalMaximum(const imImage* src_image, imImage* dst_image)
   }
 
   // remove false maximum
-  for (y = 2; y < height-2; y++) 
+#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
+  for (int y = 2; y < height-2; y++) 
   {
-    offset = y * width + 2;
-    offsetA = offset - 2*width;
-    offsetB = offset + 2*width;
+    int offset = y * width + 2;
+    int offsetA = offset - 2*width;
+    int offsetB = offset + 2*width;
 
-    for (x = 2; x < width-2; x++) 
+    for (int x = 2; x < width-2; x++) 
     {
       if (dst_data[offset] == 2)
       {
@@ -503,7 +506,8 @@ void imProcessRegionalMaximum(const imImage* src_image, imImage* dst_image)
   }
 
   // update destiny with remaining maximum
-  for (i = 0; i < src_image->count; i++) 
+#pragma omp parallel for if (src_image->count > IM_OMP_MINCOUNT)
+  for (int i = 0; i < src_image->count; i++) 
   {
     if (dst_data[i] == 2)
       dst_data[i] = 1;

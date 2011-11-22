@@ -33,7 +33,7 @@ static int DoRenderCondOp(T *map, int width, int height, int d, imRenderCondFunc
 {
   IM_INT_PROCESSING;
 
-#pragma omp parallel for
+#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
   for(int y = 0; y < height; y++)
   {
     #pragma omp flush (processing)
@@ -95,7 +95,7 @@ static int DoRenderOp(T *map, int width, int height, int d, imRenderFunc render_
 {
   IM_INT_PROCESSING;
 
-#pragma omp parallel for
+#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
   for(int y = 0; y < height; y++)
   {
     #pragma omp flush (processing)

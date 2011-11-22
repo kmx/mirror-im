@@ -26,7 +26,7 @@ int imCounterBegin_OMP(const char* title)
 
 void imCounterEnd_OMP(int counter)
 {
-  if (!imCounterHasCallback()) 
+  if (counter == -1 || !imCounterHasCallback()) 
     return;
 
   omp_lock_t lck = imCounterGetUserData(counter);
@@ -38,7 +38,7 @@ int imCounterInc_OMP(int counter)
 {
   int processing;
 
-  if (!imCounterHasCallback()) 
+  if (counter == -1 || !imCounterHasCallback()) 
     return 1;
 
   omp_lock_t lck = imCounterGetUserData(counter);
