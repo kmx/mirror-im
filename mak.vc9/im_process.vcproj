@@ -130,6 +130,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\process\im_geometric.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\process\im_histogram.cpp"
 				>
 			</File>
@@ -194,10 +198,6 @@
 				>
 				<File
 					RelativePath="..\src\process\im_analyze.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\src\process\im_geometric.cpp"
 					>
 				</File>
 				<File

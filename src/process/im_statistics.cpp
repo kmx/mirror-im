@@ -10,6 +10,7 @@
 #include <im_color.h>
 #include <im_math_op.h>
 
+#include "im_process_counter.h"
 #include "im_process_ana.h"
 
 #include <stdlib.h>
@@ -18,20 +19,24 @@
 
 #include <stdio.h>
 
+
 template <class T>
 static void DoCalcHisto(T* map, int size, unsigned long* histo, int hcount, int cumulative)
 {
-  int i;
-
   memset(histo, 0, hcount * sizeof(unsigned long));
 
-  for (i = 0; i < size; i++)
-    histo[*map++]++;
+#pragma omp parallel for if (size > IM_OMP_MINCOUNT)
+  for (int i = 0; i < size; i++)
+  {
+    T index = map[i];
+    #pragma omp atomic
+    histo[index]++;
+  }
 
   if (cumulative)
   {
     /* make cumulative histogram */
-    for (i = 1; i < hcount; i++)
+    for (int i = 1; i < hcount; i++)
       histo[i] += histo[i-1];
   }
 }
@@ -75,36 +80,42 @@ void imCalcGrayHistogram(const imImage* image, unsigned long* histo, int cumulat
         gray_map[i] = imColorRGB2Luma(r, g, b);
       }
 
+#pragma omp parallel for if (image->count > IM_OMP_MINCOUNT)
       for (i = 0; i < image->count; i++)
       {
-        int index = *map++;
-        histo[gray_map[index]]++;
+        int index = gray_map[map[i]];
+        #pragma omp atomic
+        histo[index]++;
       }
     }
     else
     {
       if (image->data_type == IM_USHORT)
       {
-        imushort gray;
         imushort* r = (imushort*)image->data[0];
         imushort* g = (imushort*)image->data[1];
         imushort* b = (imushort*)image->data[2];
+
+#pragma omp parallel for if (image->count > IM_OMP_MINCOUNT)
         for (i = 0; i < image->count; i++)
         {
-          gray = imColorRGB2Luma(*r++, *g++, *b++);
-          histo[gray]++;
+          imushort index = imColorRGB2Luma(*r++, *g++, *b++);
+          #pragma omp atomic
+          histo[index]++;
         }
       }
       else
       {
-        imbyte gray;
         imbyte* r = (imbyte*)image->data[0];
         imbyte* g = (imbyte*)image->data[1];
         imbyte* b = (imbyte*)image->data[2];
+
+#pragma omp parallel for if (image->count > IM_OMP_MINCOUNT)
         for (i = 0; i < image->count; i++)
         {
-          gray = imColorRGB2Luma(*r++, *g++, *b++);
-          histo[gray]++;
+          imbyte index = imColorRGB2Luma(*r++, *g++, *b++);
+          #pragma omp atomic
+          histo[index]++;
         }
       }
     }
@@ -184,36 +195,50 @@ unsigned long imCalcCountColors(const imImage* image)
 template <class T>
 static void DoStats(T* data, int count, imStats* stats)
 {
-  double mean = 0, stddev = 0, dcount = (double)count;
   memset(stats, 0, sizeof(imStats));
 
-  stats->min = (float)data[0];
-  stats->max = (float)data[0];
+  T max = data[0];
+  T min = data[0];
+  unsigned long positive = 0;
+  unsigned long negative = 0;
+  unsigned long zeros = 0;
+  double mean = 0;
+  double stddev = 0;
 
+//  #pragma omp atomic
+
+#pragma omp parallel for if (count > IM_OMP_MINCOUNT) \
+                         reduction (+:positive, negative, zeros, mean, stddev) 
   for (int i = 0; i < count; i++)
   {
-		if (data[i] < stats->min)
-		  stats->min = (float)data[i];
+		if (data[i] < min)
+		  min = data[i];
 
-		if (data[i] > stats->max)
-		  stats->max = (float)data[i];
+		if (data[i] > max)
+		  max = data[i];
 
     if (data[i] > 0)
-      stats->positive++;
+      positive++;
 
     if (data[i] < 0)
-      stats->negative++;
+      negative++;
 
     if (data[i] == 0)
-      stats->zeros++;
+      zeros++;
 
     mean += (double)data[i];
     stddev += ((double)data[i])*((double)data[i]);
   }
 
+  double dcount = (double)count;
   mean /= dcount;
   stddev = sqrt((stddev - dcount*mean*mean)/(dcount-1.0));
 
+  stats->max = (float)max;
+  stats->min = (float)min;
+  stats->positive = positive;
+  stats->negative = negative;
+  stats->zeros = zeros;
   stats->mean = (float)mean;
   stats->stddev = (float)stddev;
 }
@@ -377,11 +402,11 @@ template <class T>
 static double DoRMSOp(T *map1, T *map2, int count)
 {
   double rmserror = 0;
-  double diff;
 
+#pragma omp parallel for reduction(+:rmserror) if (count > IM_OMP_MINCOUNT)
   for (int i = 0; i < count; i++)
   {
-    diff = double(map1[i] - map2[i]);
+    double diff = double(map1[i] - map2[i]);
     rmserror += diff * diff;
   }
 

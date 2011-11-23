@@ -93,9 +93,9 @@ template <class T>
 inline void iMinMaxAbs(int count, const T *map, T& min, T& max, int abssolute)
 {
   if (abssolute)
-    min = iAbs(*map++);
+    min = iAbs(map[0]);
   else
-    min = *map++;
+    min = map[0];
 
   max = min;
 
@@ -104,9 +104,9 @@ inline void iMinMaxAbs(int count, const T *map, T& min, T& max, int abssolute)
     T value;
 
     if (abssolute)
-      value = iAbs(*map++);
+      value = iAbs(map[i]);
     else
-      value = *map++;
+      value = map[i];
 
     if (value > max)
       max = value;
@@ -126,9 +126,10 @@ inline void iMinMaxAbs(int count, const T *map, T& min, T& max, int abssolute)
 template <class SRCT, class DSTT> 
 IM_STATIC int iCopy(int count, const SRCT *src_map, DSTT *dst_map)
 {
+#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
   for (int i = 0; i < count; i++)
   {
-    *dst_map++ = (DSTT)(*src_map++);
+    dst_map[i] = (DSTT)(src_map[i]);
   }
 
   return IM_ERR_NONE;
@@ -137,16 +138,18 @@ IM_STATIC int iCopy(int count, const SRCT *src_map, DSTT *dst_map)
 template <class SRCT, class DSTT> 
 IM_STATIC int iCopyCrop(int count, const SRCT *src_map, DSTT *dst_map, int abssolute)
 {
-  SRCT value;
   DSTT dst_max;
   iDataTypeIntMax(dst_max);
 
+#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
   for (int i = 0; i < count; i++)
   {
+    SRCT value;
+
     if (abssolute)
-      value = iAbs(*src_map++);
+      value = iAbs(src_map[i]);
     else
-      value = *src_map++;
+      value = src_map[i];
 
     if (value > dst_max)
       value = (SRCT)dst_max;
@@ -154,7 +157,7 @@ IM_STATIC int iCopyCrop(int count, const SRCT *src_map, DSTT *dst_map, int absso
     if (!(value >= 0))
       value = 0;
 
-    *dst_map++ = (DSTT)(value);
+    dst_map[i] = (DSTT)(value);
   }
 
   return IM_ERR_NONE;
@@ -163,10 +166,10 @@ IM_STATIC int iCopyCrop(int count, const SRCT *src_map, DSTT *dst_map, int absso
 template <class SRCT> 
 IM_STATIC int iPromote2Cpx(int count, const SRCT *src_map, imcfloat *dst_map)
 {
+#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
   for (int i = 0; i < count; i++)
   {
-    dst_map->real = (float)(*src_map++);
-    dst_map++;
+    dst_map[i].real = (float)(src_map[i]);
   }
 
   return IM_ERR_NONE;
@@ -198,20 +201,21 @@ IM_STATIC int iConvertInt2Int(int count, const SRCT *src_map, DSTT *dst_map, int
 
   float factor = ((float)dst_max + 1.0f) / ((float)max - (float)min + 1.0f);
 
+#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
   for (int i = 0; i < count; i++)
   {
     SRCT value;
     if (abssolute)
-      value = iAbs(*src_map++);
+      value = iAbs(src_map[i]);
     else
-      value = *src_map++;
+      value = src_map[i];
 
     if (value >= max)
-      *dst_map++ = dst_max;
+      dst_map[i] = dst_max;
     else if (value <= min)
-      *dst_map++ = 0;
+      dst_map[i] = 0;
     else
-      *dst_map++ = (DSTT)imResample(value - min, factor);
+      dst_map[i] = (DSTT)imResample(value - min, factor);
 
     if (!imCounterInc(counter))
       return IM_ERR_COUNTER;
@@ -260,22 +264,23 @@ IM_STATIC int iPromoteInt2Real(int count, const SRCT *src_map, float *dst_map, f
   gamma = -gamma; // gamma is inverted here, because we are promoting int2real
   float factor = iGammaFactor(1.0f, gamma);
 
+#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
   for (int i = 0; i < count; i++)
   {
     float fvalue;
     if (abssolute)
-      fvalue = (iAbs(*src_map++) - min + 0.5f)/range; 
+      fvalue = (iAbs(src_map[i]) - min + 0.5f)/range; 
     else
-      fvalue = (*src_map++ - min + 0.5f)/range; 
+      fvalue = (src_map[i] - min + 0.5f)/range; 
 
     // Now 0 <= value <= 1 (if min-max are correct)
 
     if (fvalue >= 1)
-      *dst_map++ = dst_max;
+      dst_map[i] = dst_max;
     else if (fvalue <= 0)
-      *dst_map++ = dst_min;
+      dst_map[i] = dst_min;
     else
-      *dst_map++ = iGammaFunc(factor, dst_min, gamma, fvalue);
+      dst_map[i] = iGammaFunc(factor, dst_min, gamma, fvalue);
 
     if (!imCounterInc(counter))
       return IM_ERR_COUNTER;
@@ -310,13 +315,14 @@ IM_STATIC int iDemoteReal2Int(int count, const float *src_map, DSTT *dst_map, fl
 
   float factor = iGammaFactor((float)dst_range, gamma);
 
+#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
   for (int i = 0; i < count; i++)
   {
     float value;
     if (abssolute)
-      value = ((float)iAbs(*src_map++) - min)/range; 
+      value = ((float)iAbs(src_map[i]) - min)/range; 
     else
-      value = (*src_map++ - min)/range; 
+      value = (src_map[i] - min)/range; 
 
     if (i==3603)
       i=i;
@@ -324,19 +330,19 @@ IM_STATIC int iDemoteReal2Int(int count, const float *src_map, DSTT *dst_map, fl
     // Now 0 <= value <= 1 (if min-max are correct)
 
     if (value >= 1)
-      *dst_map++ = dst_max;
+      dst_map[i] = dst_max;
     else if (value <= 0)
-      *dst_map++ = dst_min;
+      dst_map[i] = dst_min;
     else
     {
       value = iGammaFunc(factor, (float)dst_min, gamma, value);
       int ivalue = imRound(value);
       if (ivalue >= dst_max)
-        *dst_map++ = dst_max;
+        dst_map[i] = dst_max;
       else if (ivalue <= dst_min)
-        *dst_map++ = dst_min;
+        dst_map[i] = dst_min;
       else
-        *dst_map++ = (DSTT)imRound(value - 0.5f);
+        dst_map[i] = (DSTT)imRound(value - 0.5f);
     }
 
     if (!imCounterInc(counter))
@@ -358,6 +364,7 @@ static int iDemoteCpx2Real(int count, const imcfloat* src_map, float *dst_map, i
   case IM_CPX_PHASE: CpxCnv = cpxphase; break;
   }
 
+#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
   for (int i = 0; i < count; i++)
   {
     dst_map[i] = CpxCnv(src_map[i]);
