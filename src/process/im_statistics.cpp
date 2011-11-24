@@ -197,26 +197,19 @@ static void DoStats(T* data, int count, imStats* stats)
 {
   memset(stats, 0, sizeof(imStats));
 
-  T max = data[0];
-  T min = data[0];
   unsigned long positive = 0;
   unsigned long negative = 0;
   unsigned long zeros = 0;
   double mean = 0;
   double stddev = 0;
 
-//  #pragma omp atomic
+  T min, max;
+  imMinMax(data, count, min, max);
 
 #pragma omp parallel for if (count > IM_OMP_MINCOUNT) \
                          reduction (+:positive, negative, zeros, mean, stddev) 
   for (int i = 0; i < count; i++)
   {
-		if (data[i] < min)
-		  min = data[i];
-
-		if (data[i] > max)
-		  max = data[i];
-
     if (data[i] > 0)
       positive++;
 

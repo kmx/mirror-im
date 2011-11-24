@@ -60,6 +60,14 @@ inline int imRound(double x)
   return (int)(x < 0? x-0.5: x+0.5);
 }
 
+template <class T>
+inline T imAbs(const T& v)
+{
+  if (v < 0)
+    return -1*v;
+  return v;
+}
+
 /** Converts between two discrete grids.
  * factor is "dst_size/src_size".
  * \ingroup math */
@@ -350,13 +358,21 @@ inline T imBicubicInterpolation(int width, int height, T *map, float xl, float y
 /** Calculates minimum and maximum values.
  * \ingroup math */
 template <class T> 
-inline void imMinMax(const T *map, int count, T& min, T& max)
+inline void imMinMax(const T *map, int count, T& min, T& max, int abssolute = 0)
 {
-  min = *map++;
+  if (abssolute)
+    min = imAbs(map[0]);
+  else
+    min = map[0];
+
   max = min;
   for (int i = 1; i < count; i++)
   {
-    T value = *map++;
+    T value;
+    if (abssolute)
+      value = imAbs(map[i]);
+    else
+      value = map[i];
 
     if (value > max)
       max = value;

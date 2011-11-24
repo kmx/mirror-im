@@ -10,12 +10,24 @@
 #include "im_image.h"
 #include "im_convert.h"
 #include "im_color.h"
+#ifdef IM_PROCESS
+#include "process\im_process_counter.h"
+#else
 #include "im_counter.h"
+#endif
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
 #include <memory.h>
+
+#ifndef IM_PROCESS
+#define IM_OMP_MINCOUNT       -1
+#define IM_INT_PROCESSING     int processing = IM_ERR_NONE;
+#define IM_BEGIN_PROCESSING   
+#define IM_COUNT_PROCESSING   if (!imCounterInc(counter)) { processing = IM_ERR_COUNTER; break; }
+#define IM_END_PROCESSING
+#endif
 
 
 /* IMPORTANT: leave template functions not "static" 
@@ -72,55 +84,12 @@ inline int iIntMax()
   return (int)(+8388607.0f);
 }
 
-/// Generic Abssolute
-template <class T>
-inline T iAbs(const T& v)
-{
-  if (v < 0)
-    return -1*v;
-  return v;
-}
-
 template <class T> 
 inline void iDataTypeIntMax(T& max)
 {
   int size_of = sizeof(T);
   int data_type = (size_of == 1)? IM_BYTE: (size_of == 2)? IM_USHORT: IM_INT;
   max = (T)imColorMax(data_type);
-}
-
-template <class T> 
-inline void iMinMaxAbs(int count, const T *map, T& min, T& max, int abssolute)
-{
-  if (abssolute)
-    min = iAbs(map[0]);
-  else
-    min = map[0];
-
-  max = min;
-
-  for (int i = 1; i < count; i++)
-  {
-    T value;
-
-    if (abssolute)
-      value = iAbs(map[i]);
-    else
-      value = map[i];
-
-    if (value > max)
-      max = value;
-    else if (value < min)
-      min = value;
-  }
-
-  if (min == max)
-  {
-    max = min + 1;
-
-    if (min != 0)
-      min = min - 1;
-  }
 }
 
 template <class SRCT, class DSTT> 
@@ -147,7 +116,7 @@ IM_STATIC int iCopyCrop(int count, const SRCT *src_map, DSTT *dst_map, int absso
     SRCT value;
 
     if (abssolute)
-      value = iAbs(src_map[i]);
+      value = imAbs(src_map[i]);
     else
       value = src_map[i];
 
@@ -182,8 +151,15 @@ IM_STATIC int iConvertInt2Int(int count, const SRCT *src_map, DSTT *dst_map, int
 
   if (cast_mode == IM_CAST_MINMAX)
   {
-    iMinMaxAbs(count, src_map, min, max, abssolute);
+    imMinMax(src_map, count, min, max, abssolute);
 
+    if (min == max)
+    {
+      max = min + 1;
+
+      if (min != 0)
+        min = min - 1;
+    }
     if (min >= 0 && max <= 255)
     {
       min = 0;
@@ -201,12 +177,17 @@ IM_STATIC int iConvertInt2Int(int count, const SRCT *src_map, DSTT *dst_map, int
 
   float factor = ((float)dst_max + 1.0f) / ((float)max - (float)min + 1.0f);
 
+  IM_INT_PROCESSING;
+
 #pragma omp parallel for if (count > IM_OMP_MINCOUNT)
   for (int i = 0; i < count; i++)
   {
+    #pragma omp flush (processing)
+    IM_BEGIN_PROCESSING;
+
     SRCT value;
     if (abssolute)
-      value = iAbs(src_map[i]);
+      value = imAbs(src_map[i]);
     else
       value = src_map[i];
 
@@ -217,11 +198,12 @@ IM_STATIC int iConvertInt2Int(int count, const SRCT *src_map, DSTT *dst_map, int
     else
       dst_map[i] = (DSTT)imResample(value - min, factor);
 
-    if (!imCounterInc(counter))
-      return IM_ERR_COUNTER;
+    IM_COUNT_PROCESSING;
+    #pragma omp flush (processing)
+    IM_END_PROCESSING;
   }
 
-  return IM_ERR_NONE;
+  return processing;
 }
 
 template <class SRCT> 
@@ -231,8 +213,15 @@ IM_STATIC int iPromoteInt2Real(int count, const SRCT *src_map, float *dst_map, f
 
   if (cast_mode == IM_CAST_MINMAX)
   {
-    iMinMaxAbs(count, src_map, min, max, abssolute);
+    imMinMax(src_map, count, min, max, abssolute);
 
+    if (min == max)
+    {
+      max = min + 1;
+
+      if (min != 0)
+        min = min - 1;
+    }
     if (min >= 0 && max <= 255)
     {
       min = 0;
@@ -264,12 +253,17 @@ IM_STATIC int iPromoteInt2Real(int count, const SRCT *src_map, float *dst_map, f
   gamma = -gamma; // gamma is inverted here, because we are promoting int2real
   float factor = iGammaFactor(1.0f, gamma);
 
+  IM_INT_PROCESSING;
+
 #pragma omp parallel for if (count > IM_OMP_MINCOUNT)
   for (int i = 0; i < count; i++)
   {
+    #pragma omp flush (processing)
+    IM_BEGIN_PROCESSING;
+
     float fvalue;
     if (abssolute)
-      fvalue = (iAbs(src_map[i]) - min + 0.5f)/range; 
+      fvalue = (imAbs(src_map[i]) - min + 0.5f)/range; 
     else
       fvalue = (src_map[i] - min + 0.5f)/range; 
 
@@ -282,11 +276,12 @@ IM_STATIC int iPromoteInt2Real(int count, const SRCT *src_map, float *dst_map, f
     else
       dst_map[i] = iGammaFunc(factor, dst_min, gamma, fvalue);
 
-    if (!imCounterInc(counter))
-      return IM_ERR_COUNTER;
+    IM_COUNT_PROCESSING;
+    #pragma omp flush (processing)
+    IM_END_PROCESSING;
   }
 
-  return IM_ERR_NONE;
+  return processing;
 }
 
 template <class DSTT> 
@@ -303,7 +298,17 @@ IM_STATIC int iDemoteReal2Int(int count, const float *src_map, DSTT *dst_map, fl
   }
 
   if (cast_mode == IM_CAST_MINMAX)
-    iMinMaxAbs(count, src_map, min, max, abssolute);
+  {
+    imMinMax(src_map, count, min, max, abssolute);
+
+    if (min == max)
+    {
+      max = min + 1;
+
+      if (min != 0)
+        min = min - 1;
+    }
+  }
   else
   {
     min = 0;
@@ -315,17 +320,19 @@ IM_STATIC int iDemoteReal2Int(int count, const float *src_map, DSTT *dst_map, fl
 
   float factor = iGammaFactor((float)dst_range, gamma);
 
+  IM_INT_PROCESSING;
+
 #pragma omp parallel for if (count > IM_OMP_MINCOUNT)
   for (int i = 0; i < count; i++)
   {
+    #pragma omp flush (processing)
+    IM_BEGIN_PROCESSING;
+
     float value;
     if (abssolute)
-      value = ((float)iAbs(src_map[i]) - min)/range; 
+      value = ((float)imAbs(src_map[i]) - min)/range; 
     else
       value = (src_map[i] - min)/range; 
-
-    if (i==3603)
-      i=i;
 
     // Now 0 <= value <= 1 (if min-max are correct)
 
@@ -345,11 +352,12 @@ IM_STATIC int iDemoteReal2Int(int count, const float *src_map, DSTT *dst_map, fl
         dst_map[i] = (DSTT)imRound(value - 0.5f);
     }
 
-    if (!imCounterInc(counter))
-      return IM_ERR_COUNTER;
+    IM_COUNT_PROCESSING;
+    #pragma omp flush (processing)
+    IM_END_PROCESSING;
   }
 
-  return IM_ERR_NONE;
+  return processing;
 }
 
 static int iDemoteCpx2Real(int count, const imcfloat* src_map, float *dst_map, int cpx2real)
@@ -409,7 +417,11 @@ IM_STATIC int iPromoteInt2Cpx(int count, const SRCT* src_map, imcfloat *dst_map,
   return IM_ERR_NONE;
 }
 
+#ifdef IM_PROCESS
+int imProcessConvertDataType(const imImage* src_image, imImage* dst_image, int cpx2real, float gamma, int abssolute, int cast_mode)
+#else
 int imConvertDataType(const imImage* src_image, imImage* dst_image, int cpx2real, float gamma, int abssolute, int cast_mode)
+#endif
 {
   assert(src_image);
   assert(dst_image);
@@ -422,7 +434,11 @@ int imConvertDataType(const imImage* src_image, imImage* dst_image, int cpx2real
 
   int total_count = src_image->depth * src_image->count;
   int ret = IM_ERR_DATA;
+#ifdef IM_PROCESS
+  int counter = imProcessCounterBegin("Convert Data Type");
+#else
   int counter = imCounterBegin("Convert Data Type");
+#endif
   char msg[50];
   sprintf(msg, "Converting to %s...", imDataTypeName(dst_image->data_type));
   imCounterTotal(counter, total_count, msg);
@@ -561,6 +577,10 @@ int imConvertDataType(const imImage* src_image, imImage* dst_image, int cpx2real
     break;
   }
 
+#ifdef IM_PROCESS
+  imProcessCounterEnd(counter);
+#else
   imCounterEnd(counter);
+#endif
   return ret;
 }

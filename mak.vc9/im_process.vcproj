@@ -43,7 +43,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="../include;../src;"
-				PreprocessorDefinitions="WIN32,_DEBUG,_LIB,_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32,_DEBUG,_LIB,_CRT_SECURE_NO_DEPRECATE,IM_PROCESS"
 				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -98,6 +98,10 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
+				RelativePath="..\src\process\im_analyze.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\process\im_arithmetic_bin.cpp"
 				>
 			</File>
@@ -111,6 +115,14 @@
 			</File>
 			<File
 				RelativePath="..\src\process\im_color.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\im_convertcolor.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\im_converttype.cpp"
 				>
 			</File>
 			<File
@@ -186,6 +198,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\process\im_statistics.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\process\im_threshold.cpp"
 				>
 			</File>
@@ -193,18 +209,6 @@
 				RelativePath="..\src\process\im_tonegamut.cpp"
 				>
 			</File>
-			<Filter
-				Name="TO_DO"
-				>
-				<File
-					RelativePath="..\src\process\im_analyze.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\src\process\im_statistics.cpp"
-					>
-				</File>
-			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
