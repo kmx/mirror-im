@@ -40,3 +40,18 @@ int imVersionNumber(void)
 {
   return IM_VERSION_NUMBER+IM_VERSION_FIX_NUMBER;
 }
+
+#include "im_util.h"
+
+static int imin_count = 10000;   /* 100*100 image size */
+
+int imOpenMPCheckMinCount(int count)
+{
+  return imin_count==-1 || count>imin_count;
+}
+
+void imOpenMPSetMinCount(int min_count)
+{
+  imin_count = min_count;
+}
+

@@ -10,7 +10,6 @@
 #include <im_palette.h>
 #include <im_math.h>
 
-#include "im_process_counter.h"
 #include "im_process_pnt.h"
 
 #include <stdlib.h>
@@ -26,7 +25,7 @@ void imProcessQuantizeRGBUniform(const imImage* src_image, imImage* dst_image, i
 
   imImageSetPalette(dst_image, imPaletteUniform(), 256);
 
-#pragma omp parallel for if (src_image->height > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINHEIGHT(src_image->height))
   for (int y = 0; y < src_image->height; y++)
   {
     int line_offset = y*src_image->width;
@@ -62,7 +61,7 @@ void imProcessQuantizeGrayUniform(const imImage* src_image, imImage* dst_image, 
   }
 
   int total_count = src_image->count*src_image->depth;
-#pragma omp parallel for if (total_count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(total_count))
   for (i = 0; i < total_count; i++)
     dst_map[i] = re_map[src_map[i]];
 }

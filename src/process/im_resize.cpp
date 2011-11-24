@@ -33,7 +33,7 @@ static int iResize(int src_width, int src_height, const DT *src_map,
 
   IM_INT_PROCESSING;
 
-#pragma omp parallel for if (dst_height > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINHEIGHT(dst_height))
   for (int y = 0; y < dst_height; y++)
   {
     #pragma omp flush (processing)
@@ -84,7 +84,7 @@ static int iReduce(int src_width, int src_height, const DT *src_map,
 
   IM_INT_PROCESSING;
 
-#pragma omp parallel for if (dst_height > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINHEIGHT(dst_height))
   for (int y = 0; y < dst_height; y++)
   {
     #pragma omp flush (processing)
@@ -217,7 +217,7 @@ static void ReduceBy4(int src_width,
   int height = (src_height/2)*2;
   int width = (src_width/2)*2;
 
-#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
   for(int y = 0 ; y < height; y += 2)
   {
     int yd = y/2;
@@ -269,7 +269,7 @@ void imProcessCrop(const imImage* src_image, imImage* dst_image, int xmin, int y
     imbyte *src_map = (imbyte*)src_image->data[i];
     imbyte *dst_map = (imbyte*)dst_image->data[i];
 
-#pragma omp parallel for if (dst_image->height > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINHEIGHT(dst_image->height))
     for (int y = 0; y < dst_image->height; y++)
     {
       int src_offset = (y + ymin)*src_image->line_size + xmin*type_size;
@@ -308,7 +308,7 @@ void imProcessInsert(const imImage* src_image, const imImage* rgn_image, imImage
     imbyte *rgn_map = (imbyte*)rgn_image->data[i];
     imbyte *dst_map = (imbyte*)dst_image->data[i];
 
-#pragma omp parallel for if (src_image->height > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINHEIGHT(src_image->height))
     for (int y = 0; y < src_image->height; y++)
     {
       if (y < ymin || y > ymax)
@@ -339,7 +339,7 @@ void imProcessAddMargins(const imImage* src_image, imImage* dst_image, int xmin,
     imbyte *dst_map = (imbyte*)dst_image->data[i];
     imbyte *src_map = (imbyte*)src_image->data[i];
 
-#pragma omp parallel for if (src_image->height > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINHEIGHT(src_image->height))
     for (int y = 0; y < src_image->height; y++)
     {
       int src_offset = y*src_image->line_size;

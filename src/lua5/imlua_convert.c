@@ -8,12 +8,17 @@
 #include "im_image.h"
 #include "im_convert.h"
 
+#ifdef IM_PROCESS
+#include "im_process_pnt.h"
+#endif
+
 #include <lua.h>
 #include <lauxlib.h>
 
 #include "imlua.h"
 #include "imlua_image.h"
 #include "imlua_aux.h"
+
 
 /*****************************************************************************\
  im.ConvertDataType(src_image, dst_image, cpx2real, gamma, abssolute, cast_mode)
@@ -28,7 +33,11 @@ static int imluaConvertDataType (lua_State *L)
   int cast_mode = luaL_checkint(L, 6);
 
   imlua_matchcolorspace(L, src_image, dst_image);
+#ifdef IM_PROCESS
+  imlua_pusherror(L, imProcessConvertDataType(src_image, dst_image, cpx2real, gamma, abssolute, cast_mode));
+#else
   imlua_pusherror(L, imConvertDataType(src_image, dst_image, cpx2real, gamma, abssolute, cast_mode));
+#endif
   return 1;
 }
 
@@ -41,7 +50,11 @@ static int imluaConvertColorSpace (lua_State *L)
   imImage* dst_image = imlua_checkimage(L, 2);
 
   imlua_matchdatatype(L, src_image, dst_image);
+#ifdef IM_PROCESS
+  imlua_pusherror(L, imProcessConvertColorSpace(src_image, dst_image));
+#else
   imlua_pusherror(L, imConvertColorSpace(src_image, dst_image));
+#endif
   return 1;
 }
 
@@ -60,10 +73,39 @@ static int imluaConvertToBitmap (lua_State *L)
   imlua_matchsize(L, src_image, dst_image);
   imlua_matchcheck(L, imImageIsBitmap(dst_image), "image must be a bitmap");
 
+#ifdef IM_PROCESS
+  imlua_pusherror(L, imProcessConvertToBitmap(src_image, dst_image, cpx2real, gamma, abssolute, cast_mode));
+#else
   imlua_pusherror(L, imConvertToBitmap(src_image, dst_image, cpx2real, gamma, abssolute, cast_mode));
+#endif
   return 1;
 }
 
+#ifdef IM_PROCESS
+static const luaL_reg imconvert_lib[] = {
+  {"ProcessConvertDataType", imluaConvertDataType},
+  {"ProcessConvertColorSpace", imluaConvertColorSpace},
+  {"ProcessConvertToBitmap", imluaConvertToBitmap},
+  {NULL, NULL}
+};
+
+void imlua_open_processconvert (lua_State *L)
+{
+  /* "im" table is at the top of the stack */
+  luaL_register(L, NULL, imconvert_lib);
+
+#ifdef IMLUA_USELOH
+#include "im_processconvert.loh"
+#else
+#ifdef IMLUA_USELZH
+#include "im_processconvert.lzh"
+#else
+  luaL_dofile(L, "im_processconvert.lua");
+#endif
+#endif
+
+}
+#else
 static const luaL_reg imconvert_lib[] = {
   {"ConvertDataType", imluaConvertDataType},
   {"ConvertColorSpace", imluaConvertColorSpace},
@@ -87,3 +129,4 @@ void imlua_open_convert (lua_State *L)
 #endif
 
 }
+#endif

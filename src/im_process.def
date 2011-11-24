@@ -171,3 +171,6 @@ EXPORTS
   imProcessUnsharp
   imProcessSharp
   imProcessSharpKernel
+  imProcessConvertDataType
+  imProcessConvertColorSpace
+  imProcessConvertToBitmap

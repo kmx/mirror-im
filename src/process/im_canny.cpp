@@ -5,8 +5,8 @@
  */
 
 #include <im.h>
+#include <im_util.h>
 
-#include "im_process_counter.h"
 #include "im_process_loc.h"
 
 #include <math.h>
@@ -127,7 +127,7 @@ static void seperable_convolution (const imImage* im, float *gau, int width, flo
   int nr = im->height;
   int nc = im->width;
 
-#pragma omp parallel for if (nr > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINHEIGHT(nr))
   for (int i=0; i<nr; i++)
   {
     for (int j=0; j<nc; j++)
@@ -154,7 +154,7 @@ static void seperable_convolution (const imImage* im, float *gau, int width, flo
 
 static void dxy_seperable_convolution (float** im, int nr, int nc,  float *gau, int width, float **sm, int which)
 {
-#pragma omp parallel for if (nr > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINHEIGHT(nr))
   for (int i=0; i<nr; i++)
   {
     for (int j=0; j<nc; j++)
@@ -193,7 +193,7 @@ static void nonmax_suppress (float **dx, float **dy, imImage* mag)
 {
   unsigned char* mag_data = (unsigned char*)mag->data[0];
 
-#pragma omp parallel for if (mag->height > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINHEIGHT(mag->height))
   for (int i=1; i<mag->height-1; i++)
   {
     for (int j=1; j<mag->width-1; j++)

@@ -118,6 +118,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\im_convertbitmap.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\im_convertcolor.cpp"
 				>
 			</File>

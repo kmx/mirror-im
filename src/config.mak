@@ -72,7 +72,7 @@ INCLUDES += liblzf
 SRC = \
     old_imcolor.c         old_imresize.c      tiff_binfile.c       im_converttype.cpp \
     im_attrib.cpp         im_format.cpp       im_format_tga.cpp    im_filebuffer.cpp \
-    im_bin.cpp            im_format_all.cpp   im_format_raw.cpp \
+    im_bin.cpp            im_format_all.cpp   im_format_raw.cpp    im_convertopengl.cpp \
     im_binfile.cpp        im_format_sgi.cpp   im_datatype.cpp      im_format_pcx.cpp \
     im_colorhsi.cpp       im_format_bmp.cpp   im_image.cpp         im_rgb2map.cpp    \
     im_colormode.cpp      im_format_gif.cpp   im_lib.cpp           im_format_pnm.cpp \

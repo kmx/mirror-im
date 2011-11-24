@@ -10,7 +10,6 @@
 #include <im_color.h>
 #include <im_math_op.h>
 
-#include "im_process_counter.h"
 #include "im_process_ana.h"
 
 #include <stdlib.h>
@@ -25,7 +24,7 @@ static void DoCalcHisto(T* map, int size, unsigned long* histo, int hcount, int 
 {
   memset(histo, 0, hcount * sizeof(unsigned long));
 
-#pragma omp parallel for if (size > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(size))
   for (int i = 0; i < size; i++)
   {
     T index = map[i];
@@ -80,7 +79,7 @@ void imCalcGrayHistogram(const imImage* image, unsigned long* histo, int cumulat
         gray_map[i] = imColorRGB2Luma(r, g, b);
       }
 
-#pragma omp parallel for if (image->count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(image->count))
       for (i = 0; i < image->count; i++)
       {
         int index = gray_map[map[i]];
@@ -96,7 +95,7 @@ void imCalcGrayHistogram(const imImage* image, unsigned long* histo, int cumulat
         imushort* g = (imushort*)image->data[1];
         imushort* b = (imushort*)image->data[2];
 
-#pragma omp parallel for if (image->count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(image->count))
         for (i = 0; i < image->count; i++)
         {
           imushort index = imColorRGB2Luma(*r++, *g++, *b++);
@@ -110,7 +109,7 @@ void imCalcGrayHistogram(const imImage* image, unsigned long* histo, int cumulat
         imbyte* g = (imbyte*)image->data[1];
         imbyte* b = (imbyte*)image->data[2];
 
-#pragma omp parallel for if (image->count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(image->count))
         for (i = 0; i < image->count; i++)
         {
           imbyte index = imColorRGB2Luma(*r++, *g++, *b++);
@@ -206,7 +205,7 @@ static void DoStats(T* data, int count, imStats* stats)
   T min, max;
   imMinMax(data, count, min, max);
 
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT) \
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count)) \
                          reduction (+:positive, negative, zeros, mean, stddev) 
   for (int i = 0; i < count; i++)
   {
@@ -396,7 +395,7 @@ static double DoRMSOp(T *map1, T *map2, int count)
 {
   double rmserror = 0;
 
-#pragma omp parallel for reduction(+:rmserror) if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for reduction(+:rmserror) if (IM_OMP_MINCOUNT(count))
   for (int i = 0; i < count; i++)
   {
     double diff = double(map1[i] - map2[i]);

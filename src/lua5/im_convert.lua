@@ -1,3 +1,4 @@
+-- Must also update of im_processconvert.lua
  
 function im.ConvertDataTypeNew(src_image, data_type, cpx2real, gamma, abssolute, cast_mode)
   local dst_image = im.ImageCreateBased(src_image, nil, nil, nil, data_type)

@@ -14,6 +14,7 @@
 #include "imlua.h"
 #include "imlua_aux.h"
 
+
 /*****************************************************************************\
  im.ImageDataSize(width, height, color_mode, data_type)
 \*****************************************************************************/
@@ -243,6 +244,13 @@ static int imlua_colordecode(lua_State *L)
   return 3;
 }
 
+static int imlua_openmpsetmincount(lua_State *L)
+{
+  imOpenMPSetMinCount(luaL_checkint(L, 1));
+  return 0;
+}
+
+
 static const luaL_reg imutil_lib[] = {
   {"ImageDataSize", imluaImageDataSize},
   {"ImageLineSize", imluaImageLineSize},
@@ -267,6 +275,8 @@ static const luaL_reg imutil_lib[] = {
 
   {"ColorEncode", imlua_colorencode},
   {"ColorDecode", imlua_colordecode},
+
+  {"OpenMPSetMinCount", imlua_openmpsetmincount},
 
   {NULL, NULL}
 };

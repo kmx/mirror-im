@@ -274,6 +274,30 @@ int imCompressDataLZF(const void* src_data, int src_size, void* dst_data, int ds
 int imCompressDataUnLZF(const void* src_data, int src_size, void* dst_data, int dst_size);
 
 
+/** \defgroup openmp OpenMP Utilities
+ * \par
+ * Used inside im_process only. But also exported to Lua.
+ * These functions do not use OpenMP, 
+ * they are used when OpenMP is enabled in im_process.
+ * See \ref im_util.h
+ * \ingroup util */
+
+/** Sets the minimum number of interations to split into threads.
+ *
+ * \verbatim im.OpenMPSetMinCount(min_count: number) [in Lua 5] \endverbatim
+ * \ingroup openmp */
+void imOpenMPSetMinCount(int min_count);
+
+/** Return true if the given count is greatter than the minimum.
+ * Default value is 10000.
+ * \ingroup openmp */
+int imOpenMPCheckMinCount(int count);
+
+/* Used inside "pragma omp parallel for if()" */
+#define IM_OMP_MINCOUNT(_c)  imOpenMPCheckMinCount(_c)
+#define IM_OMP_MINHEIGHT(_h) imOpenMPCheckMinCount((_h)*(_h))
+
+
 #if defined(__cplusplus)
 }
 #endif

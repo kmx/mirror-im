@@ -31,7 +31,7 @@ static int DoGrayMorphConvolve(T *map, T* new_map, int width, int height, const 
 
   IM_INT_PROCESSING;
 
-#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
   for(int j = 0; j < height; j++)
   {
     #pragma omp flush (processing)

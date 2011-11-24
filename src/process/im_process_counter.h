@@ -17,8 +17,6 @@
 extern "C" {
 #endif
 
-/* minimum number of interations to split into threads */
-#define IM_OMP_MINCOUNT 1000
 
 #define IM_INT_PROCESSING     int processing = 1;
 

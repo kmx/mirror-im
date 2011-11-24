@@ -857,6 +857,39 @@ void imProcessPosterize(const imImage* src_image, imImage* dst_image, int level)
 void imProcessNormDiffRatio(const imImage* image1, const imImage* image2, imImage* dst_image);
 
 
+/** \defgroup procconvert Image Conversion
+ * \par
+ * Same as imConvert functions but using OpenMP when enabled.
+ * \par
+ * See \ref im_process_pon.h
+ * \ingroup process */
+
+
+/** Same as  \ref imConvertDataType.
+ * But returns zero if the counter aborted.
+ *
+ * \verbatim im.ProcessConvertDataType(src_image: imImage, dst_image: imImage, cpx2real: number, gamma: number, abssolute: boolean, cast_mode: number) -> error: number [in Lua 5] \endverbatim
+ * \verbatim im.ProcessConvertDataTypeNew(image: imImage, data_type: number, cpx2real: number, gamma: number, abssolute: boolean, cast_mode: number) -> error: number, new_image: imImage  [in Lua 5] \endverbatim
+ * \ingroup procconvert */
+int imProcessConvertDataType(const imImage* src_image, imImage* dst_image, int cpx2real, float gamma, int abssolute, int cast_mode);
+
+/** Same as  \ref imConvertColorSpace.
+ * But returns zero if the counter aborted.
+ *
+ * \verbatim im.ProcessConvertColorSpace(src_image: imImage, dst_image: imImage) -> error: number [in Lua 5] \endverbatim
+ * \verbatim im.ProcessConvertColorSpaceNew(image: imImage, color_space: number, has_alpha: boolean) -> error: number, new_image: imImage [in Lua 5] \endverbatim
+ * \ingroup procconvert */
+int imProcessConvertColorSpace(const imImage* src_image, imImage* dst_image);
+
+/** Same as  \ref imConvertToBitmap.
+ * But returns zero if the counter aborted.
+ *
+ * \verbatim im.ProcessConvertToBitmap(src_image: imImage, dst_image: imImage, cpx2real: number, gamma: number, abssolute: boolean, cast_mode: number) -> error: number [in Lua 5] \endverbatim
+ * \verbatim im.ProcessConvertToBitmapNew(image: imImage, color_space: number, has_alpha: boolean, cpx2real: number, gamma: number, abssolute: boolean, cast_mode: number) -> error: number, new_image: imImage [in Lua 5] \endverbatim
+ * \ingroup procconvert */
+int imProcessConvertToBitmap(const imImage* src_image, imImage* dst_image, int cpx2real, float gamma, int abssolute, int cast_mode);
+
+
 
 #if defined(__cplusplus)
 }

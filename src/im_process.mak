@@ -12,10 +12,13 @@ SRC = \
     im_canny.cpp           im_distance.cpp         im_analyze.cpp    \
     im_kernel.cpp          im_remotesens.cpp       im_point.cpp      \
     im_process_counter.cpp
-SRC  := $(addprefix process/, $(SRC))
+SRC := $(addprefix process/, $(SRC))
+
+SRC += im_convertbitmap.cpp im_convertcolor.cpp im_converttype.cpp
                                        
 USE_IM = Yes
 IM = ..
+DEFINES += IM_PROCESS
 
 ifdef USE_OPENMP
   DEF_FILE := $(LIBNAME).def

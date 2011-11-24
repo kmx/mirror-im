@@ -6,8 +6,9 @@ DEFINES = IMLUA_USELOH
 USE_LOH_SUBDIR = Yes
 SRC = lua5/imlua_process.c lua5/imlua_kernel.c
 DEF_FILE = lua5/imlua_process.def
+DEFINES += IM_PROCESS
 
-SRCLUA = lua5/im_process.lua
+SRCLUA = lua5/im_process.lua lua5/im_processconvert.lua
 SRCLUADIR = lua5
 
 LIBS = im_process

@@ -10,7 +10,6 @@
 #include <im_math.h>
 #include <im_complex.h>
 
-#include "im_process_counter.h"
 #include "im_process_pnt.h"
 #include "im_math_op.h"
 
@@ -61,62 +60,62 @@ static void DoUnaryOp(T1 *map, T2 *new_map, int count, int op)
   switch(op)
   {
   case IM_UN_ABS:
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
       new_map[i] = abs_op((T2)map[i]);
     break;
   case IM_UN_INV:
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
       new_map[i] = inv_op((T2)map[i]);
     break;
   case IM_UN_EQL:
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
       new_map[i] = (T2)map[i];
     break;
   case IM_UN_LESS:
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
       new_map[i] = less_op((T2)map[i]);
     break;
   case IM_UN_SQR:
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
       new_map[i] = sqr_op((T2)map[i]);
     break;
   case IM_UN_SQRT:
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
       new_map[i] = sqrt_op((T2)map[i]);
     break;
   case IM_UN_LOG:
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
       new_map[i] = log_op((T2)map[i]);
     break;
   case IM_UN_SIN:
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
       new_map[i] = sin_op((T2)map[i]);
     break;
   case IM_UN_COS:
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
       new_map[i] = cos_op((T2)map[i]);
     break;
   case IM_UN_EXP:
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
       new_map[i] = exp_op((T2)map[i]);
     break;
   case IM_UN_CONJ:
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
       new_map[i] = conj_op((T2)map[i]);
     break;
   case IM_UN_CPXNORM:
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
       new_map[i] = cpxnorm_op((T2)map[i]);
     break;
@@ -131,52 +130,52 @@ static void DoUnaryOpByte(T1 *map, imbyte *new_map, int count, int op)
   switch(op)
   {
   case IM_UN_ABS:
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
       new_map[i] = (imbyte)crop_byte(abs_op((int)map[i]));
     break;
   case IM_UN_INV:
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
       new_map[i] = (imbyte)crop_byte(inv_op((int)map[i]));   /* will always be 0 */
     break;
   case IM_UN_EQL:
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
       new_map[i] = (imbyte)crop_byte((int)map[i]);
     break;
   case IM_UN_LESS:
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
       new_map[i] = (imbyte)crop_byte(less_op((int)map[i]));
     break;
   case IM_UN_SQR:
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
       new_map[i] = (imbyte)crop_byte(sqr_op((int)map[i]));
     break;
   case IM_UN_SQRT:
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
       new_map[i] = (imbyte)crop_byte(sqrt_op((int)map[i]));
     break;
   case IM_UN_LOG:
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
       new_map[i] = (imbyte)crop_byte(log_op((int)map[i]));
     break;
   case IM_UN_SIN:
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
       new_map[i] = (imbyte)crop_byte(sin_op((int)map[i]));
     break;
   case IM_UN_COS:
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
       new_map[i] = (imbyte)crop_byte(cos_op((int)map[i]));
     break;
   case IM_UN_EXP:
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
       new_map[i] = (imbyte)crop_byte(exp_op((int)map[i]));
     break;
@@ -236,7 +235,7 @@ void imProcessSplitComplex(const imImage* image, imImage* NewImage1, imImage* Ne
   float* map1 = (float*)NewImage1->data[0];
   float* map2 = (float*)NewImage2->data[0];
 
-#pragma omp parallel for if (total_count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(total_count))
   for (int i = 0; i < total_count; i++)
   {
     if (polar)
@@ -260,7 +259,7 @@ void imProcessMergeComplex(const imImage* image1, const imImage* image2, imImage
   float* map1 = (float*)image1->data[0];
   float* map2 = (float*)image2->data[0];
 
-#pragma omp parallel for if (total_count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(total_count))
   for (int i = 0; i < total_count; i++)
   {
     if (polar)

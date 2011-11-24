@@ -137,6 +137,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\im_convertopengl.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\im_converttype.cpp"
 				>
 			</File>

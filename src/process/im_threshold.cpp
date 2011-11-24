@@ -8,7 +8,6 @@
 #include <im.h>
 #include <im_util.h>
 
-#include "im_process_counter.h"
 #include "im_process_pnt.h"
 #include "im_process_ana.h"
 
@@ -22,7 +21,7 @@
 template <class T> 
 static void doThresholdSlice(T *src_map, imbyte *dst_map, int count, T start_level, T end_level)
 {
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
   for (int i = 0; i < count; i++)
   {
     if (src_map[i] < start_level || src_map[i] > end_level)
@@ -58,7 +57,7 @@ void imProcessSliceThreshold(const imImage* src_image, imImage* dst_image, float
 template <class T> 
 static void doThresholdByDiff(T *src_map1, T *src_map2, imbyte *dst_map, int count)
 {
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
   for (int i = 0; i < count; i++)
   {
     if (src_map1[i] <= src_map2[i])
@@ -90,7 +89,7 @@ void imProcessThresholdByDiff(const imImage* src_image1, const imImage* src_imag
 template <class T> 
 static void doThreshold(T *src_map, imbyte *dst_map, int count, T level, int value)
 {
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
   for (int i = 0; i < count; i++)
   {
     if (src_map[i] <= level)
@@ -369,7 +368,7 @@ void imProcessHysteresisThreshold(const imImage* image, imImage* NewImage, int l
   imbyte *dst_map = (imbyte*)NewImage->data[0];
   int size = image->count;
 
-#pragma omp parallel for if (size > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(size))
   for (int i = 0; i < size; i++)
   {
     if (src_map[i] > high_thres)
@@ -386,7 +385,7 @@ void imProcessHysteresisThreshold(const imImage* image, imImage* NewImage, int l
   {
     changed = 0;
 
-#pragma omp parallel for if (image->height > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINHEIGHT(image->height))
     for (int j=1; j<image->height-1; j++) 
     {
       for (int i=1; i<image->width-1; i++)
@@ -409,7 +408,7 @@ void imProcessHysteresisThreshold(const imImage* image, imImage* NewImage, int l
   }
 
   // Clear the remaining "2"s
-#pragma omp parallel for if (size > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(size))
   for (int i = 0; i < size; i++)
   {
     if (dst_map[i] == 2)

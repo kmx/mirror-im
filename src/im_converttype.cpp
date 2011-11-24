@@ -12,6 +12,7 @@
 #include "im_color.h"
 #ifdef IM_PROCESS
 #include "process\im_process_counter.h"
+#include "im_process_pnt.h"
 #else
 #include "im_counter.h"
 #endif
@@ -22,7 +23,6 @@
 #include <memory.h>
 
 #ifndef IM_PROCESS
-#define IM_OMP_MINCOUNT       -1
 #define IM_INT_PROCESSING     int processing = IM_ERR_NONE;
 #define IM_BEGIN_PROCESSING   
 #define IM_COUNT_PROCESSING   if (!imCounterInc(counter)) { processing = IM_ERR_COUNTER; break; }
@@ -95,7 +95,7 @@ inline void iDataTypeIntMax(T& max)
 template <class SRCT, class DSTT> 
 IM_STATIC int iCopy(int count, const SRCT *src_map, DSTT *dst_map)
 {
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
   for (int i = 0; i < count; i++)
   {
     dst_map[i] = (DSTT)(src_map[i]);
@@ -110,7 +110,7 @@ IM_STATIC int iCopyCrop(int count, const SRCT *src_map, DSTT *dst_map, int absso
   DSTT dst_max;
   iDataTypeIntMax(dst_max);
 
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
   for (int i = 0; i < count; i++)
   {
     SRCT value;
@@ -135,7 +135,7 @@ IM_STATIC int iCopyCrop(int count, const SRCT *src_map, DSTT *dst_map, int absso
 template <class SRCT> 
 IM_STATIC int iPromote2Cpx(int count, const SRCT *src_map, imcfloat *dst_map)
 {
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
   for (int i = 0; i < count; i++)
   {
     dst_map[i].real = (float)(src_map[i]);
@@ -179,7 +179,7 @@ IM_STATIC int iConvertInt2Int(int count, const SRCT *src_map, DSTT *dst_map, int
 
   IM_INT_PROCESSING;
 
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
   for (int i = 0; i < count; i++)
   {
     #pragma omp flush (processing)
@@ -255,7 +255,7 @@ IM_STATIC int iPromoteInt2Real(int count, const SRCT *src_map, float *dst_map, f
 
   IM_INT_PROCESSING;
 
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
   for (int i = 0; i < count; i++)
   {
     #pragma omp flush (processing)
@@ -322,7 +322,7 @@ IM_STATIC int iDemoteReal2Int(int count, const float *src_map, DSTT *dst_map, fl
 
   IM_INT_PROCESSING;
 
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
   for (int i = 0; i < count; i++)
   {
     #pragma omp flush (processing)
@@ -372,7 +372,7 @@ static int iDemoteCpx2Real(int count, const imcfloat* src_map, float *dst_map, i
   case IM_CPX_PHASE: CpxCnv = cpxphase; break;
   }
 
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
   for (int i = 0; i < count; i++)
   {
     dst_map[i] = CpxCnv(src_map[i]);

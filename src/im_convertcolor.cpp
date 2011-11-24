@@ -12,6 +12,7 @@
 #include "im_color.h"
 #ifdef IM_PROCESS
 #include "process\im_process_counter.h"
+#include "im_process_pnt.h"
 #else
 #include "im_counter.h"
 #endif
@@ -21,7 +22,6 @@
 #include <memory.h>
 
 #ifndef IM_PROCESS
-#define IM_OMP_MINCOUNT       -1
 #define IM_INT_PROCESSING     int processing = IM_ERR_NONE;
 #define IM_BEGIN_PROCESSING   
 #define IM_COUNT_PROCESSING   if (!imCounterInc(counter)) { processing = IM_ERR_COUNTER; break; }
@@ -42,7 +42,7 @@
 
 static void iConvertSetTranspMap(imbyte *src_map, imbyte *dst_alpha, int count, imbyte *transp_map, int transp_count)
 {
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
   for(int i = 0; i < count; i++)
   {
     if (src_map[i] < transp_count)
@@ -54,7 +54,7 @@ static void iConvertSetTranspMap(imbyte *src_map, imbyte *dst_alpha, int count, 
 
 static void iConvertSetTranspIndex(imbyte *src_map, imbyte *dst_alpha, int count, imbyte index)
 {
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
   for(int i = 0; i < count; i++)
   {
     if (src_map[i] == index)
@@ -71,7 +71,7 @@ static void iConvertSetTranspColor(imbyte **dst_data, int count, imbyte r, imbyt
   imbyte *pb = dst_data[2];
   imbyte *pa = dst_data[3];
 
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
   for(int i = 0; i < count; i++)
   {
     if (pr[i] == r &&
@@ -100,7 +100,7 @@ static void iConvertBinary(imbyte* map, int count, imbyte value)
       thres = max / 2;
   }
 
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
   for (int i = 0; i < count; i++)
   {
     if (map[i] >= thres)
@@ -121,7 +121,7 @@ static void iConvertMap2Gray(const imbyte* src_map, imbyte* dst_map, int count, 
     remap[c] = imColorRGB2Luma(r, g, b);
   }
 
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
   for (int i = 0; i < count; i++)
   {
     dst_map[i] = remap[src_map[i]];
@@ -134,7 +134,7 @@ static void iConvertMapToRGB(const imbyte* src_map, imbyte* red, imbyte* green, 
   for (int c = 0; c < palette_count; c++)
     imColorDecode(&r[c], &g[c], &b[c], palette[c]);
 
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
   for (int i = 0; i < count; i++)
   {
     int index = src_map[i];
@@ -165,7 +165,7 @@ IM_STATIC int iDoConvert2Gray(int count, int data_type,
   {
   case IM_XYZ: 
     max = (T)imColorMax(data_type);
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
       #pragma omp flush (processing)
@@ -184,7 +184,7 @@ IM_STATIC int iDoConvert2Gray(int count, int data_type,
     break;
   case IM_CMYK: 
     max = (T)imColorMax(data_type);
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
       #pragma omp flush (processing)
@@ -201,7 +201,7 @@ IM_STATIC int iDoConvert2Gray(int count, int data_type,
     }
     break;
   case IM_RGB:
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
       #pragma omp flush (processing)
@@ -217,7 +217,7 @@ IM_STATIC int iDoConvert2Gray(int count, int data_type,
   case IM_LUV:
   case IM_LAB:
     max = (T)imColorMax(data_type);
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
       #pragma omp flush (processing)
@@ -266,7 +266,7 @@ IM_STATIC int iDoConvert2RGB(int count, int data_type,
   {
   case IM_XYZ: 
     max = (T)imColorMax(data_type);
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
       #pragma omp flush (processing)
@@ -296,7 +296,7 @@ IM_STATIC int iDoConvert2RGB(int count, int data_type,
   case IM_YCBCR: 
     max = (T)imColorMax(data_type);
     zero = (T)imColorZero(data_type);
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
       imColorYCbCr2RGB(src_map0[i], src_map1[i], src_map2[i], 
@@ -305,7 +305,7 @@ IM_STATIC int iDoConvert2RGB(int count, int data_type,
     break;
   case IM_CMYK: 
     max = (T)imColorMax(data_type);
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
       #pragma omp flush (processing)
@@ -323,7 +323,7 @@ IM_STATIC int iDoConvert2RGB(int count, int data_type,
   case IM_LUV:
   case IM_LAB:
     max = (T)imColorMax(data_type);
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
       #pragma omp flush (processing)
@@ -385,7 +385,7 @@ IM_STATIC int iDoConvert2YCbCr(int count, int data_type,
   {
   case IM_RGB: 
     zero = (T)imColorZero(data_type);
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
       #pragma omp flush (processing)
@@ -428,7 +428,7 @@ IM_STATIC int iDoConvert2XYZ(int count, int data_type,
   {
   case IM_GRAY: 
     max = (T)imColorMax(data_type);
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
       #pragma omp flush (processing)
@@ -452,7 +452,7 @@ IM_STATIC int iDoConvert2XYZ(int count, int data_type,
     break;
   case IM_RGB: 
     max = (T)imColorMax(data_type);
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
       #pragma omp flush (processing)
@@ -487,7 +487,7 @@ IM_STATIC int iDoConvert2XYZ(int count, int data_type,
   case IM_LUV:
   case IM_LAB:
     max = (T)imColorMax(data_type);
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
       #pragma omp flush (processing)
@@ -545,7 +545,7 @@ IM_STATIC int iDoConvert2Lab(int count, int data_type,
   {
   case IM_GRAY: 
     max = (T)imColorMax(data_type);
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
       #pragma omp flush (processing)
@@ -570,7 +570,7 @@ IM_STATIC int iDoConvert2Lab(int count, int data_type,
     break;
   case IM_RGB: 
     max = (T)imColorMax(data_type);
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
       #pragma omp flush (processing)
@@ -606,7 +606,7 @@ IM_STATIC int iDoConvert2Lab(int count, int data_type,
     break;
   case IM_XYZ:
     max = (T)imColorMax(data_type);
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
       #pragma omp flush (processing)
@@ -633,7 +633,7 @@ IM_STATIC int iDoConvert2Lab(int count, int data_type,
     break;
   case IM_LUV:
     max = (T)imColorMax(data_type);
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
       #pragma omp flush (processing)
@@ -689,7 +689,7 @@ IM_STATIC int iDoConvert2Luv(int count, int data_type,
   {
   case IM_GRAY: 
     max = (T)imColorMax(data_type);
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
       #pragma omp flush (processing)
@@ -714,7 +714,7 @@ IM_STATIC int iDoConvert2Luv(int count, int data_type,
     break;
   case IM_RGB: 
     max = (T)imColorMax(data_type);
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
       #pragma omp flush (processing)
@@ -750,7 +750,7 @@ IM_STATIC int iDoConvert2Luv(int count, int data_type,
     break;
   case IM_XYZ:
     max = (T)imColorMax(data_type);
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
       #pragma omp flush (processing)
@@ -777,7 +777,7 @@ IM_STATIC int iDoConvert2Luv(int count, int data_type,
     break;
   case IM_LAB:
     max = (T)imColorMax(data_type);
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
       #pragma omp flush (processing)

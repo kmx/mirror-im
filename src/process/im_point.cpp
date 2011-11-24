@@ -25,7 +25,7 @@ static int DoUnaryPointOp(T1 *src_map, T2 *dst_map, int width, int height, int d
   int size = count * depth;
   IM_INT_PROCESSING;
 
-#pragma omp parallel for if (size > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(size))
   for(int i = 0; i < size; i++)
   {
     #pragma omp flush (processing)
@@ -113,7 +113,7 @@ static int DoUnaryPointColorOp(T1 **src_map, T2 **dst_map, int width, int height
   int count = width * height;
   IM_INT_PROCESSING;
 
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
   for(int i = 0; i < count; i++)
   {
     #pragma omp flush (processing)
@@ -213,7 +213,7 @@ static int DoMultiPointOp(T1 **src_map, T2 *dst_map, int width, int height, int 
   float* src_value = new float [src_count*tcount];
   IM_INT_PROCESSING;
 
-#pragma omp parallel for if (size > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(size))
   for(int i = 0; i < size; i++)
   {
     #pragma omp flush (processing)
@@ -314,7 +314,7 @@ static int DoMultiPointColorOp(T1 ***src_map, T2 **dst_map, int width, int heigh
   float* src_value = new float [src_count*src_depth*tcount];
   IM_INT_PROCESSING;
 
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
   for(int i = 0; i < count; i++)
   {
     #pragma omp flush (processing)

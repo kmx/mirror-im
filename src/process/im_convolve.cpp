@@ -198,7 +198,7 @@ static int DoCompassConvolve(T* map, T* new_map, int width, int height, KT* orig
 
   IM_INT_PROCESSING;
 
-#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
   for(int j = 0; j < height; j++)
   {
     #pragma omp flush (processing)
@@ -343,7 +343,7 @@ static int DoConvolveDual(T* map, T* new_map, int width, int height, KT* kernel_
 
   IM_INT_PROCESSING;
 
-#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
   for(int j = 0; j < height; j++)
   {
     #pragma omp flush (processing)
@@ -443,7 +443,7 @@ static int DoConvolveDualCpx(imcfloat* map, imcfloat* new_map, int width, int he
 
   IM_INT_PROCESSING;
 
-#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
   for(int j = 0; j < height; j++)
   {
     #pragma omp flush (processing)
@@ -581,7 +581,7 @@ static int DoConvolve(T* map, T* new_map, int width, int height, KT* kernel_map,
 
   IM_INT_PROCESSING;
 
-#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
   for(int j = 0; j < height; j++)
   {
     #pragma omp flush (processing)
@@ -657,7 +657,7 @@ static int DoConvolveCpx(imcfloat* map, imcfloat* new_map, int width, int height
 
   IM_INT_PROCESSING;
 
-#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
   for(int j = 0; j < height; j++)
   {
     #pragma omp flush (processing)
@@ -844,7 +844,7 @@ static int DoConvolveSep(T* map, T* new_map, int width, int height, KT* kernel_m
 
   IM_INT_PROCESSING;
 
-#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
   for(int j = 0; j < height; j++)
   {
     #pragma omp flush (processing)
@@ -895,7 +895,7 @@ static int DoConvolveSep(T* map, T* new_map, int width, int height, KT* kernel_m
     return 0;
   }
 
-#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
   for(int j = 0; j < height; j++)
   {
     #pragma omp flush (processing)
@@ -975,7 +975,7 @@ static int DoConvolveSepCpx(imcfloat* map, imcfloat* new_map, int width, int hei
 
   IM_INT_PROCESSING;
 
-#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
   for(int j = 0; j < height; j++)
   {
     #pragma omp flush (processing)
@@ -1022,7 +1022,7 @@ static int DoConvolveSepCpx(imcfloat* map, imcfloat* new_map, int width, int hei
     return 0;
   }
 
-#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
   for(int j = 0; j < height; j++)
   {
     #pragma omp flush (processing)
@@ -1145,7 +1145,7 @@ University of Oslo
 template <class T> 
 static void do_crossing(T* iband, T* oband, int width, int height, T t)
 {
-#pragma omp parallel for if (height > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
   for (int y=0; y < height-1; y++)
   {
     int offset00 = y*width;
@@ -1534,7 +1534,7 @@ static void DoSharpOp(T1 *src_map, T1 *dst_map, int count, float amount, T2 thre
     }
   }
 
-#pragma omp parallel for if (count > IM_OMP_MINCOUNT)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
   for (int i = 0; i < count; i++)
   {
     T2 diff;
