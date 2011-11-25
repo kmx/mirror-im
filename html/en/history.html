@@ -52,6 +52,20 @@
 	</span></span></strong><span style="color: #008000"><span
             style="color: #000000"> 
 	functions <strong>imImageSetMap</strong> and <strong>imImageSetGray</strong>.</span></span></li>
+	<li dir="ltr"><strong><span class="hist_new">New:</span><span style="color: #008000"><span
+            style="color: #000000"> 
+	</span></span></strong><span style="color: #008000"><span
+            style="color: #000000"> 
+	support for OpenMP in the im_process library. Almost all image processing 
+	functions now have support for multi-thread using OpenMP. Since 
+	multi-threading can be slower than single thread depending on the 
+	conditions, there are two libraries one called &quot;im_process&quot; and one called &quot;im_process_omp&quot;. 
+	New function <strong>imOpenMPSetMinCount</strong> to be used to control the 
+	OpenMP loop. New functions <strong>imProcessConvertDataType</strong>,
+	<strong>imProcessConvertColorSpace</strong> <strong>imProcessConvertToBitmap</strong> 
+	equivalent to <strong>imConvertDataType</strong>, <strong>
+	imConvertColorSpace</strong> <strong>imConvertToBitmap</strong> but with 
+	support for OpenMP.</span></span></li>
 	<li dir="ltr">
 		<span class="hist_changed">Changed:</span> <strong>imImageInit</strong> 
 	now accepts also the IM_ALPHA flag.</li>
