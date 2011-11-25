@@ -128,6 +128,7 @@ void imCalcPercentMinMax(const imImage* image, float percent, int ignore_zero, i
  * Result is IM_GRAY/IM_USHORT type. Regions can be 4 connected or 8 connected. \n
  * Returns the number of regions found. Background is marked as 0. \n
  * Regions touching the border are considered only if touch_border=1.
+ * Not using OpenMP when enabled.
  *
  * \verbatim im.AnalyzeFindRegions(src_image: imImage, dst_image: imImage, connect: number, touch_border: boolean) -> count: number [in Lua 5] \endverbatim
  * \verbatim im.AnalyzeFindRegionsNew(image: imImage, connect: number, touch_border: boolean) -> count: number, new_image: imImage [in Lua 5] \endverbatim
@@ -168,6 +169,7 @@ void imAnalyzeMeasureCentroid(const imImage* image, const int* area, int region_
  * data has size the number of regions. If area or centroid are NULL will be internally calculated. \n
  * Principal (major and minor) axes are defined to be those axes that pass through the
  * centroid, about which the moment of inertia of the region is, respectively maximal or minimal.
+ * Partially using OpenMP when enabled.
  *
  * \verbatim im.AnalyzeMeasurePrincipalAxis(image: imImage, [area: table of numbers], [cx: table of numbers], [cy: table of numbers], [region_count: number]) 
                               -> major_slope: table of numbers, major_length: table of numbers, minor_slope: table of numbers, minor_length: table of numbers [in Lua 5] \endverbatim
@@ -180,6 +182,7 @@ void imAnalyzeMeasurePrincipalAxis(const imImage* image, const int* area, const 
 /** Measure the number and area of holes of all regions. \n
  * Source image is IM_USHORT type (the result of \ref imAnalyzeFindRegions). \n
  * area and perim has size the number of regions, if some is NULL it will be not calculated.
+ * Not using OpenMP when enabled.
  *
  * \verbatim im.AnalyzeMeasureHoles(image: imImage, connect: number, [region_count: number]) -> holes_count: number, area: table of numbers, perim: table of numbers [in Lua 5] \endverbatim
  * The returned tables are zero indexed. 
