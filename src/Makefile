@@ -7,7 +7,7 @@ endif
 
 .PHONY: do_all im im_jp2 im_process im_fftw imlua3 imlua5 imlua_jp2 imlua_process5 imlua_fftw5 $(WINLIBS)
 #do_all: im im_jp2 im_process im_fftw imlua3 imlua5 imlua_jp2 imlua_process5 imlua_fftw5
-do_all: im im_jp2 im_process im_fftw imlua5 imlua_jp2 imlua_process5 imlua_fftw5 $(WINLIBS)
+do_all: im im_jp2 im_process im_process_omp im_fftw imlua5 imlua_jp2 imlua_process5 imlua_process_omp5 imlua_fftw5 $(WINLIBS)
 
 im:
 	@$(TECMAKE_CMD)
@@ -17,6 +17,8 @@ im_avi:
 	@$(TECMAKE_CMD) MF=im_avi
 im_process:
 	@$(TECMAKE_CMD) MF=im_process
+im_process_omp:
+	@$(TECMAKE_CMD) MF=im_process USE_OPENMP=Yes
 im_fftw:
 	@$(TECMAKE_CMD) MF=im_fftw
 imlua3:
@@ -29,6 +31,8 @@ imlua_avi:
 	@$(TECMAKE_CMD) MF=imlua_avi
 imlua_process5:
 	@$(TECMAKE_CMD) MF=imlua_process5
+imlua_process_omp5:
+	@$(TECMAKE_CMD) MF=imlua_process5 USE_OPENMP=Yes
 imlua_fftw5:
 	@$(TECMAKE_CMD) MF=imlua_fftw5
   
