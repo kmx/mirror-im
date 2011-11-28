@@ -10,6 +10,7 @@
 #include <im_color.h>
 #include <im_math_op.h>
 
+#include "im_process_counter.h"
 #include "im_process_ana.h"
 
 #include <stdlib.h>

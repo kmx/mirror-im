@@ -174,3 +174,5 @@ EXPORTS
   imProcessConvertDataType
   imProcessConvertColorSpace
   imProcessConvertToBitmap
+  imProcessOpenMPSetMinCount
+  imProcessOpenMPSetNumThreads

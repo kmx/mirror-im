@@ -32,11 +32,8 @@ extern "C" {
  * Notice that multi-threading can be slower than single thread because of 
  * the overhead introduced by the threads configuration. \n
  * When using the "im_process_omp" library you can reduce that overhead 
- * by controling the minimum number of interaction to enable the use of multiple threads
- * using the \ref imOpenMPSetMinCount function. 
- * Default value is 10000, or an image with 100x100.
- * If set to -1 will set to single thread, but notice 
- * that this is not the same thing as using the library without support for OpenMP. \n
+ * by using the \ref imProcessOpenMPSetMinCount and \ref imProcessOpenMPSetNumThreads functions. 
+ * But notice that this is not the same thing as using the library without support for OpenMP. \n
  * For more information on OpenMP: \n
  * http://www.openmp.org 
  */

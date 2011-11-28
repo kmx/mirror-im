@@ -10,6 +10,27 @@
 #include <memory.h>
 
 
+int im_process_mincount = 250000;   /* 500*500 image size */
+
+int imProcessOpenMPSetMinCount(int min_count)
+{
+  int old_imin_count = im_process_mincount;
+  im_process_mincount = min_count;
+  return old_imin_count;
+}
+
+int imProcessOpenMPSetNumThreads(int count)
+{
+#ifdef _OPENMP
+  int old_count = omp_get_num_threads();
+  omp_set_num_threads(count);
+  return old_count;
+#else
+  (void)count;
+  return 1;
+#endif
+}
+
 #ifdef _OPENMP
 
 int imCounterBegin_OMP(const char* title)

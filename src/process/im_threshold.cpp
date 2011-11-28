@@ -8,6 +8,7 @@
 #include <im.h>
 #include <im_util.h>
 
+#include "im_process_counter.h"
 #include "im_process_pnt.h"
 #include "im_process_ana.h"
 

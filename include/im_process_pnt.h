@@ -24,7 +24,7 @@ extern "C" {
  * In Lua, the params table is unpacked.
  * And the returned value contains only the destiny values to update, or nil (also no return value) to leave destiny intact.
  * \ingroup point */
-typedef int (*imUnaryPointOpFunc)(float src_value, float *dst_value, float* params, int x, int y, int d);
+typedef int (*imUnaryPointOpFunc)(float src_value, float *dst_value, float* params, void* userdata, int x, int y, int d);
 
 /** Apply an unary point operation using a custom function.
  * One pixel from the source affects the same pixel on destiny. \n
@@ -38,7 +38,7 @@ typedef int (*imUnaryPointOpFunc)(float src_value, float *dst_value, float* para
  * In Lua, the params table is passed to the function by using the Lua stack, 
  * so its table can contain any type of objects, but they all must be unnamed.
  * \ingroup point */
-int imProcessUnaryPointOp(const imImage* src_image, imImage* dst_image, imUnaryPointOpFunc func, float* params, const char* op_name);
+int imProcessUnaryPointOp(const imImage* src_image, imImage* dst_image, imUnaryPointOpFunc func, float* params, void* userdata, const char* op_name);
 
 /** Custom unary point color funtion.
  * \verbatim func(src_value_plane0: number, src_value_plane1: number, ... , params1, param2, ..., x: number, y: number) -> dst_value_plane0: number, dst_value_plane1: number, ...  [in Lua 5] \endverbatim
@@ -46,7 +46,7 @@ int imProcessUnaryPointOp(const imImage* src_image, imImage* dst_image, imUnaryP
  * Also each color plane is passed as a separe value, instead of inside an array.
  * And the returned value contains only the destiny values to update, or nil (also no return value) to leave destiny intact.
  * \ingroup point */
-typedef int (*imUnaryPointColorOpFunc)(const float* src_value, float *dst_value, float* params, int x, int y);
+typedef int (*imUnaryPointColorOpFunc)(const float* src_value, float *dst_value, float* params, void* userdata, int x, int y);
 
 /** Apply an unary point color operation using a custom function.
  * One pixel from the source affects the same pixel on destiny. \n
@@ -60,14 +60,14 @@ typedef int (*imUnaryPointColorOpFunc)(const float* src_value, float *dst_value,
  * In Lua, the params table is passed to the function by using the Lua stack, 
  * so its table can contain any type of objects, but they all must be unnamed.
  * \ingroup point */
-int imProcessUnaryPointColorOp(const imImage* src_image, imImage* dst_image, imUnaryPointColorOpFunc func, float* params, const char* op_name);
+int imProcessUnaryPointColorOp(const imImage* src_image, imImage* dst_image, imUnaryPointColorOpFunc func, float* params, void* userdata, const char* op_name);
 
 /** Custom multiple point funtion.
  * \verbatim func(src_value1: number, src_value2: number, ... , params1, param2, ..., x: number, y: number, d: number) -> dst_value: number  [in Lua 5] \endverbatim
  * In Lua, the source images data and the params table are unpacked.
  * And the returned value contains only the destiny values to update, or nil (also no return value) to leave destiny intact.
  * \ingroup point */
-typedef int (*imMultiPointOpFunc)(const float* src_value, float *dst_value, float* params, int x, int y, int d);
+typedef int (*imMultiPointOpFunc)(const float* src_value, float *dst_value, float* params, void* userdata, int x, int y, int d);
 
 /** Apply an multiple point operation using a custom function.
  * One pixel from each source affects the same pixel on destiny. \n
@@ -82,7 +82,7 @@ typedef int (*imMultiPointOpFunc)(const float* src_value, float *dst_value, floa
  * In Lua, the params table is passed to the function by using the Lua stack, 
  * so its table can contain any type of objects, but they all must be unnamed.
  * \ingroup point */
-int imProcessMultiPointOp(const imImage** src_image, int src_count, imImage* dst_image, imMultiPointOpFunc func, float* params, const char* op_name);
+int imProcessMultiPointOp(const imImage** src_image, int src_count, imImage* dst_image, imMultiPointOpFunc func, float* params, void* userdata, const char* op_name);
 
 /** Custom multiple point color funtion.
  * \verbatim func(src_value1_plane0: number, src_value1_plane1: number, ..., src_value2_plane0: number, src_value2_plane1: number, ... , params1, param2, ..., x: number, y: number) -> dst_value_plane0: number, dst_value_plane1: number, ...  [in Lua 5] \endverbatim
@@ -90,7 +90,7 @@ int imProcessMultiPointOp(const imImage** src_image, int src_count, imImage* dst
  * Also each color plane is passed as a separe value, instead of inside an array.
  * And the returned value contains only the destiny values to update, or nil (also no return value) to leave destiny intact.
  * \ingroup point */
-typedef int (*imMultiPointColorOpFunc)(float* src_value, float* dst_value, float* params, int x, int y);
+typedef int (*imMultiPointColorOpFunc)(float* src_value, float* dst_value, float* params, void* userdata, int x, int y);
 
 /** Apply an multiple point color operation using a custom function.
  * One pixel from each source affects the same pixel on destiny. \n
@@ -105,7 +105,7 @@ typedef int (*imMultiPointColorOpFunc)(float* src_value, float* dst_value, float
  * In Lua, the params table is passed to the function by using the Lua stack, 
  * so its table can contain any type of objects, but they all must be unnamed.
  * \ingroup point */
-int imProcessMultiPointColorOp(const imImage** src_image, int src_count, imImage* dst_image, imMultiPointColorOpFunc func, float* params, const char* op_name);
+int imProcessMultiPointColorOp(const imImage** src_image, int src_count, imImage* dst_image, imMultiPointColorOpFunc func, float* params, void* userdata, const char* op_name);
 
 
 

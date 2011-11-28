@@ -10,6 +10,7 @@
 #include <im_colorhsi.h>
 #include <im_palette.h>
 
+#include "im_process_counter.h"
 #include "im_process_pnt.h"
 
 #include <stdlib.h>

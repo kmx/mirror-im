@@ -17,6 +17,13 @@
 extern "C" {
 #endif
 
+/* Used inside "pragma omp parallel for if()" */
+extern int im_process_mincount;
+#define IM_OMP_MINCOUNT(_c)  (_c)>im_process_mincount
+#define IM_OMP_MINHEIGHT(_h) (_h)*(_h)>im_process_mincount
+
+int imProcessOpenMPSetMinCount(int min_count);
+int imProcessOpenMPSetNumThreads(int count);
 
 #define IM_INT_PROCESSING     int processing = 1;
 

@@ -25,7 +25,7 @@ static int imluaImageDataSize (lua_State *L)
   int color_mode = luaL_checkint(L, 3);
   int data_type = luaL_checkint(L, 4);
 
-  lua_pushnumber(L, imImageDataSize(width, height, color_mode, data_type));
+  lua_pushinteger(L, imImageDataSize(width, height, color_mode, data_type));
   return 1;
 }
 
@@ -38,7 +38,7 @@ static int imluaImageLineSize (lua_State *L)
   int color_mode = luaL_checkint(L, 2);
   int data_type = luaL_checkint(L, 3);
 
-  lua_pushnumber(L, imImageLineSize(width, color_mode, data_type));
+  lua_pushinteger(L, imImageLineSize(width, color_mode, data_type));
   return 1;
 }
 
@@ -50,7 +50,7 @@ static int imluaImageLineCount (lua_State *L)
   int width = luaL_checkint(L, 1);
   int color_mode = luaL_checkint(L, 2);
 
-  lua_pushnumber(L, imImageLineCount(width, color_mode));
+  lua_pushinteger(L, imImageLineCount(width, color_mode));
   return 1;
 }
 
@@ -80,7 +80,7 @@ static int imluaColorModeSpaceName (lua_State *L)
 \*****************************************************************************/
 static int imluaColorModeDepth (lua_State *L)
 {
-  lua_pushnumber(L, imColorModeDepth(luaL_checkint(L, 1)));
+  lua_pushinteger(L, imColorModeDepth(luaL_checkint(L, 1)));
   return 1;
 }
 
@@ -93,7 +93,7 @@ static int imluaColorModeDepth (lua_State *L)
 \*****************************************************************************/
 static int imluaColorModeSpace (lua_State *L)
 {
-  lua_pushnumber(L, imColorModeSpace(luaL_checkint(L, 1)));
+  lua_pushinteger(L, imColorModeSpace(luaL_checkint(L, 1)));
   return 1;
 }
 
@@ -138,7 +138,7 @@ static int imluaColorModeIsTopDown (lua_State *L)
 \*****************************************************************************/
 static int imluaColorModeToBitmap (lua_State *L)
 {
-  lua_pushnumber(L, imColorModeToBitmap(luaL_checkint(L, 1)));
+  lua_pushinteger(L, imColorModeToBitmap(luaL_checkint(L, 1)));
   return 1;
 }
 
@@ -159,7 +159,7 @@ static int imluaColorModeIsBitmap (lua_State *L)
 \*****************************************************************************/
 static int imluaDataTypeSize (lua_State *L)
 {
-  lua_pushnumber(L, imDataTypeSize(luaL_checkint(L, 1)));
+  lua_pushinteger(L, imDataTypeSize(luaL_checkint(L, 1)));
   return 1;
 }
 
@@ -177,7 +177,7 @@ static int imluaDataTypeName (lua_State *L)
 \*****************************************************************************/
 static int imluaDataTypeIntMax(lua_State *L)
 {
-  lua_pushnumber(L, imDataTypeIntMax(luaL_checkint(L, 1)));
+  lua_pushinteger(L, imDataTypeIntMax(luaL_checkint(L, 1)));
   return 1;
 }
 
@@ -186,7 +186,7 @@ static int imluaDataTypeIntMax(lua_State *L)
 \*****************************************************************************/
 static int imluaDataTypeIntMin(lua_State *L)
 {
-  lua_pushnumber(L, imDataTypeIntMin(luaL_checkint(L, 1)));
+  lua_pushinteger(L, imDataTypeIntMin(luaL_checkint(L, 1)));
   return 1;
 }
 
@@ -237,17 +237,11 @@ static int imlua_colordecode(lua_State *L)
   color_i = (long)lua_touserdata(L,1);
 
   imColorDecode(&red_i, &green_i, &blue_i, color_i);
-  lua_pushnumber(L, red_i);
-  lua_pushnumber(L, green_i);
-  lua_pushnumber(L, blue_i);
+  lua_pushinteger(L, red_i);
+  lua_pushinteger(L, green_i);
+  lua_pushinteger(L, blue_i);
 
   return 3;
-}
-
-static int imlua_openmpsetmincount(lua_State *L)
-{
-  imOpenMPSetMinCount(luaL_checkint(L, 1));
-  return 0;
 }
 
 
@@ -275,8 +269,6 @@ static const luaL_reg imutil_lib[] = {
 
   {"ColorEncode", imlua_colorencode},
   {"ColorDecode", imlua_colordecode},
-
-  {"OpenMPSetMinCount", imlua_openmpsetmincount},
 
   {NULL, NULL}
 };

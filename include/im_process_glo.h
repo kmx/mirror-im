@@ -165,6 +165,32 @@ void imProcessFFTraw(imImage* image, int inverse, int center, int normalize);
 void imProcessSwapQuadrants(imImage* image, int center2origin);
 
 
+
+/** \defgroup openmp OpenMP Utilities
+ * \par
+ * Used inside im_process_omp only. But also exported to Lua.
+ * These functions do not use OpenMP, 
+ * they are used when OpenMP is enabled in im_process.
+ * See \ref im_util.h
+ * \ingroup process */
+
+/** Sets the minimum number of interations to split into threads. \n
+ * Default value is 250000, or an image with 500x500. \n
+ * Returns the previous value.
+ *
+ * \verbatim im.ProcessOpenMPSetMinCount(min_count: number) -> old_min_count: number [in Lua 5] \endverbatim
+ * \ingroup openmp */
+int imProcessOpenMPSetMinCount(int min_count);
+
+/** Sets the number of threads. \n
+ * Does nothing if OpenMP is not enabled. \n
+ * Returns the previous value.
+ *
+ * \verbatim im.ProcessOpenMPSetNumThreads(min_count: number) -> old_min_count: number [in Lua 5] \endverbatim
+ * \ingroup openmp */
+int imProcessOpenMPSetNumThreads(int count);
+
+
 #if defined(__cplusplus)
 }
 #endif

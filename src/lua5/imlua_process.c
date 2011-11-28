@@ -26,8 +26,7 @@
 
 
 /* NOTE: This can breaks on multithread ONLY if using multiple states. */
-/* Used only in im.ProcessRenderOp, im.ProcessRenderCondOp and 
-                im.ProcessUnaryPointOp, im.ProcessUnaryPointColorOp, im.ProcessMultiPointOp, im.ProcessMultiPointColorOp. */
+/* Used ONLY in im.ProcessRenderOp and im.ProcessRenderCondOp. */
 static lua_State *g_State = NULL;
 
 
@@ -1624,24 +1623,20 @@ static int imluaProcessUnArithmeticOp (lua_State *L)
   return 0;
 }
 
-static int (imluaUnOpFunc)(float src_value, float *dst_value, float* params, int x, int y, int d)
+static int (imluaUnOpFunc)(float src_value, float *dst_value, float* params, void* userdata, int x, int y, int d)
 {
   int n, ret = 0;
-  lua_State *L = g_State;
-
-#ifdef _OPENMP
-  omp_lock_t lck = lua_touserdata(L, -1);
-  omp_set_lock(&lck);
-#endif
+  lua_State *L = userdata;
 
   lua_pushvalue(L, 3);  /* func is passed in the stack */
   lua_pushnumber(L, src_value);
   n = imlua_unpacktable(L, 4);  /* params is passed in the stack */
+  lua_pushvalue(L, 5);  /* userdata is passed in the stack */
   lua_pushinteger(L, x);
   lua_pushinteger(L, y);
   lua_pushinteger(L, d);
 
-  lua_call(L, 1+n+3, 1);
+  lua_call(L, 1+n+4, 1);
 
   if (!lua_isnil(L, -1))
   {
@@ -1649,10 +1644,6 @@ static int (imluaUnOpFunc)(float src_value, float *dst_value, float* params, int
     ret = 1;
   }
   lua_pop(L, 1);
-
-#ifdef _OPENMP
-  omp_unset_lock(&lck);
-#endif
 
   (void)params;
   return ret;
@@ -1662,12 +1653,11 @@ static int imluaProcessUnaryPointOp(lua_State *L)
 {
   imImage *src_image = imlua_checkimage(L, 1);
   imImage *dst_image = imlua_checkimage(L, 2);
-  const char *op_name = luaL_optstring(L, 5, NULL);
+  const char *op_name = luaL_optstring(L, 6, NULL);
 
 #ifdef _OPENMP
-  omp_lock_t lck;
-  omp_init_lock(&lck);
-  lua_pushlightuserdata(L, lck);
+  int old_num_threads = omp_get_num_threads();
+  omp_set_num_threads(1);
 #endif
 
   imlua_checknotcfloat(L, 1, src_image);
@@ -1677,38 +1667,33 @@ static int imluaProcessUnaryPointOp(lua_State *L)
     luaL_error(L, "images must have the same depth");
   luaL_checktype(L, 3, LUA_TFUNCTION);
   luaL_checktype(L, 4, LUA_TTABLE);
+  /* no need to check the userdata at 5 */
 
-  g_State = L;
-  lua_pushboolean(L, imProcessUnaryPointOp(src_image, dst_image, imluaUnOpFunc, NULL, op_name));
-  g_State = NULL;
+  lua_pushboolean(L, imProcessUnaryPointOp(src_image, dst_image, imluaUnOpFunc, NULL, L, op_name));
 
 #ifdef _OPENMP
-  omp_destroy_lock(&lck);
+  omp_set_num_threads(old_num_threads);
 #endif
 
   return 1;
 }
 
-static int imluaUnColorOpFunc(const float* src_value, float* dst_value, float* params, int x, int y)
+static int imluaUnColorOpFunc(const float* src_value, float* dst_value, float* params, void* userdata, int x, int y)
 {
   int d, n, ret = 0;
-  lua_State *L = g_State;
+  lua_State *L = userdata;
   int src_depth = (int)params[0];
   int dst_depth = (int)params[1];
-
-#ifdef _OPENMP
-  omp_lock_t lck = lua_touserdata(L, -1);
-  omp_set_lock(&lck);
-#endif
 
   lua_pushvalue(L, 3);  /* func is passed in the stack */
   for (d = 0; d < src_depth; d++)
     lua_pushnumber(L, src_value[d]);
   n = imlua_unpacktable(L, 4);  /* params is passed in the stack */
+  lua_pushvalue(L, 5);  /* userdata is passed in the stack */
   lua_pushinteger(L, x);
   lua_pushinteger(L, y);
 
-  lua_call(L, src_depth+n+2, dst_depth);
+  lua_call(L, src_depth+n+3, dst_depth);
 
   if (!lua_isnil(L, -dst_depth))
   {
@@ -1718,10 +1703,6 @@ static int imluaUnColorOpFunc(const float* src_value, float* dst_value, float* p
   }
   lua_pop(L, dst_depth);
 
-#ifdef _OPENMP
-  omp_unset_lock(&lck);
-#endif
-
   return ret;
 }
 
@@ -1729,15 +1710,14 @@ static int imluaProcessUnaryPointColorOp(lua_State *L)
 {
   imImage *src_image = imlua_checkimage(L, 1);
   imImage *dst_image = imlua_checkimage(L, 2);
-  const char *op_name = luaL_optstring(L, 5, NULL);
+  const char *op_name = luaL_optstring(L, 6, NULL);
   int src_depth = src_image->has_alpha? src_image->depth+1: src_image->depth;
   int dst_depth = dst_image->has_alpha? dst_image->depth+1: dst_image->depth;
   float params[2];
 
 #ifdef _OPENMP
-  omp_lock_t lck;
-  omp_init_lock(&lck);
-  lua_pushlightuserdata(L, lck);
+  int old_num_threads = omp_get_num_threads();
+  omp_set_num_threads(1);
 #endif
 
   params[0] = (float)src_depth;
@@ -1748,38 +1728,33 @@ static int imluaProcessUnaryPointColorOp(lua_State *L)
   imlua_matchsize(L, src_image, dst_image);
   luaL_checktype(L, 3, LUA_TFUNCTION);
   luaL_checktype(L, 4, LUA_TTABLE);
+  /* no need to check the userdata at 5 */
 
-  g_State = L;
-  lua_pushboolean(L, imProcessUnaryPointColorOp(src_image, dst_image, imluaUnColorOpFunc, params, op_name));
-  g_State = NULL;
+  lua_pushboolean(L, imProcessUnaryPointColorOp(src_image, dst_image, imluaUnColorOpFunc, params, L, op_name));
 
 #ifdef _OPENMP
-  omp_destroy_lock(&lck);
+  omp_set_num_threads(old_num_threads);
 #endif
 
   return 1;
 }
 
-static int imluaMultiOpFunc(const float* src_value, float *dst_value, float* params, int x, int y, int d)
+static int imluaMultiOpFunc(const float* src_value, float *dst_value, float* params, void* userdata, int x, int y, int d)
 {
-  lua_State *L = g_State;
+  lua_State *L = userdata;
   int ret = 0, n, i, 
     src_count = (int)params[0];
-
-#ifdef _OPENMP
-  omp_lock_t lck = lua_touserdata(L, -1);
-  omp_set_lock(&lck);
-#endif
 
   lua_pushvalue(L, 3);  /* func is passed in the stack */
   for (i = 0; i < src_count; i++)
     lua_pushnumber(L, src_value[i]);
   n = imlua_unpacktable(L, 4);  /* params is passed in the stack */
+  lua_pushvalue(L, 5);  /* userdata is passed in the stack */
   lua_pushinteger(L, x);
   lua_pushinteger(L, y);
   lua_pushinteger(L, d);
 
-  lua_call(L, src_count+n+3, 1);
+  lua_call(L, src_count+n+4, 1);
 
   if (!lua_isnil(L, -1))
   {
@@ -1787,10 +1762,6 @@ static int imluaMultiOpFunc(const float* src_value, float *dst_value, float* par
     ret = 1;
   }
   lua_pop(L, 1);
-
-#ifdef _OPENMP
-  omp_unset_lock(&lck);
-#endif
 
   return ret;
 }
@@ -1800,18 +1771,18 @@ static int imluaProcessMultiPointOp(lua_State *L)
   int src_count;
   imImage **src_image_list;
   imImage *dst_image = imlua_checkimage(L, 2);
-  const char *op_name = luaL_optstring(L, 5, NULL);
+  const char *op_name = luaL_optstring(L, 6, NULL);
   float params[1];
 
 #ifdef _OPENMP
-  omp_lock_t lck;
-  omp_init_lock(&lck);
-  lua_pushlightuserdata(L, lck);
+  int old_num_threads = omp_get_num_threads();
+  omp_set_num_threads(1);
 #endif
 
   imlua_checknotcfloat(L, 1, dst_image);
   luaL_checktype(L, 3, LUA_TFUNCTION);
   luaL_checktype(L, 4, LUA_TTABLE);
+  /* no need to check the userdata at 5 */
 
   /* minimize leak when error, checking array after other checks */
   src_image_list = imlua_toarrayimage(L, 1, &src_count, 1);
@@ -1835,41 +1806,35 @@ static int imluaProcessMultiPointOp(lua_State *L)
 
   params[0] = (float)src_count;
 
-  g_State = L;
-  lua_pushboolean(L, imProcessMultiPointOp(src_image_list, src_count, dst_image, imluaMultiOpFunc, params, op_name));
-  g_State = NULL;
+  lua_pushboolean(L, imProcessMultiPointOp(src_image_list, src_count, dst_image, imluaMultiOpFunc, params, L, op_name));
 
   free(src_image_list);
 
 #ifdef _OPENMP
-  omp_destroy_lock(&lck);
+  omp_set_num_threads(old_num_threads);
 #endif
 
   return 1;
 }
 
-static int imluaMultiColorOpFunc(float* src_value, float *dst_value, float* params, int x, int y)
+static int imluaMultiColorOpFunc(float* src_value, float *dst_value, float* params, void* userdata, int x, int y)
 {
-  lua_State *L = g_State;
+  lua_State *L = userdata;
   int n, d, m, i, ret = 0, 
     src_count = (int)params[0],
     src_depth = (int)params[1],
     dst_depth = (int)params[2];
-
-#ifdef _OPENMP
-  omp_lock_t lck = lua_touserdata(L, -1);
-  omp_set_lock(&lck);
-#endif
 
   lua_pushvalue(L, 3);  /* func is passed in the stack */
   m = src_depth*src_count;
   for (i = 0; i < m; i++)
     lua_pushnumber(L, src_value[i]);
   n = imlua_unpacktable(L, 4);  /* params is passed in the stack */
+  lua_pushvalue(L, 5);  /* userdata is passed in the stack */
   lua_pushinteger(L, x);
   lua_pushinteger(L, y);
 
-  lua_call(L, m+n+2, dst_depth);
+  lua_call(L, m+n+3, dst_depth);
 
   if (!lua_isnil(L, -dst_depth))
   {
@@ -1879,10 +1844,6 @@ static int imluaMultiColorOpFunc(float* src_value, float *dst_value, float* para
   }
   lua_pop(L, dst_depth);
 
-#ifdef _OPENMP
-  omp_unset_lock(&lck);
-#endif
-
   return ret;
 }
 
@@ -1891,18 +1852,18 @@ static int imluaProcessMultiPointColorOp(lua_State *L)
   int src_count, src_depth, dst_depth;
   imImage **src_image_list;
   imImage *dst_image = imlua_checkimage(L, 2);
-  const char *op_name = luaL_optstring(L, 5, NULL);
+  const char *op_name = luaL_optstring(L, 6, NULL);
   float params[3];
 
 #ifdef _OPENMP
-  omp_lock_t lck;
-  omp_init_lock(&lck);
-  lua_pushlightuserdata(L, lck);
+  int old_num_threads = omp_get_num_threads();
+  omp_set_num_threads(1);
 #endif
 
   imlua_checknotcfloat(L, 1, dst_image);
   luaL_checktype(L, 3, LUA_TFUNCTION);
   luaL_checktype(L, 4, LUA_TTABLE);
+  /* no need to check the userdata at 5 */
 
   /* minimize leak when error, checking array after other checks */
   src_image_list = imlua_toarrayimage(L, 1, &src_count, 1);
@@ -1925,14 +1886,12 @@ static int imluaProcessMultiPointColorOp(lua_State *L)
   params[1] = (float)src_depth;
   params[2] = (float)dst_depth;
 
-  g_State = L;
-  lua_pushboolean(L, imProcessMultiPointColorOp(src_image_list, src_count, dst_image, imluaMultiColorOpFunc, params, op_name));
-  g_State = NULL;
+  lua_pushboolean(L, imProcessMultiPointColorOp(src_image_list, src_count, dst_image, imluaMultiColorOpFunc, params, L, op_name));
 
   free(src_image_list);
 
 #ifdef _OPENMP
-  omp_destroy_lock(&lck);
+  omp_set_num_threads(old_num_threads);
 #endif
 
   return 1;
@@ -2612,11 +2571,6 @@ static float imluaRenderFunc (int x, int y, int d, float *params)
   float ret;
   lua_State *L = g_State;
 
-#ifdef _OPENMP
-  omp_lock_t lck = lua_touserdata(L, -1);
-  omp_set_lock(&lck);
-#endif
-
   lua_pushvalue(L, 2);  /* func is passed in the stack */
   lua_pushinteger(L, x);
   lua_pushinteger(L, y);
@@ -2627,10 +2581,6 @@ static float imluaRenderFunc (int x, int y, int d, float *params)
 
   ret = (float) luaL_checknumber(L, -1);
   lua_pop(L, 1);
-
-#ifdef _OPENMP
-  omp_unset_lock(&lck);
-#endif
 
   (void)params; 
   return ret;
@@ -2646,9 +2596,8 @@ static int imluaProcessRenderOp (lua_State *L)
   int plus = luaL_checkint(L, 5);
 
 #ifdef _OPENMP
-  omp_lock_t lck;
-  omp_init_lock(&lck);
-  lua_pushlightuserdata(L, lck);
+  int old_num_threads = omp_get_num_threads();
+  omp_set_num_threads(1);
 #endif
 
   imlua_checknotcfloat(L, 1, image);
@@ -2660,7 +2609,7 @@ static int imluaProcessRenderOp (lua_State *L)
   g_State = NULL;
 
 #ifdef _OPENMP
-  omp_destroy_lock(&lck);
+  omp_set_num_threads(old_num_threads);
 #endif
 
   return 1;
@@ -2670,11 +2619,6 @@ static float imluaRenderCondFunc (int x, int y, int d, int *cond, float *params)
 {
   float ret;
   lua_State *L = g_State;
-
-#ifdef _OPENMP
-  omp_lock_t lck = lua_touserdata(L, -1);
-  omp_set_lock(&lck);
-#endif
 
   lua_pushvalue(L, 2);  /* func is passed in the stack */
   lua_pushinteger(L, x);
@@ -2687,10 +2631,6 @@ static float imluaRenderCondFunc (int x, int y, int d, int *cond, float *params)
   *cond = lua_toboolean(L, -1);
   ret = (float) luaL_checknumber(L, -2);
   lua_pop(L, 2);
-
-#ifdef _OPENMP
-  omp_unset_lock(&lck);
-#endif
 
   (void)params;
   return ret;
@@ -2705,9 +2645,8 @@ static int imluaProcessRenderCondOp (lua_State *L)
   const char *render_name = luaL_checkstring(L, 3);
 
 #ifdef _OPENMP
-  omp_lock_t lck;
-  omp_init_lock(&lck);
-  lua_pushlightuserdata(L, lck);
+  int old_num_threads = omp_get_num_threads();
+  omp_set_num_threads(1);
 #endif
 
   imlua_checknotcfloat(L, 1, image);
@@ -2719,7 +2658,7 @@ static int imluaProcessRenderCondOp (lua_State *L)
   g_State = NULL;
 
 #ifdef _OPENMP
-  omp_destroy_lock(&lck);
+  omp_set_num_threads(old_num_threads);
 #endif
 
   return 1;
@@ -3344,6 +3283,17 @@ static int imluaProcessNormDiffRatio(lua_State *L)
   return 0;
 }
 
+static int imlua_ProcessOpenMPSetMinCount(lua_State *L)
+{
+  lua_pushinteger(L, imProcessOpenMPSetMinCount(luaL_checkint(L, 1)));
+  return 1;
+}
+
+static int imlua_ProcessOpenMPSetNumThreads(lua_State *L)
+{
+  lua_pushinteger(L, imProcessOpenMPSetNumThreads(luaL_checkint(L, 1)));
+  return 1;
+}
 
 static const luaL_reg improcess_lib[] = {
   {"CalcRMSError", imluaCalcRMSError},
@@ -3516,6 +3466,9 @@ static const luaL_reg improcess_lib[] = {
   {"ProcessPosterize", imluaProcessPosterize},
   {"ProcessNormDiffRatio", imluaProcessNormDiffRatio},
 
+  {"ProcessOpenMPSetMinCount", imlua_ProcessOpenMPSetMinCount},
+  {"ProcessOpenMPSetNumThreads", imlua_ProcessOpenMPSetNumThreads},
+
   {NULL, NULL}
 };
 
@@ -3568,6 +3521,9 @@ static const imlua_constant im_process_constants[] = {
 /* from imlua_kernel.c */
 void imlua_open_kernel(lua_State *L);
 
+/* from imlua_convert.c */
+void imlua_open_processconvert(lua_State *L);
+
 int imlua_open_process(lua_State *L)
 {
   luaL_register(L, "im", improcess_lib);   /* leave "im" table at the top of the stack */
@@ -3584,6 +3540,7 @@ int imlua_open_process(lua_State *L)
 #endif
 
   imlua_open_kernel(L);
+  imlua_open_processconvert(L);
   return 1;
 }
 
