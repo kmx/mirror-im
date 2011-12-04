@@ -39,9 +39,9 @@ int imCounterBegin_OMP(const char* title)
     return -1;
 
   int counter = imCounterBegin(title);
-  omp_lock_t lck;
-  omp_init_lock(&lck);
-  imCounterSetUserData(counter, lck);
+  omp_lock_t* lck = new omp_lock_t;
+  omp_init_lock(lck);
+  imCounterSetUserData(counter, (void*)lck);
   return counter;
 }
 
@@ -50,8 +50,10 @@ void imCounterEnd_OMP(int counter)
   if (counter == -1 || !imCounterHasCallback()) 
     return;
 
-  omp_lock_t lck = imCounterGetUserData(counter);
-  omp_destroy_lock(&lck);
+  omp_lock_t* lck = (omp_lock_t*)imCounterGetUserData(counter);
+  omp_destroy_lock(lck);
+  delete lck;
+  imCounterSetUserData(counter, NULL);
   imCounterEnd(counter);
 }
 
@@ -62,10 +64,10 @@ int imCounterInc_OMP(int counter)
   if (counter == -1 || !imCounterHasCallback()) 
     return 1;
 
-  omp_lock_t lck = imCounterGetUserData(counter);
-  omp_set_lock(&lck);
+  omp_lock_t* lck = (omp_lock_t*)imCounterGetUserData(counter);
+  omp_set_lock(lck);
   processing = imCounterInc(counter);
-  omp_unset_lock(&lck);
+  omp_unset_lock(lck);
     
   return processing;
 }

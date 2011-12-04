@@ -16,7 +16,7 @@
 #include <math.h>
 
 
-static imImage* iKernelCreate(int w, int h, int* data, char* desc)
+static imImage* iKernelCreate(int w, int h, int* data, const char* desc)
 {
   imImage* kernel = imImageCreate(w, h, IM_GRAY, IM_INT);
   int* kernel_data = (int*)kernel->data[0];

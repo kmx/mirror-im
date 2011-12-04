@@ -10,7 +10,7 @@
 #include "im_image.h"
 #include "im_convert.h"
 #ifdef IM_PROCESS
-#include "process\im_process_counter.h"
+#include "process/im_process_counter.h"
 #include "im_process_pnt.h"
 #else
 #include "im_counter.h"
