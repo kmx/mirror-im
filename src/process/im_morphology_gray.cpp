@@ -125,7 +125,7 @@ int imProcessGrayMorphConvolve(const imImage* src_image, imImage* dst_image, con
   if (src_image->data_type == IM_FLOAT && kernel->data_type != IM_FLOAT)
   {
     fkernel = imImageCreate(kernel->width, kernel->height, IM_GRAY, IM_FLOAT);
-    imConvertDataType(kernel, fkernel, 0, 0, 0, IM_CAST_DIRECT);
+    imProcessConvertDataType(kernel, fkernel, 0, 0, 0, IM_CAST_DIRECT);
     kernel = fkernel;
   }
 
