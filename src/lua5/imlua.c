@@ -233,7 +233,9 @@ int imlua_open (lua_State *L)
 
   imlua_open_file(L);
   imlua_open_image(L);
+#ifndef IM_PROCESS
   imlua_open_convert(L);
+#endif
   imlua_open_util(L);
   imlua_open_palette(L);
 

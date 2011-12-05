@@ -21,6 +21,10 @@
 #include "fftw.h"
 #endif
 
+#ifdef IM_PROCESS
+#define imConvertDataType imProcessConvertDataType
+#endif
+
 static void iCopyCol(imcfloat *map1, imcfloat *map2, int height, int width1, int width2)
 {
   int i;
