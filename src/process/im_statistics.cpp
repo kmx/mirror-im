@@ -369,10 +369,10 @@ void imCalcPercentMinMax(const imImage* image, float percent, int ignore_zero, i
 
 float imCalcSNR(const imImage* image, const imImage* noise_image)
 {
-  imStats stats[3];
+  imStats stats[4];
   imCalcImageStatistics((imImage*)image, stats);
 
-  imStats noise_stats[3];
+  imStats noise_stats[4];
   imCalcImageStatistics((imImage*)noise_image, noise_stats);
 
   if (image->color_space == IM_RGB)

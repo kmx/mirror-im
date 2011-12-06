@@ -176,3 +176,5 @@ EXPORTS
   imProcessConvertToBitmap
   imProcessOpenMPSetMinCount
   imProcessOpenMPSetNumThreads
+  imProcessCalcAutoGamma
+  imProcessShiftHSI

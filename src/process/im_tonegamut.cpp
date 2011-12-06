@@ -8,9 +8,11 @@
 #include <im.h>
 #include <im_util.h>
 #include <im_math.h>
+#include <im_colorhsi.h>
 
 #include "im_process_counter.h"
 #include "im_process_pnt.h"
+#include "im_process_ana.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -256,6 +258,136 @@ void imProcessToneGamut(const imImage* src_image, imImage* dst_image, int op, fl
     DoNormalizedUnaryOp((float*)src_image->data[0], (float*)dst_image->data[0], count, op, args);
     break;                                                                                
   }
+}
+
+template <class T> 
+static void DoShiftHSI(T **map, T **new_map, int count, float h_shift, float s_shift, float i_shift)
+{
+  float min, max, range;
+  T* tmap = map[0];
+  int tcount = count*3;
+
+  // Compute min-max as float
+  min = (float)tmap[0];
+  max = min;
+  for (int i = 1; i < tcount; i++)
+  {
+    float value = (float)tmap[i];
+    if (value > max)
+      max = value;
+    else if (value < min)
+      min = value;
+  }
+
+  if (min == max)
+  {
+    max = min + 1;
+
+    if (min != 0)
+      min = min - 1;
+  }
+  range = max-min;
+
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+  for (int j = 0; j < count; j++)
+  {
+    float h, s, i;
+    float r, g, b;
+
+    // Normalize to 0-1
+    r = normal_op((float)map[0][j], min, range);
+    g = normal_op((float)map[1][j], min, range);
+    b = normal_op((float)map[2][j], min, range);
+
+    imColorRGB2HSI(r, g, b, &h, &s, &i);
+
+    h += h_shift; // in degrees
+    s += s_shift;
+    if (s < 0) s = 0;
+    if (s > 1) s = 1;
+    i += i_shift;
+    if (i < 0) i = 0;
+    if (i > 1) i = 1;
+
+    imColorHSI2RGB(h, s, i, &r, &g, &b);
+
+    // Expand to min-max
+    new_map[0][j] = (T)(r*range + min);
+    new_map[1][j] = (T)(g*range + min);
+    new_map[2][j] = (T)(b*range + min);
+  }
+}
+
+static void DoShiftHSIByte(imbyte **map, imbyte **new_map, int count, float h_shift, float s_shift, float i_shift)
+{
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+  for (int j = 0; j < count; j++)
+  {
+    float h, s, i;
+    imbyte r, g, b;
+
+    r = map[0][j];
+    g = map[1][j];
+    b = map[2][j];
+
+    imColorRGB2HSIbyte(r, g, b, &h, &s, &i);
+
+    h += h_shift; // in degrees
+    s += s_shift;
+    if (s < 0) s = 0;
+    if (s > 1) s = 1;
+    i += i_shift;
+    if (i < 0) i = 0;
+    if (i > 1) i = 1;
+
+    imColorHSI2RGBbyte(h, s, i, &r, &g, &b);
+
+    new_map[0][j] = r;
+    new_map[1][j] = g;
+    new_map[2][j] = b;
+  }
+}
+
+void imProcessShiftHSI(const imImage* src_image, imImage* dst_image, float h_shift, float s_shift, float i_shift)
+{
+  switch(src_image->data_type)
+  {
+  case IM_BYTE:
+    DoShiftHSIByte((imbyte**)src_image->data, (imbyte**)dst_image->data, src_image->count, h_shift, s_shift, i_shift);
+    break;                                                                                
+  case IM_USHORT:                                                                           
+    DoShiftHSI((imushort**)src_image->data, (imushort**)dst_image->data, src_image->count, h_shift, s_shift, i_shift);
+    break;                                                                                
+  case IM_INT:                                                                           
+    DoShiftHSI((int**)src_image->data, (int**)dst_image->data, src_image->count, h_shift, s_shift, i_shift);
+    break;                                                                                
+  case IM_FLOAT:                                                                           
+    DoShiftHSI((float**)src_image->data, (float**)dst_image->data, src_image->count, h_shift, s_shift, i_shift);
+    break;                                                                                
+  }
+}
+
+float imProcessCalcAutoGamma(const imImage* image)
+{
+  float mean, min, max;
+  imStats stats[4];
+  imCalcImageStatistics(image, stats);
+  mean = stats[0].mean;
+  min = stats[0].min;
+  max = stats[0].max;
+  for (int i = 1; i < image->depth; i++)
+  {
+    if (stats[i].min < min)
+      min = stats[i].min;
+    if (stats[i].max > max)
+      max = stats[i].max;
+
+    mean += stats[i].mean;
+  }
+
+  mean /= (float)image->depth;
+
+  return (float)(log((double)((mean-min)/(max-min)))/log(0.5));
 }
 
 void imProcessUnNormalize(const imImage* image, imImage* NewImage)

@@ -684,6 +684,22 @@ void imProcessDirectConv(const imImage* src_image, imImage* dst_image);
  * \ingroup tonegamut */
 void imProcessNegative(const imImage* src_image, imImage* dst_image);
 
+/** Calculates an automatic gamma factor. \n
+ * gamma=log((mean-min)/(max-min))/log(0.5);
+ * Usefull for \ref imProcessToneGamut when using IM_GAMUT_POW.
+ *
+ * \verbatim im.ProcessCalcAutoGamma(image: imImage) -> gamma: number [in Lua 5] \endverbatim
+ * \ingroup tonegamut */
+float imProcessCalcAutoGamma(const imImage* image);
+
+/** Apply a shift using HSI coordinates. \n
+ * Supports all data types except IM_CFLOAT. \n
+ * Can be done in-place.
+ *
+ * \verbatim im.ProcessShiftHSI(src_image: imImage, dst_image: imImage, h_shift, s_shift, i_shift: number) [in Lua 5] \endverbatim
+ * \verbatim im.ProcessShiftHSI(src_image: imImage, h_shift, s_shift, i_shift: number) -> new_image: imImage [in Lua 5] \endverbatim
+ * \ingroup tonegamut */
+void imProcessShiftHSI(const imImage* src_image, imImage* dst_image, float h_shift, float s_shift, float i_shift);
 
 
 /** \defgroup threshold Threshold Operations

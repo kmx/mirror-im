@@ -2942,14 +2942,6 @@ static int imluaProcessToneGamut (lua_State *L)
   return 0;
 }
 
-static int imluaImageNormalize(lua_State *L)
-{
-  imImage *image = imlua_checkimage(L, 1);
-  imlua_checkdatatype(L, 1, image, IM_FLOAT);
-  imProcessToneGamut(image, image, IM_GAMUT_NORMALIZE, NULL);
-  return 0;
-}
-
 static int imluaImageGamma(lua_State *L)
 {
   float params[1];
@@ -2971,16 +2963,16 @@ static int imluaImageBrightnessContrast(lua_State *L)
   return 0;
 }
 
-//AutoGamma, Enhance, ContrastImage
-//ContrastStretch,  
-//IM_GAMUT_LOG,       
-//IM_GAMUT_EXP,       
-//IM_GAMUT_ZEROSTART, 
-//IM_GAMUT_SOLARIZE,  
-//IM_GAMUT_SLICE,     
-//IM_GAMUT_EXPAND,   Level  LinearStretch
-//IM_GAMUT_CROP,      
-//Posterize, HueSaturation
+static int imluaImageLevel(lua_State *L)
+{
+  float params[2];
+  imImage *image = imlua_checkimage(L, 1);
+  imlua_checknotcfloat(L, 1, image);
+  params[0] = (float)luaL_checknumber(L, 2);
+  params[1] = (float)luaL_checknumber(L, 3);
+  imProcessToneGamut(image, image, IM_GAMUT_EXPAND, params);
+  return 0;
+}
 
 static int imluaImageNegative(lua_State *L)
 {
@@ -3012,6 +3004,14 @@ static int imluaImageAutoLevel(lua_State *L)
   imProcessExpandHistogram(image, image, percent);
   return 0;
 }
+
+static int imluaProcessCalcAutoGamma(lua_State *L)
+{
+  imImage *image = imlua_checkimage(L, 1);
+  lua_pushnumber(L, imProcessCalcAutoGamma(image));
+  return 1;
+}
+
 
 /*****************************************************************************\
  im.ProcessUnNormalize
@@ -3064,6 +3064,19 @@ static int imluaProcessNegative (lua_State *L)
   return 0;
 }
 
+static int imluaProcessShiftHSI(lua_State *L)
+{
+  imImage *src_image = imlua_checkimage(L, 1);
+  imImage *dst_image = imlua_checkimage(L, 2);
+
+  imlua_checknotcfloat(L, 1, src_image);
+  imlua_match(L, src_image, dst_image);
+
+  imProcessShiftHSI(src_image, dst_image, (float)luaL_checknumber(L, 3), 
+                                          (float)luaL_checknumber(L, 4), 
+                                          (float)luaL_checknumber(L, 5));
+  return 0;
+}
 
 
 /*****************************************************************************\
@@ -3518,6 +3531,8 @@ static const luaL_reg improcess_lib[] = {
   {"ProcessUnNormalize", imluaProcessUnNormalize},
   {"ProcessDirectConv", imluaProcessDirectConv},
   {"ProcessNegative", imluaProcessNegative},
+  {"ProcessCalcAutoGamma", imluaProcessCalcAutoGamma},
+  {"ProcessShiftHSI", imluaProcessShiftHSI},
 
   {"ProcessRangeContrastThreshold", imluaProcessRangeContrastThreshold},
   {"ProcessLocalMaxThreshold", imluaProcessLocalMaxThreshold},
@@ -3544,12 +3559,12 @@ static const luaL_reg improcess_lib[] = {
 };
 
 static const luaL_reg imimageprocess_lib[] = {
-  {"Normalize", imluaImageNormalize},
   {"Gamma", imluaImageGamma},
   {"Negative", imluaImageNegative},
   {"BrightnessContrast", imluaImageBrightnessContrast},
   {"Equalize", imluaImageEqualize},
   {"AutoLevel", imluaImageAutoLevel},
+  {"Level", imluaImageLevel},
 
   {NULL, NULL}
 };
