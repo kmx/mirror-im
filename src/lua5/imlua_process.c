@@ -2942,6 +2942,77 @@ static int imluaProcessToneGamut (lua_State *L)
   return 0;
 }
 
+static int imluaImageNormalize(lua_State *L)
+{
+  imImage *image = imlua_checkimage(L, 1);
+  imlua_checkdatatype(L, 1, image, IM_FLOAT);
+  imProcessToneGamut(image, image, IM_GAMUT_NORMALIZE, NULL);
+  return 0;
+}
+
+static int imluaImageGamma(lua_State *L)
+{
+  float params[1];
+  imImage *image = imlua_checkimage(L, 1);
+  imlua_checknotcfloat(L, 1, image);
+  params[0] = (float)luaL_checknumber(L, 2);
+  imProcessToneGamut(image, image, IM_GAMUT_POW, params);
+  return 0;
+}
+
+static int imluaImageBrightnessContrast(lua_State *L)
+{
+  float params[2];
+  imImage *image = imlua_checkimage(L, 1);
+  imlua_checknotcfloat(L, 1, image);
+  params[0] = (float)luaL_checknumber(L, 2);
+  params[1] = (float)luaL_checknumber(L, 3);
+  imProcessToneGamut(image, image, IM_GAMUT_BRIGHTCONT, params);
+  return 0;
+}
+
+//AutoGamma, Enhance, ContrastImage
+//ContrastStretch,  
+//IM_GAMUT_LOG,       
+//IM_GAMUT_EXP,       
+//IM_GAMUT_ZEROSTART, 
+//IM_GAMUT_SOLARIZE,  
+//IM_GAMUT_SLICE,     
+//IM_GAMUT_EXPAND,   Level  LinearStretch
+//IM_GAMUT_CROP,      
+//Posterize, HueSaturation
+
+static int imluaImageNegative(lua_State *L)
+{
+  imImage *image = imlua_checkimage(L, 1);
+  imlua_checknotcfloat(L, 1, image);
+  imProcessNegative(image, image);
+  return 0;
+}
+
+static int imluaImageEqualize(lua_State *L)
+{
+  imImage *image = imlua_checkimage(L, 1);
+  if (image->data_type != IM_BYTE && image->data_type != IM_USHORT)
+    luaL_argerror(L, 1, "data type must be byte or ushort");
+  if (image->color_space != IM_RGB && image->color_space != IM_GRAY)
+    luaL_argerror(L, 1, "color space must be RGB or Gray");
+  imProcessEqualizeHistogram(image, image);
+  return 0;
+}
+
+static int imluaImageAutoLevel(lua_State *L)
+{
+  imImage *image = imlua_checkimage(L, 1);
+  float percent = (float)luaL_optnumber(L, 2, 0);
+  if (image->data_type != IM_BYTE && image->data_type != IM_USHORT)
+    luaL_argerror(L, 1, "data type must be byte or ushort");
+  if (image->color_space != IM_RGB && image->color_space != IM_GRAY)
+    luaL_argerror(L, 1, "color space must be RGB or Gray");
+  imProcessExpandHistogram(image, image, percent);
+  return 0;
+}
+
 /*****************************************************************************\
  im.ProcessUnNormalize
 \*****************************************************************************/
@@ -3472,6 +3543,17 @@ static const luaL_reg improcess_lib[] = {
   {NULL, NULL}
 };
 
+static const luaL_reg imimageprocess_lib[] = {
+  {"Normalize", imluaImageNormalize},
+  {"Gamma", imluaImageGamma},
+  {"Negative", imluaImageNegative},
+  {"BrightnessContrast", imluaImageBrightnessContrast},
+  {"Equalize", imluaImageEqualize},
+  {"AutoLevel", imluaImageAutoLevel},
+
+  {NULL, NULL}
+};
+
 /*****************************************************************************\
  Constants
 \*****************************************************************************/
@@ -3528,6 +3610,10 @@ int imlua_open_process(lua_State *L)
 {
   luaL_register(L, "im", improcess_lib);   /* leave "im" table at the top of the stack */
   imlua_regconstants(L, im_process_constants);
+
+  luaL_getmetatable(L, "imImage");
+  luaL_register(L, NULL, imimageprocess_lib);
+  lua_pop(L, 1);
 
 #ifdef IMLUA_USELOH
 #include "im_process.loh"

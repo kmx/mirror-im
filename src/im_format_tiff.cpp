@@ -1246,7 +1246,7 @@ static void iTIFFExpandComplexInt(void* line_buffer, int count, int cpx_int)
 {
   count *= 2;
 
-  // conversion will be done in place
+  // conversion will be done in-place
 
   if (cpx_int == 1)
   {

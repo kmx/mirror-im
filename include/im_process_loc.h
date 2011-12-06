@@ -69,7 +69,7 @@ void imProcessCrop(const imImage* src_image, imImage* dst_image, int xmin, int y
 /** Insert a rectangular region in an image. \n
  * Images must be of the same type. Region image size can be larger than source image. \n
  * ymin and xmin must be >0 and <size. \n
- * Source and destiny must be of the same size. Can be done in place.
+ * Source and destiny must be of the same size. Can be done in-place.
  *
  * \verbatim im.ProcessInsert(src_image: imImage, region_image: imImage, dst_image: imImage, xmin: number, ymin: number) [in Lua 5] \endverbatim
  * \verbatim im.ProcessInsertNew(image: imImage, region_image: imImage, xmin: number, ymin: number) -> new_image: imImage [in Lua 5] \endverbatim

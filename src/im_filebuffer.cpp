@@ -275,7 +275,7 @@ static void iDoFillDataBitmap(int width, int height, int line, int plane, int da
         if (imColorModeSpace(file_color_mode) == IM_CMYK)
           src_data[3] = line_buffer[x_file_offset + 3];
 
-        // Do conversion in place
+        // Do conversion in-place
         iConvertColor2RGB(src_data, imColorModeSpace(file_color_mode), data_type);
 
         if (imColorModeIsPacked(user_color_mode))
@@ -326,7 +326,7 @@ static void iDoFillDataBitmap(int width, int height, int line, int plane, int da
 
 static void iFileExpandBits(imFile* ifile)
 {
-  // conversion will be done in place in backward order (from end to start)
+  // conversion will be done in-place in backward order (from end to start)
 
   if (abs(ifile->convert_bpp) < 8)
   {
@@ -375,7 +375,7 @@ static void iFileExpandBits(imFile* ifile)
 
 static void iFileCompactBits(imFile* ifile)
 {
-  // conversion will be done in place
+  // conversion will be done in-place
   imbyte* byte_buffer = (imbyte*)ifile->line_buffer;
   imbyte* bit_buffer = (imbyte*)ifile->line_buffer;
 

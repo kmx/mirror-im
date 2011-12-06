@@ -28,7 +28,7 @@ typedef int (*imUnaryPointOpFunc)(float src_value, float *dst_value, float* para
 
 /** Apply an unary point operation using a custom function.
  * One pixel from the source affects the same pixel on destiny. \n
- * Can be done in place, images must match size and depth. 
+ * Can be done in-place, images must match size and depth. 
  * Data type can be different, but IM_CFLOAT is not supported. \n
  * op_name is used only by the counter and can be NULL. Data will be set only if cond is true. 
  * Returns zero if the counter aborted.
@@ -50,7 +50,7 @@ typedef int (*imUnaryPointColorOpFunc)(const float* src_value, float *dst_value,
 
 /** Apply an unary point color operation using a custom function.
  * One pixel from the source affects the same pixel on destiny. \n
- * Can be done in place, images must match size, depth can be different.
+ * Can be done in-place, images must match size, depth can be different.
  * Data type can be different, but IM_CFLOAT is not supported. \n
  * op_name is used only by the counter and can be NULL. Data will be set only if cond is true. 
  * Returns zero if the counter aborted.
@@ -72,7 +72,7 @@ typedef int (*imMultiPointOpFunc)(const float* src_value, float *dst_value, floa
 /** Apply an multiple point operation using a custom function.
  * One pixel from each source affects the same pixel on destiny. \n
  * All source images must match in size, depth and data type.
- * Can be done in place, source and destiny must match size and depth.
+ * Can be done in-place, source and destiny must match size and depth.
  * Data type can be different between sources and destiny, but IM_CFLOAT is not supported. \n
  * op_name is used only by the counter and can be NULL. Data will be set only if cond is true. 
  * Returns zero if the counter aborted.
@@ -95,7 +95,7 @@ typedef int (*imMultiPointColorOpFunc)(float* src_value, float* dst_value, float
 /** Apply an multiple point color operation using a custom function.
  * One pixel from each source affects the same pixel on destiny. \n
  * All source images must match in size, depth and data type.
- * Can be done in place, source and destiny must match size, depth can be different.
+ * Can be done in-place, source and destiny must match size, depth can be different.
  * Data type can be different between sources and destiny, but IM_CFLOAT is not supported. \n
  * op_name is used only by the counter and can be NULL. Data will be set only if cond is true. 
  * Returns zero if the counter aborted.
@@ -135,7 +135,7 @@ enum imUnaryOp {
 };
 
 /** Apply an arithmetic unary operation. \n
- * Can be done in place, images must match size. \n
+ * Can be done in-place, images must match size. \n
  * Destiny image can be several types depending on source: \n
  * \li byte -> byte, ushort, int, float
  * \li ushort -> byte, ushort, int, float
@@ -164,7 +164,7 @@ enum imBinaryOp {
 };
 
 /** Apply a binary arithmetic operation. \n
- * Can be done in place, images must match size. \n
+ * Can be done in-place, images must match size. \n
  * Source images must match type, destiny image can be several types depending on source: \n
  * \li byte -> byte, ushort, int, float
  * \li ushort -> ushort, int, float
@@ -182,7 +182,7 @@ enum imBinaryOp {
 void imProcessArithmeticOp(const imImage* src_image1, const imImage* src_image2, imImage* dst_image, int op);
 
 /** Apply a binary arithmetic operation with a constant value. \n
- * Can be done in place, images must match size. \n
+ * Can be done in-place, images must match size. \n
  * Destiny image can be several types depending on source: \n
  * \li byte -> byte, ushort, int, float
  * \li ushort -> byte, ushort, int, float
@@ -198,7 +198,7 @@ void imProcessArithmeticOp(const imImage* src_image1, const imImage* src_image2,
 void imProcessArithmeticConstOp(const imImage* src_image, float src_const, imImage* dst_image, int op);
 
 /** Blend two images using an alpha value = [a * alpha + b * (1 - alpha)]. \n
- * Can be done in place, images must match size and type. \n
+ * Can be done in-place, images must match size and type. \n
  * alpha value must be in the interval [0.0 - 1.0].
  *
  * \verbatim im.ProcessBlendConst(src_image1: imImage, src_image2: imImage, dst_image: imImage, alpha: number) [in Lua 5] \endverbatim
@@ -207,7 +207,7 @@ void imProcessArithmeticConstOp(const imImage* src_image, float src_const, imIma
 void imProcessBlendConst(const imImage* src_image1, const imImage* src_image2, imImage* dst_image, float alpha);
 
 /** Blend two images using an alpha channel = [a * alpha + b * (1 - alpha)]. \n
- * Can be done in place, images must match size and type. \n
+ * Can be done in-place, images must match size and type. \n
  * alpha_image must have the same data type except for complex images that must be float, and color_space must be IM_GRAY.
  * integer alpha values must be:
 \verbatim 
@@ -222,7 +222,7 @@ void imProcessBlendConst(const imImage* src_image1, const imImage* src_image2, i
 void imProcessBlend(const imImage* src_image1, const imImage* src_image2, const imImage* alpha_image, imImage* dst_image);
 
 /** Compose two images that have an alpha channel using the OVER operator. \n
- * Can be done in place, images must match size and type. \n
+ * Can be done in-place, images must match size and type. \n
  * Integer alpha values must be:
 \verbatim 
 0 - 255        IM_BYTE  
@@ -306,7 +306,7 @@ void imProcessMultiplyConj(const imImage* src_image1, const imImage* src_image2,
 void imProcessQuantizeRGBUniform(const imImage* src_image, imImage* dst_image, int do_dither);
 
 /** Quantizes a gray scale image in less that 256 grays using uniform quantization. \n
- * Both images must be IM_BYTE/IM_GRAY. Can be done in place. 
+ * Both images must be IM_BYTE/IM_GRAY. Can be done in-place. 
  *
  * \verbatim im.ProcessQuantizeGrayUniform(src_image: imImage, dst_image: imImage, grays: number) [in Lua 5] \endverbatim
  * \verbatim im.ProcessQuantizeGrayUniformNew(src_image: imImage, grays: number) -> new_image: imImage [in Lua 5] \endverbatim
@@ -322,8 +322,8 @@ void imProcessQuantizeGrayUniform(const imImage* src_image, imImage* dst_image, 
 
 /** Performs an histogram expansion based on a percentage of the number of pixels. \n
  * Percentage defines an amount of pixels to include at the lowest level and at the highest level.
- * If its is zero only empty counts of the histogram will be considered. \n
- * Images must be (IM_BYTE or IM_USHORT)/(IM_RGB or IM_GRAY). Can be done in place. \n
+ * If it is zero, then only empty counts of the histogram will be considered. \n
+ * Images must be (IM_BYTE or IM_USHORT)/(IM_RGB or IM_GRAY). Can be done in-place. \n
  * To expand the gammut without using the histogram, by just specifing the lowest and highest levels
  * use the \ref IM_GAMUT_EXPAND tone gammut operation (\ref imProcessToneGamut).
  *
@@ -333,7 +333,7 @@ void imProcessQuantizeGrayUniform(const imImage* src_image, imImage* dst_image, 
 void imProcessExpandHistogram(const imImage* src_image, imImage* dst_image, float percent);
 
 /** Performs an histogram equalization. \n
- * Images must be (IM_BYTE or IM_USHORT)/(IM_RGB or IM_GRAY). Can be done in place. 
+ * Images must be (IM_BYTE or IM_USHORT)/(IM_RGB or IM_GRAY). Can be done in-place. 
  *
  * \verbatim im.ProcessEqualizeHistogram(src_image: imImage, dst_image: imImage) [in Lua 5] \endverbatim
  * \verbatim im.ProcessEqualizeHistogramNew(src_image: imImage) -> new_image: imImage [in Lua 5] \endverbatim
@@ -443,7 +443,7 @@ enum imLogicOp {
 };
 
 /** Apply a logical operation.\n
- * Images must have data type IM_BYTE, IM_USHORT or IM_INT. Can be done in place. 
+ * Images must have data type IM_BYTE, IM_USHORT or IM_INT. Can be done in-place. 
  *
  * \verbatim im.ProcessBitwiseOp(src_image1: imImage, src_image2: imImage, dst_image: imImage, op: number) [in Lua 5] \endverbatim
  * \verbatim im.ProcessBitwiseOpNew(src_image1: imImage, src_image2: imImage, op: number) -> new_image: imImage [in Lua 5] \endverbatim
@@ -451,7 +451,7 @@ enum imLogicOp {
 void imProcessBitwiseOp(const imImage* src_image1, const imImage* src_image2, imImage* dst_image, int op);
 
 /** Apply a logical NOT operation.\n
- * Images must have data type IM_BYTE, IM_USHORT or IM_INT. Can be done in place. 
+ * Images must have data type IM_BYTE, IM_USHORT or IM_INT. Can be done in-place. 
  *
  * \verbatim im.ProcessBitwiseNot(src_image: imImage, dst_image: imImage) [in Lua 5] \endverbatim
  * \verbatim im.ProcessBitwiseNotNew(src_image: imImage) -> new_image: imImage [in Lua 5] \endverbatim
@@ -460,7 +460,7 @@ void imProcessBitwiseNot(const imImage* src_image, imImage* dst_image);
 
 /** Apply a bit mask. \n
  * The same as imProcessBitwiseOp but the second image is replaced by a fixed mask. \n
- * Images must have data type IM_BYTE. It is valid only for AND, OR and XOR. Can be done in place.
+ * Images must have data type IM_BYTE. It is valid only for AND, OR and XOR. Can be done in-place.
  *
  * \verbatim im.ProcessBitMask(src_image: imImage, dst_image: imImage, mask: string, op: number) [in Lua 5] \endverbatim
  * \verbatim im.ProcessBitMaskNew(src_image: imImage, mask: string, op: number) -> new_image: imImage [in Lua 5] \endverbatim
@@ -469,7 +469,7 @@ void imProcessBitwiseNot(const imImage* src_image, imImage* dst_image);
 void imProcessBitMask(const imImage* src_image, imImage* dst_image, unsigned char mask, int op);
 
 /** Extract or Reset a bit plane. For ex: 000X0000 or XXX0XXXX (plane=3).\n
- * Images must have data type IM_BYTE. Can be done in place. 
+ * Images must have data type IM_BYTE. Can be done in-place. 
  *
  * \verbatim im.ProcessBitPlane(src_image: imImage, dst_image: imImage, plane: number, do_reset: boolean) [in Lua 5] \endverbatim
  * \verbatim im.ProcessBitPlaneNew(src_image: imImage, plane: number, do_reset: boolean) -> new_image: imImage [in Lua 5] \endverbatim
@@ -480,7 +480,7 @@ void imProcessBitPlane(const imImage* src_image, imImage* dst_image, int plane, 
 
 /** \defgroup render Synthetic Image Render
  * \par
- * Renders some 2D mathematical functions as images. All the functions operates in place 
+ * Renders some 2D mathematical functions as images. All the functions operates in-place 
  * and supports all data types except IM_CFLOAT.
  * \par
  * See \ref im_process_pon.h
@@ -513,21 +513,21 @@ int imProcessRenderOp(imImage* image, imRenderFunc render_func, const char* rend
  * \ingroup render */
 int imProcessRenderCondOp(imImage* image, imRenderCondFunc render_cond_func, const char* render_name, float* params);
 
-/** Render speckle noise on existing data. Can be done in place.
+/** Render speckle noise on existing data. Can be done in-place.
  *
  * \verbatim im.ProcessRenderAddSpeckleNoise(src_image: imImage, dst_image: imImage, percent: number) -> counter: boolean [in Lua 5] \endverbatim
  * \verbatim im.ProcessRenderAddSpeckleNoiseNew(src_image: imImage, percent: number) -> counter: boolean, new_image: imImage [in Lua 5] \endverbatim
  * \ingroup render */
 int imProcessRenderAddSpeckleNoise(const imImage* src_image, imImage* dst_image, float percent);
 
-/** Render gaussian noise on existing data. Can be done in place.
+/** Render gaussian noise on existing data. Can be done in-place.
  *
  * \verbatim im.ProcessRenderAddGaussianNoise(src_image: imImage, dst_image: imImage, mean: number, stddev: number) -> counter: boolean [in Lua 5] \endverbatim
  * \verbatim im.ProcessRenderAddGaussianNoiseNew(src_image: imImage, mean: number, stddev: number) -> counter: boolean, new_image: imImage [in Lua 5] \endverbatim
  * \ingroup render */
 int imProcessRenderAddGaussianNoise(const imImage* src_image, imImage* dst_image, float mean, float stddev);
 
-/** Render uniform noise on existing data. Can be done in place.
+/** Render uniform noise on existing data. Can be done in-place.
  *
  * \verbatim im.ProcessRenderAddUniformNoise(src_image: imImage, dst_image: imImage, mean: number, stddev: number) -> counter: boolean [in Lua 5] \endverbatim
  * \verbatim im.ProcessRenderAddUniformNoiseNew(src_image: imImage, mean: number, stddev: number) -> counter: boolean, new_image: imImage [in Lua 5] \endverbatim
@@ -652,7 +652,7 @@ enum imToneGamut {
  * Supports all data types except IM_CFLOAT. \n
  * The linear operation do a special convertion when min > 0 and max < 1, it forces min=0 and max=1. \n
  * IM_BYTE images have min=0 and max=255 always. \n
- * Can be done in place. When there is no extra params, can use NULL.
+ * Can be done in-place. When there is no extra params, can use NULL.
  *
  * \verbatim im.ProcessToneGamut(src_image: imImage, dst_image: imImage, op: number, params: table of number) [in Lua 5] \endverbatim
  * \verbatim im.ProcessToneGamutNew(src_image: imImage, op: number, params: table of number) -> new_image: imImage [in Lua 5] \endverbatim
@@ -677,7 +677,7 @@ void imProcessDirectConv(const imImage* src_image, imImage* dst_image);
 
 /** A negative effect. Uses \ref imProcessToneGamut with IM_GAMUT_INVERT for non MAP images. \n
  * Supports all color spaces and all data types except IM_CFLOAT. \n
- * Can be done in place. 
+ * Can be done in-place. 
  *
  * \verbatim im.ProcessNegative(src_image: imImage, dst_image: imImage) [in Lua 5] \endverbatim
  * \verbatim im.ProcessNegativeNew(src_image: imImage) -> new_image: imImage [in Lua 5] \endverbatim
@@ -695,7 +695,7 @@ void imProcessNegative(const imImage* src_image, imImage* dst_image);
 
 /** Apply a manual threshold. \n
  * threshold = a <= level ? 0: value \n
- * Normal value is 1 but another common value is 255. Can be done in place for IM_BYTE source. \n
+ * Normal value is 1 but another common value is 255. Can be done in-place for IM_BYTE source. \n
  * Source color space must be IM_GRAY, and destiny color space must be IM_BINARY.
  * IM_CFLOAT is not supported. \n
  *
@@ -707,7 +707,7 @@ void imProcessThreshold(const imImage* src_image, imImage* dst_image, float leve
 /** Apply a threshold by the difference of two images. \n
  * threshold = a1 <= a2 ? 0: 1   \n
  * Source color space must be IM_GRAY, and destiny color space must be IM_BINARY.
- * IM_CFLOAT is not supported. Can be done in place for IM_BYTE source. \n
+ * IM_CFLOAT is not supported. Can be done in-place for IM_BYTE source. \n
  *
  * \verbatim im.ProcessThresholdByDiff(src_image1: imImage, src_image2: imImage, dst_image: imImage) [in Lua 5] \endverbatim
  * \verbatim im.ProcessThresholdByDiffNew(src_image1: imImage, src_image2: imImage) -> new_image: imImage [in Lua 5] \endverbatim
@@ -787,7 +787,7 @@ int imProcessOtsuThreshold(const imImage* src_image, imImage* dst_image);
 /** Calculates the threshold level for manual threshold using (max-min)/2. \n
  * Returns the used level. \n
  * Source color space must be IM_GRAY, and destiny color space must be IM_BINARY.
- * IM_CFLOAT is not supported. Can be done in place for IM_BYTE source. \n
+ * IM_CFLOAT is not supported. Can be done in-place for IM_BYTE source. \n
  *
  * \verbatim im.ProcessMinMaxThreshold(src_image: imImage, dst_image: imImage) -> level: number [in Lua 5] \endverbatim
  * \verbatim im.ProcessMinMaxThresholdNew(src_image: imImage) -> level: number, new_image: imImage [in Lua 5] \endverbatim
@@ -804,7 +804,7 @@ void imProcessLocalMaxThresEstimate(const imImage* image, int *level);
  * threshold = start_level <= a <= end_level ? 1: 0 \n
  * Normal value is 1 but another common value is 255. \n
  * Source color space must be IM_GRAY, and destiny color space must be IM_BINARY.
- * IM_CFLOAT is not supported. Can be done in place for IM_BYTE source. \n
+ * IM_CFLOAT is not supported. Can be done in-place for IM_BYTE source. \n
  *
  * \verbatim im.ProcessSliceThreshold(src_image: imImage, dst_image: imImage, start_level: number, end_level: number) [in Lua 5] \endverbatim
  * \verbatim im.ProcessSliceThresholdNew(src_image: imImage, start_level: number, end_level: number) -> new_image: imImage [in Lua 5] \endverbatim

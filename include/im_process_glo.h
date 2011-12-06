@@ -44,7 +44,7 @@ int imProcessHoughLines(const imImage* src_image, imImage* dst_image);
 
 /** Draw detected hough lines. \n
  * The source image must be IM_GRAY and IM_BYTE. The destiny image can be a clone of the source image or 
- * it can be the source image for in place processing. \n
+ * it can be the source image for in-place processing. \n
  * If the hough transform is not NULL, then the hough points are filtered to include only lines
  * that are significally different from each other. \n
  * The hough image is the hough transform image, but it is optional and can be NULL. 
