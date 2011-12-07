@@ -66,7 +66,8 @@ enum imErrorCodes
   IM_ERR_COUNTER   /**< Interrupted by the counter */
 };
 
-/* Internal Image File Structure. */
+/** \brief Image File Structure (Private).
+ * \ingroup file */
 typedef struct _imFile imFile;
 
 /** Opens the file for reading. It must exists. Also reads file header.

@@ -8,7 +8,7 @@
 #define __IM_PLUS_H
 
  
-/** \brief C++ Wrapper for the Image File Structure
+/** \brief Image File Wrapper Class
  *
  * \par
  * Usage is just like the C API. Open and New are replaced by equivalent constructors. \n

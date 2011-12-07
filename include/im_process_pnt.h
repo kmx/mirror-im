@@ -13,9 +13,9 @@
 extern "C" {
 #endif
 
-/** \defgroup point Point Custom Operations 
+/** \defgroup point Point Based Custom Operations 
  * \par
- * See \ref im_process_pon.h
+ * See \ref im_process_pnt.h
  * \ingroup process */
 
 
@@ -113,7 +113,7 @@ int imProcessMultiPointColorOp(const imImage** src_image, int src_count, imImage
  * \par
  * Simple math operations for images.
  * \par
- * See \ref im_process_pon.h
+ * See \ref im_process_pnt.h
  * \ingroup process */
 
 /** Unary Arithmetic Operations. \n
@@ -294,7 +294,7 @@ void imProcessMultiplyConj(const imImage* src_image1, const imImage* src_image2,
  * \par
  * Additionally operations to the \ref imConvertColorSpace function.
  * \par
- * See \ref im_process_pon.h
+ * See \ref im_process_pnt.h
  * \ingroup process */
 
 /** Converts a RGB image to a MAP image using uniform quantization 
@@ -317,7 +317,7 @@ void imProcessQuantizeGrayUniform(const imImage* src_image, imImage* dst_image, 
 
 /** \defgroup histo Histogram Based Operations
  * \par
- * See \ref im_process_pon.h
+ * See \ref im_process_pnt.h
  * \ingroup process */
 
 /** Performs an histogram expansion based on a percentage of the number of pixels. \n
@@ -346,7 +346,7 @@ void imProcessEqualizeHistogram(const imImage* src_image, imImage* dst_image);
  * \par
  * Operations to change the color components configuration.
  * \par
- * See \ref im_process_pon.h
+ * See \ref im_process_pnt.h
  * \ingroup process */
 
 /** Split a RGB image into luma and chroma. \n
@@ -431,7 +431,7 @@ void imProcessSetAlphaColor(const imImage* src_image, imImage* dst_image, float*
  * \par
  * Logical binary math operations for images.
  * \par
- * See \ref im_process_pon.h
+ * See \ref im_process_pnt.h
  * \ingroup process */
 
 /** Logical Operations.
@@ -483,7 +483,7 @@ void imProcessBitPlane(const imImage* src_image, imImage* dst_image, int plane, 
  * Renders some 2D mathematical functions as images. All the functions operates in-place 
  * and supports all data types except IM_CFLOAT.
  * \par
- * See \ref im_process_pon.h
+ * See \ref im_process_pnt.h
  * \ingroup process */
 
 /** Render Funtion.
@@ -618,7 +618,7 @@ int imProcessRenderChessboard(imImage* image, int x_space, int y_space);
  * \par
  * Operations that try to preserve the min-max interval in the output (the dynamic range).
  * \par
- * See \ref im_process_pon.h
+ * See \ref im_process_pnt.h
  * \ingroup process */
 
 
@@ -656,6 +656,7 @@ enum imToneGamut {
  *
  * \verbatim im.ProcessToneGamut(src_image: imImage, dst_image: imImage, op: number, params: table of number) [in Lua 5] \endverbatim
  * \verbatim im.ProcessToneGamutNew(src_image: imImage, op: number, params: table of number) -> new_image: imImage [in Lua 5] \endverbatim
+ * See also \ref imageenhance.
  * \ingroup tonegamut */
 void imProcessToneGamut(const imImage* src_image, imImage* dst_image, int op, float* params);
 
@@ -706,7 +707,7 @@ void imProcessShiftHSI(const imImage* src_image, imImage* dst_image, float h_shi
  * \par
  * Operations that converts a usually IM_GRAY/IM_BYTE image into a IM_BINARY image using several threshold techniques.
  * \par
- * See \ref im_process_pon.h
+ * See \ref im_process_pnt.h
  * \ingroup process */
 
 /** Apply a manual threshold. \n
@@ -832,7 +833,7 @@ void imProcessSliceThreshold(const imImage* src_image, imImage* dst_image, float
  * \par
  * Operations to change image appearance.
  * \par
- * See \ref im_process_pon.h
+ * See \ref im_process_pnt.h
  * \ingroup process */
 
 
@@ -858,7 +859,7 @@ void imProcessPosterize(const imImage* src_image, imImage* dst_image, int level)
  * \par
  * Operations used in Remote Sensing.
  * \par
- * See \ref im_process_pon.h
+ * See \ref im_process_pnt.h
  * \ingroup process */
 
 
@@ -877,7 +878,7 @@ void imProcessNormDiffRatio(const imImage* image1, const imImage* image2, imImag
  * \par
  * Same as imConvert functions but using OpenMP when enabled.
  * \par
- * See \ref im_process_pon.h
+ * See \ref im_process_pnt.h
  * \ingroup process */
 
 
@@ -904,6 +905,24 @@ int imProcessConvertColorSpace(const imImage* src_image, imImage* dst_image);
  * \verbatim im.ProcessConvertToBitmapNew(image: imImage, color_space: number, has_alpha: boolean, cpx2real: number, gamma: number, abssolute: boolean, cast_mode: number) -> error: number, new_image: imImage [in Lua 5] \endverbatim
  * \ingroup procconvert */
 int imProcessConvertToBitmap(const imImage* src_image, imImage* dst_image, int cpx2real, float gamma, int abssolute, int cast_mode);
+
+
+/** \defgroup imageenhance Image Enhance Utilities in Lua
+ * \par
+ * Operations are done in-place. Limitations are the same of the original functions.
+ * \par
+ * \verbatim
+ image:AutoLevel(percent) same as \ref imProcessExpandHistogram
+ image:Equalize()         same as \ref imProcessEqualizeHistogram
+ image:Negative()         same as \ref imProcessNegative
+                     also same as \ref imProcessToneGamut using \ref IM_GAMUT_INVERT
+ image:Level(start, end)  same as \ref imProcessToneGamut using \ref IM_GAMUT_EXPAND
+ image:BrightnessContrast(bright_shift, contrast_factor: number)    
+                          same as \ref imProcessToneGamut using \ref IM_GAMUT_BRIGHTCONT
+ image:Gamma(gamma)       same as \ref imProcessToneGamut using \ref IM_GAMUT_POW
+ * \endverbatim
+ * See \ref im_process_pnt.h
+ * \ingroup process */
 
 
 

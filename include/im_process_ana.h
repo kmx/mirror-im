@@ -15,7 +15,7 @@ extern "C" {
 
 
 
-/** \defgroup stats Image Statistics Calculations
+/** \defgroup stats Image Statistics
  * \par
  * Operations to calculate some statistics over images.
  * \par
@@ -70,7 +70,8 @@ void imCalcUShortHistogram(const unsigned short* data, int count, unsigned long*
  * \ingroup stats */
 void imCalcGrayHistogram(const imImage* image, unsigned long* histo, int cumulative);
 
-/** Numerical Statistics Structure
+
+/** \brief Numerical Statistics Structure
  * \ingroup stats */
 typedef struct _imStats
 {

@@ -28,7 +28,7 @@ extern "C" {
 
 
 
-/** \brief imImage Structure Definition.  
+/** \brief Image Representation Structure
  *
  * \par
  * An image representation than supports all the color spaces, 

@@ -28,6 +28,8 @@ extern "C" {
  * See \ref im_binfile.h
  * \ingroup util */
 
+/** \brief Binary File Structure (Private).
+ * \ingroup binfile */
 typedef struct _imBinFile imBinFile;
 
 /** Opens an existant binary file for reading.
@@ -124,7 +126,7 @@ enum imBinFileModule
  * \ingroup binfile */
 int imBinFileSetCurrentModule(int pModule);
 
-/** \brief Memory File I/O Filename
+/** \brief Memory File Filename Parameter Structure
  *
  * \par
  *  Fake file name for the memory I/O module.
@@ -152,7 +154,9 @@ void imBinMemoryRelease(unsigned char *buffer);
 
 #if	defined(__cplusplus)
 
-/** Base class to help the creation of new modules.\n
+/** \brief Binary File I/O Base Class
+ *
+ * Base class to help the creation of new modules.\n
  * It handles the read/write operations with byte order correction if necessary.
  * \ingroup binfile */
 class imBinFileBase

@@ -13,7 +13,7 @@
 
 class imFormat;
 
-/** \brief Image File Format Virtual Class (SDK Use Only) 
+/** \brief Image File Format Virtual Base Class (SDK Use Only) 
  * 
  * \par
  * Virtual Base class for file formats. All file formats inherit from this class.
@@ -40,7 +40,7 @@ public:
   virtual int WriteImageData(void* data) = 0;  // Must update image_count
 };
 
-/** \brief Image File Format Descriptor (SDK Use Only) 
+/** \brief Image File Format Descriptor Class (SDK Use Only) 
  * 
  * \par
  * All file formats must define these informations. They are stored by \ref imFormatRegister.

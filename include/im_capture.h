@@ -29,6 +29,8 @@ extern "C" {
  * See \ref im_capture.h
  */
 
+/** \brief Video Capture Structure (Private).
+ * \ingroup capture */
 typedef struct _imVideoCapture imVideoCapture;
 
 /** Returns the number of available devices.
@@ -297,7 +299,7 @@ const char** IM_DECL imVideoCaptureGetAttributeList(imVideoCapture* vc, int *num
 #if defined(__cplusplus)
 }
 
-/** A C++ Wrapper for the imVideoCapture structure functions.
+/** \brief Video Capture Wrapper Class
  * \ingroup capture */
 class imCapture
 {

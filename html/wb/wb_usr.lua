@@ -12,7 +12,7 @@ wb_usr = {
 
 wb_usr.messages = {
   en = {
-    bar_title = "IM - Version 3.6",
+    bar_title = "IM - Version 3.7",
     title = "IM - An Imaging Tool",
   }
 } 
@@ -253,6 +253,8 @@ wb_usr.tree =
             { link= "doxygen/group__arithm.html", name= {en= "Arithmetic Operations" } },
             { link= "doxygen/group__logic.html", name= {en= "Logical Arithmetic Operations" } },
             { link= "doxygen/group__tonegamut.html", name= {en= "Tone Gamut Operations" } },
+            { link= "doxygen/group__point.html", name= {en= "Point Based Custom Operations" } },
+            { link= "doxygen/group__imageenhance.html", name= {en= "Image Enhance Utilities in Lua" } },
             { link= "",                        name= {en= "" } },
             { link= "doxygen/group__convolve.html", name= {en= "Convolution Operations" } },
             { link= "doxygen/group__kernel.html", name= {en= "Predefined Kernels" } },
@@ -263,8 +265,10 @@ wb_usr.tree =
             { link= "doxygen/group__fourier.html", name= {en= "Fourier Transform Operations" } },
             { link= "doxygen/group__transform.html", name= {en= "Other Domain Transform Operations" } },
             { link= "doxygen/group__effects.html", name= {en= "Special Effects" } },
+            { link= "doxygen/group__remotesens.html", name= {en= "Remote Sensing Operations" } },
+            { link= "doxygen/group__openmp.html", name= {en= "OpenMP Utilities" } },
             { link= "",                        name= {en= "" } },
-            { link= "doxygen/group__stats.html", name= {en= "Statistics Calculations" } },
+            { link= "doxygen/group__stats.html", name= {en= "Image Statistics" } },
             { link= "doxygen/group__analyze.html", name= {en= "Image Analysis" } }
           }
         }  
@@ -314,14 +318,20 @@ wb_usr.tree =
           name= {en= "Structures" },
           folder=
           {
-            { link= "doxygen/classimAttribTable.html", name= {en= "imAttribTable" } },
             { link= "doxygen/struct__imBinMemoryFileName.html", name= {en= "imBinMemoryFileName" } },
             { link= "doxygen/struct__imDib.html", name= {en= "imDib" } },
             { link= "doxygen/struct__imFile.html", name= {en= "imFile" } },
-            { link= "doxygen/classimFormat.html", name= {en= "imFormat" } },
-            { link= "doxygen/classimcfloat.html", name= {en= "imcfloat" } },
             { link= "doxygen/struct__imImage.html", name= {en= "imImage" } },
-            { link= "doxygen/classimImageFile.html", name= {en= "imImageFile" } }
+            { link= "doxygen/struct__imStats.html", name= {en= "imStats" } },
+            { link= "", name= {en= "" } },
+            { link= "doxygen/classimAttribArray.html", name= {en= "imAttribArray" } },
+            { link= "doxygen/classimAttribTable.html", name= {en= "imAttribTable" } },
+            { link= "doxygen/classimBinFileBase.html", name= {en= "imBinFileBase" } },
+            { link= "doxygen/classimCapture.html", name= {en= "imCapture" } },
+            { link= "doxygen/classimcfloat.html", name= {en= "imcfloat" } },
+            { link= "doxygen/classimFileFormatBase.html", name= {en= "imFileFormatBase" } },
+            { link= "doxygen/classimFormat.html", name= {en= "imFormat" } },
+            { link= "doxygen/classimImageFile.html", name= {en= "imImageFile" } },
           }
         },  
         { 
@@ -344,10 +354,12 @@ wb_usr.tree =
             { link= "doxygen/im__format_8h.html", name= {en= "im_format.h" } },
             { link= "doxygen/im__format__all_8h.html", name= {en= "im_format_all.h" } },
             { link= "doxygen/im__format__avi_8h.html", name= {en= "im_format_avi.h" } },
+            { link= "doxygen/im__format__ecw_8h.html", name= {en= "im_format_ecw.h" } },
             { link= "doxygen/im__format__jp2_8h.html", name= {en= "im_format_jp2.h" } },
             { link= "doxygen/im__format__raw_8h.html", name= {en= "im_format_raw.h" } },
             { link= "doxygen/im__format__wmv_8h.html", name= {en= "im_format_wmv.h" } },
             { link= "doxygen/im__image_8h.html", name= {en= "im_image.h" } },
+            { link= "doxygen/im__kernel_8h.html", name= {en= "im_kernel.h" } },
             { link= "doxygen/im__lib_8h.html", name= {en= "im_lib.h" } },
             { link= "doxygen/im__math_8h.html", name= {en= "im_math.h" } },
             { link= "doxygen/im__math__op_8h.html", name= {en= "im_math_op.h" } },
@@ -370,7 +382,9 @@ wb_usr.tree =
           {
             { link= "doxygen/globals_func.html", name= {en= "Functions" } },
             { link= "doxygen/globals_type.html", name= {en= "Typedefs" } },
+            { link= "doxygen/globals_enum.html", name= {en= "Enumerations" } },
             { link= "doxygen/globals_eval.html", name= {en= "Enumeration Values" } },
+            { link= "doxygen/globals_defs.html", name= {en= "Defines" } },
           }
         }  
       }

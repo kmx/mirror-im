@@ -15,7 +15,7 @@
  * \ingroup util
  */
 
-/** \brief Complex Float Data Type  
+/** \brief Complex Float Data Type Class 
  *         
  * \par
  * Complex class using two floats, one for real part, one for the imaginary part.

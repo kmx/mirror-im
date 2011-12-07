@@ -9,7 +9,7 @@
 
 #include "im_attrib_flat.h"
 
-/** \brief Attributes Table.
+/** \brief Attributes Table Class
  *
  * \par
  * All the attributes have a name, a type, a count and the data.\n
@@ -71,7 +71,7 @@ public:
     { imAttribTableForEach(ptable, user_data, attrib_func); }
 };
 
-/** \brief Attributes Table.
+/** \brief Attributes Array Class
  *
  * \par
  * Same as \ref imAttribTable, but uses an array of fixed size.
