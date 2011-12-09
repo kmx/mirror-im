@@ -3633,8 +3633,8 @@ int imlua_open_process(lua_State *L)
 #ifdef IMLUA_USELOH
 #include "im_process.loh"
 #else
-#ifdef IMLUA_USELZH
-#include "im_process.lzh"
+#ifdef IMLUA_USELH
+#include "im_process.lh"
 #else
   luaL_dofile(L, "im_process.lua");
 #endif

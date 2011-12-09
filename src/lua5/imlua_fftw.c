@@ -134,8 +134,8 @@ int imlua_open_fftw (lua_State *L)
 #ifdef IMLUA_USELOH
 #include "im_fftw.loh"
 #else
-#ifdef IMLUA_USELZH
-#include "im_fftw.lzh"
+#ifdef IMLUA_USELH
+#include "im_fftw.lh"
 #else
   luaL_dofile(L, "im_fftw.lua");
 #endif

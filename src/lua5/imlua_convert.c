@@ -97,8 +97,8 @@ void imlua_open_processconvert (lua_State *L)
 #ifdef IMLUA_USELOH
 #include "im_processconvert.loh"
 #else
-#ifdef IMLUA_USELZH
-#include "im_processconvert.lzh"
+#ifdef IMLUA_USELH
+#include "im_processconvert.lh"
 #else
   luaL_dofile(L, "im_processconvert.lua");
 #endif
@@ -121,8 +121,8 @@ void imlua_open_convert (lua_State *L)
 #ifdef IMLUA_USELOH
 #include "im_convert.loh"
 #else
-#ifdef IMLUA_USELZH
-#include "im_convert.lzh"
+#ifdef IMLUA_USELH
+#include "im_convert.lh"
 #else
   luaL_dofile(L, "im_convert.lua");
 #endif
