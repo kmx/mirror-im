@@ -13,11 +13,13 @@ LIBS = im_wmv
 INCLUDES = lua5
 
 ifdef USE_LUA52
-  LIBNAME := $(LIBNAME)52
+  LUASFX = 52
 else
   USE_LUA51 = Yes
-  LIBNAME := $(LIBNAME)51
+  LUASFX = 51
 endif
+
+LIBNAME := $(LIBNAME)$(LUASFX)
 
 USE_IMLUA = Yes
 IM = ..

@@ -1,52 +1,47 @@
 PROJNAME = im
 LIBNAME = imlua_process
 
+IM = ..
+
 OPT = YES
+NO_LUALINK = Yes
+USE_BIN2C_LUA = Yes
+NO_LUAOBJECT = Yes
+
+USE_IMLUA = YES
+
 SRC = lua5/imlua_process.c lua5/imlua_kernel.c lua5/imlua_convert.c
 DEF_FILE = lua5/imlua_process.def
-DEFINES += IM_PROCESS
 
 SRCLUA = lua5/im_process.lua lua5/im_processconvert.lua
 SRCLUADIR = lua5
-NO_LUAOBJECT = Yes
 
-ifdef NO_LUAOBJECT
-  DEFINES += IMLUA_USELH
-  USE_LH_SUBDIR = Yes
-else
-  DEFINES += IMLUA_USELOH
-  USE_LOH_SUBDIR = Yes
-endif
-
-LIBS = im_process
+DEFINES += IM_PROCESS
 INCLUDES = lua5
+LIBS = im_process
+
+ifdef USE_LUA52
+  LUASFX = 52
+else
+  USE_LUA51 = Yes
+  LUASFX = 51
+endif
 
 ifdef USE_OPENMP
   LIBNAME := $(LIBNAME)_omp
   LIBS := im_process_omp
 endif
+LIBNAME := $(LIBNAME)$(LUASFX)
 
-ifdef USE_LUA52
-  LIBNAME := $(LIBNAME)52
-  ifdef NO_LUAOBJECT
-    LHDIR = lua5/lh
-  else
-    LOHDIR = lua5/loh52
-  endif
+ifdef NO_LUAOBJECT
+  DEFINES += IMLUA_USELH
+  USE_LH_SUBDIR = Yes
+  LHDIR = lua5/lh
 else
-  USE_LUA51 = Yes
-  LIBNAME := $(LIBNAME)51
-  ifdef NO_LUAOBJECT
-    LHDIR = lua5/lh
-  else
-    LOHDIR = lua5/loh51
-  endif
+  DEFINES += IMLUA_USELOH
+  USE_LOH_SUBDIR = Yes
+  LOHDIR = lua5/loh$(LUASFX)
 endif
-
-USE_IMLUA = YES
-NO_LUALINK = Yes
-USE_BIN2C_LUA=Yes
-IM = ..
 
 ifneq ($(findstring MacOS, $(TEC_UNAME)), )
   USE_IMLUA:=
