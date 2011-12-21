@@ -1064,7 +1064,7 @@ static int imluaImage_index (lua_State *L)
   return 1;
 }
 
-static const luaL_reg imimage_lib[] = {
+static const luaL_Reg imimage_lib[] = {
   {"ImageCreate", imluaImageCreate},
   {"ImageCreateFromOpenGLData", imluaImageCreateFromOpenGLData},
   {"ImageDestroy", imluaImageDestroy},
@@ -1075,7 +1075,7 @@ static const luaL_reg imimage_lib[] = {
   {NULL, NULL}
 };
 
-static const luaL_reg imimage_metalib[] = {
+static const luaL_Reg imimage_metalib[] = {
   {"Destroy", imluaImageDestroy},
   {"AddAlpha", imluaImageAddAlpha},
   {"SetAlpha", imluaImageSetAlpha},

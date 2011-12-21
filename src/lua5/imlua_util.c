@@ -245,7 +245,7 @@ static int imlua_colordecode(lua_State *L)
 }
 
 
-static const luaL_reg imutil_lib[] = {
+static const luaL_Reg imutil_lib[] = {
   {"ImageDataSize", imluaImageDataSize},
   {"ImageLineSize", imluaImageLineSize},
   {"ImageLineCount", imluaImageLineCount},

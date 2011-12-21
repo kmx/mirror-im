@@ -3379,7 +3379,7 @@ static int imlua_ProcessOpenMPSetNumThreads(lua_State *L)
   return 1;
 }
 
-static const luaL_reg improcess_lib[] = {
+static const luaL_Reg improcess_lib[] = {
   {"CalcRMSError", imluaCalcRMSError},
   {"CalcSNR", imluaCalcSNR},
   {"CalcCountColors", imluaCalcCountColors},
@@ -3558,7 +3558,7 @@ static const luaL_reg improcess_lib[] = {
   {NULL, NULL}
 };
 
-static const luaL_reg imimageprocess_lib[] = {
+static const luaL_Reg imimageprocess_lib[] = {
   {"Gamma", imluaImageGamma},
   {"Negative", imluaImageNegative},
   {"BrightnessContrast", imluaImageBrightnessContrast},

@@ -23,26 +23,19 @@
 
 static imluaPalette* imlua_rawcheckpalette(lua_State *L, int param)
 {
+  /* check also for CD palette, but don't handle error */
   void *p = lua_touserdata(L, param);
   if (p != NULL) {  /* value is a userdata? */
     if (lua_getmetatable(L, param)) {  /* does it have a metatable? */
-      lua_getfield(L, LUA_REGISTRYINDEX, "imPalette");  /* get correct metatable */
-      if (lua_rawequal(L, -1, -2)) {  /* does it have the correct mt? */
-        lua_pop(L, 2);  /* remove both metatables */
-        return (imluaPalette*)p;
-      }
-      lua_pop(L, 1);  /* remove previous metatable */
-
-      /* check also for CD palette */
-      lua_getfield(L, LUA_REGISTRYINDEX, "cdPalette");  /* get correct metatable */
+      luaL_getmetatable(L, "cdPalette");  /* get correct metatable */
       if (lua_rawequal(L, -1, -2)) {  /* does it have the correct mt? */
         lua_pop(L, 2);  /* remove both metatables */
         return (imluaPalette*)p;
       }
     }
   }
-  luaL_typeerror(L, param, "imPalette");  /* else error */
-  return NULL;  /* to avoid warnings */
+
+  return (imluaPalette*)luaL_checkudata (L, param, "imPalette");
 }
 
 imluaPalette* imlua_checkpalette (lua_State *L, int param)
@@ -346,7 +339,7 @@ static int imluaPalette_tostring (lua_State *L)
   return 1;
 }
 
-static const luaL_reg impalette_lib[] = {
+static const luaL_Reg impalette_lib[] = {
   {"PaletteFindNearest", imluaPaletteFindNearest},
   {"PaletteFindColor", imluaPaletteFindColor},
   {"PaletteGray", imluaPaletteGray },
@@ -372,7 +365,7 @@ static const luaL_reg impalette_lib[] = {
   {NULL, NULL}
 };
 
-static const luaL_reg impalette_metalib[] = {
+static const luaL_Reg impalette_metalib[] = {
   {"__gc", imluaPalette_gc},
   {"__tostring", imluaPalette_tostring},
   {"__index", imluaPalette_index},

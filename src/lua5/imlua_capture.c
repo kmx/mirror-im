@@ -386,7 +386,7 @@ static int imluaVideoCapture_tostring (lua_State *L)
   return 1;
 }
 
-static const luaL_reg imcapture_lib[] = {
+static const luaL_Reg imcapture_lib[] = {
   {"VideoCaptureDeviceCount", imluaVideoCaptureDeviceCount},
   {"VideoCaptureDeviceDesc", imluaVideoCaptureDeviceDesc},
   {"VideoCaptureReloadDevices", imluaVideoCaptureReloadDevices},
@@ -396,7 +396,7 @@ static const luaL_reg imcapture_lib[] = {
   {NULL, NULL}
 };
 
-static const luaL_reg imcapture_metalib[] = {
+static const luaL_Reg imcapture_metalib[] = {
   {"Destroy", imluaVideoCaptureDestroy},
   {"Connect", imluaVideoCaptureConnect},
   {"Disconnect", imluaVideoCaptureDisconnect},

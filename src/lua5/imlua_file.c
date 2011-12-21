@@ -604,7 +604,7 @@ static int imluaFile_tostring (lua_State *L)
 
 /*****************************************************************************\
 \*****************************************************************************/
-static const luaL_reg imfile_lib[] = {
+static const luaL_Reg imfile_lib[] = {
   {"FileOpen", imluaFileOpen},
   {"FileOpenAs", imluaFileOpenAs},
   {"FileOpenRaw", imluaFileOpenRaw},
@@ -614,7 +614,7 @@ static const luaL_reg imfile_lib[] = {
   {NULL, NULL}
 };
 
-static const luaL_reg imfile_metalib[] = {
+static const luaL_Reg imfile_metalib[] = {
   {"Handle", imluaFileHandle},
   {"Close", imluaFileClose},
   {"LoadImage", imluaFileLoadImage},

@@ -116,7 +116,7 @@ static int imluaProcessAutoCorrelation (lua_State *L)
   return 0;
 }
 
-static const luaL_reg imfftw_lib[] = {
+static const luaL_Reg imfftw_lib[] = {
   {"ProcessFFT", imluaProcessFFT},
   {"ProcessIFFT", imluaProcessIFFT},
   {"ProcessFFTraw", imluaProcessFFTraw},

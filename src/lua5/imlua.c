@@ -213,7 +213,7 @@ void imlua_regconstants (lua_State *L, const imlua_constant *imconst)
   lua_settable(L, -3);
 }
 
-static const luaL_reg im_lib[] = {
+static const luaL_Reg im_lib[] = {
   {"Version", imluaVersion},
   {"VersionDate", imluaVersionDate},
   {"VersionNumber", imluaVersionNumber},

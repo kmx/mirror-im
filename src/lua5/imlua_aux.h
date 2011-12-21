@@ -98,10 +98,6 @@ void imlua_open_convert(lua_State *L);  /* imlua_convert.c */
 void imlua_open_util(lua_State *L);     /* imlua_util.c    */
 void imlua_open_file(lua_State *L);     /* imlua_file.c    */
 
-#if LUA_VERSION_NUM < 502
-#define luaL_typeerror luaL_typerror
-#endif
-
 
 #ifdef __cplusplus
 }

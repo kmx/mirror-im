@@ -82,7 +82,7 @@ static int imluaConvertToBitmap (lua_State *L)
 }
 
 #ifdef IM_PROCESS
-static const luaL_reg imconvert_lib[] = {
+static const luaL_Reg imconvert_lib[] = {
   {"ProcessConvertDataType", imluaConvertDataType},
   {"ProcessConvertColorSpace", imluaConvertColorSpace},
   {"ProcessConvertToBitmap", imluaConvertToBitmap},
@@ -106,7 +106,7 @@ void imlua_open_processconvert (lua_State *L)
 
 }
 #else
-static const luaL_reg imconvert_lib[] = {
+static const luaL_Reg imconvert_lib[] = {
   {"ConvertDataType", imluaConvertDataType},
   {"ConvertColorSpace", imluaConvertColorSpace},
   {"ConvertToBitmap", imluaConvertToBitmap},
