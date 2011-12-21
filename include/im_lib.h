@@ -33,7 +33,7 @@ extern "C" {
 #define IM_COPYRIGHT "Copyright (C) 1994-2011 Tecgraf, PUC-Rio."
 #define IM_VERSION "3.7"      /* bug fixes are reported only by imVersion functions */
 #define IM_VERSION_NUMBER 307000
-#define IM_VERSION_DATE "2011/12/XX"  /* does not include bug fix releases */
+#define IM_VERSION_DATE "2011/12/21"  /* does not include bug fix releases */
 #define IM_DESCRIPTION "Image Representation, Storage, Capture and Processing"
 #define IM_NAME "IM - An Imaging Toolkit"
 /** @} */
