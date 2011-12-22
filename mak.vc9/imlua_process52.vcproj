@@ -43,7 +43,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="../include;../src;../src/lua5/lh;../../lua52/include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;IMLUA_USELH;LUA_COMPAT_MODULE"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;IMLUA_USELH;LUA_COMPAT_MODULE;IM_PROCESS"
 				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -97,6 +97,14 @@
 			>
 			<File
 				RelativePath="..\src\lua5\im_process.lua"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua5\im_processconvert.lua"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua5\imlua_convert.c"
 				>
 			</File>
 			<File
