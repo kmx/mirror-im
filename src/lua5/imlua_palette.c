@@ -32,6 +32,7 @@ static imluaPalette* imlua_rawcheckpalette(lua_State *L, int param)
         lua_pop(L, 2);  /* remove both metatables */
         return (imluaPalette*)p;
       }
+      lua_pop(L, 1);  /* remove previous metatable */
     }
   }
 
