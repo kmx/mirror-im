@@ -21,6 +21,7 @@ INCLUDES = lua5
 
 ifdef USE_LUA52
   LUASFX = 52
+  DEFINES += LUA_COMPAT_MODULE
 else
   USE_LUA51 = Yes
   LUASFX = 51

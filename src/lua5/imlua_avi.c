@@ -20,7 +20,7 @@ static int imlua_FormatRegisterAVI(lua_State *L)
   return 0;
 }
 
-static const struct luaL_reg imlib[] = {
+static const struct luaL_Reg imlib[] = {
   {"FormatRegisterAVI", imlua_FormatRegisterAVI},
   {NULL, NULL},
 };
