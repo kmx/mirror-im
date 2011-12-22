@@ -119,6 +119,8 @@ void imFormatRegisterTIFF(void);
  * ISO/IEC 10918 (1994, 1995, 1997, 1999)\n
  * http://www.jpeg.org/
  * \par
+ http://libjpeg.sourceforge.net/
+ http://www.libjpeg-turbo.org/
  * Access to the JPEG file format uses libJPEG version 7. \n
  * http://www.ijg.org                                      \n
  * Copyright (C) 1994-2009, Thomas G. Lane, Guido Vollbeding  \n
@@ -175,9 +177,9 @@ void imFormatRegisterJPEG(void);
  * \section Description
  *
  * \par
- * Access to the PNG file format uses libPNG version 1.2.39. \n
+ * Access to the PNG file format uses libpng version 1.5.7. \n
  * http://www.libpng.org                                    \n
- * Copyright (C) 1998-2009 Glenn Randers-Pehrson
+ * Copyright (C) 1998-2011 Glenn Randers-Pehrson
  *
  * \section Features
  *
@@ -217,14 +219,10 @@ void imFormatRegisterJPEG(void);
       XScale, YScale IM_FLOAT (1)
 
     Comments:
-      When saving PNG image with TransparencyIndex or TransparencyMap, TransparencyMap has precedence, so set it to NULL if you changed TransparencyIndex.
-      Attributes after the image are ignored.
-      Define PNG_NO_CONSOLE_IO to avoid printfs. We also define PNG_TIME_RFC1123_SUPPORTED.
-      Added the following files to the makefile to optimize the library:
-      pngvcrd.c  - PNG_USE_PNGVCRD
-                   For Intel x86 CPU and Microsoft Visual C++ compiler
-      pnggccrd.c - PNG_USE_PNGGCCRD
-                   For Intel x86 CPU (Pentium-MMX or later) and GNU C compiler.
+      When saving PNG image with TransparencyIndex or TransparencyMap, TransparencyMap has precedence, 
+        so set it to NULL if you changed TransparencyIndex.
+      Attributes set after the image are ignored.
+      Defined PNG_TIME_RFC1123_SUPPORTED.
 \endverbatim
  * \ingroup format */
 void imFormatRegisterPNG(void);
