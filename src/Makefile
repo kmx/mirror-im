@@ -5,10 +5,14 @@ else
   TECMAKE_CMD = $(MAKE) --no-print-directory -f ../tecmake.mak
 endif
 
-.PHONY: do_all im im_jp2 im_process im_fftw imlua3 imlua5 imlua_jp2 imlua_process5 imlua_fftw5 $(WINLIBS)
+.PHONY: do_all im_zlib im_libpng im im_jp2 im_process im_fftw imlua3 imlua5 imlua_jp2 imlua_process5 imlua_fftw5 $(WINLIBS)
 #do_all: im im_jp2 im_process im_fftw imlua3 imlua5 imlua_jp2 imlua_process5 imlua_fftw5
-do_all: im im_jp2 im_process im_process_omp im_fftw imlua5 imlua_jp2 imlua_process5 imlua_process_omp5 imlua_fftw5 $(WINLIBS)
+do_all: im_zlib im_libpng im im_jp2 im_process im_process_omp im_fftw imlua5 imlua_jp2 imlua_process5 imlua_process_omp5 imlua_fftw5 $(WINLIBS)
 
+im_zlib:
+	@$(TECMAKE_CMD) MF=im_zlib
+im_libpng:
+	@$(TECMAKE_CMD) MF=im_libpng
 im:
 	@$(TECMAKE_CMD)
 im_jp2:

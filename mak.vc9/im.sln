@@ -71,7 +71,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extra", "Extra", "{7C837DD1
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib1", "im_zlib.vcproj", "{5A761D29-5743-DE34-8E4A-A718C5C73C42}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libpng", "im_libpng.vcproj", "{5A761569-12DD-48BD-8A2A-B45EC5123442}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libpng15", "im_libpng.vcproj", "{5A761569-12DD-48BD-8A2A-B45EC5123442}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,5 +1,6 @@
 PROJNAME = im
-LIBNAME = libpng
+PNGSFX = 15
+LIBNAME = png$(PNGSFX)
 
 OPT = YES
 
@@ -17,16 +18,21 @@ ifneq ($(findstring dll, $(TEC_UNAME)), )
 endif
 
 ifneq ($(findstring Win, $(TEC_SYSNAME)), )
-  # To be compatible with the existing DLLs
-  LIBNAME = libpng15
+  # To be compatible with the existing DLLs of gnuwin32
+  LIBNAME = libpng$(PNGSFX)
 endif
 
 ifneq ($(findstring gcc, $(TEC_UNAME)), )
-  LIBNAME = z
+  # To be compatible with the existing static libs of gnuwin32 and cygwin
+  LIBNAME = png$(PNGSFX)
+endif
+ifneq ($(findstring mingw, $(TEC_UNAME)), )
+  LIBNAME = png$(PNGSFX)
 endif
 
 ifneq ($(findstring cygw, $(TEC_UNAME)), )
-  LIBNAME = z
+  # To be compatible with the existing DLLs of cygwin
+  LIBNAME = png$(PNGSFX)
 endif
 
 ifneq ($(findstring MacOS, $(TEC_UNAME)), )

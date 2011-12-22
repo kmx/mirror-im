@@ -65,7 +65,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="im.lib zlib1.lib"
+				AdditionalDependencies="im.lib zlib1.lib libpng15.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="D:\LNG\WMFSDK9\lib;../lib"
@@ -104,13 +104,6 @@
 		<File
 			RelativePath="..\test\im_info.cpp"
 			>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-				/>
-			</FileConfiguration>
 		</File>
 	</Files>
 	<Globals>

@@ -2,7 +2,7 @@ PROJNAME = im
 LIBNAME = im
 OPT = YES
 
-INCLUDES = . ../include zlib
+INCLUDES = . ../include zlib libpng
                      
 # WORDS_BIGENDIAN used by libTIFF
 ifeq ($(TEC_SYSARCH), ppc)
@@ -40,14 +40,6 @@ SRCJPEG = \
 SRCJPEG  := $(addprefix libjpeg/, $(SRCJPEG)) im_format_jpeg.cpp
 INCLUDES += libjpeg 
 
-SRCPNG = \
-    png.c       pngget.c    pngread.c   pngrutil.c     pngwtran.c  \
-    pngerror.c  pngmem.c    pngrio.c    pngset.c    pngwio.c    pngwutil.c  \
-    pngpread.c  pngrtran.c  pngtrans.c  pngwrite.c
-SRCPNG  := $(addprefix libpng/, $(SRCPNG)) im_format_png.cpp
-INCLUDES += libpng 
-DEFINES += PNG_NO_STDIO PNG_TIME_RFC1123_SUPPORTED
-
 SRCEXIF = \
     fuji/exif-mnote-data-fuji.c  fuji/mnote-fuji-entry.c  fuji/mnote-fuji-tag.c              \
     canon/exif-mnote-data-canon.c  canon/mnote-canon-entry.c  canon/mnote-canon-tag.c              \
@@ -70,11 +62,11 @@ SRC = \
     im_binfile.cpp        im_format_sgi.cpp   im_datatype.cpp      im_format_pcx.cpp \
     im_colorhsi.cpp       im_format_bmp.cpp   im_image.cpp         im_rgb2map.cpp    \
     im_colormode.cpp      im_format_gif.cpp   im_lib.cpp           im_format_pnm.cpp \
-    im_colorutil.cpp      im_format_ico.cpp   im_palette.cpp    \
+    im_colorutil.cpp      im_format_ico.cpp   im_palette.cpp       im_format_png.cpp \
     im_convertbitmap.cpp  im_format_led.cpp   im_counter.cpp       im_str.cpp        \
     im_convertcolor.cpp   im_fileraw.cpp      im_format_krn.cpp \
     im_file.cpp           im_format_ras.cpp   old_im.cpp           im_compress.cpp   \
-    $(SRCJPEG) $(SRCTIFF) $(SRCPNG) $(SRCLZF)
+    $(SRCJPEG) $(SRCTIFF) $(SRCLZF)
 
     
 ifneq ($(findstring Win, $(TEC_SYSNAME)), )
@@ -83,18 +75,6 @@ ifneq ($(findstring Win, $(TEC_SYSNAME)), )
     ifneq ($(findstring dll, $(TEC_UNAME)), )
       SRC += im.rc
     endif
-    
-    ifeq ($(findstring _64, $(TEC_UNAME)), )
-      # optimize PNG lib for VC
-      ifneq ($(findstring vc, $(TEC_UNAME)), )
-        SRC += libpng/pngvcrd.c
-        DEFINES += PNG_USE_PNGVCRD
-      endif
-      ifneq ($(findstring dll, $(TEC_UNAME)), )
-        SRC += libpng/pngvcrd.c
-        DEFINES += PNG_USE_PNGVCRD
-      endif         
-    endif         
     
     # force the definition of math functions using float
     # Watcom does not define them
@@ -115,14 +95,6 @@ ifdef USE_EXIF
   SRC += $(SRCEXIF)    
   DEFINES += USE_EXIF
 endif  
-
-ifneq ($(findstring Linux, $(TEC_UNAME)), )
-    # optimize PNG lib for Linux in x86
-    ifeq "$(TEC_SYSARCH)" "x86"
-      SRC += libpng/pnggccrd.c
-      DEFINES += PNG_USE_PNGGCCRD
-    endif
-endif
 
 ifneq ($(findstring AIX, $(TEC_UNAME)), )
   DEFINES += IM_DEFMATHFLOAT

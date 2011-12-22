@@ -17,17 +17,20 @@
 
 #include "png.h"
 
+
 static void png_user_read_fn(png_structp png_ptr, png_bytep buffer, png_size_t size)
 {
-  imBinFileRead((imBinFile*)png_ptr->io_ptr, buffer, size, 1);
-  if (imBinFileError((imBinFile*)png_ptr->io_ptr))
+  imBinFile* handle = (imBinFile*)png_get_io_ptr(png_ptr);
+  imBinFileRead(handle, buffer, size, 1);
+  if (imBinFileError(handle))
     png_error(png_ptr, "Read Error");
 }
 
 static void png_user_write_fn(png_structp png_ptr, png_bytep buffer, png_size_t size)
 {
-  imBinFileWrite((imBinFile*)png_ptr->io_ptr, buffer, size, 1);
-  if (imBinFileError((imBinFile*)png_ptr->io_ptr))
+  imBinFile* handle = (imBinFile*)png_get_io_ptr(png_ptr);
+  imBinFileWrite(handle, buffer, size, 1);
+  if (imBinFileError(handle))
     png_error(png_ptr, "Write Error");
 }
 
@@ -332,13 +335,13 @@ void imFileFormatPNG::iReadAttrib(imAttribTable* attrib_table)
   png_timep time;
   if (png_get_tIME(png_ptr, info_ptr, &time))
   {
-    char* stime = png_convert_to_rfc1123(png_ptr, time);
+    const char* stime = png_convert_to_rfc1123(png_ptr, time);
     attrib_table->Set("DateTimeModified", IM_BYTE, -1, stime);
   }
 
   png_charp name;
   int compression_type;
-  png_charp profile;
+  png_bytep profile;
   png_uint_32 proflen;
   if (png_get_iCCP(png_ptr, info_ptr, &name, &compression_type, &profile, &proflen))
     attrib_table->Set("ICCProfile", IM_BYTE, proflen, profile);
@@ -573,7 +576,7 @@ void imFileFormatPNG::iWriteAttrib(imAttribTable* attrib_table)
   attrib_data = attrib_table->Get("ICCProfile", NULL, &proflen);
   if (attrib_data)
   {
-    png_charp profile = (png_charp)attrib_data;
+    png_bytep profile = (png_bytep)attrib_data;
     png_set_iCCP(png_ptr, info_ptr, "ICC Profile", 0, profile, proflen);
   }
 
@@ -605,7 +608,7 @@ int imFileFormatPNG::ReadImageInfo(int index)
     return IM_ERR_ACCESS;
 
   /* Set error handling */
-  if (setjmp(png_ptr->jmpbuf))
+  if (setjmp(png_jmpbuf(png_ptr)))
     return IM_ERR_ACCESS;
 
   png_set_read_fn(png_ptr, (void*)this->handle, (png_rw_ptr)png_user_read_fn);
@@ -756,7 +759,7 @@ int imFileFormatPNG::WriteImageInfo()
 
   /* Set error handling.  REQUIRED if you aren't supplying your own
   * error hadnling functions in the png_create_write_struct() call. */
-  if (setjmp(png_ptr->jmpbuf))
+  if (setjmp(png_jmpbuf(png_ptr)))
     return IM_ERR_ACCESS;
 
   png_set_write_fn(png_ptr, this->handle, (png_rw_ptr)png_user_write_fn, (png_flush_ptr)png_user_flush_fn);
@@ -839,7 +842,7 @@ static int iInterlaceRowCheck(int row_step, int pass)
 
 int imFileFormatPNG::ReadImageData(void* data)
 {
-  if (setjmp(this->png_ptr->jmpbuf))
+  if (setjmp(png_jmpbuf(this->png_ptr)))
     return IM_ERR_ACCESS;
 
   int count = this->height*this->interlace_steps;
@@ -853,7 +856,7 @@ int imFileFormatPNG::ReadImageData(void* data)
 
     png_read_row(this->png_ptr, (imbyte*)this->line_buffer, NULL);
 
-    if (this->interlace_steps == 1 || iInterlaceRowCheck(row % 8, png_ptr->pass+1))
+    if (this->interlace_steps == 1 || iInterlaceRowCheck(row % 8, png_get_current_pass_number(png_ptr)+1))
     {
       if (this->fixbits)
       {
@@ -890,7 +893,7 @@ int imFileFormatPNG::ReadImageData(void* data)
 
 int imFileFormatPNG::WriteImageData(void* data)
 {
-  if (setjmp(this->png_ptr->jmpbuf))
+  if (setjmp(png_jmpbuf(this->png_ptr)))
     return IM_ERR_ACCESS;
 
   int count = this->height*this->interlace_steps;

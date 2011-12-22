@@ -112,6 +112,7 @@ extern "C" {
  * \ingroup format */
 void imFormatRegisterTIFF(void);
 
+
 /** \defgroup jpeg JPEG - JPEG File Interchange Format
  * \section Description
  *
@@ -173,6 +174,7 @@ void imFormatRegisterTIFF(void);
  * \ingroup format */
 void imFormatRegisterJPEG(void);
 
+
 /** \defgroup png PNG - Portable Network Graphic Format
  * \section Description
  *
@@ -222,10 +224,10 @@ void imFormatRegisterJPEG(void);
       When saving PNG image with TransparencyIndex or TransparencyMap, TransparencyMap has precedence, 
         so set it to NULL if you changed TransparencyIndex.
       Attributes set after the image are ignored.
-      Defined PNG_TIME_RFC1123_SUPPORTED.
 \endverbatim
  * \ingroup format */
 void imFormatRegisterPNG(void);
+
 
 /** \defgroup gif GIF - Graphics Interchange Format
  * \section Description
@@ -271,6 +273,7 @@ void imFormatRegisterPNG(void);
  * \ingroup format */
 void imFormatRegisterGIF(void);
 
+
 /** \defgroup bmp BMP - Windows Device Independent Bitmap
  * \section Description
  *
@@ -303,6 +306,7 @@ void imFormatRegisterGIF(void);
  * \ingroup format */
 void imFormatRegisterBMP(void);
 
+
 /** \defgroup ras RAS - Sun Raster File
  * \section Description
  *
@@ -329,6 +333,7 @@ void imFormatRegisterBMP(void);
 \endverbatim
  * \ingroup format */
 void imFormatRegisterRAS(void);
+
 
 /** \defgroup led LED - IUP image in LED
  * \section Description
@@ -358,6 +363,7 @@ void imFormatRegisterRAS(void);
  * \ingroup format */
 void imFormatRegisterLED(void);
 
+
 /** \defgroup sgi SGI - Silicon Graphics Image File Format
  * \section Description
  *
@@ -384,6 +390,7 @@ void imFormatRegisterLED(void);
 \endverbatim
  * \ingroup format */
 void imFormatRegisterSGI(void);
+
 
 /** \defgroup pcx PCX - ZSoft Picture
  * \section Description
@@ -418,6 +425,7 @@ void imFormatRegisterSGI(void);
  * \ingroup format */
 void imFormatRegisterPCX(void);
 
+
 /** \defgroup tga TGA - Truevision Graphics Adapter File
  * \section Description
  *
@@ -451,6 +459,7 @@ void imFormatRegisterPCX(void);
  * \ingroup format */
 void imFormatRegisterTGA(void);
 
+
 /** \defgroup pnm PNM - Netpbm Portable Image Map
  * \section Description
  *
@@ -480,6 +489,7 @@ void imFormatRegisterTGA(void);
 \endverbatim
  * \ingroup format */
 void imFormatRegisterPNM(void);
+
 
 /** \defgroup ico ICO - Windows Icon
  * \section Description
@@ -518,6 +528,7 @@ void imFormatRegisterPNM(void);
 \endverbatim
  * \ingroup format */
 void imFormatRegisterICO(void);
+
 
 /** \defgroup krn KRN - IM Kernel File Format
  * \section Description
