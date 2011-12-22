@@ -241,7 +241,7 @@ void imBinSwapBytes8(void *data, int count);
 
 /** \defgroup compress Data Compression Utilities
  * \par
- * Deflate compression support uses zlib version 1.2.3.     \n
+ * Deflate compression support uses zlib version 1.2.5.     \n
  * http://www.zlib.org/                                      \n
  * Copyright (C) 1995-2004 Jean-loup Gailly and Mark Adler
  * \par

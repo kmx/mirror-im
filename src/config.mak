@@ -2,7 +2,7 @@ PROJNAME = im
 LIBNAME = im
 OPT = YES
 
-INCLUDES = . ../include
+INCLUDES = . ../include zlib
                      
 # WORDS_BIGENDIAN used by libTIFF
 ifeq ($(TEC_SYSARCH), ppc)
@@ -48,12 +48,6 @@ SRCPNG  := $(addprefix libpng/, $(SRCPNG)) im_format_png.cpp
 INCLUDES += libpng 
 DEFINES += PNG_NO_STDIO PNG_TIME_RFC1123_SUPPORTED
 
-SRCZLIB = \
-    adler32.c   crc32.c    gzio.c     inffast.c  inftrees.c  uncompr.c \
-    compress.c  deflate.c  infback.c  inflate.c  trees.c     zutil.c
-SRCZLIB  := $(addprefix zlib/, $(SRCZLIB))
-INCLUDES += zlib
-
 SRCEXIF = \
     fuji/exif-mnote-data-fuji.c  fuji/mnote-fuji-entry.c  fuji/mnote-fuji-tag.c              \
     canon/exif-mnote-data-canon.c  canon/mnote-canon-entry.c  canon/mnote-canon-tag.c              \
@@ -80,7 +74,7 @@ SRC = \
     im_convertbitmap.cpp  im_format_led.cpp   im_counter.cpp       im_str.cpp        \
     im_convertcolor.cpp   im_fileraw.cpp      im_format_krn.cpp \
     im_file.cpp           im_format_ras.cpp   old_im.cpp           im_compress.cpp   \
-    $(SRCJPEG) $(SRCTIFF) $(SRCPNG) $(SRCZLIB) $(SRCLZF)
+    $(SRCJPEG) $(SRCTIFF) $(SRCPNG) $(SRCLZF)
 
     
 ifneq ($(findstring Win, $(TEC_SYSNAME)), )
