@@ -2,7 +2,6 @@
 REM This builds all the libraries of the folder for 1 uname  
 
 call tecmake %1 "MF=im_zlib" %2 %3 %4 %5 %6 %7 %8
-call tecmake %1 "MF=im_libpng" %2 %3 %4 %5 %6 %7 %8
 call tecmake %1 %2 %3 %4 %5 %6 %7 %8
 call tecmake %1 "MF=im_process" %2 %3 %4 %5 %6 %7 %8
 call tecmake %1 "MF=im_process" "USE_OPENMP=Yes" %2 %3 %4 %5 %6 %7 %8

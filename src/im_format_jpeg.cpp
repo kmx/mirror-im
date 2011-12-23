@@ -41,8 +41,7 @@ struct JPEGerror_mgr
   jmp_buf setjmp_buffer;      /* for return to caller */
 };
 
-METHODDEF(void)
-JPEGerror_exit (j_common_ptr cinfo)
+static void JPEGerror_exit (j_common_ptr cinfo)
 {
   /* cinfo->err really points to a my_error_mgr struct, so coerce pointer */
   JPEGerror_mgr* err_mgr = (JPEGerror_mgr*)cinfo->err;
@@ -51,14 +50,12 @@ JPEGerror_exit (j_common_ptr cinfo)
   longjmp(err_mgr->setjmp_buffer, 1);
 }
 
-METHODDEF(void)
-JPEGoutput_message (j_common_ptr cinfo)
+static void JPEGoutput_message (j_common_ptr cinfo)
 {
   (void)cinfo;
 }
 
-METHODDEF(void)
-JPEGemit_message (j_common_ptr cinfo, int msg_level)
+static void JPEGemit_message (j_common_ptr cinfo, int msg_level)
 {
   (void)cinfo; (void)msg_level;
 }

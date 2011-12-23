@@ -2,7 +2,7 @@ PROJNAME = im
 LIBNAME = im
 OPT = YES
 
-INCLUDES = . ../include zlib libpng
+INCLUDES = . ../include zlib
                      
 # WORDS_BIGENDIAN used by libTIFF
 ifeq ($(TEC_SYSARCH), ppc)
@@ -27,6 +27,13 @@ SRCTIFF = \
     tif_write.c     tif_warning.c    tif_ojpeg.c
 SRCTIFF  := $(addprefix libtiff/, $(SRCTIFF)) im_format_tiff.cpp
 INCLUDES += libtiff 
+
+SRCPNG = \
+    png.c       pngget.c    pngread.c   pngrutil.c  pngwtran.c  \
+    pngerror.c  pngmem.c    pngrio.c    pngset.c    pngwio.c    \
+    pngpread.c  pngrtran.c  pngtrans.c  pngwrite.c  pngwutil.c
+SRCPNG := $(addprefix libpng/, $(SRCPNG)) im_format_png.cpp
+INCLUDES += libpng
 
 SRCJPEG = \
     jcapimin.c  jcmarker.c  jdapimin.c  jdinput.c   jdtrans.c   \
@@ -56,17 +63,17 @@ SRCLZF  := $(addprefix liblzf/, $(SRCLZF))
 INCLUDES += liblzf
 
 SRC = \
-    old_imcolor.c         old_imresize.c      tiff_binfile.c       im_converttype.cpp \
-    im_attrib.cpp         im_format.cpp       im_format_tga.cpp    im_filebuffer.cpp \
+    old_imcolor.c         old_imresize.c      tiff_binfile.c       im_converttype.cpp   \
+    im_attrib.cpp         im_format.cpp       im_format_tga.cpp    im_filebuffer.cpp    \
     im_bin.cpp            im_format_all.cpp   im_format_raw.cpp    im_convertopengl.cpp \
     im_binfile.cpp        im_format_sgi.cpp   im_datatype.cpp      im_format_pcx.cpp \
     im_colorhsi.cpp       im_format_bmp.cpp   im_image.cpp         im_rgb2map.cpp    \
     im_colormode.cpp      im_format_gif.cpp   im_lib.cpp           im_format_pnm.cpp \
     im_colorutil.cpp      im_format_ico.cpp   im_palette.cpp       im_format_png.cpp \
     im_convertbitmap.cpp  im_format_led.cpp   im_counter.cpp       im_str.cpp        \
-    im_convertcolor.cpp   im_fileraw.cpp      im_format_krn.cpp \
-    im_file.cpp           im_format_ras.cpp   old_im.cpp           im_compress.cpp   \
-    $(SRCJPEG) $(SRCTIFF) $(SRCLZF)
+    im_convertcolor.cpp   im_fileraw.cpp      im_format_krn.cpp    im_compress.cpp   \
+    im_file.cpp           im_format_ras.cpp   old_im.cpp                             \
+    $(SRCJPEG) $(SRCPNG) $(SRCTIFF) $(SRCLZF)
 
     
 ifneq ($(findstring Win, $(TEC_SYSNAME)), )
@@ -88,6 +95,7 @@ ifneq ($(findstring Win, $(TEC_SYSNAME)), )
       USE_EXIF = Yes
     endif
 else
+  USE_EXIF = Yes
   SRC += im_sysfile_unix.cpp
 endif
 

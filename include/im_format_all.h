@@ -120,11 +120,9 @@ void imFormatRegisterTIFF(void);
  * ISO/IEC 10918 (1994, 1995, 1997, 1999)\n
  * http://www.jpeg.org/
  * \par
- http://libjpeg.sourceforge.net/
- http://www.libjpeg-turbo.org/
- * Access to the JPEG file format uses libJPEG version 7. \n
+ * Access to the JPEG file format uses libjpeg version 8c. \n
  * http://www.ijg.org                                      \n
- * Copyright (C) 1994-2009, Thomas G. Lane, Guido Vollbeding  \n
+ * Copyright (C) 1994-2011, Thomas G. Lane, Guido Vollbeding  \n
  *   from the Independent JPEG Group.
  * \par
  * Access to the EXIF attributes uses libEXIF version 0.6.17. \n
@@ -158,7 +156,7 @@ void imFormatRegisterTIFF(void);
       jdatadst.c - fflush and ferror replaced by macros JFFLUSH and JFERROR.
       jinclude.h - standard JFFLUSH and JFERROR definitions, and new macro HAVE_JFIO.
       jdhuf.c - added support for OJPEG_SUPPORT in libTIFF.
-      new file created: jconfig.h
+      new file created: jconfig.h from jconfig.txt
 
     Changes to libEXIF:
       new files config.h and _stdint.h

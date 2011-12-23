@@ -66,7 +66,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="comctl32.lib vfw32.lib im.lib zlib1.lib libpng15.lib im_avi.lib iup.lib cd.lib iupcd.lib freetype6.lib iupimglib.lib"
+				AdditionalDependencies="comctl32.lib vfw32.lib im.lib zlib1.lib im_avi.lib iup.lib cd.lib iupcd.lib freetype6.lib iupimglib.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="../lib;../../iup/lib;../../cd/lib"
