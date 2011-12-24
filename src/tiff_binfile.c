@@ -12,16 +12,16 @@
 #include <stdlib.h>
 #include <memory.h>
 
-static tsize_t iTIFFReadProc(thandle_t fd, tdata_t buf, tsize_t size)
+static tmsize_t iTIFFReadProc(thandle_t fd, void* buf, tmsize_t size)
 {
   imBinFile* file_bin = (imBinFile*)fd;
-  return imBinFileRead(file_bin, buf, size, 1);
+  return imBinFileRead(file_bin, buf, (unsigned long)size, 1);
 }
 
-static tsize_t iTIFFWriteProc(thandle_t fd, tdata_t buf, tsize_t size)
+static tmsize_t iTIFFWriteProc(thandle_t fd, void* buf, tmsize_t size)
 {
   imBinFile* file_bin = (imBinFile*)fd;
-  return imBinFileWrite(file_bin, buf, size, 1);
+  return imBinFileWrite(file_bin, buf, (unsigned long)size, 1);
 }
 
 static toff_t iTIFFSeekProc(thandle_t fd, toff_t off, int whence)
@@ -30,13 +30,13 @@ static toff_t iTIFFSeekProc(thandle_t fd, toff_t off, int whence)
   switch (whence)
   {
   case SEEK_SET:
-    imBinFileSeekTo(file_bin, off);
+    imBinFileSeekTo(file_bin, (unsigned long)off);
     break;
   case SEEK_CUR:
-    imBinFileSeekOffset(file_bin, off);
+    imBinFileSeekOffset(file_bin, (unsigned long)off);
     break;
   case SEEK_END: 
-    imBinFileSeekFrom(file_bin, off);
+    imBinFileSeekFrom(file_bin, (unsigned long)off);
     break;
   }
 
@@ -56,13 +56,13 @@ static toff_t iTIFFSizeProc(thandle_t fd)
   return imBinFileSize(file_bin);
 }
 
-static int iTIFFMapProc(thandle_t fd, tdata_t* pbase, toff_t* psize)
+static int iTIFFMapProc(thandle_t fd, void** pbase, toff_t* psize)
 {
   (void) fd; (void) pbase; (void) psize;
   return (0);
 }
 
-static void iTIFFUnmapProc(thandle_t fd, tdata_t base, toff_t size)
+static void iTIFFUnmapProc(thandle_t fd, void* base, toff_t size)
 {
   (void) fd; (void) base; (void) size;
 }

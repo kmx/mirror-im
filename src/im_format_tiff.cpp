@@ -164,7 +164,7 @@ static uint16 iTIFFCompCalc(const char* compression, int color_mode, int data_ty
 
 static int iTIFFWriteTag(TIFF* tiff, int index, const char* name, int data_type, int count, const void* data)
 {
-  const TIFFFieldInfo *fld = TIFFFieldWithName(tiff, name);
+  const TIFFField *fld = TIFFFieldWithName(tiff, name);
   (void)data_type;
   (void)index;
   if (fld)
@@ -291,7 +291,7 @@ static void iTIFFReadCustomTags(TIFF* tiff, imAttribTable* attrib_table)
   for( i = 0; i < tag_count; i++ )
   {
     ttag_t tag = TIFFGetTagListEntry(tiff, i);
-    const TIFFFieldInfo *fld;
+    const TIFFField *fld;
 
     fld = TIFFFieldWithTag(tiff, tag);
     if (fld == NULL)
@@ -574,7 +574,7 @@ static void iTIFFReadAttributes(TIFF* tiff, imAttribTable* attrib_table)
 
   iTIFFReadCustomTags(tiff, attrib_table);
 
-  uint32 offset;
+  uint64 offset;
   if (TIFFGetField(tiff, TIFFTAG_EXIFIFD, &offset))
   {
     tdir_t cur_dir = TIFFCurrentDirectory(tiff);
@@ -791,7 +791,7 @@ int imFileFormatTIFF::ReadImageInfo(int index)
     TIFFGetField(this->tiff, TIFFTAG_SUBFILETYPE, &SubFileType);
 
     uint16 SubIFDsCount = 0;
-    uint32* SubIFDs = NULL;
+    uint64* SubIFDs = NULL;
     TIFFGetField(this->tiff, TIFFTAG_SUBIFD, &SubIFDsCount, &SubIFDs);
     attrib_table->Set("SubIFDCount", IM_USHORT, 1, (void*)&SubIFDsCount);
 
