@@ -259,6 +259,15 @@ void imFormatList(char** format_list, int *format_count);
  * \ingroup format */
 int imFormatInfo(const char* format, char* desc, char* ext, int *can_sequence);
 
+/** Returns the format information of the third party library used to support the format. \n
+ * Format extra is 50 chars max. \n
+ * Returns an error code. 
+ * See also \ref format.
+ *
+ * \verbatim im.FormatInfoExtra(format: string) -> error: number, extra: string [in Lua 5] \endverbatim
+ * \ingroup format */
+int imFormatInfoExtra(const char* format, char* extra);
+
 /** Returns the format compressions. \n
  * Compressions are 20 chars max each, maximum of 50 compressions. You can use "char* comp[50]". \n
  * color_mode and data_type are optional, use -1 to ignore them. \n

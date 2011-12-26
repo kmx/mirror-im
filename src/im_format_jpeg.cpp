@@ -103,7 +103,7 @@ public:
               iJPEGCompTable, 
               1, 
               0)
-    {}
+    { extra = "libjpeg Version 8c"; }
   ~imFormatJPEG() {}
 
   imFileFormatBase* Create(void) const { return new imFileFormatJPEG(this); }

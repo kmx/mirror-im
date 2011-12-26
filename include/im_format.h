@@ -52,6 +52,7 @@ public:
   const char* desc;
   const char* ext;
   const char** comp;
+  const char* extra;
   int comp_count, 
       can_sequence;
 
@@ -60,7 +61,7 @@ public:
 
   imFormat(const char* _format, const char* _desc, const char* _ext, 
            const char** _comp, int _comp_count, int _can_sequence)
-    :format(_format), desc(_desc), ext(_ext), comp(_comp), 
+    :format(_format), desc(_desc), ext(_ext), comp(_comp), extra(""),
      comp_count(_comp_count), can_sequence(_can_sequence)
     {} 
   virtual ~imFormat() {}

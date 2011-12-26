@@ -85,7 +85,7 @@ public:
               iAVICompTable, 
               15, 
               1)
-  {}
+  { extra = "Video for Windows SDK"; }
   ~imFormatAVI() {}
 
   imFileFormatBase* Create(void) const { return new imFileFormatAVI(this); }

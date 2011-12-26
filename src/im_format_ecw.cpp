@@ -52,7 +52,7 @@ public:
               iECWCompTable, 
               2, 
               0)
-    {}
+    { extra = "ECW JPEG 2000 SDK Version 3.3"; }
   ~imFormatECW() {}
 
   imFileFormatBase* Create(void) const { return new imFileFormatECW(this); }

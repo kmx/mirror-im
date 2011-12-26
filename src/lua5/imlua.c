@@ -76,9 +76,8 @@ static int imluaFormatInfo (lua_State *L)
   char desc[50];
   char ext[50];
   int can_sequence;
-  int error;
 
-  error = imFormatInfo(luaL_checkstring(L, 1), desc, ext, &can_sequence);
+  int error = imFormatInfo(luaL_checkstring(L, 1), desc, ext, &can_sequence);
 
   imlua_pusherror(L, error);
   if (error)
@@ -89,6 +88,21 @@ static int imluaFormatInfo (lua_State *L)
   lua_pushboolean(L, can_sequence);
 
   return 4;
+}
+
+static int imluaFormatInfoExtra (lua_State *L)
+{
+  char extra[50];
+
+  int error = imFormatInfoExtra(luaL_checkstring(L, 1), extra);
+
+  imlua_pusherror(L, error);
+  if (error)
+    return 1;
+
+  lua_pushstring(L, extra);
+
+  return 2;
 }
 
 /*****************************************************************************\
@@ -220,6 +234,7 @@ static const luaL_Reg im_lib[] = {
 
   {"FormatList", imluaFormatList},
   {"FormatInfo", imluaFormatInfo},
+  {"FormatInfoExtra", imluaFormatInfoExtra},
   {"FormatCompressions", imluaFormatCompressions},
   {"FormatCanWriteImage", imluaFormatCanWriteImage},
 

@@ -79,7 +79,7 @@ public:
               iPNGCompTable, 
               1, 
               0)
-    {}
+    { extra = "libpng Version 1.5.7"; }
   ~imFormatPNG() {}
 
   imFileFormatBase* Create(void) const { return new imFileFormatPNG(this); }

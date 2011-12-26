@@ -91,6 +91,16 @@ int imFormatInfo(const char* format, char* desc, char* ext, int *can_sequence)
   return IM_ERR_NONE;
 }
 
+int imFormatInfoExtra(const char* format, char* extra)
+{
+  imFormat* iformat = iFormatFind(format);
+  if (!iformat) return IM_ERR_FORMAT;
+
+  strcpy(extra, iformat->extra);
+
+  return IM_ERR_NONE;
+}
+
 int imFormatCompressions(const char* format, char** comp, int *comp_count, int color_mode, int data_type)
 {
   imFormat* iformat = iFormatFind(format);

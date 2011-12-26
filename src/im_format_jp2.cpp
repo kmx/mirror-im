@@ -136,8 +136,7 @@ public:
               iJP2CompTable, 
               1, 
               0)
-    {
-    }
+    { extra = "JasPer Version 1.4.0"; }
   ~imFormatJP2() {}
 
   imFileFormatBase* Create(void) const { return new imFileFormatJP2(this); }

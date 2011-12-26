@@ -548,7 +548,7 @@ public:
               iWMVCompTable, 
               WMV_COMPRESS_COUNT+1, 
               1)
-    {}
+    { extra = "Windows Media Format SDK"; }
   ~imFormatWMV() {}
 
   imFileFormatBase* Create(void) const { return new imFileFormatWMV(this); }
