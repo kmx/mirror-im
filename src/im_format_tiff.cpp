@@ -681,7 +681,7 @@ public:
               iTIFFCompTable, 
               IMTIFF_NUMCOMP, 
               1)
-    {}
+    { extra = "LIBTIFF Version 4.0.0"; }
   ~imFormatTIFF() {}
 
   imFileFormatBase* Create(void) const { return new imFileFormatTIFF(this); }
@@ -755,7 +755,7 @@ void* imFileFormatTIFF::Handle(int index)
                 
 int imFileFormatTIFF::ReadImageInfo(int index)
 {
-  int sub_ifd = 0;
+  int sub_ifd = -1;
   int switch_type_int = 1;
 
   this->cpx_int = 0;
@@ -795,13 +795,12 @@ int imFileFormatTIFF::ReadImageInfo(int index)
     TIFFGetField(this->tiff, TIFFTAG_SUBIFD, &SubIFDsCount, &SubIFDs);
     attrib_table->Set("SubIFDCount", IM_USHORT, 1, (void*)&SubIFDsCount);
 
-    /* If is a DNG file, and has SubIFDs, 
-       then ignore the thumbnail and position at the desired SubIFD. */
-
+    /* If it is a DNG file and has SubIFDs, 
+       then ignore the thumbnail and position at the image SubIFD. */
     if (SubFileType == FILETYPE_REDUCEDIMAGE && SubIFDsCount != 0)
     {
-      if (sub_ifd >= SubIFDsCount) sub_ifd = SubIFDsCount-1;
-      uint32 SubIFDOffset = SubIFDs[sub_ifd];
+      if (sub_ifd < 0 || sub_ifd >= SubIFDsCount) sub_ifd = SubIFDsCount-1;
+      uint64 SubIFDOffset = SubIFDs[sub_ifd];
 
       /* Load the main image attributes, the SubIFD contains only a few attributes. */
       iTIFFReadAttributes(this->tiff, attrib_table);
