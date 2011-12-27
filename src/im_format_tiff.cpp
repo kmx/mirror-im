@@ -717,8 +717,6 @@ int imFileFormatTIFF::Open(const char* file_name)
   this->image_count = TIFFNumberOfDirectories(this->tiff);
   this->tile_buf = 0;
   this->start_plane = 0;
-  this->h_subsample = 1;
-  this->v_subsample = 1;
 
   return IM_ERR_NONE;
 }
@@ -761,10 +759,13 @@ int imFileFormatTIFF::ReadImageInfo(int index)
   int sub_ifd = -1;
   int switch_type_int = 1;
 
+  // Defaults that can be different for each image
   this->cpx_int = 0;
   this->invert = 0;
   this->lab_fix = 0;
   this->extra_sample_size = 0;
+  this->h_subsample = 1;
+  this->v_subsample = 1;
 
   if (!TIFFSetDirectory(this->tiff, (tdir_t)index))
     return IM_ERR_ACCESS;
