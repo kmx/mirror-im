@@ -41,7 +41,7 @@ extern "C" {
  * to avoid unnecessary shared variables that could lead to incorrect results. 
  * In a few places we use the "atomic" directive to be able to compute histograms and other counts. 
  * But min/max computation must be done in single thread
- * because of limitations in OpenMP support in C (in Fortran it will be easy to implement).
+ * because of limitations in OpenMP support in C (in Fortran it would be easy to implement).
  * \par
  * For more information on OpenMP: \n
  * http://www.openmp.org 
