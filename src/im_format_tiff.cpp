@@ -1290,12 +1290,23 @@ static void iTIFFExtraSamplesFix(unsigned char* line_buffer, int width, int samp
   }
 }
 
-static void iTIFFExpandSubSample(unsigned char* line_buffer, int width, int row, int v_subsample, int h_subsample)
+static void iTIFFExpandSubSamplePacked(unsigned char* line_buffer, int width, int row, int v_subsample, int h_subsample)
 {
   //TODO
   (void)line_buffer;
   (void)width;
   (void)row;
+  (void)v_subsample;
+  (void)h_subsample;
+}
+
+static void iTIFFExpandSubSamplePlanar(unsigned char* line_buffer, int width, int row, int plane, int v_subsample, int h_subsample)
+{
+  //TODO
+  (void)line_buffer;
+  (void)width;
+  (void)row;
+  (void)plane;
   (void)v_subsample;
   (void)h_subsample;
 }
@@ -1348,7 +1359,7 @@ static void iTIFFLabFix(void* line_buffer, int width, int data_type, int is_new)
       ushort_buffer += 3;
     }
   }
-  // Do NOT know how it is encoded for other data types.
+  //TODO: do NOT know how it is encoded for other data types.
 }
 
 int imFileFormatTIFF::ReadTileline(void* line_buffer, int row, int plane)
@@ -1435,7 +1446,12 @@ int imFileFormatTIFF::ReadImageData(void* data)
       iTIFFExtraSamplesFix((imbyte*)this->line_buffer, this->width, this->sample_size, this->extra_sample_size, plane);
 
     if (this->v_subsample != 1 || this->h_subsample != 1)
-      iTIFFExpandSubSample((imbyte*)this->line_buffer, this->width, row, this->v_subsample, this->h_subsample);
+    {
+      if (this->file_color_mode & IM_PACKED)
+        iTIFFExpandSubSamplePacked((imbyte*)this->line_buffer, this->width, row, this->v_subsample, this->h_subsample);
+      else
+        iTIFFExpandSubSamplePlanar((imbyte*)this->line_buffer, this->width, row, plane, this->v_subsample, this->h_subsample);
+    }
 
     imFileLineBufferRead(this, data, row, plane);
 
