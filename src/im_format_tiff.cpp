@@ -650,6 +650,7 @@ class imFileFormatTIFF: public imFileFormatBase
       lab_fix,     // convert CIE Lab to unsigned
       extra_sample_size, // eliminate extra samples if more than one
       sample_size,
+      h_subsample, v_subsample,
       start_plane; // first band to read in a multiband image
 
   void** tile_buf;
@@ -716,6 +717,8 @@ int imFileFormatTIFF::Open(const char* file_name)
   this->image_count = TIFFNumberOfDirectories(this->tiff);
   this->tile_buf = 0;
   this->start_plane = 0;
+  this->h_subsample = 1;
+  this->v_subsample = 1;
 
   return IM_ERR_NONE;
 }
@@ -894,6 +897,14 @@ int imFileFormatTIFF::ReadImageInfo(int index)
 
   if ((Photometric == PHOTOMETRIC_CFA || Photometric == PHOTOMETRIC_LINEARRAW) && BitsPerSample == 12)
     this->convert_bpp = 12;
+
+  if (Photometric == PHOTOMETRIC_YCBCR && this->file_color_mode == IM_YCBCR)
+  {
+    uint16 ycbcrsubsampling[2];
+    TIFFGetFieldDefaulted(this->tiff, TIFFTAG_YCBCRSUBSAMPLING, &ycbcrsubsampling[0], &ycbcrsubsampling[1]);
+    this->h_subsample = ycbcrsubsampling[0];
+    this->v_subsample = ycbcrsubsampling[1];
+  }
 
   uint16 PlanarConfig = PLANARCONFIG_CONTIG;
   TIFFGetFieldDefaulted(this->tiff, TIFFTAG_PLANARCONFIG, &PlanarConfig);
@@ -1279,6 +1290,16 @@ static void iTIFFExtraSamplesFix(unsigned char* line_buffer, int width, int samp
   }
 }
 
+static void iTIFFExpandSubSample(unsigned char* line_buffer, int width, int row, int v_subsample, int h_subsample)
+{
+  //TODO
+  (void)line_buffer;
+  (void)width;
+  (void)row;
+  (void)v_subsample;
+  (void)h_subsample;
+}
+
 /*
 For CIELab (PhotometricInterpretation = 8), the L* component is encoded in 8 bits as an unsigned integer
 range [0,255], and encoded in 16 bits as an unsigned integer range [0,65535]. The a* and b* components
@@ -1412,6 +1433,9 @@ int imFileFormatTIFF::ReadImageData(void* data)
 
     if (this->extra_sample_size)
       iTIFFExtraSamplesFix((imbyte*)this->line_buffer, this->width, this->sample_size, this->extra_sample_size, plane);
+
+    if (this->v_subsample != 1 || this->h_subsample != 1)
+      iTIFFExpandSubSample((imbyte*)this->line_buffer, this->width, row, this->v_subsample, this->h_subsample);
 
     imFileLineBufferRead(this, data, row, plane);
 
