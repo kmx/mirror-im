@@ -34,6 +34,15 @@ extern "C" {
  * When using the "im_process_omp" library you can reduce that overhead 
  * by using the \ref imProcessOpenMPSetMinCount and \ref imProcessOpenMPSetNumThreads functions. 
  * But notice that this is not the same thing as using the library without support for OpenMP. \n
+ * \par
+ * The parallelization in im_process involves only loops, usually for all the pixels in the image.
+ * To accomplish that we had to first isolate the \ref counter code, so the counting could also be done
+ * in parallel. Then we made sure that all loops contain only local variables 
+ * to avoid unnecessary shared variables that could lead to incorrect results. 
+ * In a few places we use the "atomic" directive to be able to compute histograms and other counts. 
+ * But min/max computation must be done in single thread
+ * because of limitations in OpenMP support in C (in Fortran it will be easy to implement).
+ * \par
  * For more information on OpenMP: \n
  * http://www.openmp.org 
  */
