@@ -155,7 +155,6 @@ void imFormatRegisterTIFF(void);
     Changes to libJPEG:
       jdatadst.c - fflush and ferror replaced by macros JFFLUSH and JFERROR.
       jinclude.h - standard JFFLUSH and JFERROR definitions, and new macro HAVE_JFIO.
-      jdhuf.c - added support for OJPEG_SUPPORT in libTIFF.
       new file created: jconfig.h from jconfig.txt
 
     Changes to libEXIF:

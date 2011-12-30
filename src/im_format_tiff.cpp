@@ -17,6 +17,8 @@
 #include <string.h>
 #include <memory.h>
 
+//Used to debug TIFF loading and decoding
+//#define IM_TIFF_DEBUG_RGBA 1
 
 #define TIFFTAG_GEOPIXELSCALE        33550
 #define TIFFTAG_INTERGRAPH_MATRIX    33920
@@ -819,7 +821,7 @@ int imFileFormatTIFF::ReadImageInfo(int index)
   if (comp_index == -1) return IM_ERR_COMPRESS;
   strcpy(this->compression, iTIFFCompTable[comp_index]);
 
-  if (Compression == COMPRESSION_JPEG || Compression == COMPRESSION_OJPEG)
+  if (Compression == COMPRESSION_JPEG)
     TIFFSetField(this->tiff, TIFFTAG_JPEGCOLORMODE, JPEGCOLORMODE_RGB);
 
   uint32 Width;
@@ -858,7 +860,7 @@ int imFileFormatTIFF::ReadImageInfo(int index)
     this->file_color_mode = IM_CMYK;
     break;
   case PHOTOMETRIC_YCBCR:
-    if (Compression == COMPRESSION_JPEG || Compression == COMPRESSION_OJPEG)
+    if (Compression == COMPRESSION_JPEG)
       this->file_color_mode = IM_RGB;
     else
       this->file_color_mode = IM_YCBCR;
@@ -905,6 +907,9 @@ int imFileFormatTIFF::ReadImageInfo(int index)
     TIFFGetFieldDefaulted(this->tiff, TIFFTAG_YCBCRSUBSAMPLING, &ycbcrsubsampling[0], &ycbcrsubsampling[1]);
     this->h_subsample = ycbcrsubsampling[0];
     this->v_subsample = ycbcrsubsampling[1];
+
+    /* add space for the line buffer (this is more than necessary) */
+    this->line_buffer_extra = TIFFScanlineSize(this->tiff);
   }
 
   uint16 PlanarConfig = PLANARCONFIG_CONTIG;
@@ -1095,6 +1100,11 @@ int imFileFormatTIFF::ReadImageInfo(int index)
   attrib_table->Set("Orientation", IM_USHORT, 1, (void*)&Orientation);
 
   iTIFFReadAttributes(this->tiff, attrib_table);
+
+#ifdef IM_TIFF_DEBUG_RGBA
+  this->file_color_mode = IM_RGB;
+  this->file_data_type = IM_BYTE;
+#endif
 
   return IM_ERR_NONE;
 }
@@ -1291,25 +1301,38 @@ static void iTIFFExtraSamplesFix(unsigned char* line_buffer, int width, int samp
   }
 }
 
-static void iTIFFExpandSubSamplePacked(unsigned char* line_buffer, int width, int row, int v_subsample, int h_subsample)
+static void iTIFFExpandSubSamplePacked(unsigned char* line_buffer, int width, int row, int h_subsample, int v_subsample)
 {
-  //TODO
-  (void)line_buffer;
-  (void)width;
-  (void)row;
-  (void)v_subsample;
-  (void)h_subsample;
+  //TODO: Check other data types.
+  // (2,1) YYCbCr...
+  // (2,2) Y0Y0Y1Y1CbCr...
+  // (4,1) YYYYCbCr...
+  // (4,2) Y0Y0Y0Y0Y1Y1Y1Y1CbCr...
+  // (4,4) Y0Y0Y0Y0Y1Y1Y1Y1Y2Y2Y2Y2Y3Y3Y3Y3CbCr...  
+  // BUG: in 4,4 data will overlap if just doing it backwards
+  int yy = h_subsample*v_subsample + 2;
+  int l = (row%v_subsample)*v_subsample;
+  for (int i = width-1; i >=0 ; i--)
+  {
+    int dst = i*3;
+    int j = i/h_subsample, r = i%h_subsample;
+    int src = j*yy;
+    line_buffer[dst+2] = line_buffer[src+yy-1];   // Cr
+    line_buffer[dst+1] = line_buffer[src+yy-2];   // Cb
+    line_buffer[dst+0] = line_buffer[src+r+l];    // Y
+  }
 }
 
-static void iTIFFExpandSubSamplePlanar(unsigned char* line_buffer, int width, int row, int plane, int v_subsample, int h_subsample)
+static void iTIFFExpandSubSamplePlanar(unsigned char* line_buffer, int width, int plane, int h_subsample)
 {
-  //TODO
-  (void)line_buffer;
-  (void)width;
-  (void)row;
-  (void)plane;
-  (void)v_subsample;
-  (void)h_subsample;
+  if (plane != 0)
+  {
+    for (int i = width-1; i >=0 ; i--)
+    {
+      int j = i/h_subsample;
+      line_buffer[i] = line_buffer[j];
+    }
+  }
 }
 
 /*
@@ -1404,12 +1427,38 @@ int imFileFormatTIFF::ReadTileline(void* line_buffer, int row, int plane)
   return 1;
 }
 
+#ifdef IM_TIFF_DEBUG_RGBA
+static void iTIFFReadRGBA(TIFF* tif, int w, int h, imbyte* data)
+{
+  uint32* raster = (uint32*)malloc(w*h*4);
+  if (TIFFReadRGBAImage(tif, w, h, raster, 0))
+  {
+    int count = w*h;
+    imbyte* red = data;
+    imbyte* green = data + count;
+    imbyte* blue = data + 2*count;
+
+    for (int i=0; i<count; i++)
+    {
+      // ABGR
+      red[i] = imbyte((raster[i] >> 0) & 0xFF);
+      green[i] = imbyte((raster[i] >> 8) & 0xFF);
+      blue[i] = imbyte((raster[i] >> 16) & 0xFF);
+    }
+  }
+  free(raster);
+}
+#endif
+
 int imFileFormatTIFF::ReadImageData(void* data)
 {
   int count = imFileLineBufferCount(this);
 
   imCounterTotal(this->counter, count, "Reading TIFF...");
 
+#ifdef IM_TIFF_DEBUG_RGBA
+  iTIFFReadRGBA(this->tiff, this->width, this->height, (imbyte*)data);
+#else
   int row = 0, plane = this->start_plane;
   for (int i = 0; i < count; i++)
   {
@@ -1449,9 +1498,9 @@ int imFileFormatTIFF::ReadImageData(void* data)
     if (this->v_subsample != 1 || this->h_subsample != 1)
     {
       if (this->file_color_mode & IM_PACKED)
-        iTIFFExpandSubSamplePacked((imbyte*)this->line_buffer, this->width, row, this->v_subsample, this->h_subsample);
+        iTIFFExpandSubSamplePacked((imbyte*)this->line_buffer, this->width, row, this->h_subsample, this->v_subsample);
       else
-        iTIFFExpandSubSamplePlanar((imbyte*)this->line_buffer, this->width, row, plane, this->v_subsample, this->h_subsample);
+        iTIFFExpandSubSamplePlanar((imbyte*)this->line_buffer, this->width, plane, this->h_subsample);
     }
 
     imFileLineBufferRead(this, data, row, plane);
@@ -1461,6 +1510,7 @@ int imFileFormatTIFF::ReadImageData(void* data)
 
     imFileLineBufferInc(this, &row, &plane);
   }
+#endif
 
   return IM_ERR_NONE;
 }
