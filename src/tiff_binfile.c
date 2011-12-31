@@ -104,32 +104,32 @@ TIFF* TIFFOpen(const char* name, const char* mode)
   return tiff;
 }
 
-void* _TIFFmalloc(tsize_t s)
+void* _TIFFmalloc(tmsize_t s)
 {
   return (malloc((size_t) s));
 }
 
-void _TIFFfree(tdata_t p)
+void _TIFFfree(void* p)
 {
   free(p);
 }
 
-void* _TIFFrealloc(tdata_t p, tsize_t s)
+void* _TIFFrealloc(void* p, tmsize_t s)
 {
   return (realloc(p, (size_t) s));
 }
 
-void _TIFFmemset(tdata_t p, int v, tsize_t c)
+void _TIFFmemset(void* p, int v, tmsize_t c)
 {
   memset(p, v, (size_t) c);
 }
 
-void _TIFFmemcpy(tdata_t d, const tdata_t s, tsize_t c)
+void _TIFFmemcpy(void* d, const void* s, tmsize_t c)
 {
   memcpy(d, s, (size_t) c);
 }
 
-int _TIFFmemcmp(const tdata_t p1, const tdata_t p2, tsize_t c)
+int _TIFFmemcmp(const void* p1, const void* p2, tmsize_t c)
 {
   return (memcmp(p1, p2, (size_t) c));
 }

@@ -1301,7 +1301,7 @@ static void iTIFFExtraSamplesFix(unsigned char* line_buffer, int width, int samp
   }
 }
 
-static void iTIFFExpandSubSamplePacked(unsigned char* line_buffer, int width, int row, int h_subsample, int v_subsample)
+static void iTIFFExpandSubSamplePacked(const unsigned char* src_line_buffer, unsigned char* dst_line_buffer, int width, int row, int h_subsample, int v_subsample)
 {
   //TODO: Check other data types.
   // (2,1) YYCbCr...
@@ -1309,28 +1309,27 @@ static void iTIFFExpandSubSamplePacked(unsigned char* line_buffer, int width, in
   // (4,1) YYYYCbCr...
   // (4,2) Y0Y0Y0Y0Y1Y1Y1Y1CbCr...
   // (4,4) Y0Y0Y0Y0Y1Y1Y1Y1Y2Y2Y2Y2Y3Y3Y3Y3CbCr...  
-  // BUG: in 4,4 data will overlap if just doing it backwards
   int yy = h_subsample*v_subsample + 2;
   int l = (row%v_subsample)*v_subsample;
-  for (int i = width-1; i >=0 ; i--)
+  for (int i=0; i <width; i++)
   {
     int dst = i*3;
     int j = i/h_subsample, r = i%h_subsample;
     int src = j*yy;
-    line_buffer[dst+2] = line_buffer[src+yy-1];   // Cr
-    line_buffer[dst+1] = line_buffer[src+yy-2];   // Cb
-    line_buffer[dst+0] = line_buffer[src+r+l];    // Y
+    dst_line_buffer[dst+0] = src_line_buffer[src+r+l];    // Y
+    dst_line_buffer[dst+1] = src_line_buffer[src+yy-2];   // Cb
+    dst_line_buffer[dst+2] = src_line_buffer[src+yy-1];   // Cr
   }
 }
 
-static void iTIFFExpandSubSamplePlanar(unsigned char* line_buffer, int width, int plane, int h_subsample)
+static void iTIFFExpandSubSamplePlanar(const unsigned char* src_line_buffer, unsigned char* dst_line_buffer, int width, int plane, int h_subsample)
 {
   if (plane != 0)
   {
-    for (int i = width-1; i >=0 ; i--)
+    for (int i=0; i <width; i++)
     {
       int j = i/h_subsample;
-      line_buffer[i] = line_buffer[j];
+      dst_line_buffer[i] = src_line_buffer[j];
     }
   }
 }
@@ -1393,7 +1392,7 @@ int imFileFormatTIFF::ReadTileline(void* line_buffer, int row, int plane)
   if (row == 0)
     this->start_row = 0;
 
-  if (row == this->start_row + this->tile_width)
+  if (row == this->start_row + this->tile_height)
     this->start_row = row;
 
   // load a line of tiles
@@ -1416,11 +1415,12 @@ int imFileFormatTIFF::ReadTileline(void* line_buffer, int row, int plane)
   {
     if (t == this->tile_buf_count-1)
     {
+      // At the last tile, compute the correct size
       int extra = this->tile_line_size*this->tile_buf_count - this->tile_line_raw_size;
       line_size -= extra;
     }
 
-    memcpy(line_buffer, (imbyte*)(this->tile_buf[t]) + tile_line*tile_line_size, line_size);
+    memcpy(line_buffer, (imbyte*)(this->tile_buf[t]) + tile_line*this->tile_line_size, line_size);
     line_buffer = (imbyte*)(line_buffer) + line_size;
   }
 
@@ -1464,13 +1464,45 @@ int imFileFormatTIFF::ReadImageData(void* data)
   {
     if (TIFFIsTiled(this->tiff))
     {
-      if (ReadTileline(this->line_buffer, row, (tsample_t)plane) <= 0)
-        return IM_ERR_ACCESS;
+      if (this->h_subsample != 1 || this->v_subsample != 1)
+      {
+        if (i%this->v_subsample==0)
+        {
+          if (ReadTileline((imbyte*)this->line_buffer+line_buffer_size, row/this->v_subsample, (tsample_t)plane) <= 0)
+            return IM_ERR_ACCESS;
+        }
+
+        if (this->file_color_mode & IM_PACKED)
+          iTIFFExpandSubSamplePacked((imbyte*)this->line_buffer+line_buffer_size, (imbyte*)this->line_buffer, this->width, row, this->h_subsample, this->v_subsample);
+        else
+          iTIFFExpandSubSamplePlanar((imbyte*)this->line_buffer+line_buffer_size, (imbyte*)this->line_buffer, this->width, plane, this->h_subsample);
+      }
+      else
+      {
+        if (ReadTileline(this->line_buffer, row, (tsample_t)plane) <= 0)
+          return IM_ERR_ACCESS;
+      }
     }
     else
     {
-      if (TIFFReadScanline(this->tiff, this->line_buffer, row, (tsample_t)plane) <= 0)
-        return IM_ERR_ACCESS;
+      if (this->h_subsample != 1 || this->v_subsample != 1)
+      {
+        if (i%this->v_subsample==0)
+        {
+          if (TIFFReadScanline(this->tiff, (imbyte*)this->line_buffer+line_buffer_size, row/this->v_subsample, (tsample_t)plane) <= 0)
+            return IM_ERR_ACCESS;
+        }
+
+        if (this->file_color_mode & IM_PACKED)
+          iTIFFExpandSubSamplePacked((imbyte*)this->line_buffer+line_buffer_size, (imbyte*)this->line_buffer, this->width, row, this->h_subsample, this->v_subsample);
+        else
+          iTIFFExpandSubSamplePlanar((imbyte*)this->line_buffer+line_buffer_size, (imbyte*)this->line_buffer, this->width, plane, this->h_subsample);
+      }
+      else
+      {
+        if (TIFFReadScanline(this->tiff, this->line_buffer, row, (tsample_t)plane) <= 0)
+          return IM_ERR_ACCESS;
+      }
     }
 
     if (this->invert && this->file_data_type == IM_BYTE)
@@ -1494,14 +1526,6 @@ int imFileFormatTIFF::ReadImageData(void* data)
 
     if (this->extra_sample_size)
       iTIFFExtraSamplesFix((imbyte*)this->line_buffer, this->width, this->sample_size, this->extra_sample_size, plane);
-
-    if (this->v_subsample != 1 || this->h_subsample != 1)
-    {
-      if (this->file_color_mode & IM_PACKED)
-        iTIFFExpandSubSamplePacked((imbyte*)this->line_buffer, this->width, row, this->h_subsample, this->v_subsample);
-      else
-        iTIFFExpandSubSamplePlanar((imbyte*)this->line_buffer, this->width, plane, this->h_subsample);
-    }
 
     imFileLineBufferRead(this, data, row, plane);
 

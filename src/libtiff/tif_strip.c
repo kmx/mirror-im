@@ -305,7 +305,8 @@ TIFFScanlineSize64(TIFF* tif)
 			samplingblocks_hor = TIFFhowmany_32(td->td_imagewidth,ycbcrsubsampling[0]);
 			samplingrow_samples = _TIFFMultiply64(tif,samplingblocks_hor,samplingblock_samples,module);
 			samplingrow_size = TIFFhowmany_64(_TIFFMultiply64(tif,samplingrow_samples,td->td_bitspersample,module),8);
-			scanline_size = (samplingrow_size/ycbcrsubsampling[1]);
+/* IMLIB			scanline_size = (samplingrow_size/ycbcrsubsampling[1]); */
+			scanline_size = samplingrow_size;
 		}
 		else
 		{
