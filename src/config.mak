@@ -3,7 +3,24 @@ LIBNAME = im
 OPT = YES
 
 INCLUDES = . ../include zlib
-                     
+LDIR = ../lib/$(TEC_UNAME)
+
+ifneq ($(findstring Win, $(TEC_SYSNAME)), )
+  LIBS = zlib1
+  
+  ifneq ($(findstring gcc, $(TEC_UNAME)), )
+    LIBS = z
+  endif
+  ifneq ($(findstring mingw, $(TEC_UNAME)), )
+    LIBS = z
+  endif
+  ifneq ($(findstring cygw, $(TEC_UNAME)), )
+    LIBS = z
+  endif
+else
+  LIBS = z
+endif
+
 # WORDS_BIGENDIAN used by libTIFF
 ifeq ($(TEC_SYSARCH), ppc)
   DEFINES = WORDS_BIGENDIAN
@@ -69,31 +86,30 @@ SRC = \
     im_binfile.cpp        im_format_sgi.cpp   im_datatype.cpp      im_format_pcx.cpp \
     im_colorhsi.cpp       im_format_bmp.cpp   im_image.cpp         im_rgb2map.cpp    \
     im_colormode.cpp      im_format_gif.cpp   im_lib.cpp           im_format_pnm.cpp \
-    im_colorutil.cpp      im_format_ico.cpp   im_palette.cpp       im_format_png.cpp \
+    im_colorutil.cpp      im_format_ico.cpp   im_palette.cpp       im_format_ras.cpp \
     im_convertbitmap.cpp  im_format_led.cpp   im_counter.cpp       im_str.cpp        \
     im_convertcolor.cpp   im_fileraw.cpp      im_format_krn.cpp    im_compress.cpp   \
-    im_file.cpp           im_format_ras.cpp   old_im.cpp                             \
+    im_file.cpp           old_im.cpp                                                 \
     $(SRCJPEG) $(SRCPNG) $(SRCTIFF) $(SRCLZF)
-
     
 ifneq ($(findstring Win, $(TEC_SYSNAME)), )
-    SRC += im_sysfile_win32.cpp im_dib.cpp im_dibxbitmap.cpp
-    
-    ifneq ($(findstring dll, $(TEC_UNAME)), )
-      SRC += im.rc
-    endif
-    
-    # force the definition of math functions using float
-    # Watcom does not define them
-    ifneq ($(findstring ow, $(TEC_UNAME)), )
-      DEFINES += IM_DEFMATHFLOAT
-    endif         
-    
-    ifneq ($(findstring bc, $(TEC_UNAME)), )
-      DEFINES += IM_DEFMATHFLOAT
-    else
-      USE_EXIF = Yes
-    endif
+  SRC += im_sysfile_win32.cpp im_dib.cpp im_dibxbitmap.cpp
+  
+  ifneq ($(findstring dll, $(TEC_UNAME)), )
+    SRC += im.rc
+  endif
+  
+  # force the definition of math functions using float
+  # Watcom does not define them
+  ifneq ($(findstring owc, $(TEC_UNAME)), )
+    DEFINES += IM_DEFMATHFLOAT
+  endif         
+  
+  ifneq ($(findstring bc, $(TEC_UNAME)), )
+    DEFINES += IM_DEFMATHFLOAT
+  else
+    USE_EXIF = Yes
+  endif
 else
   USE_EXIF = Yes
   SRC += im_sysfile_unix.cpp

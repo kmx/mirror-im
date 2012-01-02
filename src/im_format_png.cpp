@@ -256,7 +256,8 @@ void imFileFormatPNG::iReadAttrib(imAttribTable* attrib_table)
   png_charpp pcal_params;  
   if (png_get_pCAL(png_ptr, info_ptr, &pcal_purpose, &pcal_limits[0], &pcal_limits[1], &pcal_type, &pcal_nparams, &pcal_units, &pcal_params))
   {
-    char param_buf[255*100], *param_ptr;
+    char param_buf[255*100];
+    char *param_ptr;
     int p, size, total_size = 0;
 
     attrib_table->Set("CalibrationName", IM_BYTE, -1, pcal_purpose);
@@ -486,7 +487,9 @@ void imFileFormatPNG::iWriteAttrib(imAttribTable* attrib_table)
   attrib_data = attrib_table->Get("CalibrationName");
   if (attrib_data)
   {
-    char params[255][100], *pparams[255], *new_param_ptr;
+    char params[255][100];
+    char *pparams[255];
+    char *new_param_ptr;
     int nparams = 0, size;
 
     char* name = (char*)attrib_data;

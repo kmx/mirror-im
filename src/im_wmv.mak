@@ -5,19 +5,19 @@ OPT = YES
 SRC = im_format_wmv.cpp
 
 ifneq ($(findstring vc9, $(TEC_UNAME)), )
-  USE_WIN_SDK = Yes
+  USE_WINSDK = Yes
 endif
 ifneq ($(findstring vc10, $(TEC_UNAME)), )
-  USE_WIN_SDK = Yes
+  USE_WINSDK = Yes
 endif
 ifneq ($(findstring dll9, $(TEC_UNAME)), )
-  USE_WIN_SDK = Yes
+  USE_WINSDK = Yes
 endif
 ifneq ($(findstring dll10, $(TEC_UNAME)), )
-  USE_WIN_SDK = Yes
+  USE_WINSDK = Yes
 endif
 
-ifndef USE_WIN_SDK
+ifndef USE_WINSDK
   #vc6-vc8 needs an external SDK
   ifneq ($(findstring _64, $(TEC_UNAME)), )
     WMFSDK = d:/lng/wmfsdk95
@@ -37,3 +37,25 @@ LIBS = wmvcore
 
 USE_IM = Yes
 IM = ..
+
+ifneq ($(findstring gcc, $(TEC_UNAME)), )
+  $(error No support for WMFSDK in Cygwin)
+endif
+ifneq ($(findstring mingw, $(TEC_UNAME)), )
+  $(error No support for WMFSDK in MingW)
+endif
+ifneq ($(findstring cygw, $(TEC_UNAME)), )
+  $(error No support for WMFSDK in Cygwin)
+endif
+ifneq ($(findstring dllw, $(TEC_UNAME)), )
+  $(error No support for WMFSDK in MingW)
+endif
+ifneq ($(findstring dllg, $(TEC_UNAME)), )
+  $(error No support for WMFSDK in Cygwin)
+endif
+ifneq ($(findstring owc, $(TEC_UNAME)), )
+  $(error No support for WMFSDK in OpenWatcom)
+endif
+ifneq ($(findstring bc, $(TEC_UNAME)), )
+  $(error No support for WMFSDK in BorlandC)
+endif

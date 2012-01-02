@@ -25,3 +25,7 @@ LIBNAME := $(LIBNAME)$(LUASFX)
 USE_IMLUA = Yes
 NO_LUALINK = Yes
 IM = ..
+
+ifneq ($(findstring cygw, $(TEC_UNAME)), )
+  $(error No support for AVI in Cygwin when using Posix mode)
+endif

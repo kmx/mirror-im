@@ -190,6 +190,10 @@
    * special treatment because they are not compatible with GCC or Visual C
    * because of different calling conventions.
    */
+/* IMLIB */
+#ifdef __WATCOMC__
+#define PNGCAPI
+#endif
 #  if PNG_API_RULE == 2
     /* If this line results in an error, either because __watcall is not
      * understood or because of a redefine just below you cannot use *this*

@@ -22,6 +22,41 @@
 #include <string.h>
 #include <math.h>
 
+
+template <class T> 
+static T iKernelTotal(T* map, int w, int h)
+{
+  T total = 0;
+  int count = w*h;
+  for(int i = 0; i < count; i++) 
+    total += map[i];
+  if (total == 0)
+    total = 1;
+  return total;
+}
+
+template <class T> 
+static T iKernelTotalH(T* map, int w, int h)
+{
+  T total = 0;
+  for(int i = 0; i < h; i++) 
+    total += map[i*w];  // Only for the first column
+  if (total == 0)
+    total = 1;
+  return total;
+}
+
+template <class T> 
+static T iKernelTotalW(T* map, int w)
+{
+  T total = 0;
+  for(int i = 0; i < w; i++) 
+    total += map[i];  // Only for the first line
+  if (total == 0)
+    total = 1;
+  return total;
+}
+
 /* Rotating Kernels
 3x3
   6 7 8   7 8 5
@@ -48,7 +83,7 @@
 */
 
 template <class KT> 
-static void iRotateKernel(KT* kernel_map, int kernel_size)
+static void iKernelRotate(KT* kernel_map, int kernel_size)
 {
   KT temp;
 
@@ -169,32 +204,24 @@ static void iRotateKernel(KT* kernel_map, int kernel_size)
 void imProcessRotateKernel(imImage* kernel)
 {
   if (kernel->data_type == IM_INT)
-    iRotateKernel((int*)kernel->data[0], kernel->width);
+    iKernelRotate((int*)kernel->data[0], kernel->width);
   else
-    iRotateKernel((float*)kernel->data[0], kernel->width);
+    iKernelRotate((float*)kernel->data[0], kernel->width);
 }
 
 template <class T, class KT, class CT> 
 static int DoCompassConvolve(T* map, T* new_map, int width, int height, KT* orig_kernel_map, int kernel_size, int counter, CT)
 {
-  KT total, *kernel_line, kvalue;
+  KT total, *kernel_line;
 
   // duplicate the kernel data so we can rotate it
-  int kcount = kernel_size*kernel_size;
-  KT* kernel_map = (KT*)malloc(kcount*sizeof(KT));
+  int ksize = kernel_size*kernel_size*sizeof(KT);
+  KT* kernel_map = (KT*)malloc(ksize);
+  memcpy(kernel_map, orig_kernel_map, ksize);
 
   int ks2 = kernel_size/2;
 
-  total = 0;
-  for(int j = 0; j < kcount; j++) 
-  {
-    kvalue = orig_kernel_map[j];
-    kernel_map[j] = kvalue;
-    total += kvalue;
-  }
-
-  if (total == 0)
-    total = 1;
+  total = iKernelTotal(kernel_map, kernel_size, kernel_size);
 
   IM_INT_PROCESSING;
 
@@ -241,7 +268,7 @@ static int DoCompassConvolve(T* map, T* new_map, int width, int height, KT* orig
         if (abs_op(value) > max_value)
           max_value = abs_op(value);
 
-        iRotateKernel(kernel_map, kernel_size);
+        iKernelRotate(kernel_map, kernel_size);
       }  
 
       max_value /= total;
@@ -321,25 +348,8 @@ static int DoConvolveDual(T* map, T* new_map, int width, int height, KT* kernel_
   if (kernel_height % 2 == 0) kh2--;
   if (kernel_width % 2 == 0) kw2--;
 
-  total1 = 0;
-  for(int j = 0; j < kernel_height; j++) 
-  {
-    for(int i = 0; i < kernel_width; i++)
-      total1 += kernel_map1[j*kernel_width + i];
-  }
-
-  if (total1 == 0)
-    total1 = 1;
-
-  total2 = 0;
-  for(int j = 0; j < kernel_height; j++) 
-  {
-    for(int i = 0; i < kernel_width; i++)
-      total2 += kernel_map2[j*kernel_width + i];
-  }
-
-  if (total2 == 0)
-    total2 = 1;
+  total1 = iKernelTotal(kernel_map1, kernel_width, kernel_height);
+  total2 = iKernelTotal(kernel_map2, kernel_width, kernel_height);
 
   IM_INT_PROCESSING;
 
@@ -358,7 +368,7 @@ static int DoConvolveDual(T* map, T* new_map, int width, int height, KT* kernel_
     
       for(int y = -kh2; y <= kh2; y++)
       {
-        int offset;
+        int offset, x;
 
         if (j + y < 0)             // pass the bottom border
           offset = -(y + j + 1) * width;
@@ -368,7 +378,7 @@ static int DoConvolveDual(T* map, T* new_map, int width, int height, KT* kernel_
           offset = (j + y) * width;
 
         kernel_line = kernel_map1 + (y+kh2)*kernel_width;
-        for(int x = -kw2; x <= kw2; x++)
+        for(x = -kw2; x <= kw2; x++)
         {
           if (i + x < 0)            // pass the left border
             value1 += kernel_line[x+kw2] * map[offset - (i + x + 1)];
@@ -379,7 +389,7 @@ static int DoConvolveDual(T* map, T* new_map, int width, int height, KT* kernel_
         }
 
         kernel_line = kernel_map2 + (y+kh2)*kernel_width;
-        for(int x = -kw2; x <= kw2; x++)
+        for(x = -kw2; x <= kw2; x++)
         {
           if (i + x < 0)            // pass the left border
             value2 += kernel_line[x+kw2] * map[offset - (i + x + 1)];
@@ -421,25 +431,8 @@ static int DoConvolveDualCpx(imcfloat* map, imcfloat* new_map, int width, int he
   if (kernel_height % 2 == 0) kh2--;
   if (kernel_width % 2 == 0) kw2--;
 
-  total1 = 0;
-  for(int j = 0; j < kernel_height; j++) 
-  {
-    for(int i = 0; i < kernel_width; i++)
-      total1 += kernel_map1[j*kernel_width + i];
-  }
-
-  if (total1 == 0)
-    total1 = 1;
-
-  total2 = 0;
-  for(int j = 0; j < kernel_height; j++) 
-  {
-    for(int i = 0; i < kernel_width; i++)
-      total2 += kernel_map1[j*kernel_width + i];
-  }
-
-  if (total2 == 0)
-    total2 = 1;
+  total1 = iKernelTotal(kernel_map1, kernel_width, kernel_height);
+  total2 = iKernelTotal(kernel_map2, kernel_width, kernel_height);
 
   IM_INT_PROCESSING;
 
@@ -458,7 +451,7 @@ static int DoConvolveDualCpx(imcfloat* map, imcfloat* new_map, int width, int he
     
       for(int y = -kh2; y <= kh2; y++)
       {
-        int offset;
+        int offset, x;
 
         if (j + y < 0)             // pass the bottom border
           offset = -(y + j + 1) * width;
@@ -468,7 +461,7 @@ static int DoConvolveDualCpx(imcfloat* map, imcfloat* new_map, int width, int he
           offset = (j + y) * width;
 
         kernel_line = kernel_map1 + (y+kh2)*kernel_width;
-        for(int x = -kw2; x <= kw2; x++)
+        for(x = -kw2; x <= kw2; x++)
         {
           if (i + x < 0)            // pass the left border
             value1 += map[offset - (i + x + 1)] * (float)kernel_line[x+kw2];
@@ -479,7 +472,7 @@ static int DoConvolveDualCpx(imcfloat* map, imcfloat* new_map, int width, int he
         }
 
         kernel_line = kernel_map2 + (y+kh2)*kernel_width;
-        for(int x = -kw2; x <= kw2; x++)
+        for(x = -kw2; x <= kw2; x++)
         {
           if (i + x < 0)            // pass the left border
             value2 += map[offset - (i + x + 1)] * (float)kernel_line[x+kw2];
@@ -569,15 +562,7 @@ static int DoConvolve(T* map, T* new_map, int width, int height, KT* kernel_map,
   if (kernel_height % 2 == 0) kh2--;
   if (kernel_width % 2 == 0) kw2--;
 
-  total = 0;
-  for(int j = 0; j < kernel_height; j++) 
-  {
-    for(int i = 0; i < kernel_width; i++)
-      total += kernel_map[j*kernel_width + i];
-  }
-
-  if (total == 0)
-    total = 1;
+  total = iKernelTotal(kernel_map, kernel_width, kernel_height);
 
   IM_INT_PROCESSING;
 
@@ -645,15 +630,7 @@ static int DoConvolveCpx(imcfloat* map, imcfloat* new_map, int width, int height
   if (kernel_height % 2 == 0) kh2--;
   if (kernel_width % 2 == 0) kw2--;
 
-  total = 0;
-  for(int j = 0; j < kernel_height; j++) 
-  {
-    for(int i = 0; i < kernel_width; i++)
-      total += kernel_map[j*kernel_width + i];
-  }
-
-  if (total == 0)
-    total = 1;
+  total = iKernelTotal(kernel_map, kernel_width, kernel_height);
 
   IM_INT_PROCESSING;
 
@@ -815,7 +792,7 @@ int imProcessConvolveRep(const imImage* src_image, imImage* dst_image, const imI
 template <class T, class KT, class CT> 
 static int DoConvolveSep(T* map, T* new_map, int width, int height, KT* kernel_map, int kernel_width, int kernel_height, int counter, CT)
 {
-  KT totalV, totalH, *kernel_line;
+  KT totalH, totalW, *kernel_line;
   T* aux_line;
 
   int kh2 = kernel_height/2;
@@ -826,19 +803,8 @@ static int DoConvolveSep(T* map, T* new_map, int width, int height, KT* kernel_m
 
   // use only the first line and the first column of the kernel
 
-  totalV = 0;
-  for(int j = 0; j < kernel_height; j++) 
-    totalV += kernel_map[j*kernel_width];
-
-  if (totalV == 0)
-    totalV = 1;
-
-  totalH = 0;
-  for(int i = 0; i < kernel_width; i++)
-    totalH += kernel_map[i];
-
-  if (totalH == 0)
-    totalH = 1;
+  totalH = iKernelTotalH(kernel_map, kernel_width, kernel_height);
+  totalW = iKernelTotalW(kernel_map, kernel_width);
 
   aux_line = (T*)malloc(width*sizeof(T));
 
@@ -862,7 +828,7 @@ static int DoConvolveSep(T* map, T* new_map, int width, int height, KT* kernel_m
       {
         int offset;
 
-        kernel_line = kernel_map + (y+kh2)*kernel_width;
+        kernel_line = kernel_map + (y+kh2)*kernel_width;  // Use only the first column
 
         if (j + y < 0)             // pass the bottom border
           offset = -(y + j + 1) * width;
@@ -875,7 +841,7 @@ static int DoConvolveSep(T* map, T* new_map, int width, int height, KT* kernel_m
           value += kernel_line[0] * map[offset + i];
       }
       
-      value /= totalV;
+      value /= totalH;
 
       int size_of = sizeof(imbyte);
       if (sizeof(T) == size_of)
@@ -910,7 +876,7 @@ static int DoConvolveSep(T* map, T* new_map, int width, int height, KT* kernel_m
 
       // second pass, only for lines, but has to use an auxiliar buffer
     
-      kernel_line = kernel_map;
+      kernel_line = kernel_map;  // Use only the first line
 
       for(int x = -kw2; x <= kw2; x++)
       {
@@ -922,7 +888,7 @@ static int DoConvolveSep(T* map, T* new_map, int width, int height, KT* kernel_m
           value += kernel_line[x+kw2] * new_map[offset + (i + x)];
       }
       
-      value /= totalH;
+      value /= totalW;
 
       int size_of = sizeof(imbyte);
       if (sizeof(T) == size_of)
@@ -946,7 +912,7 @@ static int DoConvolveSep(T* map, T* new_map, int width, int height, KT* kernel_m
 template <class KT> 
 static int DoConvolveSepCpx(imcfloat* map, imcfloat* new_map, int width, int height, KT* kernel_map, int kernel_width, int kernel_height, int counter)
 {
-  KT totalV, totalH, *kernel_line;
+  KT totalH, totalW, *kernel_line;
   imcfloat* aux_line;
 
   int kh2 = kernel_height/2;
@@ -957,19 +923,8 @@ static int DoConvolveSepCpx(imcfloat* map, imcfloat* new_map, int width, int hei
 
   // use only the first line and the first column of the kernel
 
-  totalV = 0;
-  for(int j = 0; j < kernel_height; j++) 
-    totalV += kernel_map[j*kernel_width];
-
-  if (totalV == 0)
-    totalV = 1;
-
-  totalH = 0;
-  for(int i = 0; i < kernel_width; i++)
-    totalH += kernel_map[i];
-
-  if (totalH == 0)
-    totalH = 1;
+  totalH = iKernelTotalH(kernel_map, kernel_width, kernel_height);
+  totalW = iKernelTotalW(kernel_map, kernel_width);
 
   aux_line = (imcfloat*)malloc(width*sizeof(imcfloat));
 
@@ -1006,7 +961,7 @@ static int DoConvolveSepCpx(imcfloat* map, imcfloat* new_map, int width, int hei
           value += map[offset + i] * (float)kernel_line[0];
       }
       
-      value /= (float)totalV;
+      value /= (float)totalH;
 
       new_map[new_offset + i] = value;
     }    
@@ -1050,7 +1005,7 @@ static int DoConvolveSepCpx(imcfloat* map, imcfloat* new_map, int width, int hei
           value += new_map[offset + (i + x)] * (float)kernel_line[x+kw2];
       }
       
-      value /= (float)totalH;
+      value /= (float)totalW;
 
       aux_line[i] = value;
     }    
