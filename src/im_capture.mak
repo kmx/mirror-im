@@ -70,16 +70,16 @@ mingw4-dll:
 	@echo Importing MingW stub library
 	@cd ../lib/dll
 	@dlltool -d im_capture.def -D im_capture.dll -l ../lib/mingw4/libim_capture.a
-  @copy /y im_capture.dll ../lib/mingw4/
 	@cd ../src
+	@cp -f ../lib/dll/im_capture.dll ../lib/mingw4/
 
 #VC6 DLL must be available
 dllw4-dll:                    
 	@echo Importing MingW stub library
 	@cd ../lib/dll
 	@dlltool -d im_capture.def -D im_capture.dll -l ../lib/dllw4/libim_capture.a
-  @copy /y im_capture.dll ../lib/dllw4/
 	@cd ../src
+	@cp -f ../lib/dll/im_capture.dll ../lib/dllw4/
 
 #bc56-dll:                    
 #	@echo Importing Bcc stub library
