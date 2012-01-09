@@ -4,22 +4,7 @@ OPT = YES
 
 INCLUDES = . ../include zlib
 LDIR = ../lib/$(TEC_UNAME)
-
-ifneq ($(findstring Win, $(TEC_SYSNAME)), )
-  LIBS = zlib1
-  
-  ifneq ($(findstring gcc, $(TEC_UNAME)), )
-    LIBS = z
-  endif
-  ifneq ($(findstring mingw, $(TEC_UNAME)), )
-    LIBS = z
-  endif
-  ifneq ($(findstring cygw, $(TEC_UNAME)), )
-    LIBS = z
-  endif
-else
-  LIBS = z
-endif
+LINK_ZLIB = Yes
 
 # WORDS_BIGENDIAN used by libTIFF
 ifeq ($(TEC_SYSARCH), ppc)
