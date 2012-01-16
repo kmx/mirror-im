@@ -2944,33 +2944,30 @@ static int imluaProcessToneGamut (lua_State *L)
 
 static int imluaImageGamma(lua_State *L)
 {
-  float params[1];
   imImage *image = imlua_checkimage(L, 1);
+  float gamma = (float)luaL_checknumber(L, 2);
   imlua_checknotcfloat(L, 1, image);
-  params[0] = (float)luaL_checknumber(L, 2);
-  imProcessToneGamut(image, image, IM_GAMUT_POW, params);
+  imImageGamma(image, gamma);
   return 0;
 }
 
 static int imluaImageBrightnessContrast(lua_State *L)
 {
-  float params[2];
   imImage *image = imlua_checkimage(L, 1);
+  float bright_shift = (float)luaL_checknumber(L, 2);
+  float contrast_factor = (float)luaL_checknumber(L, 3);
   imlua_checknotcfloat(L, 1, image);
-  params[0] = (float)luaL_checknumber(L, 2);
-  params[1] = (float)luaL_checknumber(L, 3);
-  imProcessToneGamut(image, image, IM_GAMUT_BRIGHTCONT, params);
+  imImageBrightnessContrast(image, bright_shift, contrast_factor);
   return 0;
 }
 
 static int imluaImageLevel(lua_State *L)
 {
-  float params[2];
   imImage *image = imlua_checkimage(L, 1);
+  float start = (float)luaL_checknumber(L, 2);
+  float end = (float)luaL_checknumber(L, 3);
   imlua_checknotcfloat(L, 1, image);
-  params[0] = (float)luaL_checknumber(L, 2);
-  params[1] = (float)luaL_checknumber(L, 3);
-  imProcessToneGamut(image, image, IM_GAMUT_EXPAND, params);
+  imImageLevel(image, start, end);
   return 0;
 }
 
@@ -2978,7 +2975,7 @@ static int imluaImageNegative(lua_State *L)
 {
   imImage *image = imlua_checkimage(L, 1);
   imlua_checknotcfloat(L, 1, image);
-  imProcessNegative(image, image);
+  imImageNegative(image);
   return 0;
 }
 
@@ -2989,7 +2986,7 @@ static int imluaImageEqualize(lua_State *L)
     luaL_argerror(L, 1, "data type must be byte or ushort");
   if (image->color_space != IM_RGB && image->color_space != IM_GRAY)
     luaL_argerror(L, 1, "color space must be RGB or Gray");
-  imProcessEqualizeHistogram(image, image);
+  imImageEqualize(image);
   return 0;
 }
 
@@ -3001,7 +2998,7 @@ static int imluaImageAutoLevel(lua_State *L)
     luaL_argerror(L, 1, "data type must be byte or ushort");
   if (image->color_space != IM_RGB && image->color_space != IM_GRAY)
     luaL_argerror(L, 1, "color space must be RGB or Gray");
-  imProcessExpandHistogram(image, image, percent);
+  imImageAutoLevel(image, percent);
   return 0;
 }
 

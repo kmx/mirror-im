@@ -911,19 +911,45 @@ int imProcessConvertToBitmap(const imImage* src_image, imImage* dst_image, int c
  * \par
  * Operations are done in-place. Limitations are the same of the original functions.
  * \par
- * \verbatim
- image:AutoLevel(percent) same as \ref imProcessExpandHistogram
- image:Equalize()         same as \ref imProcessEqualizeHistogram
- image:Negative()         same as \ref imProcessNegative
-                     also same as \ref imProcessToneGamut using \ref IM_GAMUT_INVERT
- image:Level(start, end)  same as \ref imProcessToneGamut using \ref IM_GAMUT_EXPAND
- image:BrightnessContrast(bright_shift, contrast_factor: number)    
-                          same as \ref imProcessToneGamut using \ref IM_GAMUT_BRIGHTCONT
- image:Gamma(gamma)       same as \ref imProcessToneGamut using \ref IM_GAMUT_POW
- * \endverbatim
  * See \ref im_process_pnt.h
  * \ingroup process */
 
+/** Same as \ref imProcessToneGamut using \ref IM_GAMUT_POW.
+ *
+ * \verbatim image:Gamma(gamma) [in Lua 5] \endverbatim
+ * \ingroup imageenhance */
+#define imImageGamma(_image, _gamma) { float params[1]; params[0] = _gamma; imProcessToneGamut(_image, _image, IM_GAMUT_POW, params); }
+
+/** Same as \ref imProcessToneGamut using \ref IM_GAMUT_BRIGHTCONT.
+ *
+ * \verbatim image:BrightnessContrast(bright_shift, contrast_factor: number)   [in Lua 5] \endverbatim
+ * \ingroup imageenhance */
+#define imImageBrightnessContrast(_image, _bright_shift, _contrast_factor) { float _params[2]; _params[0] = bright_shift; _params[1] = contrast_factor; imProcessToneGamut(_image, _image, IM_GAMUT_BRIGHTCONT, _params); }
+
+/** Same as \ref imProcessToneGamut using \ref IM_GAMUT_EXPAND.
+ *
+ * \verbatim image:Level(start, end)  [in Lua 5] \endverbatim
+ * \ingroup imageenhance */
+#define imImageLevel(_image, _start, _end) { float _params[2]; _params[0] = _start; _params[1] = _end; imProcessToneGamut(_image, _image, IM_GAMUT_EXPAND, _params); }
+
+/** Same as \ref imProcessEqualizeHistogram.
+ *
+ * \verbatim image:Equalize()  [in Lua 5] \endverbatim
+ * \ingroup imageenhance */
+#define imImageEqualize(_image) imProcessEqualizeHistogram(_image, _image)
+
+/** Same as \ref imProcessNegative.
+ * Also same as \ref imProcessToneGamut using \ref IM_GAMUT_INVERT.
+ *
+ * \verbatim image:Negative()  [in Lua 5] \endverbatim
+ * \ingroup imageenhance */
+#define imImageNegative(_image) imProcessNegative(_image, _image)
+
+/** Same as \ref imProcessExpandHistogram.
+ *
+ * \verbatim image:AutoLevel(percent)  [in Lua 5] \endverbatim
+ * \ingroup imageenhance */
+#define imImageAutoLevel(_image, _percent) imProcessExpandHistogram(_image, _image, _percent)
 
 
 #if defined(__cplusplus)
