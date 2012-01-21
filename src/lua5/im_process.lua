@@ -343,3 +343,4 @@ OneSourceOneDest("ProcessPixelate")
 OneSourceOneDest("ProcessPosterize")
 
 TwoSourcesOneDest("ProcessNormDiffRatio", nil, nil, nil, im.FLOAT)
+OneSourceOneDest("ProcessAbnormalHyperionCorrection")

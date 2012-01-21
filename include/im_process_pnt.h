@@ -873,6 +873,23 @@ void imProcessPosterize(const imImage* src_image, imImage* dst_image, int level)
  * \ingroup remotesens */
 void imProcessNormDiffRatio(const imImage* image1, const imImage* image2, imImage* dst_image);
 
+/** Applies the abnormal pixel correction as described in the article. \n
+ * Images must be IM_GRAY. Source and Destiny must have the same datatype, and IM_CFLOAT is not supported. \n
+ * image_abnormal is optional, can be NULL. If not NULL, must be IM_BINARY and 
+ * it will store the abnormal pixels distribution. \n
+ * Can be done in-place. \n
+ * threshold_percent is the percentage of the height that must have abnormal pixels candidates. \n
+ * threshold_consecutive is the minimum number of consecutive abnormal pixels candidates to be considered an abnormal range. 
+ * (usually the longest vertical ground feature in pixels)\n 
+ * \par
+ * Based on "Detection and Correction of Abnormal Pixels in Hyperion Images"
+ * from T. Han, D. G. Goodenough, A. Dyk, and J. Love
+ *
+ * \verbatim im.AbnormalHyperionCorrection(src_image: imImage, dst_image: imImage, threshold_consecutive, threshold_percent: number[, image_abnormal: imImage]) [in Lua 5] \endverbatim
+ * \verbatim im.AbnormalHyperionCorrectionNew(src_image: imImage, threshold_consecutive, threshold_percent: number[, image_abnormal: imImage]) -> new_image: imImage [in Lua 5] \endverbatim
+ * \ingroup remotesens */
+void imProcessAbnormalHyperionCorrection(const imImage* src_image, imImage* dst_image, int threshold_consecutive, int threshold_percent, imImage* image_abnormal);
+
 
 /** \defgroup procconvert Image Conversion
  * \par

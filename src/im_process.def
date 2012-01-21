@@ -116,6 +116,7 @@ EXPORTS
   imProcessPosterize
   imProcessNegative
   imProcessNormDiffRatio
+  imProcessAbnormalHyperionCorrection
   imProcessCanny
   imProcessMultiplyConj
   imProcessNormalizeComponents

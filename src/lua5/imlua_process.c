@@ -3364,6 +3364,26 @@ static int imluaProcessNormDiffRatio(lua_State *L)
   return 0;
 }
 
+static int imluaProcessAbnormalHyperionCorrection(lua_State *L)
+{
+  imImage *src_image = imlua_checkimage(L, 1);
+  imImage *dst_image = imlua_checkimage(L, 2);
+  imImage *image_abnormal = NULL;
+
+  imlua_match(L, src_image, dst_image);
+  imlua_checknotcfloat(L, 1, src_image);
+
+  if (!lua_isnil(L, 5))
+  {
+    image_abnormal = imlua_checkimage(L, 5);
+    imlua_checkcolorspace(L, 5, image_abnormal, IM_BINARY);
+  }
+
+  imProcessAbnormalHyperionCorrection(src_image, dst_image, luaL_checkint(L, 3), luaL_checkint(L, 4), image_abnormal);
+  return 0;
+}
+
+
 static int imlua_ProcessOpenMPSetMinCount(lua_State *L)
 {
   lua_pushinteger(L, imProcessOpenMPSetMinCount(luaL_checkint(L, 1)));
@@ -3548,7 +3568,8 @@ static const luaL_Reg improcess_lib[] = {
   {"ProcessPixelate", imluaProcessPixelate},
   {"ProcessPosterize", imluaProcessPosterize},
   {"ProcessNormDiffRatio", imluaProcessNormDiffRatio},
-
+  {"ProcessAbnormalHyperionCorrection", imluaProcessAbnormalHyperionCorrection},
+  
   {"ProcessOpenMPSetMinCount", imlua_ProcessOpenMPSetMinCount},
   {"ProcessOpenMPSetNumThreads", imlua_ProcessOpenMPSetNumThreads},
 
