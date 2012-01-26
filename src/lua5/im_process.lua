@@ -13,6 +13,7 @@ local function OneSourceOneDest (funcname, width, height, color_space, data_type
   im[funcname.."New"] = function (src_image, ...)
     -- create destination image
     local dst_image = im.ImageCreateBased(src_image, width, height, color_space, data_type)
+    if (not dst_image) then error("Failed to create destiny image") end
 
     -- call previous method, repassing all parameters
     local ret = func(src_image, dst_image, ...)
@@ -38,6 +39,7 @@ local function TwoSourcesOneDest (funcname, width, height, color_space, data_typ
   im[funcname.."New"] = function (src_image1, src_image2, ...)
     -- create destination image
     local dst_image = im.ImageCreateBased(src_image1, width, height, color_space, data_type)
+    if (not dst_image) then error("Failed to create destiny image") end
 
     -- call previous method, repassing all parameters
     local ret = func(src_image1, src_image2, dst_image, ...)
@@ -61,6 +63,7 @@ local function ThreeSourcesOneDest (funcname, width, height, color_space, data_t
   im[funcname.."New"] = function (src_image1, src_image2, src_image3, ...)
     -- create destination image
     local dst_image = im.ImageCreateBased(src_image1, width, height, color_space, data_type)
+    if (not dst_image) then error("Failed to create destiny image") end
 
     -- call previous method, repassing all parameters
     local ret = func(src_image1, src_image2, src_image3, dst_image, ...)
@@ -84,7 +87,9 @@ local function OneSourceTwoDests (funcname, width, height, color_space, data_typ
   im[funcname.."New"] = function (src_image, ...)
     -- create destination image
     local dst_image1 = im.ImageCreateBased(src_image, width, height, color_space, data_type)
+    if (not dst_image1) then error("Failed to create destiny image 1") end
     local dst_image2 = im.ImageCreateBased(src_image, width, height, color_space, data_type)
+    if (not dst_image2) then error("Failed to create destiny image 2") end
 
     -- call previous method, repassing all parameters
     local ret = func(src_image, dst_image1, dst_image2, ...)
@@ -108,8 +113,11 @@ local function OneSourceThreeDests (funcname, width, height, color_space, data_t
   im[funcname.."New"] = function (src_image, ...)
     -- create destination image
     local dst_image1 = im.ImageCreateBased(src_image, width, height, color_space, data_type)
+    if (not dst_image1) then error("Failed to create destiny image 1") end
     local dst_image2 = im.ImageCreateBased(src_image, width, height, color_space, data_type)
+    if (not dst_image2) then error("Failed to create destiny image 2") end
     local dst_image3 = im.ImageCreateBased(src_image, width, height, color_space, data_type)
+    if (not dst_image3) then error("Failed to create destiny image 3") end
 
     -- call previous method, repassing all parameters
     local ret = func(src_image, dst_image1, dst_image2, dst_image3, ...)
@@ -140,11 +148,13 @@ OneSourceOneDest("ProcessRegionalMaximum", nil, nil, im.BINARY, nil)
 
 function im.ProcessReduceNew (src_image, width, height)
   local dst_image = im.ImageCreateBased(src_image, width, height)
+  if (not dst_image) then error("Failed to create destiny image") end
   return im.ProcessReduce(src_image, dst_image), dst_image
 end
 
 function im.ProcessResizeNew (src_image, width, height)
   local dst_image = im.ImageCreateBased(src_image, width, height)
+  if (not dst_image) then error("Failed to create destiny image") end
   return im.ProcessResize(src_image, dst_image), dst_image
 end
 
@@ -155,6 +165,7 @@ function im.ProcessCropNew (src_image, xmin, xmax, ymin, ymax)
   local width = xmax - xmin + 1
   local height = ymax - ymin + 1
   local dst_image = im.ImageCreateBased(src_image, width, height)
+  if (not dst_image) then error("Failed to create destiny image") end
   im.ProcessCrop(src_image, dst_image, xmin, ymin)
   return dst_image
 end
@@ -165,6 +176,7 @@ function im.ProcessAddMarginsNew (src_image, xmin, xmax, ymin, ymax)
   local width = xmax - xmin + 1
   local height = ymax - ymin + 1
   local dst_image = im.ImageCreateBased(src_image, width, height)
+  if (not dst_image) then error("Failed to create destiny image") end
   im.ProcessAddMargins(src_image, dst_image, xmin, ymin)
   return dst_image
 end
@@ -172,6 +184,7 @@ end
 function im.ProcessRotateNew (src_image, cos0, sin0, order)
   local width, height = im.ProcessCalcRotateSize(src_image:Width(), src_image:Height(), cos0, sin0)
   local dst_image = im.ImageCreateBased(src_image, width, height)
+  if (not dst_image) then error("Failed to create destiny image") end
   return im.ProcessRotate(src_image, dst_image, cos0, sin0, order), dst_image
 end
 
@@ -219,7 +232,9 @@ function im.ProcessInterlaceSplitNew(src_image)
   end
 
   local dst_image1 = im.ImageCreateBased(src_image, nil, dst_height1)
+  if (not dst_image1) then error("Failed to create destiny image 1") end
   local dst_image2 = im.ImageCreateBased(src_image, nil, src_image:Height()/2)
+  if (not dst_image2) then error("Failed to create destiny image 2") end
 
   -- call method, repassing all parameters
   im.ProcessInterlaceSplit(src_image, dst_image1, dst_image2)
@@ -251,18 +266,21 @@ TwoSourcesOneDest("ProcessSharpKernel")
 
 function im.ProcessArithmeticConstOpNew (src_image, src_const, op)
   local dst_image = im.ImageCreateBased(src_image)
+  if (not dst_image) then error("Failed to create destiny image") end
   im.ProcessArithmeticConstOp(src_image, src_const, dst_image, op)
   return dst_image
 end
 
 function im.ProcessMultiPointOpNew (src_image_list, dst_image, func, params, op_name)
   local dst_image = im.ImageCreateBased(src_image_list[1])
+  if (not dst_image) then error("Failed to create destiny image") end
   local counter = im.ProcessMultiPointOp(src_image_list, dst_image, func, params, op_name)
   return counter, dst_image
 end
 
 function im.ProcessMultiPointColorOpNew (src_image_list, dst_image, func, params, op_name)
   local dst_image = im.ImageCreateBased(src_image_list[1])
+  if (not dst_image) then error("Failed to create destiny image") end
   local counter = im.ProcessMultiPointColorOp(src_image_list, dst_image, func, params, op_name)
   return counter, dst_image
 end
@@ -275,12 +293,14 @@ TwoSourcesOneDest("ProcessMergeComplex", nil, nil, nil, im.CFLOAT)
 
 function im.ProcessMultipleMeanNew (src_image_list, dst_image)
   local dst_image = im.ImageCreateBased(src_image_list[1])
+  if (not dst_image) then error("Failed to create destiny image") end
   im.ProcessMultipleMean(src_image_list, dst_image)
   return dst_image
 end
 
 function im.ProcessMultipleStdDevNew (src_image_list, mean_image)
   local dst_image = im.ImageCreateBased(src_image_list[1])
+  if (not dst_image) then error("Failed to create destiny image") end
   im.ProcessMultipleStdDev(src_image_list, mean_image, dst_image)
   return dst_image
 end
@@ -294,7 +314,9 @@ OneSourceOneDest("ProcessEqualizeHistogram")
 
 function im.ProcessSplitYChromaNew (src_image)
   local y_image = im.ImageCreateBased(src_image, nil, nil, im.GRAY, im.BYTE)
+  if (not y_image) then error("Failed to create destiny image Y") end
   local chroma_image = im.ImageCreateBased(src_image, nil, nil, im.RGB, im.BYTE)
+  if (not chroma_image) then error("Failed to create destiny image chroma") end
   im.ProcessSplitYChroma(src_image, y_image, chroma_image)
   return y_image, chroma_image
 end
@@ -306,7 +328,9 @@ function im.ProcessSplitComponentsNew (src_image)
   local depth = src_image:Depth()
   local dst_images = {}
   for i = 1, depth do
-    table.insert(dst_images, im.ImageCreateBased(src_image, nil, nil, im.GRAY))
+    local dst_image_i = im.ImageCreateBased(src_image, nil, nil, im.GRAY)
+    --if (not dst_image_i) then error("Failed to create destiny image "..i) end
+    table.insert(dst_images, dst_image_i)
   end
   im.ProcessSplitComponents(src_image, dst_images)
   return unpack(dst_images) --must replace this by table.unpack when 5.1 is not supported
@@ -314,6 +338,7 @@ end
 
 function im.ProcessMergeComponentsNew (src_image_list)
   local dst_image = im.ImageCreateBased(src_image_list[1], nil, nil, im.RGB)
+  if (not dst_image) then error("Failed to create destiny image") end
   im.ProcessMergeComponents(src_image_list, dst_image)
   return dst_image
 end
