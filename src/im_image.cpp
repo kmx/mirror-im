@@ -123,7 +123,8 @@ imImage* imImageInit(int width, int height, int color_mode, int data_type, void*
 imImage* imImageCreate(int width, int height, int color_space, int data_type)
 {
   imImage* image = imImageInit(width, height, color_space, data_type, NULL, NULL, 0);
-  if (!image) return NULL;
+  if (!image) 
+    return NULL;
 
   /* palette is available to BINARY, MAP and GRAY */
   if (imColorModeDepth(color_space) == 1)

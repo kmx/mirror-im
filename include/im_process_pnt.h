@@ -625,7 +625,7 @@ int imProcessRenderChessboard(imImage* image, int x_space, int y_space);
 /** Tone Gamut Operations.
  * \ingroup tonegamut */
 enum imToneGamut {
-  IM_GAMUT_NORMALIZE, /**< normalize = (a-min) / (max-min)     (destiny image must be IM_FLOAT)   */
+  IM_GAMUT_NORMALIZE, /**< normalize = (a-min) / (max-min)     (images must be IM_FLOAT)   */
   IM_GAMUT_POW,       /**< pow       = ((a-min) / (max-min))^gamma * (max-min) + min                  \n
                                        params[0]=gamma                                             */
   IM_GAMUT_LOG,       /**< log       = log(K * (a-min) / (max-min) + 1))*(max-min)/log(K+1) + min     \n
