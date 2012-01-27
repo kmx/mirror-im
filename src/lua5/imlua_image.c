@@ -41,21 +41,23 @@ int imlua_pushimageerror(lua_State *L, imImage* image, int error)
 {
   if (error)
   {
-    lua_pushnil(L);
-    imlua_pusherror(L, error);
+    lua_pushnil(L);  /* one for the image */
+    imlua_pusherror(L, error);  /* one for the error */
     return 2;
   }
   else
   {
     imlua_pushimage(L, image);
-    return 1;
+    return 1;   /* the error will be nil */
   }
 }
 
 void imlua_pushimage(lua_State *L, imImage* image)
 {
   if (!image)
-    lua_pushnil(L);
+  {
+    luaL_error(L, "image failed to be created, insuficient memory");
+  }
   else
   {
     imImage **image_p = (imImage**) lua_newuserdata(L, sizeof(imImage*));
@@ -111,8 +113,12 @@ static int imluaImageCreate (lua_State *L)
   int height = luaL_checkint(L, 2);
   int color_space = luaL_checkint(L, 3);
   int data_type = luaL_checkint(L, 4);
+  imImage *image;
 
-  imImage *image = imImageCreate(width, height, color_space, data_type);
+  if (!imImageCheckFormat(color_space, data_type))
+    luaL_error(L, "invalid combination of color space and data type.");
+
+  image = imImageCreate(width, height, color_space, data_type);
   imlua_pushimage(L, image);
   return 1;
 }

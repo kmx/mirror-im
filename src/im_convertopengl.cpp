@@ -168,11 +168,13 @@ imImage* imImageCreateFromOpenGLData(int width, int height, int glformat, const 
     color_space = IM_GRAY;
     depth = 2;
     has_alpha = 1;
-  default: /* GL_LUMINANCE */
+  case GL_LUMINANCE:
     color_space = IM_GRAY;
     depth = 1;
     has_alpha = 0;
     break;
+  default:
+    return NULL;
   }
 
   image = imImageCreate(width, height, color_space, IM_BYTE);

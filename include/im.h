@@ -53,6 +53,8 @@ enum imColorModeConfig
 
 
 /** File Access Error Codes
+ * \par
+ * In Lua use im.ErrorStr(err) to convert the error number into a string.
  * \ingroup file */
 enum imErrorCodes	
 {

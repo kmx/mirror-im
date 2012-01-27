@@ -30,3 +30,21 @@ function im.ImageCreateBased(image, width, height, color_space, data_type)
     return nil
   end
 end                                                                               
+
+function im.ErrorStr(err)
+	local msg = {}
+	msg[im.ERR_OPEN] = "Error Opening File."
+	msg[im.ERR_MEM] = "Insuficient memory."
+	msg[im.ERR_ACCESS] = "Error Accessing File."
+	msg[im.ERR_DATA] = "Image type not Suported."
+	msg[im.ERR_FORMAT] = "Invalid Format."
+	msg[im.ERR_COMPRESS] = "Invalid or unsupported compression."
+	msg[im.ERR_NONE] = "None."
+	msg[im.ERR_COUNTER] = "Counter Interrupted."
+	
+	if msg[err] then
+		return msg[err]
+	else
+		return "Unknown Error."
+	end
+end

@@ -13,7 +13,6 @@ local function OneSourceOneDest (funcname, width, height, color_space, data_type
   im[funcname.."New"] = function (src_image, ...)
     -- create destination image
     local dst_image = im.ImageCreateBased(src_image, width, height, color_space, data_type)
-    if (not dst_image) then error("Failed to create destiny image") end
 
     -- call previous method, repassing all parameters
     local ret = func(src_image, dst_image, ...)
@@ -39,7 +38,6 @@ local function TwoSourcesOneDest (funcname, width, height, color_space, data_typ
   im[funcname.."New"] = function (src_image1, src_image2, ...)
     -- create destination image
     local dst_image = im.ImageCreateBased(src_image1, width, height, color_space, data_type)
-    if (not dst_image) then error("Failed to create destiny image") end
 
     -- call previous method, repassing all parameters
     local ret = func(src_image1, src_image2, dst_image, ...)
