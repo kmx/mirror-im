@@ -74,7 +74,7 @@ static int imluaFileOpen (lua_State *L)
 static int imluaFileOpenAs (lua_State *L)
 {
   const char *filename = luaL_checkstring(L, 1);
-  const char *format = luaL_checkstring(L, 2);
+  const char *format = imlua_checkformat(L, 2);
   int error;
   imFile *ifile = imFileOpenAs(filename, format, &error);
   return imlua_pushifileerror(L, ifile, error);
@@ -97,7 +97,7 @@ static int imluaFileOpenRaw (lua_State *L)
 static int imluaFileNew (lua_State *L)
 {
   const char *filename = luaL_checkstring(L, 1);
-  const char *format = luaL_checkstring(L, 2);
+  const char *format = imlua_checkformat(L, 2);
   int error;
 
   imFile *ifile = imFileNew(filename, format, &error);

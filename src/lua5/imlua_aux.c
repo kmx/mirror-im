@@ -268,3 +268,13 @@ void imlua_errormatch(lua_State *L)
 {
   luaL_error(L, "images must have the same size, data type and color space");
 }
+
+const char* imlua_checkformat(lua_State *L, int index)
+{
+  const char *format = luaL_checkstring(L, index);
+
+  if (imFormatInfo(format, NULL, NULL, NULL)==IM_ERR_FORMAT)
+    luaL_error(L, "invalid, unknown or unregistered format");
+
+  return format;
+}

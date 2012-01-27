@@ -783,7 +783,7 @@ static int imluaFileImageLoadBitmap (lua_State *L)
 static int imluaFileImageSave (lua_State *L)
 {
   const char *file_name = luaL_checkstring(L, 1);
-  const char *format = luaL_checkstring(L, 2);
+  const char *format = imlua_checkformat(L, 2);
   imImage *image = imlua_checkimage(L, 3);
 
   imlua_pusherror(L, imFileImageSave(file_name, format, image));
@@ -797,7 +797,7 @@ static int imluaImageSave (lua_State *L)
 {
   imImage *image = imlua_checkimage(L, 1);
   const char *file_name = luaL_checkstring(L, 2);
-  const char *format = luaL_checkstring(L, 3);
+  const char *format = imlua_checkformat(L, 3);
 
   imlua_pusherror(L, imFileImageSave(file_name, format, image));
   return 1;

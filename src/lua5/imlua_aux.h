@@ -41,6 +41,7 @@ imImage* *imlua_toarrayimage(lua_State *L, int index, int *count, int start);
 /* other parameter checking */
 
 unsigned char imlua_checkmask(lua_State *L, int index);
+const char* imlua_checkformat(lua_State *L, int index);
 
 void imlua_argerrordatatype (lua_State *L, int index, int data_type);
 void imlua_argerrorcolorspace (lua_State *L, int index, int color_space);
