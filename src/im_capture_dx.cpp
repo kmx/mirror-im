@@ -587,7 +587,7 @@ struct _imVideoCapture
 
   int format_count;   /* number of supported formats */
   int format_current; /* current format */
-  int format_map[50]; /* table to map returned formats to direct X formats */
+  int format_map[100]; /* table to map returned formats to direct X formats */
 };
 
 int imVideoCaptureDeviceCount(void)
