@@ -3090,7 +3090,7 @@ static int imluaProcessRangeContrastThreshold (lua_State *L)
   int kernel_size = luaL_checkint(L, 3);
   int min_range = luaL_checkint(L, 4);
 
-  imlua_checktype(L, 1, src_image, IM_GRAY, IM_BYTE);
+  imlua_checkcolorspace(L, 1, src_image, IM_GRAY);
   luaL_argcheck(L, (src_image->data_type < IM_FLOAT), 1, "image data type can be integer only");
   imlua_checkcolorspace(L, 2, dst_image, IM_BINARY);
   imlua_matchsize(L, src_image, dst_image);
@@ -3109,7 +3109,7 @@ static int imluaProcessLocalMaxThreshold (lua_State *L)
   int kernel_size = luaL_checkint(L, 3);
   int min_thres = luaL_checkint(L, 4);
 
-  imlua_checktype(L, 1, src_image, IM_GRAY, IM_BYTE);
+  imlua_checkcolorspace(L, 1, src_image, IM_GRAY);
   luaL_argcheck(L, (src_image->data_type < IM_FLOAT), 1, "image data type can be integer only");
   imlua_checkcolorspace(L, 2, dst_image, IM_BINARY);
   imlua_matchsize(L, src_image, dst_image);
