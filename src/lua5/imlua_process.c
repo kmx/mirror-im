@@ -41,7 +41,6 @@ static void imlua_errorcfloat(lua_State *L, int index)
 #define imlua_checknotcfloat(_L, _a, _i) if ((_i)->data_type == IM_CFLOAT) \
                                            imlua_errorcfloat(_L, _a)
 
-
 static int imlua_unpacktable(lua_State *L, int index)
 {
   int i, n = imlua_getn(L, index);
@@ -50,6 +49,14 @@ static int imlua_unpacktable(lua_State *L, int index)
     lua_rawgeti(L, index, i+1);
 
   return n;
+}
+
+static void imlua_checkhistogramtype(lua_State *L, int index, imImage* image)
+{
+  if (image->data_type != IM_BYTE && 
+      image->data_type != IM_SHORT &&
+      image->data_type != IM_USHORT)
+    luaL_argerror(L, index, "image data type must be byte, short or ushort");
 }
 
 /*****************************************************************************\
@@ -91,11 +98,15 @@ static int imluaCalcCountColors (lua_State *L)
 {
   imImage* src_image = imlua_checkimage(L, 1);
 
-  if (src_image->data_type != IM_BYTE && src_image->data_type != IM_USHORT)
-    luaL_argerror(L, 1, "image data type must be IM_BYTE or IM_USHORT");
+  if (imColorModeDepth(src_image->color_space) > 1)
+  {
+    if (src_image->color_space == IM_CMYK)
+      luaL_argerror(L, 1, "color space can not be CMYK");
 
-  if (src_image->color_space >= IM_CMYK)
-    luaL_argerror(L, 1, "color space can be RGB, Gray, Binary or Map only");
+    imlua_checkdatatype(L, 1, src_image, IM_BYTE);
+  }
+  else
+    imlua_checkhistogramtype(L, 1, src_image);
 
   lua_pushnumber(L, imCalcCountColors(src_image));
   return 1;
@@ -136,7 +147,7 @@ static int imluaCalcHistogram (lua_State *L)
     }
     break;
   default:
-    luaL_argerror(L, 1, "data_type can be byte or ushort only");
+    luaL_argerror(L, 1, "data_type can be byte, short or ushort only");
     break;
   }
 
@@ -153,14 +164,13 @@ static int imluaCalcGrayHistogram (lua_State *L)
   imImage* src_image = imlua_checkimage(L, 1);
   int cumulative = lua_toboolean(L, 2);
 
-  if (src_image->data_type != IM_BYTE && src_image->data_type != IM_USHORT)
-    luaL_argerror(L, 1, "image data type must be IM_BYTE or IM_USHORT");
+  imlua_checkhistogramtype(L, 1, src_image);
 
   if (src_image->color_space >= IM_CMYK)
     luaL_argerror(L, 1, "color space can be RGB, Gray, Binary or Map only");
 
   hcount = 256;
-  if (src_image->data_type == IM_USHORT)
+  if (src_image->data_type == IM_USHORT || src_image->data_type == IM_SHORT)
     hcount = 65536;
 
   histo = malloc(sizeof(unsigned long) * hcount);
@@ -205,8 +215,7 @@ static int imluaCalcHistogramStatistics (lua_State *L)
   imStats stats;
   imImage *image = imlua_checkimage(L, 1);
 
-  if (image->data_type != IM_BYTE && image->data_type != IM_USHORT)
-    luaL_argerror(L, 1, "image data type must be IM_BYTE or IM_USHORT");
+  imlua_checkhistogramtype(L, 1, image);
 
   imCalcHistogramStatistics(image, &stats);
 
@@ -231,8 +240,7 @@ static int imluaCalcHistoImageStatistics (lua_State *L)
 
   imImage *image = imlua_checkimage(L, 1);
 
-  if (image->data_type != IM_BYTE && image->data_type != IM_USHORT)
-    luaL_argerror(L, 1, "image data type must be IM_BYTE or IM_USHORT");
+  imlua_checkhistogramtype(L, 1, image);
 
   median = (int*)malloc(sizeof(int)*image->depth);
   mode = (int*)malloc(sizeof(int)*image->depth);
@@ -256,8 +264,7 @@ static int imluaCalcPercentMinMax(lua_State *L)
   float percent = (float)luaL_checknumber(L, 2);
   int ignore_zero = lua_toboolean(L, 3);
 
-  if (image->data_type != IM_BYTE && image->data_type != IM_USHORT)
-    luaL_argerror(L, 1, "image data type must be IM_BYTE or IM_USHORT");
+  imlua_checkhistogramtype(L, 1, image);
 
   imCalcPercentMinMax(image, percent, ignore_zero, &min, &max);
 
@@ -1630,6 +1637,8 @@ static int imluaProcessUnArithmeticOp (lua_State *L)
 
   imlua_matchcolorspace(L, src_image, dst_image);
 
+  //TODO
+
   imProcessUnArithmeticOp(src_image, dst_image, op);
   return 0;
 }
@@ -1927,17 +1936,27 @@ static int imluaProcessArithmeticOp (lua_State *L)
   case IM_BYTE:
     luaL_argcheck(L,
       dst_image->data_type == IM_BYTE ||
+      dst_image->data_type == IM_SHORT ||
       dst_image->data_type == IM_USHORT ||
       dst_image->data_type == IM_INT ||
       dst_image->data_type == IM_FLOAT,
-      2, "source image is byte, destiny image data type can be byte, ushort, int and float only.");
+      2, "source image is byte, destiny image data type can be byte, short, ushort, int and float only.");
+    break;
+  case IM_SHORT:
+    luaL_argcheck(L,
+      dst_image->data_type == IM_SHORT ||
+      dst_image->data_type == IM_USHORT ||
+      dst_image->data_type == IM_INT ||
+      dst_image->data_type == IM_FLOAT,
+      2, "source image is short, destiny image data type can be short, ushort, int and float only.");
     break;
   case IM_USHORT:
     luaL_argcheck(L,
+      dst_image->data_type == IM_SHORT ||
       dst_image->data_type == IM_USHORT ||
       dst_image->data_type == IM_INT ||
       dst_image->data_type == IM_FLOAT,
-      2, "source image is ushort, destiny image data type can be ushort, int and float only.");
+      2, "source image is ushort, destiny image data type can be short, ushort, int and float only.");
     break;
   case IM_INT:
     luaL_argcheck(L,
@@ -1978,23 +1997,38 @@ static int imluaProcessArithmeticConstOp (lua_State *L)
   case IM_BYTE:
     luaL_argcheck(L,
       dst_image->data_type == IM_BYTE ||
+      dst_image->data_type == IM_SHORT ||
       dst_image->data_type == IM_USHORT ||
       dst_image->data_type == IM_INT ||
       dst_image->data_type == IM_FLOAT,
-      2, "source image is byte, destiny image data type can be byte, ushort, int and float only.");
+      2, "source image is byte, destiny image data type can be byte, short, ushort, int and float only.");
+    break;
+  case IM_SHORT:
+    luaL_argcheck(L,
+      dst_image->data_type == IM_BYTE ||
+      dst_image->data_type == IM_SHORT ||
+      dst_image->data_type == IM_USHORT ||
+      dst_image->data_type == IM_INT ||
+      dst_image->data_type == IM_FLOAT,
+      2, "source image is short, destiny image data type can be byte, short, ushort, int and float only.");
     break;
   case IM_USHORT:
     luaL_argcheck(L,
+      dst_image->data_type == IM_BYTE ||
+      dst_image->data_type == IM_SHORT ||
       dst_image->data_type == IM_USHORT ||
       dst_image->data_type == IM_INT ||
       dst_image->data_type == IM_FLOAT,
-      2, "source image is ushort, destiny image data type can be ushort, int and float only.");
+      2, "source image is ushort, destiny image data type can be byte, short, ushort, int and float only.");
     break;
   case IM_INT:
     luaL_argcheck(L,
+      dst_image->data_type == IM_BYTE ||
+      dst_image->data_type == IM_SHORT ||
+      dst_image->data_type == IM_USHORT ||
       dst_image->data_type == IM_INT ||
       dst_image->data_type == IM_FLOAT,
-      2, "source image is int, destiny image data type can be int and float only.");
+      2, "source image is int, destiny image data type can be byte, short, ushort, int and float only.");
     break;
   case IM_FLOAT:
     luaL_argcheck(L,
@@ -2239,8 +2273,7 @@ static int imluaProcessExpandHistogram (lua_State *L)
   imImage *dst_image = imlua_checkimage(L, 2);
   float percent = (float) luaL_checknumber(L, 3);
 
-  if (src_image->data_type != IM_BYTE && src_image->data_type != IM_USHORT)
-    luaL_argerror(L, 1, "image data type must be IM_BYTE or IM_USHORT");
+  imlua_checkhistogramtype(L, 1, src_image);
 
   imlua_match(L, src_image, dst_image);
   luaL_argcheck(L, src_image->color_space == IM_RGB || src_image->color_space == IM_GRAY, 1, "color space can be RGB or Gray only");
@@ -2258,8 +2291,7 @@ static int imluaProcessEqualizeHistogram (lua_State *L)
   imImage *src_image = imlua_checkimage(L, 1);
   imImage *dst_image = imlua_checkimage(L, 2);
 
-  if (src_image->data_type != IM_BYTE && src_image->data_type != IM_USHORT)
-    luaL_argerror(L, 1, "image data type must be IM_BYTE or IM_USHORT");
+  imlua_checkhistogramtype(L, 1, src_image);
 
   imlua_match(L, src_image, dst_image);
   luaL_argcheck(L, src_image->color_space == IM_RGB || src_image->color_space == IM_GRAY, 1, "color space can be RGB or Gray only");
@@ -2993,8 +3025,7 @@ static int imluaImageNegative(lua_State *L)
 static int imluaImageEqualize(lua_State *L)
 {
   imImage *image = imlua_checkimage(L, 1);
-  if (image->data_type != IM_BYTE && image->data_type != IM_USHORT)
-    luaL_argerror(L, 1, "data type must be byte or ushort");
+  imlua_checkhistogramtype(L, 1, image);
   if (image->color_space != IM_RGB && image->color_space != IM_GRAY)
     luaL_argerror(L, 1, "color space must be RGB or Gray");
   imImageEqualize(image);
@@ -3005,8 +3036,7 @@ static int imluaImageAutoLevel(lua_State *L)
 {
   imImage *image = imlua_checkimage(L, 1);
   float percent = (float)luaL_optnumber(L, 2, 0);
-  if (image->data_type != IM_BYTE && image->data_type != IM_USHORT)
-    luaL_argerror(L, 1, "data type must be byte or ushort");
+  imlua_checkhistogramtype(L, 1, image);
   if (image->color_space != IM_RGB && image->color_space != IM_GRAY)
     luaL_argerror(L, 1, "color space must be RGB or Gray");
   imImageAutoLevel(image, percent);
@@ -3046,10 +3076,11 @@ static int imluaProcessDirectConv (lua_State *L)
   imImage *dst_image = imlua_checkimage(L, 2);
 
   luaL_argcheck(L,
+    src_image->data_type == IM_SHORT ||
     src_image->data_type == IM_USHORT ||
     src_image->data_type == IM_INT ||
     src_image->data_type == IM_FLOAT,
-    1, "data type can be ushort, int or float only");
+    1, "data type can be short, ushort, int or float only");
   imlua_checkdatatype(L, 2, dst_image, IM_BYTE);
   imlua_matchsize(L, src_image, dst_image);
 

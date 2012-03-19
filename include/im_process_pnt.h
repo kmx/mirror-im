@@ -137,9 +137,9 @@ enum imUnaryOp {
 /** Apply an arithmetic unary operation. \n
  * Can be done in-place, images must match size. \n
  * Destiny image can be several types depending on source: \n
- * \li byte -> byte, ushort, int, float
- * \li ushort -> byte, ushort, int, float
- * \li int -> byte, ushort, int, float
+ * \li byte -> byte, short, ushort, int, float
+ * \li ushort -> byte, short, ushort, int, float
+ * \li int -> byte, short, ushort, int, float
  * \li float -> float
  * \li complex -> complex
  * If destiny is byte, then the result is cropped to 0-255.
@@ -166,8 +166,8 @@ enum imBinaryOp {
 /** Apply a binary arithmetic operation. \n
  * Can be done in-place, images must match size. \n
  * Source images must match type, destiny image can be several types depending on source: \n
- * \li byte -> byte, ushort, int, float
- * \li ushort -> ushort, int, float
+ * \li byte -> byte, short, ushort, int, float
+ * \li ushort -> short, ushort, int, float
  * \li int -> int, float
  * \li float -> float
  * \li complex -> complex
@@ -184,9 +184,9 @@ void imProcessArithmeticOp(const imImage* src_image1, const imImage* src_image2,
 /** Apply a binary arithmetic operation with a constant value. \n
  * Can be done in-place, images must match size. \n
  * Destiny image can be several types depending on source: \n
- * \li byte -> byte, ushort, int, float
- * \li ushort -> byte, ushort, int, float
- * \li int -> byte, ushort, int, float
+ * \li byte -> byte, short, ushort, int, float
+ * \li ushort -> byte, short, ushort, int, float
+ * \li int -> byte, short, ushort, int, float
  * \li float -> float
  * \li complex -> complex
  * The constant value is type casted to an apropriate type before the operation.
@@ -311,7 +311,7 @@ void imProcessQuantizeGrayUniform(const imImage* src_image, imImage* dst_image, 
 /** Performs an histogram expansion based on a percentage of the number of pixels. \n
  * Percentage defines an amount of pixels to include at the lowest level and at the highest level.
  * If it is zero, then only empty counts of the histogram will be considered. \n
- * Images must be (IM_BYTE or IM_USHORT)/(IM_RGB or IM_GRAY). Can be done in-place. \n
+ * Images must be (IM_BYTE, IM_SHORT or IM_USHORT)/(IM_RGB or IM_GRAY). Can be done in-place. \n
  * To expand the gammut without using the histogram, by just specifing the lowest and highest levels
  * use the \ref IM_GAMUT_EXPAND tone gammut operation (\ref imProcessToneGamut).
  *
@@ -321,7 +321,7 @@ void imProcessQuantizeGrayUniform(const imImage* src_image, imImage* dst_image, 
 void imProcessExpandHistogram(const imImage* src_image, imImage* dst_image, float percent);
 
 /** Performs an histogram equalization. \n
- * Images must be (IM_BYTE or IM_USHORT)/(IM_RGB or IM_GRAY). Can be done in-place. 
+ * Images must be (IM_BYTE, IM_SHORT or IM_USHORT)/(IM_RGB or IM_GRAY). Can be done in-place. 
  *
  * \verbatim im.ProcessEqualizeHistogram(src_image: imImage, dst_image: imImage) [in Lua 5] \endverbatim
  * \verbatim im.ProcessEqualizeHistogramNew(src_image: imImage) -> new_image: imImage [in Lua 5] \endverbatim
@@ -431,7 +431,7 @@ enum imLogicOp {
 };
 
 /** Apply a logical operation.\n
- * Images must have data type IM_BYTE, IM_USHORT or IM_INT. Can be done in-place. 
+ * Images must have data type integer. Can be done in-place. 
  *
  * \verbatim im.ProcessBitwiseOp(src_image1: imImage, src_image2: imImage, dst_image: imImage, op: number) [in Lua 5] \endverbatim
  * \verbatim im.ProcessBitwiseOpNew(src_image1: imImage, src_image2: imImage, op: number) -> new_image: imImage [in Lua 5] \endverbatim
@@ -439,7 +439,7 @@ enum imLogicOp {
 void imProcessBitwiseOp(const imImage* src_image1, const imImage* src_image2, imImage* dst_image, int op);
 
 /** Apply a logical NOT operation.\n
- * Images must have data type IM_BYTE, IM_USHORT or IM_INT. Can be done in-place. 
+ * Images must have data type integer. Can be done in-place. 
  *
  * \verbatim im.ProcessBitwiseNot(src_image: imImage, dst_image: imImage) [in Lua 5] \endverbatim
  * \verbatim im.ProcessBitwiseNotNew(src_image: imImage) -> new_image: imImage [in Lua 5] \endverbatim
@@ -656,8 +656,8 @@ void imProcessToneGamut(const imImage* src_image, imImage* dst_image, int op, fl
  * \ingroup tonegamut */
 void imProcessUnNormalize(const imImage* src_image, imImage* dst_image);
 
-/** Directly converts IM_USHORT, IM_INT and IM_FLOAT into IM_BYTE images. \n
- * This can also be done using \ref imConvertDataType with IM_CAST_DIRECT.
+/** Directly converts IM_SHORT, IM_USHORT, IM_INT and IM_FLOAT into IM_BYTE images. \n
+ * This can also be done using \ref imConvertDataType with IM_CAST_DIRECT flag.
  *
  * \verbatim im.ProcessDirectConv(src_image: imImage, dst_image: imImage) [in Lua 5] \endverbatim
  * \verbatim im.ProcessDirectConvNew(src_image: imImage) -> new_image: imImage [in Lua 5] \endverbatim

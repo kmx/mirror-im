@@ -138,14 +138,14 @@ OneSourceOneDest("ProcessHoughLinesDraw")
 OneSourceOneDest("ProcessDistanceTransform", nil, nil, nil, im.FLOAT)
 OneSourceOneDest("ProcessRegionalMaximum", nil, nil, im.BINARY, nil)
 
-function im.ProcessReduceNew (src_image, width, height)
+function im.ProcessReduceNew (src_image, width, height, order)
   local dst_image = im.ImageCreateBased(src_image, width, height)
-  return im.ProcessReduce(src_image, dst_image), dst_image
+  return im.ProcessReduce(src_image, dst_image, order), dst_image
 end
 
-function im.ProcessResizeNew (src_image, width, height)
+function im.ProcessResizeNew (src_image, width, height, order)
   local dst_image = im.ImageCreateBased(src_image, width, height)
-  return im.ProcessResize(src_image, dst_image), dst_image
+  return im.ProcessResize(src_image, dst_image, order), dst_image
 end
 
 OneSourceOneDest("ProcessReduceBy4", function (image) return image:Width() / 2 end,
@@ -228,7 +228,7 @@ end
 
 local function int_datatype (image)
   local data_type = image:DataType()
-  if data_type == im.BYTE or data_type == im.USHORT then
+  if data_type == im.BYTE or data_type == im.SHORT or data_type == im.USHORT then
     data_type = im.INT
   end
   return data_type

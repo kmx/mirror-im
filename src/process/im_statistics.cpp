@@ -95,7 +95,7 @@ void imCalcGrayHistogram(const imImage* image, unsigned long* histo, int cumulat
         histo[index]++;
       }
     }
-    else
+    else   // RGB
     {
       if (image->data_type == IM_USHORT)
       {
@@ -178,23 +178,22 @@ static unsigned long count_map(const imImage* image)
   return numcolor;
 }
 
-// will count also all the 3 components color spaces
-static unsigned long count_rgb(const imImage* image)
+static unsigned long count_comp(const imImage* image)
 {
   imbyte *count = (imbyte*)calloc(sizeof(imbyte), 1 << 21); /* (2^24)/8=2^21 ~ 2Mb - using a bit array */
   if (!count)
     return (unsigned long)-1;
 
-  imbyte *red = (imbyte*)image->data[0];
-  imbyte *green = (imbyte*)image->data[1];
-  imbyte *blue = (imbyte*)image->data[2];
+  imbyte *comp0 = (imbyte*)image->data[0];
+  imbyte *comp1 = (imbyte*)image->data[1];
+  imbyte *comp2 = (imbyte*)image->data[2];
 
   int index;
   unsigned long numcolor = 0;
 
   for(int i = 0; i < image->count; i++)
   {
-    index = red[i] << 16 | green[i] << 8 | blue[i];
+    index = comp0[i] << 16 | comp1[i] << 8 | comp2[i];
 
     if(imDataBitGet(count, index) == 0)
       numcolor++;
@@ -210,7 +209,7 @@ static unsigned long count_rgb(const imImage* image)
 unsigned long imCalcCountColors(const imImage* image)
 {
   if (imColorModeDepth(image->color_space) > 1)
-    return count_rgb(image);
+    return count_comp(image);
   else
     return count_map(image);
 }

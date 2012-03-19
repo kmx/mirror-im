@@ -628,7 +628,7 @@ void imProcessArithmeticConstOp(const imImage* src_image1, float value, imImage*
     else if (dst_image->data_type == IM_BYTE)
       DoBinaryConstOpByte((short*)src_image1->data[0], (int)value, (imbyte*)dst_image->data[0], count, op);
     else
-      DoBinaryConstOp((short*)src_image1->data[0], (imushort)value, (imushort*)dst_image->data[0], count, op);
+      DoBinaryConstOp((short*)src_image1->data[0], (int)value, (short*)dst_image->data[0], count, op);
     break;
   case IM_USHORT:
     if (dst_image->data_type == IM_FLOAT)
@@ -640,7 +640,7 @@ void imProcessArithmeticConstOp(const imImage* src_image1, float value, imImage*
     else if (dst_image->data_type == IM_BYTE)
       DoBinaryConstOpByte((imushort*)src_image1->data[0], (int)value, (imbyte*)dst_image->data[0], count, op);
     else
-      DoBinaryConstOp((imushort*)src_image1->data[0], (imushort)value, (imushort*)dst_image->data[0], count, op);
+      DoBinaryConstOp((imushort*)src_image1->data[0], (int)value, (imushort*)dst_image->data[0], count, op);
     break;
   case IM_INT:
     if (dst_image->data_type == IM_FLOAT)

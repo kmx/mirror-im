@@ -31,7 +31,7 @@ extern "C" {
  * Returns zero if the counter aborted.
  *
  * \verbatim im.ProcessReduce(src_image: imImage, dst_image: imImage, order: number) -> counter: boolean [in Lua 5] \endverbatim
- * \verbatim im.ProcessReduceNew(image: imImage, order: number) -> counter: boolean, new_image: imImage [in Lua 5] \endverbatim
+ * \verbatim im.ProcessReduceNew(image: imImage, width, height, order: number) -> counter: boolean, new_image: imImage [in Lua 5] \endverbatim
  * \ingroup resize */
 int imProcessReduce(const imImage* src_image, imImage* dst_image, int order);
 
@@ -44,7 +44,7 @@ int imProcessReduce(const imImage* src_image, imImage* dst_image, int order);
  * Returns zero if the counter aborted.
  *
  * \verbatim im.ProcessResize(src_image: imImage, dst_image: imImage, order: number) -> counter: boolean [in Lua 5] \endverbatim
- * \verbatim im.ProcessResizeNew(image: imImage, order: number) -> counter: boolean, new_image: imImage [in Lua 5] \endverbatim
+ * \verbatim im.ProcessResizeNew(image: imImage, width, height, order: number) -> counter: boolean, new_image: imImage [in Lua 5] \endverbatim
  * \ingroup resize */
 int imProcessResize(const imImage* src_image, imImage* dst_image, int order);
 
@@ -62,7 +62,7 @@ void imProcessReduceBy4(const imImage* src_image, imImage* dst_image);
  * ymin and xmin must be >0 and <size.
  *
  * \verbatim im.ProcessCrop(src_image: imImage, dst_image: imImage, xmin: number, ymin: number) [in Lua 5] \endverbatim
- * \verbatim im.ProcessCropNew(image: imImage, xmin: number, xmax: number, ymin: number, ymax: number) -> new_image: imImage [in Lua 5] \endverbatim
+ * \verbatim im.ProcessCropNew(image: imImage, xmin, xmax, ymin, ymax: number) -> new_image: imImage [in Lua 5] \endverbatim
  * \ingroup resize */
 void imProcessCrop(const imImage* src_image, imImage* dst_image, int xmin, int ymin);
 
@@ -80,7 +80,7 @@ void imProcessInsert(const imImage* src_image, const imImage* region_image, imIm
  * Images must be of the same type. Destiny image size must be greatter or equal than source image width+xmin, height+ymin.
  *
  * \verbatim im.ProcessAddMargins(src_image: imImage, dst_image: imImage, xmin: number, ymin: number) [in Lua 5] \endverbatim
- * \verbatim im.ProcessAddMarginsNew(image: imImage, xmin: number, xmax: number, ymin: number, ymax: number) -> new_image: imImage [in Lua 5] \endverbatim
+ * \verbatim im.ProcessAddMarginsNew(image: imImage, xmin, xmax, ymin, ymax: number) -> new_image: imImage [in Lua 5] \endverbatim
  * \ingroup resize */
 void imProcessAddMargins(const imImage* src_image, imImage* dst_image, int xmin, int ymin);
 
@@ -106,7 +106,7 @@ void imProcessCalcRotateSize(int width, int height, int *new_width, int *new_hei
  * Returns zero if the counter aborted.
  *
  * \verbatim im.ProcessRotate(src_image: imImage, dst_image: imImage, cos0: number, sin0: number, order: number) -> counter: boolean [in Lua 5] \endverbatim
- * \verbatim im.ProcessRotateNew(image: imImage, cos0: number, sin0: number, order: number) -> counter: boolean, new_image: imImage [in Lua 5] \endverbatim
+ * \verbatim im.ProcessRotateNew(image: imImage, cos0, sin0, order: number) -> counter: boolean, new_image: imImage [in Lua 5] \endverbatim
  * \ingroup geom */
 int imProcessRotate(const imImage* src_image, imImage* dst_image, double cos0, double sin0, int order);
 
