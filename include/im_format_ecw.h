@@ -48,7 +48,7 @@ extern "C" {
  * \section Features
  *
 \verbatim
-    Data Types: Byte, UShort, Float
+    Data Types: Byte, Short, UShort, Float
     Color Spaces: BINARY, GRAY, RGB, YCBCR
     Compressions:
       ECW - Enhanced Compression Wavelet

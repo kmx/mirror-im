@@ -57,6 +57,9 @@ void imConvertPacking(const void* src_data, void* dst_data, int width, int heigh
   case IM_BYTE:
     iDoChangePacking((const imbyte*)src_data, (imbyte*)dst_data, width, height, src_depth, dst_depth, src_is_packed); 
     break;
+  case IM_SHORT:
+    iDoChangePacking((const short*)src_data, (short*)dst_data, width, height, src_depth, dst_depth, src_is_packed); 
+    break;
   case IM_USHORT:
     iDoChangePacking((const imushort*)src_data, (imushort*)dst_data, width, height, src_depth, dst_depth, src_is_packed); 
     break;

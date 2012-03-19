@@ -141,7 +141,7 @@ static int iTGADecodeScanLine(imBinFile* handle, imbyte *DecodedBuffer, int widt
   return IM_ERR_NONE;
 }
 
-static inline int iTGAEqualPixel(const imbyte* Buffer1, const imbyte* Buffer2, int pixel_size)
+inline int iTGAEqualPixel(const imbyte* Buffer1, const imbyte* Buffer2, int pixel_size)
 {
   while(pixel_size--)
   {

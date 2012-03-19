@@ -281,6 +281,13 @@ void imFileFormatJPEG::iReadExifAttrib(unsigned char* data, int data_length, imA
           }
           break;
         case EXIF_FORMAT_SSHORT:
+          {
+            type = IM_SHORT;
+            short *svalue = (short*)value;
+            for (c = 0; c < (int)entry->components; c++) 
+              svalue[c] = exif_get_short(entry->data + format_size * c, byte_order);
+          }
+          break;
         case EXIF_FORMAT_SHORT:
           {
             type = IM_USHORT;

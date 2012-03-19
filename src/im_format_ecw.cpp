@@ -159,13 +159,19 @@ int imFileFormatECW::ReadImageInfo(int index)
     this->file_data_type = IM_BYTE;
     break;
   case NCSCT_INT16:
+    this->file_data_type = IM_SHORT;
+    break;
   case NCSCT_UINT16:
     this->file_data_type = IM_USHORT;
     break;
-  case NCSCT_UINT64:
   case NCSCT_INT64:
-  case NCSCT_UINT32:
   case NCSCT_INT32:
+    // Should be:  this->file_data_type = IM_INT;  
+    // but 32bits ints are not supported by the NCScbmReadViewLineBILEx function
+    this->file_data_type = IM_SHORT;
+    break;
+  case NCSCT_UINT64:
+  case NCSCT_UINT32:
     // Should be:  this->file_data_type = IM_INT;  
     // but 32bits ints are not supported by the NCScbmReadViewLineBILEx function
     this->file_data_type = IM_USHORT;
@@ -318,7 +324,12 @@ int imFileFormatECW::ReadImageData(void* data)
 
   NCSEcwCellType eType = NCSCT_UINT8;
   int type_size = 1;
-  if (this->file_data_type == IM_USHORT)
+  if (this->file_data_type == IM_SHORT)
+  {
+    eType = NCSCT_INT16;
+    type_size = 2;
+  }
+  else if (this->file_data_type == IM_USHORT)
   {
     eType = NCSCT_UINT16;
     type_size = 2;

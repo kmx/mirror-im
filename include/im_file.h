@@ -33,7 +33,7 @@ struct _imFile
   int is_new;
   void* attrib_table;    /**< in fact is a imAttribTable, but we hide this here */
 
-  void* line_buffer;     /**< used for line convertion, contains all components if packed, or only one if not */
+  void* line_buffer;     /**< used for line conversion, contains all components if packed, or only one if not */
   int line_buffer_size;
   int line_buffer_extra; /**< extra bytes to be allocated */
   int line_buffer_alloc; /**< total allocated so far */

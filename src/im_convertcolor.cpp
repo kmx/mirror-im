@@ -149,7 +149,8 @@ IM_STATIC int iDoConvert2Gray(int count, int data_type,
                     const T** src_data, int src_color_space, T** dst_data, int counter)
 {
   int i;
-  T max;
+  T type_max = (T)imColorMax(data_type);
+  T type_min = (T)imColorMin(data_type);
 
   const T* src_map0 = src_data[0];
   const T* src_map1 = src_data[1];
@@ -164,7 +165,6 @@ IM_STATIC int iDoConvert2Gray(int count, int data_type,
   switch(src_color_space)
   {
   case IM_XYZ: 
-    max = (T)imColorMax(data_type);
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
@@ -172,10 +172,10 @@ IM_STATIC int iDoConvert2Gray(int count, int data_type,
       IM_BEGIN_PROCESSING;
 
       // scale to 0-1
-      float c1 = imColorReconstruct(src_map1[i], max);  // use only Y component
+      float c1 = imColorReconstruct(src_map1[i], type_min, type_max);  // use only Y component
 
-      // do gamma correction then scale back to 0-max
-      dst_map[i] = imColorQuantize(imColorTransfer2Nonlinear(c1), max);
+      // do gamma correction then scale back to 0-type_max
+      dst_map[i] = imColorQuantize(imColorTransfer2Nonlinear(c1), type_min, type_max);
 
       IM_COUNT_PROCESSING;
       #pragma omp flush (processing)
@@ -183,7 +183,6 @@ IM_STATIC int iDoConvert2Gray(int count, int data_type,
     }
     break;
   case IM_CMYK: 
-    max = (T)imColorMax(data_type);
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
@@ -191,8 +190,8 @@ IM_STATIC int iDoConvert2Gray(int count, int data_type,
       IM_BEGIN_PROCESSING;
 
       T r, g, b;
-      // result is still 0-max
-      imColorCMYK2RGB(src_map0[i], src_map1[i], src_map2[i], src_map3[i], r, g, b, max);
+      // result is still 0-type_max
+      imColorCMYK2RGB(src_map0[i], src_map1[i], src_map2[i], src_map3[i], r, g, b, type_max);
       dst_map[i] = imColorRGB2Luma(r, g, b);
 
       IM_COUNT_PROCESSING;
@@ -216,7 +215,6 @@ IM_STATIC int iDoConvert2Gray(int count, int data_type,
     break;
   case IM_LUV:
   case IM_LAB:
-    max = (T)imColorMax(data_type);
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
@@ -225,11 +223,11 @@ IM_STATIC int iDoConvert2Gray(int count, int data_type,
 
       // to increase precision do intermediate conversions in float
       
-      float c0 = imColorReconstruct(src_map0[i], max); // scale to 0-1
-      c0 = imColorLightness2Luminance(c0);             // do the convertion
+      float c0 = imColorReconstruct(src_map0[i], type_min, type_max); // scale to 0-1
+      c0 = imColorLightness2Luminance(c0);             // do the conversion
 
-      // do gamma correction then scale back to 0-max
-      dst_map[i] = imColorQuantize(imColorTransfer2Nonlinear(c0), max);
+      // do gamma correction then scale back to 0-type_max
+      dst_map[i] = imColorQuantize(imColorTransfer2Nonlinear(c0), type_min, type_max);
 
       IM_COUNT_PROCESSING;
       #pragma omp flush (processing)
@@ -248,7 +246,9 @@ IM_STATIC int iDoConvert2RGB(int count, int data_type,
                    const T** src_data, int src_color_space, T** dst_data, int counter)
 {
   int i;
-  T max, zero;
+  T zero;
+  T type_max = (T)imColorMax(data_type);
+  T type_min = (T)imColorMin(data_type);
 
   const T* src_map0 = src_data[0];
   const T* src_map1 = src_data[1];
@@ -265,7 +265,6 @@ IM_STATIC int iDoConvert2RGB(int count, int data_type,
   switch(src_color_space)
   {
   case IM_XYZ: 
-    max = (T)imColorMax(data_type);
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
@@ -275,18 +274,18 @@ IM_STATIC int iDoConvert2RGB(int count, int data_type,
       // to increase precision do intermediate conversions in float
 
       // scale to 0-1
-      float c0 = imColorReconstruct(src_map0[i], max);
-      float c1 = imColorReconstruct(src_map1[i], max);
-      float c2 = imColorReconstruct(src_map2[i], max);
+      float c0 = imColorReconstruct(src_map0[i], type_min, type_max);
+      float c1 = imColorReconstruct(src_map1[i], type_min, type_max);
+      float c2 = imColorReconstruct(src_map2[i], type_min, type_max);
 
       // result is still 0-1
       imColorXYZ2RGB(c0, c1, c2, 
-                     c0, c1, c2, 1.0f);
+                     c0, c1, c2);
 
-      // do gamma correction then scale back to 0-max
-      dst_map0[i] = imColorQuantize(imColorTransfer2Nonlinear(c0), max);
-      dst_map1[i] = imColorQuantize(imColorTransfer2Nonlinear(c1), max);
-      dst_map2[i] = imColorQuantize(imColorTransfer2Nonlinear(c2), max);
+      // do gamma correction then scale back to 0-type_max
+      dst_map0[i] = imColorQuantize(imColorTransfer2Nonlinear(c0), type_min, type_max);
+      dst_map1[i] = imColorQuantize(imColorTransfer2Nonlinear(c1), type_min, type_max);
+      dst_map2[i] = imColorQuantize(imColorTransfer2Nonlinear(c2), type_min, type_max);
 
       IM_COUNT_PROCESSING;
       #pragma omp flush (processing)
@@ -294,26 +293,24 @@ IM_STATIC int iDoConvert2RGB(int count, int data_type,
     }
     break;
   case IM_YCBCR: 
-    max = (T)imColorMax(data_type);
-    zero = (T)imColorZero(data_type);
+    zero = (T)imColorZeroShift(data_type);
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
       imColorYCbCr2RGB(src_map0[i], src_map1[i], src_map2[i], 
-                       dst_map0[i], dst_map1[i], dst_map2[i], zero, max);
+                       dst_map0[i], dst_map1[i], dst_map2[i], zero, type_min, type_max);
     }
     break;
   case IM_CMYK: 
-    max = (T)imColorMax(data_type);
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
       #pragma omp flush (processing)
       IM_BEGIN_PROCESSING;
 
-      // result is still 0-max
+      // result is still 0-type_max
       imColorCMYK2RGB(src_map0[i], src_map1[i], src_map2[i], src_map3[i], 
-                      dst_map0[i], dst_map1[i], dst_map2[i], max);
+                      dst_map0[i], dst_map1[i], dst_map2[i], type_max);
 
       IM_COUNT_PROCESSING;
       #pragma omp flush (processing)
@@ -322,7 +319,6 @@ IM_STATIC int iDoConvert2RGB(int count, int data_type,
     break;
   case IM_LUV:
   case IM_LAB:
-    max = (T)imColorMax(data_type);
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
@@ -332,9 +328,9 @@ IM_STATIC int iDoConvert2RGB(int count, int data_type,
       // to increase precision do intermediate conversions in float
 
       // scale to 0-1 and -0.5/+0.5
-      float c0 = imColorReconstruct(src_map0[i], max);
-      float c1 = imColorReconstruct(src_map1[i], max) - 0.5f;
-      float c2 = imColorReconstruct(src_map2[i], max) - 0.5f;
+      float c0 = imColorReconstruct(src_map0[i], type_min, type_max);
+      float c1 = imColorReconstruct(src_map1[i], type_min, type_max) - 0.5f;
+      float c2 = imColorReconstruct(src_map2[i], type_min, type_max) - 0.5f;
 
       if (src_color_space == IM_LUV)
         imColorLuv2XYZ(c0, c1, c2,  // conversion in-place
@@ -344,12 +340,12 @@ IM_STATIC int iDoConvert2RGB(int count, int data_type,
                        c0, c1, c2);
 
       imColorXYZ2RGB(c0, c1, c2,    // conversion in-place
-                     c0, c1, c2, 1.0f);
+                     c0, c1, c2);
 
-      // do gamma correction then scale back to 0-max
-      dst_map0[i] = imColorQuantize(imColorTransfer2Nonlinear(c0), max);
-      dst_map1[i] = imColorQuantize(imColorTransfer2Nonlinear(c1), max);
-      dst_map2[i] = imColorQuantize(imColorTransfer2Nonlinear(c2), max);
+      // do gamma correction then scale back to 0-type_max
+      dst_map0[i] = imColorQuantize(imColorTransfer2Nonlinear(c0), type_min, type_max);
+      dst_map1[i] = imColorQuantize(imColorTransfer2Nonlinear(c1), type_min, type_max);
+      dst_map2[i] = imColorQuantize(imColorTransfer2Nonlinear(c2), type_min, type_max);
 
       IM_COUNT_PROCESSING;
       #pragma omp flush (processing)
@@ -384,7 +380,7 @@ IM_STATIC int iDoConvert2YCbCr(int count, int data_type,
   switch(src_color_space)
   {
   case IM_RGB: 
-    zero = (T)imColorZero(data_type);
+    zero = (T)imColorZeroShift(data_type);
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
@@ -411,7 +407,8 @@ IM_STATIC int iDoConvert2XYZ(int count, int data_type,
                    const T** src_data, int src_color_space, T** dst_data, int counter)
 {
   int i;
-  T max;
+  T type_max = (T)imColorMax(data_type);
+  T type_min = (T)imColorMin(data_type);
 
   const T* src_map0 = src_data[0];
   const T* src_map1 = (src_color_space == IM_GRAY)? 0: src_data[1];
@@ -427,7 +424,6 @@ IM_STATIC int iDoConvert2XYZ(int count, int data_type,
   switch(src_color_space)
   {
   case IM_GRAY: 
-    max = (T)imColorMax(data_type);
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
@@ -435,15 +431,15 @@ IM_STATIC int iDoConvert2XYZ(int count, int data_type,
       IM_BEGIN_PROCESSING;
 
       // scale to 0-1
-      float c0 = imColorReconstruct(src_map0[i], max);
+      float c0 = imColorReconstruct(src_map0[i], type_min, type_max);
 
       // do gamma correction
       c0 = imColorTransfer2Linear(c0);
 
-      // then scale back to 0-max
-      dst_map0[i] = imColorQuantize(c0*0.9505f, max);    // Compensate D65 white point
-      dst_map1[i] = imColorQuantize(c0, max);
-      dst_map2[i] = imColorQuantize(c0*1.0890f, max);
+      // then scale back to 0-type_max
+      dst_map0[i] = imColorQuantize(c0*0.9505f, type_min, type_max);    // Compensate D65 white point
+      dst_map1[i] = imColorQuantize(c0, type_min, type_max);
+      dst_map2[i] = imColorQuantize(c0*1.0890f, type_min, type_max);
 
       IM_COUNT_PROCESSING;
       #pragma omp flush (processing)
@@ -451,7 +447,6 @@ IM_STATIC int iDoConvert2XYZ(int count, int data_type,
     }
     break;
   case IM_RGB: 
-    max = (T)imColorMax(data_type);
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
@@ -461,9 +456,9 @@ IM_STATIC int iDoConvert2XYZ(int count, int data_type,
       // to increase precision do intermediate conversions in float
 
       // scale to 0-1
-      float c0 = imColorReconstruct(src_map0[i], max);
-      float c1 = imColorReconstruct(src_map1[i], max);
-      float c2 = imColorReconstruct(src_map2[i], max);
+      float c0 = imColorReconstruct(src_map0[i], type_min, type_max);
+      float c1 = imColorReconstruct(src_map1[i], type_min, type_max);
+      float c2 = imColorReconstruct(src_map2[i], type_min, type_max);
 
       // do gamma correction
       c0 = imColorTransfer2Linear(c0);
@@ -474,10 +469,10 @@ IM_STATIC int iDoConvert2XYZ(int count, int data_type,
       imColorRGB2XYZ(c0, c1, c2, 
                      c0, c1, c2);
 
-      // then scale back to 0-max
-      dst_map0[i] = imColorQuantize(c0, max);
-      dst_map1[i] = imColorQuantize(c1, max);
-      dst_map2[i] = imColorQuantize(c2, max);
+      // then scale back to 0-type_max
+      dst_map0[i] = imColorQuantize(c0, type_min, type_max);
+      dst_map1[i] = imColorQuantize(c1, type_min, type_max);
+      dst_map2[i] = imColorQuantize(c2, type_min, type_max);
 
       IM_COUNT_PROCESSING;
       #pragma omp flush (processing)
@@ -486,7 +481,6 @@ IM_STATIC int iDoConvert2XYZ(int count, int data_type,
     break;
   case IM_LUV:
   case IM_LAB:
-    max = (T)imColorMax(data_type);
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
@@ -495,21 +489,21 @@ IM_STATIC int iDoConvert2XYZ(int count, int data_type,
 
       // to increase precision do intermediate conversions in float
       // scale to 0-1 and -0.5/+0.5
-      float c0 = imColorReconstruct(src_map0[i], max);
-      float c1 = imColorReconstruct(src_map1[i], max) - 0.5f;
-      float c2 = imColorReconstruct(src_map2[i], max) - 0.5f;
+      float c0 = imColorReconstruct(src_map0[i], type_min, type_max);
+      float c1 = imColorReconstruct(src_map1[i], type_min, type_max) - 0.5f;
+      float c2 = imColorReconstruct(src_map2[i], type_min, type_max) - 0.5f;
 
       if (src_color_space == IM_LUV)
-        imColorLuv2XYZ(c0, c1, c2,  // convertion in-place
+        imColorLuv2XYZ(c0, c1, c2,  // conversion in-place
                        c0, c1, c2);
       else
-        imColorLab2XYZ(c0, c1, c2,  // convertion in-place
+        imColorLab2XYZ(c0, c1, c2,  // conversion in-place
                        c0, c1, c2);
 
-      // scale back to 0-max
-      dst_map0[i] = imColorQuantize(c0, max);
-      dst_map1[i] = imColorQuantize(c1, max);
-      dst_map2[i] = imColorQuantize(c2, max);
+      // scale back to 0-type_max
+      dst_map0[i] = imColorQuantize(c0, type_min, type_max);
+      dst_map1[i] = imColorQuantize(c1, type_min, type_max);
+      dst_map2[i] = imColorQuantize(c2, type_min, type_max);
 
       IM_COUNT_PROCESSING;
       #pragma omp flush (processing)
@@ -528,7 +522,8 @@ IM_STATIC int iDoConvert2Lab(int count, int data_type,
                    const T** src_data, int src_color_space, T** dst_data, int counter)
 {
   int i;
-  T max;
+  T type_max = (T)imColorMax(data_type);
+  T type_min = (T)imColorMin(data_type);
 
   const T* src_map0 = src_data[0];
   const T* src_map1 = (src_color_space == IM_GRAY)? 0: src_data[1];
@@ -544,7 +539,6 @@ IM_STATIC int iDoConvert2Lab(int count, int data_type,
   switch(src_color_space)
   {
   case IM_GRAY: 
-    max = (T)imColorMax(data_type);
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
@@ -552,7 +546,7 @@ IM_STATIC int iDoConvert2Lab(int count, int data_type,
       IM_BEGIN_PROCESSING;
 
       // scale to 0-1
-      float c0 = imColorReconstruct(src_map0[i], max);
+      float c0 = imColorReconstruct(src_map0[i], type_min, type_max);
 
       // do gamma correction
       c0 = imColorTransfer2Linear(c0);
@@ -560,8 +554,8 @@ IM_STATIC int iDoConvert2Lab(int count, int data_type,
       // do conversion
       c0 = imColorLuminance2Lightness(c0);
 
-      // then scale back to 0-max
-      dst_map0[i] = imColorQuantize(c0, max);  // update only the L component
+      // then scale back to 0-type_max
+      dst_map0[i] = imColorQuantize(c0, type_min, type_max);  // update only the L component
 
       IM_COUNT_PROCESSING;
       #pragma omp flush (processing)
@@ -569,7 +563,6 @@ IM_STATIC int iDoConvert2Lab(int count, int data_type,
     }
     break;
   case IM_RGB: 
-    max = (T)imColorMax(data_type);
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
@@ -579,25 +572,25 @@ IM_STATIC int iDoConvert2Lab(int count, int data_type,
       // to increase precision do intermediate conversions in float
 
       // scale to 0-1
-      float c0 = imColorReconstruct(src_map0[i], max);
-      float c1 = imColorReconstruct(src_map1[i], max);
-      float c2 = imColorReconstruct(src_map2[i], max);
+      float c0 = imColorReconstruct(src_map0[i], type_min, type_max);
+      float c1 = imColorReconstruct(src_map1[i], type_min, type_max);
+      float c2 = imColorReconstruct(src_map2[i], type_min, type_max);
 
       // do gamma correction
       c0 = imColorTransfer2Linear(c0);
       c1 = imColorTransfer2Linear(c1);
       c2 = imColorTransfer2Linear(c2);
 
-      imColorRGB2XYZ(c0, c1, c2,  // convertion in-place
+      imColorRGB2XYZ(c0, c1, c2,  // conversion in-place
                      c0, c1, c2);
 
-      imColorXYZ2Lab(c0, c1, c2,  // convertion in-place
+      imColorXYZ2Lab(c0, c1, c2,  // conversion in-place
                      c0, c1, c2);
 
-      // then scale back to 0-max
-      dst_map0[i] = imColorQuantize(c0, max);
-      dst_map1[i] = imColorQuantize(c1 + 0.5f, max);
-      dst_map2[i] = imColorQuantize(c2 + 0.5f, max);
+      // then scale back to 0-type_max
+      dst_map0[i] = imColorQuantize(c0, type_min, type_max);
+      dst_map1[i] = imColorQuantize(c1 + 0.5f, type_min, type_max);
+      dst_map2[i] = imColorQuantize(c2 + 0.5f, type_min, type_max);
 
       IM_COUNT_PROCESSING;
       #pragma omp flush (processing)
@@ -605,7 +598,6 @@ IM_STATIC int iDoConvert2Lab(int count, int data_type,
     }
     break;
   case IM_XYZ:
-    max = (T)imColorMax(data_type);
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
@@ -614,17 +606,17 @@ IM_STATIC int iDoConvert2Lab(int count, int data_type,
 
       // to increase precision do intermediate conversions in float
       // scale to 0-1 and -0.5/+0.5
-      float c0 = imColorReconstruct(src_map0[i], max);
-      float c1 = imColorReconstruct(src_map1[i], max);
-      float c2 = imColorReconstruct(src_map2[i], max);
+      float c0 = imColorReconstruct(src_map0[i], type_min, type_max);
+      float c1 = imColorReconstruct(src_map1[i], type_min, type_max);
+      float c2 = imColorReconstruct(src_map2[i], type_min, type_max);
 
-      imColorXYZ2Lab(c0, c1, c2,  // convertion in-place
+      imColorXYZ2Lab(c0, c1, c2,  // conversion in-place
                      c0, c1, c2);
 
-      // scale back to 0-max
-      dst_map0[i] = imColorQuantize(c0, max);
-      dst_map1[i] = imColorQuantize(c1 + 0.5f, max);
-      dst_map2[i] = imColorQuantize(c2 + 0.5f, max);
+      // scale back to 0-type_max
+      dst_map0[i] = imColorQuantize(c0, type_min, type_max);
+      dst_map1[i] = imColorQuantize(c1 + 0.5f, type_min, type_max);
+      dst_map2[i] = imColorQuantize(c2 + 0.5f, type_min, type_max);
 
       IM_COUNT_PROCESSING;
       #pragma omp flush (processing)
@@ -632,7 +624,6 @@ IM_STATIC int iDoConvert2Lab(int count, int data_type,
     }
     break;
   case IM_LUV:
-    max = (T)imColorMax(data_type);
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
@@ -641,19 +632,19 @@ IM_STATIC int iDoConvert2Lab(int count, int data_type,
 
       // to increase precision do intermediate conversions in float
       // scale to 0-1 and -0.5/+0.5
-      float c0 = imColorReconstruct(src_map0[i], max);
-      float c1 = imColorReconstruct(src_map1[i], max) - 0.5f;
-      float c2 = imColorReconstruct(src_map2[i], max) - 0.5f;
+      float c0 = imColorReconstruct(src_map0[i], type_min, type_max);
+      float c1 = imColorReconstruct(src_map1[i], type_min, type_max) - 0.5f;
+      float c2 = imColorReconstruct(src_map2[i], type_min, type_max) - 0.5f;
 
-      imColorLuv2XYZ(c0, c1, c2,  // convertion in-place
+      imColorLuv2XYZ(c0, c1, c2,  // conversion in-place
                      c0, c1, c2);
-      imColorXYZ2Lab(c0, c1, c2,  // convertion in-place
+      imColorXYZ2Lab(c0, c1, c2,  // conversion in-place
                      c0, c1, c2);
 
-      // scale back to 0-max
-      dst_map0[i] = imColorQuantize(c0, max);
-      dst_map1[i] = imColorQuantize(c1 + 0.5f, max);
-      dst_map2[i] = imColorQuantize(c2 + 0.5f, max);
+      // scale back to 0-type_max
+      dst_map0[i] = imColorQuantize(c0, type_min, type_max);
+      dst_map1[i] = imColorQuantize(c1 + 0.5f, type_min, type_max);
+      dst_map2[i] = imColorQuantize(c2 + 0.5f, type_min, type_max);
 
       IM_COUNT_PROCESSING;
       #pragma omp flush (processing)
@@ -672,7 +663,8 @@ IM_STATIC int iDoConvert2Luv(int count, int data_type,
                    const T** src_data, int src_color_space, T** dst_data, int counter)
 {
   int i;
-  T max;
+  T type_max = (T)imColorMax(data_type);
+  T type_min = (T)imColorMin(data_type);
 
   const T* src_map0 = src_data[0];
   const T* src_map1 = (src_color_space == IM_GRAY)? 0: src_data[1];
@@ -688,7 +680,6 @@ IM_STATIC int iDoConvert2Luv(int count, int data_type,
   switch(src_color_space)
   {
   case IM_GRAY: 
-    max = (T)imColorMax(data_type);
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
@@ -696,7 +687,7 @@ IM_STATIC int iDoConvert2Luv(int count, int data_type,
       IM_BEGIN_PROCESSING;
 
       // scale to 0-1
-      float c0 = imColorReconstruct(src_map0[i], max);
+      float c0 = imColorReconstruct(src_map0[i], type_min, type_max);
 
       // do gamma correction
       c0 = imColorTransfer2Linear(c0);
@@ -704,8 +695,8 @@ IM_STATIC int iDoConvert2Luv(int count, int data_type,
       // do conversion
       c0 = imColorLuminance2Lightness(c0);
 
-      // then scale back to 0-max
-      dst_map0[i] = imColorQuantize(c0, max);  // update only the L component
+      // then scale back to 0-type_max
+      dst_map0[i] = imColorQuantize(c0, type_min, type_max);  // update only the L component
 
       IM_COUNT_PROCESSING;
       #pragma omp flush (processing)
@@ -713,7 +704,6 @@ IM_STATIC int iDoConvert2Luv(int count, int data_type,
     }
     break;
   case IM_RGB: 
-    max = (T)imColorMax(data_type);
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
@@ -723,25 +713,25 @@ IM_STATIC int iDoConvert2Luv(int count, int data_type,
       // to increase precision do intermediate conversions in float
 
       // scale to 0-1
-      float c0 = imColorReconstruct(src_map0[i], max);
-      float c1 = imColorReconstruct(src_map1[i], max);
-      float c2 = imColorReconstruct(src_map2[i], max);
+      float c0 = imColorReconstruct(src_map0[i], type_min, type_max);
+      float c1 = imColorReconstruct(src_map1[i], type_min, type_max);
+      float c2 = imColorReconstruct(src_map2[i], type_min, type_max);
 
       // do gamma correction
       c0 = imColorTransfer2Linear(c0);
       c1 = imColorTransfer2Linear(c1);
       c2 = imColorTransfer2Linear(c2);
 
-      imColorRGB2XYZ(c0, c1, c2,  // convertion in-place
+      imColorRGB2XYZ(c0, c1, c2,  // conversion in-place
                      c0, c1, c2);
 
-      imColorXYZ2Luv(c0, c1, c2,  // convertion in-place
+      imColorXYZ2Luv(c0, c1, c2,  // conversion in-place
                      c0, c1, c2);
 
-      // then scale back to 0-max
-      dst_map0[i] = imColorQuantize(c0, max);
-      dst_map1[i] = imColorQuantize(c1 + 0.5f, max);
-      dst_map2[i] = imColorQuantize(c2 + 0.5f, max);
+      // then scale back to 0-type_max
+      dst_map0[i] = imColorQuantize(c0, type_min, type_max);
+      dst_map1[i] = imColorQuantize(c1 + 0.5f, type_min, type_max);
+      dst_map2[i] = imColorQuantize(c2 + 0.5f, type_min, type_max);
 
       IM_COUNT_PROCESSING;
       #pragma omp flush (processing)
@@ -749,7 +739,6 @@ IM_STATIC int iDoConvert2Luv(int count, int data_type,
     }
     break;
   case IM_XYZ:
-    max = (T)imColorMax(data_type);
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
@@ -758,17 +747,17 @@ IM_STATIC int iDoConvert2Luv(int count, int data_type,
 
       // to increase precision do intermediate conversions in float
       // scale to 0-1 and -0.5/+0.5
-      float c0 = imColorReconstruct(src_map0[i], max);
-      float c1 = imColorReconstruct(src_map1[i], max);
-      float c2 = imColorReconstruct(src_map2[i], max);
+      float c0 = imColorReconstruct(src_map0[i], type_min, type_max);
+      float c1 = imColorReconstruct(src_map1[i], type_min, type_max);
+      float c2 = imColorReconstruct(src_map2[i], type_min, type_max);
 
-      imColorXYZ2Luv(c0, c1, c2,  // convertion in-place
+      imColorXYZ2Luv(c0, c1, c2,  // conversion in-place
                      c0, c1, c2);
 
-      // scale back to 0-max
-      dst_map0[i] = imColorQuantize(c0, max);
-      dst_map1[i] = imColorQuantize(c1 + 0.5f, max);
-      dst_map2[i] = imColorQuantize(c2 + 0.5f, max);
+      // scale back to 0-type_max
+      dst_map0[i] = imColorQuantize(c0, type_min, type_max);
+      dst_map1[i] = imColorQuantize(c1 + 0.5f, type_min, type_max);
+      dst_map2[i] = imColorQuantize(c2 + 0.5f, type_min, type_max);
 
       IM_COUNT_PROCESSING;
       #pragma omp flush (processing)
@@ -776,7 +765,6 @@ IM_STATIC int iDoConvert2Luv(int count, int data_type,
     }
     break;
   case IM_LAB:
-    max = (T)imColorMax(data_type);
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
     {
@@ -785,19 +773,19 @@ IM_STATIC int iDoConvert2Luv(int count, int data_type,
 
       // to increase precision do intermediate conversions in float
       // scale to 0-1 and -0.5/+0.5
-      float c0 = imColorReconstruct(src_map0[i], max);
-      float c1 = imColorReconstruct(src_map1[i], max) - 0.5f;
-      float c2 = imColorReconstruct(src_map2[i], max) - 0.5f;
+      float c0 = imColorReconstruct(src_map0[i], type_min, type_max);
+      float c1 = imColorReconstruct(src_map1[i], type_min, type_max) - 0.5f;
+      float c2 = imColorReconstruct(src_map2[i], type_min, type_max) - 0.5f;
 
-      imColorLab2XYZ(c0, c1, c2,  // convertion in-place
+      imColorLab2XYZ(c0, c1, c2,  // conversion in-place
                      c0, c1, c2);
-      imColorXYZ2Luv(c0, c1, c2,  // convertion in-place
+      imColorXYZ2Luv(c0, c1, c2,  // conversion in-place
                      c0, c1, c2);
 
-      // scale back to 0-max
-      dst_map0[i] = imColorQuantize(c0, max);
-      dst_map1[i] = imColorQuantize(c1 + 0.5f, max);
-      dst_map2[i] = imColorQuantize(c2 + 0.5f, max);
+      // scale back to 0-type_max
+      dst_map0[i] = imColorQuantize(c0, type_min, type_max);
+      dst_map1[i] = imColorQuantize(c1 + 0.5f, type_min, type_max);
+      dst_map2[i] = imColorQuantize(c2 + 0.5f, type_min, type_max);
 
       IM_COUNT_PROCESSING;
       #pragma omp flush (processing)
@@ -897,6 +885,10 @@ static int iConvertColorSpace(const imImage* src_image, imImage* dst_image)
     return iDoConvertColorSpace(src_image->count, src_image->data_type,
                          (const imbyte**)src_image->data, src_image->color_space, 
                                (imbyte**)dst_image->data, dst_image->color_space);
+  case IM_SHORT:
+    return iDoConvertColorSpace(src_image->count, src_image->data_type, 
+                         (const short**)src_image->data, src_image->color_space, 
+                               (short**)dst_image->data, dst_image->color_space);
   case IM_USHORT:
     return iDoConvertColorSpace(src_image->count, src_image->data_type, 
                          (const imushort**)src_image->data, src_image->color_space, 

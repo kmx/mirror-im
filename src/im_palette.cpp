@@ -15,12 +15,12 @@
 #include <assert.h>
 #include <math.h>
 
-static inline int iSqr(int x)
+inline int iSqr(int x)
 {
   return x*x;
 }
 
-static inline int iAbs(int x)
+inline int iAbs(int x)
 {
   return x < 0? -x: x;
 }

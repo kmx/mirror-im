@@ -193,9 +193,9 @@ void imColorRGB2HSI(float r, float g, float b, float *h, float *s, float *i)
 
 void imColorRGB2HSIbyte(unsigned char r, unsigned char g, unsigned char b, float *h, float *s, float *i)
 {
-  float fr = imColorReconstruct(r, (imbyte)255);
-  float fg = imColorReconstruct(g, (imbyte)255);
-  float fb = imColorReconstruct(b, (imbyte)255);
+  float fr = imColorReconstruct(r, (imbyte)0, (imbyte)255);
+  float fg = imColorReconstruct(g, (imbyte)0, (imbyte)255);
+  float fb = imColorReconstruct(b, (imbyte)0, (imbyte)255);
   
   imColorRGB2HSI(fr, fg, fb, h, s, i);
 }
@@ -258,7 +258,7 @@ void imColorHSI2RGBbyte(float h, float s, float i, unsigned char *r, unsigned ch
   
   imColorHSI2RGB(h, s, i, &fr, &fg, &fb);
   
-  *r = imColorQuantize(fr, (imbyte)255);
-  *g = imColorQuantize(fg, (imbyte)255);
-  *b = imColorQuantize(fb, (imbyte)255);
+  *r = imColorQuantize(fr, (imbyte)0, (imbyte)255);
+  *g = imColorQuantize(fg, (imbyte)0, (imbyte)255);
+  *b = imColorQuantize(fb, (imbyte)0, (imbyte)255);
 }

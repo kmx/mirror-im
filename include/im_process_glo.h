@@ -43,15 +43,18 @@ extern "C" {
 int imProcessHoughLines(const imImage* src_image, imImage* dst_image);
 
 /** Draw detected hough lines. \n
- * The source image must be IM_GRAY and IM_BYTE. The destiny image can be a clone of the source image or 
- * it can be the source image for in-place processing. \n
+ * The source image must be IM_GRAY and IM_BYTE. 
+ * The destiny can be IM_MAP, IM_GRAY or IM_RGB, with data type IM_BYTE, 
+ * or it can be the source image for in-place processing. \n
  * If the hough transform is not NULL, then the hough points are filtered to include only lines
  * that are significally different from each other. \n
  * The hough image is the hough transform image, but it is optional and can be NULL. 
  * If not NULL then it will be used to filter lines that are very similar. \n
  * The hough points image is a hough transform image that was thresholded to a IM_BINARY image, 
  * usually using a Local Max threshold operation (see \ref imProcessLocalMaxThreshold). Again the better the threshold the better the results. \n
- * The destiny image will be set to IM_MAP, and the detected lines will be drawn using a red color. \n
+ * The detected lines will be drawn using a red color.
+ * If the destiny image is IM_GRAY, it will be changed to IM_MAP. \n
+ * If the destiny image is IM_RGB, then only the red plane will be changed.
  * Returns the number of detected lines. \n
  * Not using OpenMP when enabled.
  *

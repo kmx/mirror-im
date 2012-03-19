@@ -172,17 +172,22 @@ protected:
   virtual unsigned long ReadBuf(void* pValues, unsigned long pSize) = 0;
   virtual unsigned long WriteBuf(void* pValues, unsigned long pSize) = 0;
 
-public:
-
-  int InitByteOrder(int ByteOrder)
+  void SetByteOrder(int ByteOrder)
   {
-    int old_byte_order = this->FileByteOrder;
     this->FileByteOrder = ByteOrder;
     
 	  if (ByteOrder != imBinCPUByteOrder())
 	    this->DoByteOrder = 1;
 	  else
       this->DoByteOrder = 0;
+  }
+
+public:
+
+  int InitByteOrder(int ByteOrder)
+  {
+    int old_byte_order = this->FileByteOrder;
+    SetByteOrder(ByteOrder);
     return old_byte_order;
   }
 

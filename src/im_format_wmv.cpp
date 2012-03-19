@@ -870,6 +870,7 @@ static int iAttribSet(void* user_data, int index, const char* name, int data_typ
     else
       Type = WMT_TYPE_BINARY;
     break;
+  case IM_SHORT:
   case IM_USHORT:
     Type = WMT_TYPE_WORD;
     break;

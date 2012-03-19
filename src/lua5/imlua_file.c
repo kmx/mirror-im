@@ -291,6 +291,18 @@ static int imluaFileSetAttribute (lua_State *L)
       }
       break;
 
+    case IM_SHORT:
+      {
+        short *d = (short*) data;
+        for (i = 0; i < count; i++)
+        {
+          lua_rawgeti(L, 4, i+1);
+          d[i] = (short) luaL_checkint(L, -1);
+          lua_pop(L, 1);
+        }
+      }
+      break;
+
     case IM_USHORT:
       {
         imushort *d = (imushort*) data;
@@ -396,6 +408,17 @@ static int imluaFileGetAttribute (lua_State *L)
           lua_pushnumber(L, *data_byte);
           lua_rawseti(L, -2, i+1);
         }
+      }
+    }
+    break;
+
+  case IM_SHORT:
+    {
+      short *data_short = (short*) data;
+      for (i = 0; i < count; i++, data_short += 2)
+      {
+        lua_pushnumber(L, *data_short);
+        lua_rawseti(L, -2, i+1);
       }
     }
     break;

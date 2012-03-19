@@ -56,7 +56,7 @@ void imBinSystemFile::Open(const char* pFileName)
     this->Error = errno;
   else
     this->Error = 0;
-  InitByteOrder(imBinCPUByteOrder());
+  SetByteOrder(imBinCPUByteOrder());
   this->IsNew = 0;
 }
 
@@ -71,7 +71,7 @@ void imBinSystemFile::New(const char* pFileName)
     this->Error = errno;
   else
     this->Error = 0;
-  InitByteOrder(imBinCPUByteOrder());
+  SetByteOrder(imBinCPUByteOrder());
   this->IsNew = 1;
 }
 
@@ -189,7 +189,7 @@ void imBinSystemFileHandle::Open(const char* pFileName)
 
   int *s = (int*)pFileName;
   this->FileHandle = s[0];
-  InitByteOrder(imBinCPUByteOrder());
+  SetByteOrder(imBinCPUByteOrder());
   this->IsNew = 0;
   this->Error = 0;
 }
@@ -200,7 +200,7 @@ void imBinSystemFileHandle::New(const char* pFileName)
 
   int *s = (int*)pFileName;
   this->FileHandle = s[0];
-  InitByteOrder(imBinCPUByteOrder());
+  SetByteOrder(imBinCPUByteOrder());
   this->IsNew = 1;
   this->Error = 0;
 }

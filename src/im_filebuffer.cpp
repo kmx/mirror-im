@@ -132,11 +132,12 @@ static void iDoFillData(int width, int height, int line, int plane,
 }
 
 template <class T> 
-static inline void iConvertColor2RGB(T* data, int color_space, int data_type)
+inline void iConvertColor2RGB(T* data, int color_space, int data_type)
 {
-  T zero, max = (T)imColorMax(data_type);
+  T type_max = (T)imColorMax(data_type);
+  T type_min = (T)imColorMin(data_type);
 
-  // These are identical procedures to iDoConvert2RGB in "im_filebuffer.cpp".
+  // These are identical procedures to iDoConvert2RGB in "im_convertcolor.cpp".
 
   switch (color_space)
   {
@@ -145,37 +146,39 @@ static inline void iConvertColor2RGB(T* data, int color_space, int data_type)
       // to increase precision do intermediate conversions in float
 
       // scale to 0-1
-      float c0 = imColorReconstruct(data[0], max);
-      float c1 = imColorReconstruct(data[1], max);
-      float c2 = imColorReconstruct(data[2], max);
+      float c0 = imColorReconstruct(data[0], type_min, type_max);
+      float c1 = imColorReconstruct(data[1], type_min, type_max);
+      float c2 = imColorReconstruct(data[2], type_min, type_max);
 
       // result is still 0-1
       imColorXYZ2RGB(c0, c1, c2, 
-                     c0, c1, c2, 1.0f);
+                     c0, c1, c2);
 
-      // do gamma correction then scale back to 0-max
-      data[0] = imColorQuantize(imColorTransfer2Nonlinear(c0), max);
-      data[1] = imColorQuantize(imColorTransfer2Nonlinear(c1), max);
-      data[2] = imColorQuantize(imColorTransfer2Nonlinear(c2), max);
+      // do gamma correction then scale back to 0-type_max
+      data[0] = imColorQuantize(imColorTransfer2Nonlinear(c0), type_min, type_max);
+      data[1] = imColorQuantize(imColorTransfer2Nonlinear(c1), type_min, type_max);
+      data[2] = imColorQuantize(imColorTransfer2Nonlinear(c2), type_min, type_max);
     }
     break;
   case IM_YCBCR: 
-    zero = (T)imColorZero(data_type);
-    imColorYCbCr2RGB(data[0], data[1], data[2], 
-                      data[0], data[1], data[2], zero, max);
+    {
+      T zero = (T)imColorZeroShift(data_type);
+      imColorYCbCr2RGB(data[0], data[1], data[2], 
+                       data[0], data[1], data[2], zero, type_min, type_max);
+    }
     break;
   case IM_CMYK: 
     imColorCMYK2RGB(data[0], data[1], data[2], data[3], 
-                    data[0], data[1], data[2], max);
+                    data[0], data[1], data[2], type_max);
     break;
   case IM_LUV:
   case IM_LAB:
     {
       // to increase precision do intermediate conversions in float
       // scale to 0-1 and -0.5/+0.5
-      float c0 = imColorReconstruct(data[0], max);
-      float c1 = imColorReconstruct(data[1], max) - 0.5f;
-      float c2 = imColorReconstruct(data[2], max) - 0.5f;
+      float c0 = imColorReconstruct(data[0], type_min, type_max);
+      float c1 = imColorReconstruct(data[1], type_min, type_max) - 0.5f;
+      float c2 = imColorReconstruct(data[2], type_min, type_max) - 0.5f;
 
       if (color_space == IM_LUV)
         imColorLuv2XYZ(c0, c1, c2,  // conversion in-place
@@ -185,38 +188,24 @@ static inline void iConvertColor2RGB(T* data, int color_space, int data_type)
                        c0, c1, c2);
 
       imColorXYZ2RGB(c0, c1, c2,    // conversion in-place
-                     c0, c1, c2, 1.0f);
+                     c0, c1, c2);
 
-      // do gamma correction then scale back to 0-max
-      data[0] = imColorQuantize(imColorTransfer2Nonlinear(c0), max);
-      data[1] = imColorQuantize(imColorTransfer2Nonlinear(c1), max);
-      data[2] = imColorQuantize(imColorTransfer2Nonlinear(c2), max);
+      // do gamma correction then scale back to 0-type_max
+      data[0] = imColorQuantize(imColorTransfer2Nonlinear(c0), type_min, type_max);
+      data[1] = imColorQuantize(imColorTransfer2Nonlinear(c1), type_min, type_max);
+      data[2] = imColorQuantize(imColorTransfer2Nonlinear(c2), type_min, type_max);
     }
     break;
   }
 }
 
-// These functions will be always converting RGB -> RGB  (0-max) -> (0-255)
-
-static inline imbyte iConvertType2Byte(const imbyte& data)
-  { return data; }
-
-static inline imbyte iConvertType2Byte(const imushort& data)
-  { return imColorQuantize(imColorReconstruct(data, (imushort)65535), (imbyte)255); }
-
-static inline imbyte iConvertType2Byte(const int& data)
-  { return imColorQuantize(imColorReconstruct(data, 16777215), (imbyte)255); }
-
-static inline imbyte iConvertType2Byte(const float& data)
-  { return imColorQuantize(data, (imbyte)255); }
-
-// Fake float to avoid erros in the color conversion template rotines.
-// Since the color conversion use the double value, they are invalid,
-// so the automatic conversion to bitmap for complex images works only for RGB.
-static inline imbyte iConvertType2Byte(const double& data)
-{ 
-  imcfloat* fdata = (imcfloat*)&data;
-  return imColorQuantize(cpxmag(*fdata), (imbyte)255); 
+template <class T> 
+inline imbyte iConvertType2Byte(const T& data, const T& type_min, const T& type_max)
+{
+  // min-max to 0-1
+  // 0-1 to 0-255
+  float value = imColorReconstruct(data, type_min, type_max);
+  return imColorQuantize(value, (imbyte)0, (imbyte)255);
 }
 
 template <class T> 
@@ -231,6 +220,9 @@ static void iDoFillDataBitmap(int width, int height, int line, int plane, int da
   int data_depth = imColorModeDepth(user_color_mode);
   int copy_alpha = imColorModeHasAlpha(file_color_mode) && imColorModeHasAlpha(user_color_mode);
   int data_plane_size = width*height;  // This will be used in UNpacked data
+
+  T type_max = (T)imColorMax(data_type);
+  T type_min = (T)imColorMin(data_type);
 
   if (imColorModeIsPacked(user_color_mode))
     data += line*width*data_depth;
@@ -254,9 +246,9 @@ static void iDoFillDataBitmap(int width, int height, int line, int plane, int da
         for (int d = 0; d < depth; d++)
         {
           if (imColorModeIsPacked(user_color_mode))
-            data[x_data_offset + d] = iConvertType2Byte(line_buffer[x_file_offset + d]);
+            data[x_data_offset + d] = iConvertType2Byte(line_buffer[x_file_offset + d], type_min, type_max);
           else
-            data[d*data_plane_size + x] = iConvertType2Byte(line_buffer[x_file_offset + d]);
+            data[d*data_plane_size + x] = iConvertType2Byte(line_buffer[x_file_offset + d], type_min, type_max);
         }
       }
       else
@@ -280,30 +272,30 @@ static void iDoFillDataBitmap(int width, int height, int line, int plane, int da
 
         if (imColorModeIsPacked(user_color_mode))
         {
-          data[x_data_offset] = iConvertType2Byte(src_data[0]);
-          data[x_data_offset + 1] = iConvertType2Byte(src_data[1]);
-          data[x_data_offset + 2] = iConvertType2Byte(src_data[2]);
+          data[x_data_offset] = iConvertType2Byte(src_data[0], type_min, type_max);
+          data[x_data_offset + 1] = iConvertType2Byte(src_data[1], type_min, type_max);
+          data[x_data_offset + 2] = iConvertType2Byte(src_data[2], type_min, type_max);
 
           if (copy_alpha)
           {
             if (imColorModeSpace(file_color_mode) == IM_CMYK)
-              data[x_data_offset + 3] = iConvertType2Byte(line_buffer[x_file_offset + 4]);
+              data[x_data_offset + 3] = iConvertType2Byte(line_buffer[x_file_offset + 4], type_min, type_max);
             else
-              data[x_data_offset + 3] = iConvertType2Byte(line_buffer[x_file_offset + 3]);
+              data[x_data_offset + 3] = iConvertType2Byte(line_buffer[x_file_offset + 3], type_min, type_max);
           }
         }
         else
         {
-          data[x] = iConvertType2Byte(src_data[0]);
-          data[data_plane_size + x] = iConvertType2Byte(src_data[1]);
-          data[2*data_plane_size + x] = iConvertType2Byte(src_data[2]);
+          data[x] = iConvertType2Byte(src_data[0], type_min, type_max);
+          data[data_plane_size + x] = iConvertType2Byte(src_data[1], type_min, type_max);
+          data[2*data_plane_size + x] = iConvertType2Byte(src_data[2], type_min, type_max);
 
           if (copy_alpha)
           {
             if (imColorModeSpace(file_color_mode) == IM_CMYK)
-              data[3*data_plane_size + x] = iConvertType2Byte(line_buffer[x_file_offset + 4]);
+              data[3*data_plane_size + x] = iConvertType2Byte(line_buffer[x_file_offset + 4], type_min, type_max);
             else
-              data[3*data_plane_size + x] = iConvertType2Byte(line_buffer[x_file_offset + 3]);
+              data[3*data_plane_size + x] = iConvertType2Byte(line_buffer[x_file_offset + 3], type_min, type_max);
           }
         }
       }
@@ -317,9 +309,9 @@ static void iDoFillDataBitmap(int width, int height, int line, int plane, int da
         return;
 
       if (imColorModeIsPacked(user_color_mode))
-        data[x_data_offset + plane] = iConvertType2Byte(line_buffer[x]);
+        data[x_data_offset + plane] = iConvertType2Byte(line_buffer[x], type_min, type_max);
       else
-        data[plane*data_plane_size + x] = iConvertType2Byte(line_buffer[x]);
+        data[plane*data_plane_size + x] = iConvertType2Byte(line_buffer[x], type_min, type_max);
     }
   }
 }
@@ -429,11 +421,14 @@ static void iFileSwitchFromType(imFile* ifile)
   case IM_BYTE:    // Source is char
     iDoSwitchInt(line_count, (const char*)ifile->line_buffer, (imbyte*)ifile->line_buffer, 128);
     break;
+  case IM_SHORT:  // Source is ushort
+    iDoSwitchInt(line_count, (const imushort*)ifile->line_buffer, (short*)ifile->line_buffer, -32768);
+    break;
   case IM_USHORT:  // Source is short
     iDoSwitchInt(line_count, (const short*)ifile->line_buffer, (imushort*)ifile->line_buffer, 32768);
     break;
-  case IM_INT:     // Source is uint
-    iDoSwitchInt(line_count, (const unsigned int*)ifile->line_buffer, (int*)ifile->line_buffer, -8388608);
+  case IM_INT:     // Source is uint                                                             
+    iDoSwitchInt(line_count, (const unsigned int*)ifile->line_buffer, (int*)ifile->line_buffer, -2147483647-1);
     break;
   case IM_FLOAT:   // Source is double
     iDoSwitchReal(line_count, (const double*)ifile->line_buffer, (float*)ifile->line_buffer);
@@ -452,11 +447,14 @@ static void iFileSwitchToType(imFile* ifile)
   case IM_BYTE:    // Destiny is char
     iDoSwitchInt(line_count, (const imbyte*)ifile->line_buffer, (char*)ifile->line_buffer, -128);
     break;
+  case IM_SHORT:  // Destiny is ushort
+    iDoSwitchInt(line_count, (const short*)ifile->line_buffer, (imushort*)ifile->line_buffer, 32768);
+    break;
   case IM_USHORT:  // Destiny is short
     iDoSwitchInt(line_count, (const imushort*)ifile->line_buffer, (short*)ifile->line_buffer, -32768);
     break;
   case IM_INT:     // Destiny is uint
-    iDoSwitchInt(line_count, (const int*)ifile->line_buffer, (unsigned int*)ifile->line_buffer, 8388608);
+    iDoSwitchInt(line_count, (const int*)ifile->line_buffer, (unsigned int*)ifile->line_buffer, 2147483648);
     break;
   case IM_FLOAT:   // Destiny is double
     iDoSwitchReal(line_count, (const float*)ifile->line_buffer, (double*)ifile->line_buffer);
@@ -491,6 +489,11 @@ void imFileLineBufferWrite(imFile* ifile, const void* data, int line, int plane)
       iDoFillLineBuffer(ifile->width, ifile->height, line, plane, 
                         ifile->file_color_mode, (imbyte*)ifile->line_buffer, 
                         ifile->user_color_mode, (const imbyte*)data);
+      break;
+    case IM_SHORT:
+      iDoFillLineBuffer(ifile->width, ifile->height, line, plane,  
+                        ifile->file_color_mode, (short*)ifile->line_buffer, 
+                        ifile->user_color_mode, (const short*)data);
       break;
     case IM_USHORT:
       iDoFillLineBuffer(ifile->width, ifile->height, line, plane,  
@@ -566,6 +569,16 @@ void imFileLineBufferRead(imFile* ifile, void* data, int line, int plane)
         iDoFillData(ifile->width, ifile->height, line, plane, 
                     ifile->file_color_mode, (const imbyte*)ifile->line_buffer, 
                     ifile->user_color_mode, (imbyte*)data);
+      break;
+    case IM_SHORT:
+      if (convert2bitmap)
+        iDoFillDataBitmap(ifile->width, ifile->height, line, plane, ifile->file_data_type,
+                          ifile->file_color_mode, (const short*)ifile->line_buffer, 
+                          ifile->user_color_mode, (imbyte*)data);
+      else
+        iDoFillData(ifile->width, ifile->height, line, plane,  
+                    ifile->file_color_mode, (const short*)ifile->line_buffer, 
+                    ifile->user_color_mode, (short*)data);
       break;
     case IM_USHORT:
       if (convert2bitmap)

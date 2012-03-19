@@ -58,64 +58,92 @@
  *
  * \section cci Color Component Intervals
  * \par
- * All the color components are stored in the 0-max interval, even the signed ones. \n
- * Here are the pre-defined intervals for each data type. These values are used for standard color conversion.
- * You should normalize data before converting betwwen color spaces.
+ * When minimum and maximum values must be pre-defined values,
+ * the following values are used:
  * \par
 \verbatim
- byte   [0,255]      or [-128,+127]          (1 byte)
- ushort [0,65535]    or [-32768,+32767]      (2 bytes)
- int    [0,16777215] or [-8388608,+8388607]  (3 bytes)
- float  [0,1]        or [-0.5,+0.5]          (4 bytes)
+ byte   [0,255]              (1 byte)
+ short  [-32768,32767]       (2 bytes)
+ ushort [0,65535]            (2 bytes)
+ int    [-8388608,+8388607]  (3 bytes of 4 possible)
+ float  [0,1]                (4 bytes)
 \endverbatim
+ * Usually this intervals are used when converting from real to integer,
+ * and when demoting an integer data type.  
  * \ingroup util */
 
-/** Returns the zero value for color conversion porpouses. \n
- * This is a value to be compensated when the data_type is unsigned and component is signed. \n
+/** Returns the zero value for YCbCr color conversion. \n
+ * When data type is unsigned Cb and Cr are shifted to 0-max.
+ * So before they can be used in conversion equations 
+ * Cb and Cr values must be shifted back to fix the zero position.
  * \ingroup color */
-inline float imColorZero(int data_type)
+inline float imColorZeroShift(int data_type)
 {
-  float zero[] = {128.0f, 32768.0f, 8388608.0f, 0.5f};
+  float zero[] = {128.0f,     // [-128,+127]
+                  0,      
+                  32768.0f,   // [-32768,+32767]
+                  0, 
+                  0, 
+                  0};      
   return zero[data_type];
 }
 
-/** Returns the maximum value for color conversion porpouses. \n
+/** Returns the maximum value for pre-defined color conversion porpouses. \n
+ * See \ref cci.
  * \ingroup color */
 inline int imColorMax(int data_type)
 {
-  int max[] = {255, 65535, 16777215, 1};
+  int max[] = {255,      
+               32767,    
+               65535,    
+               8388607,  
+               1,        
+               0};
   return max[data_type];
 }
 
-/** Quantize r=0-1 values into q=0-max.
- * max is the maximum value.
- * max and the returned value are usually integers,
+/** Returns the minimum value for pre-defined color conversion porpouses. \n
+ * See \ref cci.
+ * \ingroup color */
+inline int imColorMin(int data_type)
+{
+  int min[] = {0,        
+               -32768,   
+               0,        
+               -8388608, 
+               0,        
+               0};
+  return min[data_type];
+}
+
+/** Quantize 0-1 values into min-max. \n
+ * Value are usually integers,
  * but the dummy quantizer uses real values.
  * See also \ref math.
  * \ingroup color */
 template <class T> 
-inline T imColorQuantize(const float& value, const T& max)
+inline T imColorQuantize(const float& value, const T& min, const T& max)
 {
   if (max == 1) return (T)value; // to allow a dummy quantizer
   if (value >= 1) return max;
-  if (value <= 0) return 0;
-  /* return (T)imRound(value*(max + 1) - 0.5f);  not necessary since all values are positive */
-  return (T)(value*(max + 1));
+  if (value <= 0) return min;
+  float range = (float)max - (float)min + 1.0f;
+  return (T)imRound(value*range + (float)min);
 }                               
 
-/** Reconstruct 0-max values into 0-1. \n
- * max is the maximum value.
- * max and the given value are usually integers,
+/** Reconstruct min-max values into 0-1. \n
+ * Values are usually integers,
  * but the dummy reconstructor uses real values.
  * See also \ref math.
  * \ingroup color */
 template <class T> 
-inline float imColorReconstruct(const T& value, const T& max)
+inline float imColorReconstruct(const T& value, const T& min, const T& max)
 {
   if (max == 1) return (float)value;  // to allow a dummy reconstructor
-  if (value <= 0) return 0;
+  if (value <= min) return 0;
   if (value >= max) return 1;
-  return (((float)value + 0.5f)/((float)max + 1.0f));
+  float range = (float)max - (float)min + 1.0f;
+  return (((float)value - (float)min + 0.5f)/range);
 }
 
 /** Converts Y'CbCr to R'G'B' (all nonlinear). \n
@@ -131,17 +159,16 @@ inline float imColorReconstruct(const T& value, const T& max)
 template <class T> 
 inline void imColorYCbCr2RGB(const T Y, const T Cb, const T Cr, 
                              T& R, T& G, T& B,
-                             const T& zero, const T& max)
+                             const T& zero, const T& min, const T& max)
 {
   float r = float(Y                        + 1.402f * (Cr - zero));
   float g = float(Y - 0.344f * (Cb - zero) - 0.714f * (Cr - zero));
   float b = float(Y + 1.772f * (Cb - zero));
 
-  // now we should enforce 0<= rgb <= max
-
-  R = (T)IM_CROPMAX(r, max);
-  G = (T)IM_CROPMAX(g, max);
-  B = (T)IM_CROPMAX(b, max);
+  // now we should enforce min <= rgb <= max
+  R = (T)IM_CROPMINMAX(r, min, max);
+  G = (T)IM_CROPMINMAX(g, min, max);
+  B = (T)IM_CROPMINMAX(b, min, max);
 }
 
 /** Converts R'G'B' to Y'CbCr (all nonlinear). \n
@@ -162,8 +189,6 @@ inline void imColorRGB2YCbCr(const T R, const T G, const T B,
   Y  = (T)( 0.299f *R + 0.587f *G + 0.114f *B);
   Cb = (T)(-0.169f *R - 0.331f *G + 0.500f *B + (float)zero);
   Cr = (T)( 0.500f *R - 0.419f *G - 0.081f *B + (float)zero);
-
-  // there is no need for cropping here, YCrCr is already at the limits
 }
 
 /** Converts C'M'Y'K' to R'G'B' (all nonlinear). \n
@@ -184,8 +209,6 @@ inline void imColorCMYK2RGB(const T C, const T M, const T Y, const T K,
   R = (T)((W * (max - C)) / max);
   G = (T)((W * (max - M)) / max);
   B = (T)((W * (max - Y)) / max);
-
-  // there is no need for cropping here, RGB is already at the limits
 }
 
 /** Converts CIE XYZ to Rec 709 RGB (all linear). \n
@@ -200,17 +223,16 @@ inline void imColorCMYK2RGB(const T C, const T M, const T Y, const T K,
  * \ingroup color */
 template <class T>
 inline void imColorXYZ2RGB(const T X, const T Y, const T Z, 
-                           T& R, T& G, T& B, const T& max)
+                           T& R, T& G, T& B)
 {
   float r =  3.2406f *X - 1.5372f *Y - 0.4986f *Z;
   float g = -0.9689f *X + 1.8758f *Y + 0.0415f *Z;
   float b =  0.0557f *X - 0.2040f *Y + 1.0570f *Z;
 
   // we need to crop because not all XYZ colors are visible
-
-  R = (T)IM_CROPMAX(r, max);
-  G = (T)IM_CROPMAX(g, max);
-  B = (T)IM_CROPMAX(b, max);
+  R = (T)IM_FLOATCROP(r);
+  G = (T)IM_FLOATCROP(g);
+  B = (T)IM_FLOATCROP(b);
 }
 
 /** Converts Rec 709 RGB to CIE XYZ (all linear). \n
@@ -230,8 +252,6 @@ inline void imColorRGB2XYZ(const T R, const T G, const T B,
   X = (T)(0.4124f *R + 0.3576f *G + 0.1805f *B);
   Y = (T)(0.2126f *R + 0.7152f *G + 0.0722f *B);
   Z = (T)(0.0193f *R + 0.1192f *G + 0.9505f *B);
-
-  // there is no need for cropping here, XYZ is already at the limits
 }
 
 #define IM_FWLAB(_w) (_w > 0.008856f?               \

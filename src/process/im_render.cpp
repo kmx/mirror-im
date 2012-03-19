@@ -8,6 +8,7 @@
 #include <im.h>
 #include <im_util.h>
 #include <im_math.h>
+#include <im_color.h>
 
 #include "im_process_counter.h"
 #include "im_process_pnt.h"
@@ -17,16 +18,6 @@
 #include <math.h>
 #include <time.h>
 
-
-static float iGetFactor(int data_type)
-{
-  if (data_type == IM_BYTE)
-    return 255.0f;
-  else if (data_type == IM_INT || data_type == IM_USHORT)
-    return 65535.0f;
-  else
-    return 1.0f;
-}
 
 template <class T> 
 static int DoRenderCondOp(T *map, int width, int height, int d, imRenderCondFunc render_func, float* param, int counter)
@@ -179,7 +170,7 @@ static float do_add_specklenoise(int, int, int, int *cond, float* param)
 int imProcessRenderAddSpeckleNoise(const imImage* src_image, imImage* dst_image, float percent)
 {
   float param[2];
-  param[0] = iGetFactor(src_image->data_type);
+  param[0] = (float)imColorMax(src_image->data_type);
   param[1] = percent / 100.0f;
   srand((unsigned)time(NULL));
   imImageCopyData(src_image, dst_image);
@@ -248,7 +239,7 @@ static float do_noise(int, int, int, float* param)
 int imProcessRenderRandomNoise(imImage* image)
 {
   static float param[1];
-  param[0] = iGetFactor(image->data_type);
+  param[0] = (float)imColorMax(image->data_type);
   srand((unsigned)time(NULL));
   return imProcessRenderOp(image, do_noise, "Random Noise", param, 0);
 }
@@ -261,7 +252,7 @@ static float do_cosine(int x, int y, int, float* param)
 int imProcessRenderCosine(imImage* image, float xperiod, float yperiod)
 {
   float param[6];
-  param[0] = iGetFactor(image->data_type);
+  param[0] = (float)imColorMax(image->data_type);
 
   if (xperiod == 0.0f) param[1] = 0.0;
   else param[1] = 2.0f * 3.1416f / xperiod;
@@ -295,7 +286,7 @@ static float do_gaussian(int x, int y, int, float* param)
 int imProcessRenderGaussian(imImage* image, float stddev)
 {
   float param[4];
-  param[0] = iGetFactor(image->data_type);
+  param[0] = (float)imColorMax(image->data_type);
   param[1] = -1.0f / (2.0f * stddev * stddev);
   param[2] = image->width/2.0f;
   param[3] = image->height/2.0f;
@@ -315,7 +306,7 @@ static float do_lapgauss(int x, int y, int, float* param)
 int imProcessRenderLapOfGaussian(imImage* image, float stddev)
 {
   float param[5];
-  param[0] = iGetFactor(image->data_type);
+  param[0] = (float)imColorMax(image->data_type);
   param[1] = -1.0f / (2.0f * stddev * stddev);
   param[2] = image->width/2.0f;
   param[3] = image->height/2.0f;
@@ -340,7 +331,7 @@ static float do_sinc(int x, int y, int, float* param)
 int imProcessRenderSinc(imImage* image, float xperiod, float yperiod)
 {
   float param[6];
-  param[0] = iGetFactor(image->data_type);
+  param[0] = (float)imColorMax(image->data_type);
 
   if (xperiod == 0.0f) param[1] = 0.0;
   else param[1] = 2.0f * 3.1416f / xperiod;
@@ -376,7 +367,7 @@ static float do_box(int x, int y, int, float* param)
 int imProcessRenderBox(imImage* image, int width, int height)
 {
   float param[5];
-  param[0] = iGetFactor(image->data_type);
+  param[0] = (float)imColorMax(image->data_type);
   param[1] = width/2.0f;
   param[2] = height/2.0f;
   param[3] = image->width/2.0f;
@@ -409,7 +400,7 @@ static float do_ramp(int x, int y, int, float* param)
 int imProcessRenderRamp(imImage* image, int start, int end, int dir)
 {
   float param[4];
-  param[0] = iGetFactor(image->data_type);
+  param[0] = (float)imColorMax(image->data_type);
   param[1] = (float)start;
   param[2] = (float)end;
   param[3] = (float)dir;
@@ -439,7 +430,7 @@ static float do_tent(int x, int y, int, float* param)
 int imProcessRenderTent(imImage* image, int width, int height)
 {
   float param[5];
-  param[0] = iGetFactor(image->data_type);
+  param[0] = (float)imColorMax(image->data_type);
   param[1] = width/2.0f;
   param[2] = height/2.0f;
   param[0] /= param[1]*param[2];
@@ -462,7 +453,7 @@ static float do_cone(int x, int y, int, float* param)
 int imProcessRenderCone(imImage* image, int radius)
 {
   float param[4];
-  param[0] = iGetFactor(image->data_type);
+  param[0] = (float)imColorMax(image->data_type);
   param[1] = (float)radius;
   param[0] /= param[1];
   param[2] = image->width/2.0f;
@@ -484,7 +475,7 @@ static float do_wheel(int x, int y, int, float* param)
 int imProcessRenderWheel(imImage* image, int int_radius, int ext_radius)
 {
   float param[5];
-  param[0] = iGetFactor(image->data_type);
+  param[0] = (float)imColorMax(image->data_type);
   param[1] = (float)int_radius;
   param[2] = (float)ext_radius;
   param[3] = image->width/2.0f;
@@ -505,7 +496,7 @@ static float do_grid(int x, int y, int, float* param)
 int imProcessRenderGrid(imImage* image, int x_space, int y_space)
 {
   float param[5];
-  param[0] = iGetFactor(image->data_type);
+  param[0] = (float)imColorMax(image->data_type);
   param[1] = (float)x_space;
   param[2] = (float)y_space;
   param[3] = image->width/2.0f;
@@ -533,7 +524,7 @@ static float do_chessboard(int x, int y, int, float* param)
 int imProcessRenderChessboard(imImage* image, int x_space, int y_space)
 {
   float param[5];
-  param[0] = iGetFactor(image->data_type);
+  param[0] = (float)imColorMax(image->data_type);
   param[1] = (float)x_space*2;
   param[2] = (float)y_space*2;
   param[3] = image->width/2.0f;

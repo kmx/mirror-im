@@ -18,6 +18,7 @@ extern "C" {
 enum imDataType
 {
   IM_BYTE,   /**< "unsigned char". 1 byte from 0 to 255.                  */
+  IM_SHORT,  /**< "short". 2 bytes from -32,768 to 32,767.                */
   IM_USHORT, /**< "unsigned short". 2 bytes from 0 to 65,535.             */
   IM_INT,    /**< "int". 4 bytes from -2,147,483,648 to 2,147,483,647.    */
   IM_FLOAT,  /**< "float". 4 bytes single precision IEEE floating point.  */

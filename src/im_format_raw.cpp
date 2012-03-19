@@ -244,6 +244,8 @@ int imFileFormatRAW::ReadImageData(void* data)
 
           if (this->file_data_type == IM_INT)
             ((int*)this->line_buffer)[col] = value;
+          else if (this->file_data_type == IM_SHORT)
+            ((short*)this->line_buffer)[col] = (short)value;
           else if (this->file_data_type == IM_USHORT)
             ((imushort*)this->line_buffer)[col] = (imushort)value;
           else
@@ -315,6 +317,8 @@ int imFileFormatRAW::WriteImageData(void* data)
           int value;
           if (this->file_data_type == IM_INT)
             value = ((int*)this->line_buffer)[col];
+          else if (this->file_data_type == IM_SHORT)
+            value = ((short*)this->line_buffer)[col];
           else if (this->file_data_type == IM_USHORT)
             value = ((imushort*)this->line_buffer)[col];
           else

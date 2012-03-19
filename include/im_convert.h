@@ -52,7 +52,7 @@ enum imGammaFactor
 enum imCastMode
 {
   IM_CAST_MINMAX, /**< scan for min and max values */
-  IM_CAST_FIXED,  /**< use predefied 0-max values, see \ref color Color Manipulation. */
+  IM_CAST_FIXED,  /**< use predefied min-max values, see \ref color Color Manipulation. */
   IM_CAST_DIRECT  /**< direct type cast the value. Only byte and ushort will be cropped. */
 };
 
@@ -87,7 +87,7 @@ int imConvertColorSpace(const imImage* src_image, imImage* dst_image);
  * uses \ref imConvertColorSpace and \ref imConvertDataType. \n
  * Returns IM_ERR_NONE, IM_ERR_DATA or IM_ERR_COUNTER, see also \ref imErrorCodes.
  * See also \ref imComplex2Real, \ref imGammaFactor and \ref imCastMode. \n
- * The function im.ConvertToBitmapNew uses the default convertion result from \ref imColorModeToBitmap if color_space is nil.
+ * The function im.ConvertToBitmapNew uses the default conversion result from \ref imColorModeToBitmap if color_space is nil.
  *
  * \verbatim im.ConvertToBitmap(src_image: imImage, dst_image: imImage, cpx2real: number, gamma: number, abssolute: boolean, cast_mode: number) -> error: number [in Lua 5] \endverbatim
  * \verbatim im.ConvertToBitmapNew(image: imImage, color_space: number, has_alpha: boolean, cpx2real: number, gamma: number, abssolute: boolean, cast_mode: number) -> error: number, new_image: imImage [in Lua 5] \endverbatim

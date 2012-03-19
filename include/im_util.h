@@ -174,7 +174,9 @@ typedef unsigned char imbyte;
 typedef unsigned short imushort;
 
 #define IM_BYTECROP(_v) (_v < 0? 0: _v > 255? 255: _v)
+#define IM_FLOATCROP(_v) (_v < 0? 0: _v > 1.0f? 1.0f: _v)
 #define IM_CROPMAX(_v, _max) (_v < 0? 0: _v > _max? _max: _v)
+#define IM_CROPMINMAX(_v, _min, _max) (_v < _min? _min: _v > _max? _max: _v)
 
 /** @} */
 

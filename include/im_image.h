@@ -118,6 +118,12 @@ void imImageAddAlpha(imImage* image);
  * \ingroup imgclass */
 void imImageSetAlpha(imImage* image, float alpha);
 
+/** Removes the alpha channel plane if any.
+ *
+ * \verbatim image:RemoveAlpha() [in Lua 5] \endverbatim
+ * \ingroup imgclass */
+void imImageRemoveAlpha(imImage* image);
+
 /** Changes the buffer size. Reallocate internal buffers if the new size is larger than the original.
  *
  * \verbatim image:Reshape(width: number, height: number) [in Lua 5] \endverbatim

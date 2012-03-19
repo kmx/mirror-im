@@ -153,6 +153,7 @@ static int imluaFormatCanWriteImage (lua_State *L)
 static const imlua_constant im_constants[] = {
 
   { "BYTE", IM_BYTE, NULL },
+  { "SHORT", IM_SHORT, NULL },
   { "USHORT", IM_USHORT, NULL },
   { "INT", IM_INT, NULL },
   { "FLOAT", IM_FLOAT, NULL },

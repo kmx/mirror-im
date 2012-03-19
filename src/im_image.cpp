@@ -14,6 +14,7 @@
 #include "im_util.h"
 #include "im_attrib.h"
 #include "im_file.h"
+#include "im_color.h"
 
 
 int imImageCheckFormat(int color_mode, int data_type)
@@ -200,6 +201,24 @@ void imImageAddAlpha(imImage* image)
   image->has_alpha = IM_ALPHA;
 }
 
+void imImageRemoveAlpha(imImage* image)
+{
+  assert(image);
+
+  if (!image->has_alpha)
+    return;
+
+  unsigned char* new_data = (unsigned char*)realloc(image->data[0], image->size-image->plane_size);
+  if (!new_data)
+    return;
+
+ image->data[0] = new_data;
+  for (int d = 1; d < image->depth; d++)
+    image->data[d] = (imbyte*)(image->data[0]) + d*image->plane_size;
+
+  image->has_alpha = 0;
+}
+
 void imImageReshape(imImage* image, int width, int height)
 {
   assert(image);
@@ -257,15 +276,17 @@ void imImageClear(imImage* image)
 
     if (image->data_type == IM_BYTE)
     {
+      imbyte zero = (imbyte)imColorZeroShift(image->data_type);
       imbyte* usdata = (imbyte*)image->data[1];
       for (int i = 0; i < 2*image->count; i++)
-        *usdata++ = 128;
+        *usdata++ = zero;
     }
     else
     {
+      imushort zero = (imushort)imColorZeroShift(image->data_type);
       imushort* usdata = (imushort*)image->data[1];
       for (int i = 0; i < 2*image->count; i++)
-        *usdata++ = 32768;
+        *usdata++ = zero;
     }
   }
   else
@@ -294,6 +315,9 @@ void imImageSetAlpha(imImage* image, float alpha)
     {
     case IM_BYTE:
       memset(image->data[image->depth], (imbyte)alpha, image->plane_size);
+      break;                                                                                
+    case IM_SHORT:                                                                           
+      iSet((short*)image->data[image->depth], (short)alpha, image->plane_size);
       break;                                                                                
     case IM_USHORT:                                                                           
       iSet((imushort*)image->data[image->depth], (imushort)alpha, image->plane_size);

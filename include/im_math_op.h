@@ -89,6 +89,11 @@ inline imushort pow_op(const imushort& v1, const imushort& v2)
   return (imushort)pow((float)v1, v2);
 }
 
+inline short pow_op(const short& v1, const short& v2)
+{
+  return (short)pow((float)v1, v2);
+}
+
 inline int pow_op(const int& v1, const int& v2)
 {
   return (int)pow((float)v1, v2);

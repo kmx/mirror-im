@@ -353,8 +353,10 @@ static void iTIFFReadCustomTags(TIFF* tiff, imAttribTable* attrib_table)
       case TIFF_SBYTE:
         data_type = IM_BYTE;
         break;
-      case TIFF_SHORT:
       case TIFF_SSHORT:
+        data_type = IM_SHORT;
+        break;
+      case TIFF_SHORT:
         data_type = IM_USHORT;
         break;
       case TIFF_LONG:
@@ -407,8 +409,10 @@ static void iTIFFReadCustomTags(TIFF* tiff, imAttribTable* attrib_table)
       case TIFF_ASCII:
         data_type = IM_BYTE;
         break;
-      case TIFF_SHORT:
       case TIFF_SSHORT:
+        data_type = IM_SHORT;
+        break;
+      case TIFF_SHORT:
         data_type = IM_USHORT;
         break;
       case TIFF_LONG:
@@ -759,7 +763,6 @@ void* imFileFormatTIFF::Handle(int index)
 int imFileFormatTIFF::ReadImageInfo(int index)
 {
   int sub_ifd = -1;
-  int switch_type_int = 1;
 
   // Defaults that can be different for each image
   this->cpx_int = 0;
@@ -782,8 +785,6 @@ int imFileFormatTIFF::ReadImageInfo(int index)
 
   uint16* sub_ifd_atrib = (uint16*)attrib_table->Get("SubIFDSelect");
   if (sub_ifd_atrib) sub_ifd = *sub_ifd_atrib;
-  int* switch_type_int_atrib = (int*)attrib_table->Get("SwitchTypeInteger");
-  if (switch_type_int_atrib) switch_type_int = *switch_type_int_atrib;
 
   /* must clear the attribute list, because it can have multiple images and 
      has many attributes that may exists only for specific images. */
@@ -964,9 +965,6 @@ int imFileFormatTIFF::ReadImageInfo(int index)
     {
       this->switch_type = 1;             // switch unsigned to signed
       this->file_data_type = IM_INT;
-
-      if (!switch_type_int)
-        this->switch_type = 0;
     }
     else
       return IM_ERR_DATA;
@@ -976,18 +974,9 @@ int imFileFormatTIFF::ReadImageInfo(int index)
     {
       this->switch_type = 1;             // switch signed to unsigned
       this->file_data_type = IM_BYTE;
-
-      if (!switch_type_int)
-        this->switch_type = 0;
     }
     else if (BitsPerSample <= 16)
-    {
-      this->switch_type = 1;             // switch signed to unsigned
-      this->file_data_type = IM_USHORT;
-
-      if (!switch_type_int)
-        this->switch_type = 0;
-    }
+      this->file_data_type = IM_SHORT;
     else if (BitsPerSample <= 32)
       this->file_data_type = IM_INT;
     else

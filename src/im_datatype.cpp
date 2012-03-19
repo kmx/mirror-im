@@ -19,12 +19,13 @@ typedef struct _iTypeInfo
 } iTypeInfo;
 
 static iTypeInfo iTypeInfoTable[] =  
-{        
-  {1,  255,                  0,                       "byte"}, 
-  {2,  65535,                0,                       "ushort"},
-  {4,  2147483647,           -2147483647-1,           "int"},
-  {4,  0,                    0,                       "float"}, 
-  {8,  0,                    0,                       "cfloat"}
+{//size  max          min             name
+  {1,    255,         0,              "byte"}, 
+  {2,    32767,       -32767-1,       "short"},
+  {2,    65535,       0,              "ushort"},
+  {4,    2147483647,  -2147483647-1,  "int"},
+  {4,    0,           0,              "float"}, 
+  {8,    0,           0,              "cfloat"}
 };
 
 const char* imDataTypeName(int data_type)

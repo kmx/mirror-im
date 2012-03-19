@@ -13,6 +13,7 @@
 #include "im_process_counter.h"
 #include "im_process_pnt.h"
 #include "im_math_op.h"
+#include "im_color.h"
 
 #include <stdlib.h>
 #include <memory.h>
@@ -175,6 +176,8 @@ void imProcessArithmeticOp(const imImage* src_image1, const imImage* src_image2,
   case IM_BYTE:
     if (dst_image->data_type == IM_FLOAT)
       DoBinaryOp((imbyte*)src_image1->data[0], (imbyte*)src_image2->data[0], (float*)dst_image->data[0], count, op);
+    else if (dst_image->data_type == IM_SHORT)
+      DoBinaryOp((imbyte*)src_image1->data[0], (imbyte*)src_image2->data[0], (short*)dst_image->data[0], count, op);
     else if (dst_image->data_type == IM_USHORT)
       DoBinaryOp((imbyte*)src_image1->data[0], (imbyte*)src_image2->data[0], (imushort*)dst_image->data[0], count, op);
     else if (dst_image->data_type == IM_INT)
@@ -182,11 +185,23 @@ void imProcessArithmeticOp(const imImage* src_image1, const imImage* src_image2,
     else
       DoBinaryOpByte((imbyte*)src_image1->data[0], (imbyte*)src_image2->data[0], (imbyte*)dst_image->data[0], count, op);
     break;
+  case IM_SHORT:
+    if (dst_image->data_type == IM_FLOAT)
+      DoBinaryOp((short*)src_image1->data[0], (short*)src_image2->data[0], (float*)dst_image->data[0], count, op);
+    else if (dst_image->data_type == IM_INT)
+      DoBinaryOp((short*)src_image1->data[0], (short*)src_image2->data[0], (int*)dst_image->data[0], count, op);
+    else if (dst_image->data_type == IM_USHORT)
+      DoBinaryOp((short*)src_image1->data[0], (short*)src_image2->data[0], (imushort*)dst_image->data[0], count, op);
+    else
+      DoBinaryOp((short*)src_image1->data[0], (short*)src_image2->data[0], (short*)dst_image->data[0], count, op);
+    break;
   case IM_USHORT:
     if (dst_image->data_type == IM_FLOAT)
       DoBinaryOp((imushort*)src_image1->data[0], (imushort*)src_image2->data[0], (float*)dst_image->data[0], count, op);
     else if (dst_image->data_type == IM_INT)
       DoBinaryOp((imushort*)src_image1->data[0], (imushort*)src_image2->data[0], (int*)dst_image->data[0], count, op);
+    else if (dst_image->data_type == IM_SHORT)
+      DoBinaryOp((imushort*)src_image1->data[0], (imushort*)src_image2->data[0], (short*)dst_image->data[0], count, op);
     else
       DoBinaryOp((imushort*)src_image1->data[0], (imushort*)src_image2->data[0], (imushort*)dst_image->data[0], count, op);
     break;
@@ -231,6 +246,9 @@ void imProcessBlendConst(const imImage* src_image1, const imImage* src_image2, i
   case IM_BYTE:
     DoBlendConst((imbyte*)src_image1->data[0], (imbyte*)src_image2->data[0], (imbyte*)dst_image->data[0], count, alpha);
     break;
+  case IM_SHORT:
+    DoBlendConst((short*)src_image1->data[0], (short*)src_image2->data[0], (short*)dst_image->data[0], count, alpha);
+    break;
   case IM_USHORT:
     DoBlendConst((imushort*)src_image1->data[0], (imushort*)src_image2->data[0], (imushort*)dst_image->data[0], count, alpha);
     break;
@@ -247,33 +265,37 @@ void imProcessBlendConst(const imImage* src_image1, const imImage* src_image2, i
 }
 
 template <class T, class TA> 
-static void DoBlend(T *map1, T *map2, TA *alpha, T *map, int count, TA max)
+static void DoBlend(T *map1, T *map2, TA *alpha, T *map, int count, float type_max)
 {
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
   for (int i = 0; i < count; i++)
-    map[i] = blend_op(map1[i], map2[i], ((float)alpha[i])/max);
+    map[i] = blend_op(map1[i], map2[i], ((float)alpha[i])/type_max);
 }
 
 void imProcessBlend(const imImage* src_image1, const imImage* src_image2, const imImage* alpha, imImage* dst_image)
 {
   int count = src_image1->count*src_image1->depth;
+  float type_max = (float)imColorMax(src_image1->data_type);
 
   switch(src_image1->data_type)
   {
   case IM_BYTE:
-    DoBlend((imbyte*)src_image1->data[0], (imbyte*)src_image2->data[0], (imbyte*)alpha->data[0], (imbyte*)dst_image->data[0], count, (imbyte)255);
+    DoBlend((imbyte*)src_image1->data[0], (imbyte*)src_image2->data[0], (imbyte*)alpha->data[0], (imbyte*)dst_image->data[0], count, type_max);
+    break;
+  case IM_SHORT:
+    DoBlend((short*)src_image1->data[0], (short*)src_image2->data[0], (short*)alpha->data[0], (short*)dst_image->data[0], count, type_max);
     break;
   case IM_USHORT:
-    DoBlend((imushort*)src_image1->data[0], (imushort*)src_image2->data[0], (imushort*)alpha->data[0], (imushort*)dst_image->data[0], count, (imushort)65535);
+    DoBlend((imushort*)src_image1->data[0], (imushort*)src_image2->data[0], (imushort*)alpha->data[0], (imushort*)dst_image->data[0], count, type_max);
     break;
   case IM_INT:
-    DoBlend((int*)src_image1->data[0], (int*)src_image2->data[0], (int*)alpha->data[0], (int*)dst_image->data[0], count, (int)2147483647);
+    DoBlend((int*)src_image1->data[0], (int*)src_image2->data[0], (int*)alpha->data[0], (int*)dst_image->data[0], count, type_max);
     break;
   case IM_FLOAT:
-    DoBlend((float*)src_image1->data[0], (float*)src_image2->data[0], (float*)alpha->data[0], (float*)dst_image->data[0], count, 1.0f);
+    DoBlend((float*)src_image1->data[0], (float*)src_image2->data[0], (float*)alpha->data[0], (float*)dst_image->data[0], count, type_max);
     break;
   case IM_CFLOAT:
-    DoBlend((imcfloat*)src_image1->data[0], (imcfloat*)src_image2->data[0], (float*)alpha->data[0], (imcfloat*)dst_image->data[0], count, 1.0f);
+    DoBlend((imcfloat*)src_image1->data[0], (imcfloat*)src_image2->data[0], (float*)alpha->data[0], (imcfloat*)dst_image->data[0], count, type_max);
     break;
   }
 }
@@ -381,6 +403,7 @@ void imProcessCompose(const imImage* src_image1, const imImage* src_image2, imIm
 {
   int count = src_image1->count, 
       src_alpha = src_image1->depth;
+  int type_max = (int)imColorMax(src_image1->data_type);
 
   if (!src_image1->has_alpha || !src_image2->has_alpha || !dst_image->has_alpha)
     return;
@@ -390,16 +413,19 @@ void imProcessCompose(const imImage* src_image1, const imImage* src_image2, imIm
     switch(src_image1->data_type)
     {
     case IM_BYTE:
-      DoCompose((imbyte*)src_image1->data[i], (imbyte*)src_image2->data[i], (imbyte*)src_image1->data[src_alpha], (imbyte*)src_image2->data[src_alpha], (imbyte*)dst_image->data[i], count, (int)255);
+      DoCompose((imbyte*)src_image1->data[i], (imbyte*)src_image2->data[i], (imbyte*)src_image1->data[src_alpha], (imbyte*)src_image2->data[src_alpha], (imbyte*)dst_image->data[i], count, type_max);
+      break;
+    case IM_SHORT:
+      DoCompose((short*)src_image1->data[i], (short*)src_image2->data[i], (short*)src_image1->data[src_alpha], (short*)src_image2->data[src_alpha], (short*)dst_image->data[i], count, type_max);
       break;
     case IM_USHORT:
-      DoCompose((imushort*)src_image1->data[i], (imushort*)src_image2->data[i], (imushort*)src_image1->data[src_alpha], (imushort*)src_image2->data[src_alpha], (imushort*)dst_image->data[i], count, (int)65535);
+      DoCompose((imushort*)src_image1->data[i], (imushort*)src_image2->data[i], (imushort*)src_image1->data[src_alpha], (imushort*)src_image2->data[src_alpha], (imushort*)dst_image->data[i], count, type_max);
       break;
     case IM_INT:
-      DoCompose((int*)src_image1->data[i], (int*)src_image2->data[i], (int*)src_image1->data[src_alpha], (int*)src_image2->data[src_alpha], (int*)dst_image->data[i], count, (int)2147483647);
+      DoCompose((int*)src_image1->data[i], (int*)src_image2->data[i], (int*)src_image1->data[src_alpha], (int*)src_image2->data[src_alpha], (int*)dst_image->data[i], count, type_max);
       break;
     case IM_FLOAT:
-      DoCompose((float*)src_image1->data[i], (float*)src_image2->data[i], (float*)src_image1->data[src_alpha], (float*)src_image2->data[src_alpha], (float*)dst_image->data[i], count, 1.0f);
+      DoCompose((float*)src_image1->data[i], (float*)src_image2->data[i], (float*)src_image1->data[src_alpha], (float*)src_image2->data[src_alpha], (float*)dst_image->data[i], count, (float)type_max);
       break;
     }
   }
@@ -408,16 +434,19 @@ void imProcessCompose(const imImage* src_image1, const imImage* src_image2, imIm
   switch(src_image1->data_type)
   {
   case IM_BYTE:
-    DoComposeAlpha((imbyte*)src_image1->data[src_alpha], (imbyte*)src_image2->data[src_alpha], (imbyte*)dst_image->data[src_alpha], count, (int)255);
+    DoComposeAlpha((imbyte*)src_image1->data[src_alpha], (imbyte*)src_image2->data[src_alpha], (imbyte*)dst_image->data[src_alpha], count, type_max);
+    break;
+  case IM_SHORT:
+    DoComposeAlpha((short*)src_image1->data[src_alpha], (short*)src_image2->data[src_alpha], (short*)dst_image->data[src_alpha], count, type_max);
     break;
   case IM_USHORT:
-    DoComposeAlpha((imushort*)src_image1->data[src_alpha], (imushort*)src_image2->data[src_alpha], (imushort*)dst_image->data[src_alpha], count, (int)65535);
+    DoComposeAlpha((imushort*)src_image1->data[src_alpha], (imushort*)src_image2->data[src_alpha], (imushort*)dst_image->data[src_alpha], count, type_max);
     break;
   case IM_INT:
-    DoComposeAlpha((int*)src_image1->data[src_alpha], (int*)src_image2->data[src_alpha], (int*)dst_image->data[src_alpha], count, (int)2147483647);
+    DoComposeAlpha((int*)src_image1->data[src_alpha], (int*)src_image2->data[src_alpha], (int*)dst_image->data[src_alpha], count, type_max);
     break;
   case IM_FLOAT:
-    DoComposeAlpha((float*)src_image1->data[src_alpha], (float*)src_image2->data[src_alpha], (float*)dst_image->data[src_alpha], count, 1.0f);
+    DoComposeAlpha((float*)src_image1->data[src_alpha], (float*)src_image2->data[src_alpha], (float*)dst_image->data[src_alpha], count, (float)type_max);
     break;
   }
 }
@@ -580,6 +609,8 @@ void imProcessArithmeticConstOp(const imImage* src_image1, float value, imImage*
   case IM_BYTE:
     if (dst_image->data_type == IM_FLOAT)
       DoBinaryConstOp((imbyte*)src_image1->data[0], (float)value, (float*)dst_image->data[0], count, op);
+    else if (dst_image->data_type == IM_SHORT)
+      DoBinaryConstOp((imbyte*)src_image1->data[0], (short)value, (short*)dst_image->data[0], count, op);
     else if (dst_image->data_type == IM_USHORT)
       DoBinaryConstOp((imbyte*)src_image1->data[0], (imushort)value, (imushort*)dst_image->data[0], count, op);
     else if (dst_image->data_type == IM_INT)
@@ -587,11 +618,25 @@ void imProcessArithmeticConstOp(const imImage* src_image1, float value, imImage*
     else
       DoBinaryConstOpByte((imbyte*)src_image1->data[0], (int)value, (imbyte*)dst_image->data[0], count, op);
     break;
+  case IM_SHORT:
+    if (dst_image->data_type == IM_FLOAT)
+      DoBinaryConstOp((short*)src_image1->data[0], (float)value, (float*)dst_image->data[0], count, op);
+    else if (dst_image->data_type == IM_INT)
+      DoBinaryConstOp((short*)src_image1->data[0], (int)value, (int*)dst_image->data[0], count, op);
+    else if (dst_image->data_type == IM_USHORT)
+      DoBinaryConstOp((short*)src_image1->data[0], (int)value, (imushort*)dst_image->data[0], count, op);
+    else if (dst_image->data_type == IM_BYTE)
+      DoBinaryConstOpByte((short*)src_image1->data[0], (int)value, (imbyte*)dst_image->data[0], count, op);
+    else
+      DoBinaryConstOp((short*)src_image1->data[0], (imushort)value, (imushort*)dst_image->data[0], count, op);
+    break;
   case IM_USHORT:
     if (dst_image->data_type == IM_FLOAT)
       DoBinaryConstOp((imushort*)src_image1->data[0], (float)value, (float*)dst_image->data[0], count, op);
     else if (dst_image->data_type == IM_INT)
       DoBinaryConstOp((imushort*)src_image1->data[0], (int)value, (int*)dst_image->data[0], count, op);
+    else if (dst_image->data_type == IM_SHORT)
+      DoBinaryConstOp((imushort*)src_image1->data[0], (int)value, (short*)dst_image->data[0], count, op);
     else if (dst_image->data_type == IM_BYTE)
       DoBinaryConstOpByte((imushort*)src_image1->data[0], (int)value, (imbyte*)dst_image->data[0], count, op);
     else
@@ -600,6 +645,8 @@ void imProcessArithmeticConstOp(const imImage* src_image1, float value, imImage*
   case IM_INT:
     if (dst_image->data_type == IM_FLOAT)
       DoBinaryConstOp((int*)src_image1->data[0], (float)value, (float*)dst_image->data[0], count, op);
+    else if (dst_image->data_type == IM_SHORT)
+      DoBinaryConstOp((int*)src_image1->data[0], (int)value, (short*)dst_image->data[0], count, op);
     else if (dst_image->data_type == IM_USHORT)
       DoBinaryConstOp((int*)src_image1->data[0], (int)value, (imushort*)dst_image->data[0], count, op);
     else if (dst_image->data_type == IM_BYTE)
@@ -745,6 +792,9 @@ int imProcessAutoCovariance(const imImage* image, const imImage* mean_image, imI
     {
     case IM_BYTE:
       ret = doAutoCov(image->width, image->height, (imbyte*)image->data[i], (imbyte*)mean_image->data[i], (float*)dst_image->data[i], counter);
+      break;
+    case IM_SHORT:
+      ret = doAutoCov(image->width, image->height, (short*)image->data[i], (short*)mean_image->data[i], (float*)dst_image->data[i], counter);
       break;
     case IM_USHORT:
       ret = doAutoCov(image->width, image->height, (imushort*)image->data[i], (imushort*)mean_image->data[i], (float*)dst_image->data[i], counter);

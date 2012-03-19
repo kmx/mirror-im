@@ -64,6 +64,9 @@ char* AttribData2Str(const void* data, int data_type)
   case IM_BYTE:
     sprintf(data_str, "%3d", (int)(*((imbyte*)data)));
     break;
+  case IM_SHORT:
+    sprintf(data_str, "%5d", (int)(*((short*)data)));
+    break;
   case IM_USHORT:
     sprintf(data_str, "%5d", (int)(*((imushort*)data)));
     break;

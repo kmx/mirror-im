@@ -153,14 +153,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\im_dib.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\im_dibxbitmap.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\src\im_file.cpp"
 				>
 			</File>
@@ -198,10 +190,6 @@
 			</File>
 			<File
 				RelativePath="..\src\im_str.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\im_sysfile_win32.cpp"
 				>
 			</File>
 			<File
@@ -1047,6 +1035,38 @@
 						>
 					</File>
 				</Filter>
+			</Filter>
+			<Filter
+				Name="Win32"
+				>
+				<File
+					RelativePath="..\src\im_dib.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\im_dibxbitmap.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\im_sysfile_win32.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Unix"
+				>
+				<File
+					RelativePath="..\src\im_sysfile_unix.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter

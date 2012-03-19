@@ -59,7 +59,7 @@ void imBinMemoryFile::Open(const char* pFileName)
 {
   this->file_name = (imBinMemoryFileName*)pFileName;
 
-  InitByteOrder(imBinCPUByteOrder());
+  SetByteOrder(imBinCPUByteOrder());
   this->IsNew = 0;
 
   assert(this->file_name->size);
@@ -76,7 +76,7 @@ void imBinMemoryFile::New(const char* pFileName)
 {
   this->file_name = (imBinMemoryFileName*)pFileName;
 
-  InitByteOrder(imBinCPUByteOrder());
+  SetByteOrder(imBinCPUByteOrder());
   this->IsNew = 1;
 
   assert(this->file_name->size);
@@ -391,14 +391,14 @@ static imBinFileBase* iBinStreamFileNewFunc()
 void imBinStreamFile::Open(const char* pFileName)
 {
   this->FileHandle = fopen(pFileName, "rb");
-  InitByteOrder(imBinCPUByteOrder());
+  SetByteOrder(imBinCPUByteOrder());
   this->IsNew = 0;
 }
 
 void imBinStreamFile::New(const char* pFileName)
 {
   this->FileHandle = fopen(pFileName, "wb");
-  InitByteOrder(imBinCPUByteOrder());
+  SetByteOrder(imBinCPUByteOrder());
   this->IsNew = 1;
 }
 

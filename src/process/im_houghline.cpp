@@ -257,7 +257,7 @@ static void drawLine(imImage* image, int theta, int rho)
 {
   int xsize, ysize, xstart, xstop, ystart, ystop, xhalf, yhalf;
   float a, b;
-  imbyte *map = (imbyte*)image->data[0];
+  imbyte *map = (imbyte*)image->data[0];  // gray or red plane
 
   xsize = image->width;
   ysize = image->height;
@@ -391,10 +391,13 @@ static void DrawPoints(imImage *image, listnode* maxima)
 static void ReplaceColor(imImage* NewImage)
 {
   int i;
-  imbyte* map = (imbyte*)NewImage->data[0];
+  imbyte* map = (imbyte*)NewImage->data[0];  // gray or red plane
 
-  NewImage->color_space = IM_MAP;
-  NewImage->palette[254] = imColorEncode(255, 0, 0);
+  if (NewImage->color_space == IM_GRAY)
+  {
+    NewImage->color_space = IM_MAP;
+    NewImage->palette[254] = imColorEncode(255, 0, 0);
+  }
 
   for (i = 0; i < NewImage->count; i++)
   {

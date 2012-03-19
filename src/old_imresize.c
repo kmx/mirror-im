@@ -90,7 +90,7 @@ void imStretch(int src_width, int src_height, unsigned char *src_map, int dst_wi
   unsigned char *line_map;
 	int* XTab = (int*)malloc(dst_width*sizeof(int));
 
-  /* initialize convertion tables to speed up the stretch process */
+  /* initialize conversion tables to speed up the stretch process */
 	factor = (double)(src_width-1) / (double)(dst_width-1);
 	for(x = 0; x < dst_width; x++)
 		XTab[x] = (int)(factor * x + 0.5);

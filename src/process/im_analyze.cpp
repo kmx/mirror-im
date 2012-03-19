@@ -896,6 +896,9 @@ void imProcessPerimeterLine(const imImage* src_image, imImage* dst_image)
   case IM_BYTE:
     DoPerimeterLine((imbyte*)src_image->data[0], (imbyte*)dst_image->data[0], src_image->width, src_image->height);
     break;                                                                                
+  case IM_SHORT:
+    DoPerimeterLine((short*)src_image->data[0], (short*)dst_image->data[0], src_image->width, src_image->height);
+    break;                                                                                
   case IM_USHORT:
     DoPerimeterLine((imushort*)src_image->data[0], (imushort*)dst_image->data[0], src_image->width, src_image->height);
     break;                                                                                

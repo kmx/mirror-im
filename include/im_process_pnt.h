@@ -209,13 +209,7 @@ void imProcessBlendConst(const imImage* src_image1, const imImage* src_image2, i
 /** Blend two images using an alpha channel = [a * alpha + b * (1 - alpha)]. \n
  * Can be done in-place, images must match size and type. \n
  * alpha_image must have the same data type except for complex images that must be float, and color_space must be IM_GRAY.
- * integer alpha values must be:
-\verbatim 
-0 - 255        IM_BYTE  
-0 - 65535      IM_USHORT
-0 - 2147483647 IM_INT
-\endverbatim
- * that will be normalized to 0 - 1.
+ * Maximum alpha values are baed in \ref imColorMax. Minimum is always 0.
  * \verbatim im.ProcessBlend(src_image1: imImage, src_image2: imImage, alpha_image: imImage, dst_image: imImage) [in Lua 5] \endverbatim
  * \verbatim im.ProcessBlendNew(image1: imImage, image2: imImage, alpha_image: imImage) -> new_image: imImage [in Lua 5] \endverbatim
  * \ingroup arithm */
@@ -223,13 +217,7 @@ void imProcessBlend(const imImage* src_image1, const imImage* src_image2, const 
 
 /** Compose two images that have an alpha channel using the OVER operator. \n
  * Can be done in-place, images must match size and type. \n
- * Integer alpha values must be:
-\verbatim 
-0 - 255        IM_BYTE  
-0 - 65535      IM_USHORT
-0 - 2147483647 IM_INT
-\endverbatim
- * that will be normalized to 0 - 1.
+ * Maximum alpha values are baed in \ref imColorMax. Minimum is always 0.
  * \verbatim im.ProcessCompose(src_image1: imImage, src_image2: imImage, dst_image: imImage) [in Lua 5] \endverbatim
  * \verbatim im.ProcessComposeNew(image1: imImage, image2: imImage) -> new_image: imImage [in Lua 5] \endverbatim
  * \ingroup arithm */

@@ -38,7 +38,7 @@ inline float tanhf(float _X) {return ((float)tanh((double)_X)); }
  * Continuous = Discrete + 0.5         [Reconstruction/Interpolation] \n
  * Discrete = Round(Continuous - 0.5)  [Sampling/Quantization] \n
  * \par
- * Notice that must check 0-max limits when converting from Continuous to Discrete.
+ * Notice that must check min-max limits when converting from Continuous to Discrete.
  * \par
  * When converting between discrete and discrete use: \n
  * integer src_size, dst_len, src_i, dst_i            \n
@@ -71,7 +71,7 @@ inline T imAbs(const T& v)
 /** Converts between two discrete grids.
  * factor is "dst_size/src_size".
  * \ingroup math */
-inline int imResample(int x, float factor)
+inline int imResampleInt(int x, float factor)
 {
   float xr = factor*(x + 0.5f) - 0.5f;
   return (int)(xr < 0? xr-0.5f: xr+0.5f);  /* Round */

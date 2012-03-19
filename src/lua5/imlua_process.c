@@ -572,7 +572,7 @@ static int imluaProcessHoughLines (lua_State *L)
 }
 
 /*****************************************************************************\
- im.ProcessHoughLinesDraw(src_image, hough_points, dst_image)
+ im.ProcessHoughLinesDraw(src_image, hough, hough_points, dst_image)
 \*****************************************************************************/
 static int imluaProcessHoughLinesDraw (lua_State *L)
 {
@@ -588,9 +588,14 @@ static int imluaProcessHoughLinesDraw (lua_State *L)
   }
 
   imlua_checktype(L, 1, src_image, IM_GRAY, IM_BYTE);
+  imlua_checkdatatype(L, 1, src_image, IM_BYTE);
   imlua_checkcolorspace(L, 3, hough_points, IM_BINARY);
   imlua_checkhoughsize(L, src_image, hough_points, 3);
   imlua_matchsize(L, src_image, dst_image);
+  if (dst_image->color_space != IM_GRAY && 
+      dst_image->color_space != IM_MAP &&
+      dst_image->color_space != IM_RGB)
+    luaL_argerror(L, 4, "image must be RGB, Map or Gray");
 
   lua_pushnumber(L, imProcessHoughLinesDraw(src_image, hough, hough_points, dst_image));
   return 0;

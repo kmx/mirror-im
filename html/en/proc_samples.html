@@ -29,12 +29,12 @@
 
   <p>The Hough transform can be used to detect lines in an image. But it results 
   are highly dependent on other operations done before and after the transform. 
-  Here you can see a small pseudo code that ilustrates a possible sequence of 
-  operations to detect lines using the hough transform.</p>
+  Here you can see a small pseudo code that illustrates a possible sequence of 
+  operations to detect lines using the Hough transform.</p>
   <p>First the canny operator will isolate the borders, the threshold will mark 
   the candidate pixels. After the transform the local maximum are isolated to 
   detect the line parameters of the lines that have many pixels from the 
-  cadidate ones. The last operation will just draw the detected lines over the 
+  candidate ones. The last operation will just draw the detected lines over the 
   original gray scale image.</p>
   
     <pre>imProcessCanny(in,out,stddev)
@@ -43,7 +43,7 @@ imProcessHysteresisThreshold(in,out,low,high)
 imProcessHoughLines(in,out)
 imProcessLocalMaxThreshold(in,out,size,min)
 
-imProcessHoughLinesDraw(in1,in2,out)</pre>
+imProcessHoughLinesDraw(in1,in2,in3,out)</pre>
   
   <p>Or a more complete sequence using another approach:</p>
   
@@ -82,7 +82,7 @@ imProcessHoughLines(binary, hough);
 imProcessLocalMaxThreshold(hough, hough_binary, 7, 100);
 
 // this is optional, it will draw the results
-imProcessHoughLinesDraw(gray,hough_binary,draw_hough); </pre>
+imProcessHoughLinesDraw(gray,hough,hough_binary,draw_hough); </pre>
   
   <p>In the result of <b>imProcessLocalMaxThreshold</b> there will be several white 
   pixels. They represent the detected lines. Defining:</p>

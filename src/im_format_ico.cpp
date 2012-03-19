@@ -455,7 +455,7 @@ void imFileFormatICO::FixRGBOrder()
   }
 }
 
-static inline int PixelOffset(int is_top_down, int is_packed, int width, int height, int depth, int col, int row, int plane)
+inline int iICOPixelOffset(int is_top_down, int is_packed, int width, int height, int depth, int col, int row, int plane)
 {
   if (is_top_down)
     row = height-1 - row;
@@ -510,9 +510,9 @@ int imFileFormatICO::ReadImageData(void* data)
     {
       for (int i = 0; i < this->width; i++)
       {
-        int offset = PixelOffset(imColorModeIsTopDown(this->user_color_mode), 
-                                imColorModeIsPacked(this->user_color_mode), 
-                                this->width, this->height, depth, i, j, alpha_plane);
+        int offset = iICOPixelOffset(imColorModeIsTopDown(this->user_color_mode), 
+                                     imColorModeIsPacked(this->user_color_mode), 
+                                     this->width, this->height, depth, i, j, alpha_plane);
 
         if (imColorModeHasAlpha(this->user_color_mode))
         {
@@ -593,9 +593,9 @@ int imFileFormatICO::WriteImageData(void* data)
     {
       for (int i = 0; i < this->width; i++)
       {
-        int offset = PixelOffset(imColorModeIsTopDown(this->user_color_mode), 
-                                 imColorModeIsPacked(this->user_color_mode), 
-                                 this->width, this->height, depth, i, j, alpha_plane);
+        int offset = iICOPixelOffset(imColorModeIsTopDown(this->user_color_mode), 
+                                     imColorModeIsPacked(this->user_color_mode), 
+                                     this->width, this->height, depth, i, j, alpha_plane);
 
         if (user_data[offset] == 0) /* mark only full transparent pixels */
           and_data_line[i / 8] |=  (0x01 << (7 - (i % 8)));
@@ -616,9 +616,9 @@ int imFileFormatICO::WriteImageData(void* data)
       {
         for (int i = 0; i < this->width; i++)
         {
-          int offset = PixelOffset(imColorModeIsTopDown(this->user_color_mode), 
-                                  imColorModeIsPacked(this->user_color_mode), 
-                                  this->width, this->height, depth, i, j, 0);
+          int offset = iICOPixelOffset(imColorModeIsTopDown(this->user_color_mode), 
+                                       imColorModeIsPacked(this->user_color_mode), 
+                                       this->width, this->height, depth, i, j, 0);
 
           if (user_data[offset] == *transp_index)
             and_data_line[i / 8] |=  (0x01 << (7 - (i % 8)));

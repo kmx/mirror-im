@@ -57,7 +57,7 @@ void imBinSystemFile::Open(const char* pFileName)
                                            NULL);
   this->Error = (this->FileHandle == INVALID_HANDLE_VALUE)? 1: 0;
   SetLastError(NO_ERROR);
-  InitByteOrder(imBinCPUByteOrder());
+  SetByteOrder(imBinCPUByteOrder());
   this->IsNew = 0;
 }
 
@@ -71,7 +71,7 @@ void imBinSystemFile::New(const char* pFileName)
                                            NULL);
   this->Error = (this->FileHandle == INVALID_HANDLE_VALUE)? 1: 0;
   SetLastError(NO_ERROR);
-  InitByteOrder(imBinCPUByteOrder());
+  SetByteOrder(imBinCPUByteOrder());
   this->IsNew = 1;
 }
 
@@ -184,7 +184,7 @@ void imBinSystemFileHandle::Open(const char* pFileName)
 
   HANDLE file_handle = (HANDLE)pFileName;
   this->FileHandle = file_handle;
-  InitByteOrder(imBinCPUByteOrder());
+  SetByteOrder(imBinCPUByteOrder());
   this->IsNew = 0;
   this->Error = 0;
 }
@@ -195,7 +195,7 @@ void imBinSystemFileHandle::New(const char* pFileName)
 
   HANDLE file_handle = (HANDLE)pFileName;
   this->FileHandle = file_handle;
-  InitByteOrder(imBinCPUByteOrder());
+  SetByteOrder(imBinCPUByteOrder());
   this->IsNew = 1;
   this->Error = 0;
 }

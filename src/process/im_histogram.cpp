@@ -30,13 +30,13 @@ static void DoExpandHistogram(T* src_map, T* dst_map, int size, int depth, int h
 
   for (i = 0; i < hcount; i++)
   {             
-    if (i < low_level)
+    if (i <= low_level)
       re_map[i] = 0;
-    else if (i > high_level)
+    else if (i >= high_level)
       re_map[i] = (T)(hcount-1);
     else
     {
-      int value = imResample(i - low_level, factor);
+      int value = imResampleInt(i - low_level, factor);
       re_map[i] = (T)IM_CROPMAX(value, hcount-1);
     }
   }
@@ -76,7 +76,7 @@ static void DoEqualizeHistogram(T* src_map, T* dst_map, int size, int depth, int
 
   for (i = 0; i < hcount; i++)
   {             
-    int value = imResample(histo[i], factor);
+    int value = imResampleInt(histo[i], factor); // from 0-size to 0-(hcount-1)
     re_map[i] = (T)IM_CROPMAX(value, hcount-1);
   }
 

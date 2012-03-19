@@ -146,6 +146,12 @@ static int imluaImageAddAlpha (lua_State *L)
   return 0;
 }
 
+static int imluaImageRemoveAlpha (lua_State *L)
+{
+  imImageRemoveAlpha(imlua_checkimage(L, 1));
+  return 0;
+}
+
 /*****************************************************************************\
  image:SetAlpha()
 \*****************************************************************************/
@@ -288,6 +294,18 @@ static int imluaImageSetAttribute (lua_State *L)
       }
       break;
 
+    case IM_SHORT:
+      {
+        short *data_short = (short*) data;
+        for (i = 0; i < count; i++)
+        {
+          lua_rawgeti(L, 4, i+1);
+          data_short[i] = (short)luaL_checkint(L, -1);
+          lua_pop(L, 1);
+        }
+      }
+      break;
+
     case IM_USHORT:
       {
         imushort *data_ushort = (imushort*) data;
@@ -393,6 +411,17 @@ static int imluaImageGetAttribute (lua_State *L)
           lua_pushnumber(L, *data_byte);
           lua_rawseti(L, -2, i+1);
         }
+      }
+    }
+    break;
+
+  case IM_SHORT:
+    {
+      short *data_short = (short*) data;
+      for (i = 0; i < count; i++, data_short += 2)
+      {
+        lua_pushnumber(L, *data_short);
+        lua_rawseti(L, -2, i+1);
       }
     }
     break;
@@ -916,6 +945,13 @@ static int imluaImageRow_index (lua_State *L)
     }
     break;
 
+  case IM_SHORT:
+    {
+      short *sdata = (short*) channel_buffer;
+      lua_pushnumber(L, (lua_Number) sdata[index]);
+    }
+    break;
+
   case IM_USHORT:
     {
       imushort *udata = (imushort*) channel_buffer;
@@ -973,6 +1009,14 @@ static int imluaImageRow_newindex (lua_State *L)
       lua_Number value = luaL_checknumber(L, 3);
       imbyte *bdata = (imbyte*) channel_buffer;
       bdata[index] = (imbyte) value;
+    }
+    break;
+
+  case IM_SHORT:
+    {
+      lua_Number value = luaL_checknumber(L, 3);
+      short *sdata = (short*) channel_buffer;
+      sdata[index] = (short) value;
     }
     break;
 
@@ -1084,6 +1128,7 @@ static const luaL_Reg imimage_lib[] = {
 static const luaL_Reg imimage_metalib[] = {
   {"Destroy", imluaImageDestroy},
   {"AddAlpha", imluaImageAddAlpha},
+  {"RemoveAlpha", imluaImageRemoveAlpha},
   {"SetAlpha", imluaImageSetAlpha},
   {"Reshape", imluaImageReshape},
   {"Copy", imluaImageCopy},
