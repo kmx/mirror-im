@@ -248,6 +248,9 @@ void imProcessToneGamut(const imImage* src_image, imImage* dst_image, int op, fl
   case IM_BYTE:
     DoNormalizedUnaryOp((imbyte*)src_image->data[0], (imbyte*)dst_image->data[0], count, op, args);
     break;                                                                                
+  case IM_SHORT:                                                                           
+    DoNormalizedUnaryOp((short*)src_image->data[0], (short*)dst_image->data[0], count, op, args);
+    break;                                                                                
   case IM_USHORT:                                                                           
     DoNormalizedUnaryOp((imushort*)src_image->data[0], (imushort*)dst_image->data[0], count, op, args);
     break;                                                                                
@@ -355,6 +358,9 @@ void imProcessShiftHSI(const imImage* src_image, imImage* dst_image, float h_shi
   case IM_BYTE:
     DoShiftHSIByte((imbyte**)src_image->data, (imbyte**)dst_image->data, src_image->count, h_shift, s_shift, i_shift);
     break;                                                                                
+  case IM_SHORT:                                                                           
+    DoShiftHSI((short**)src_image->data, (short**)dst_image->data, src_image->count, h_shift, s_shift, i_shift);
+    break;                                                                                
   case IM_USHORT:                                                                           
     DoShiftHSI((imushort**)src_image->data, (imushort**)dst_image->data, src_image->count, h_shift, s_shift, i_shift);
     break;                                                                                
@@ -430,6 +436,9 @@ void imProcessDirectConv(const imImage* image, imImage* NewImage)
 
   switch(image->data_type)
   {
+  case IM_SHORT:                                                                           
+    DoDirectConv((short*)image->data[0], (imbyte*)NewImage->data[0], count);
+    break;                                                                                
   case IM_USHORT:                                                                           
     DoDirectConv((imushort*)image->data[0], (imbyte*)NewImage->data[0], count);
     break;                                                                                

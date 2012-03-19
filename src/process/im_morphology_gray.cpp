@@ -136,6 +136,9 @@ int imProcessGrayMorphConvolve(const imImage* src_image, imImage* dst_image, con
     case IM_BYTE:
       ret = DoGrayMorphConvolve((imbyte*)src_image->data[i], (imbyte*)dst_image->data[i], src_image->width, src_image->height, kernel, counter, ismax, (int)0);
       break;                                                                                
+    case IM_SHORT:
+      ret = DoGrayMorphConvolve((short*)src_image->data[i], (short*)dst_image->data[i], src_image->width, src_image->height, kernel, counter, ismax, (int)0);
+      break;                                                                                
     case IM_USHORT:
       ret = DoGrayMorphConvolve((imushort*)src_image->data[i], (imushort*)dst_image->data[i], src_image->width, src_image->height, kernel, counter, ismax, (int)0);
       break;                                                                                

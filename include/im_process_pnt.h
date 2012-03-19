@@ -771,7 +771,7 @@ void imProcessDifusionErrThreshold(const imImage* src_image, imImage* dst_image,
 
 /** Calculates the threshold level for manual threshold using a percentage of pixels
  * that should stay bellow the threshold. \n
- * Supports only IM_BYTE images.
+ * Image can be IM_BYTE, IM_SHORT or IM_USHORT.
  * Returns the used level.
  *
  * \verbatim im.ProcessPercentThreshold(src_image: imImage, dst_image: imImage, percent: number) -> level: number [in Lua 5] \endverbatim

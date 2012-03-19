@@ -308,6 +308,12 @@ int imProcessCompassConvolve(const imImage* src_image, imImage* dst_image, imIma
       else
         ret = DoCompassConvolve((imbyte*)src_image->data[i], (imbyte*)dst_image->data[i], src_image->width, src_image->height, (float*)kernel->data[0], kernel->width, counter, (float)0);
       break;                                                                                
+    case IM_SHORT:                                                                           
+      if (kernel->data_type == IM_INT)
+        ret = DoCompassConvolve((short*)src_image->data[i], (short*)dst_image->data[i], src_image->width, src_image->height, (int*)kernel->data[0], kernel->width, counter, (int)0);
+      else
+        ret = DoCompassConvolve((short*)src_image->data[i], (short*)dst_image->data[i], src_image->width, src_image->height, (float*)kernel->data[0], kernel->width, counter, (float)0);
+      break;                                                                                
     case IM_USHORT:                                                                           
       if (kernel->data_type == IM_INT)
         ret = DoCompassConvolve((imushort*)src_image->data[i], (imushort*)dst_image->data[i], src_image->width, src_image->height, (int*)kernel->data[0], kernel->width, counter, (int)0);
@@ -516,6 +522,12 @@ int imProcessConvolveDual(const imImage* src_image, imImage* dst_image, const im
       else
         ret = DoConvolveDual((imbyte*)src_image->data[i], (imbyte*)dst_image->data[i], src_image->width, src_image->height, (float*)kernel1->data[0], (float*)kernel2->data[0], kernel1->width, kernel1->height, counter, (float)0);
       break;                                                                                
+    case IM_SHORT:                                                                           
+      if (kernel1->data_type == IM_INT)
+        ret = DoConvolveDual((short*)src_image->data[i], (short*)dst_image->data[i], src_image->width, src_image->height, (int*)kernel1->data[0], (int*)kernel2->data[0], kernel1->width, kernel1->height, counter, (int)0);
+      else
+        ret = DoConvolveDual((short*)src_image->data[i], (short*)dst_image->data[i], src_image->width, src_image->height, (float*)kernel1->data[0], (float*)kernel2->data[0], kernel1->width, kernel1->height, counter, (float)0);
+      break;                                                                                
     case IM_USHORT:                                                                           
       if (kernel1->data_type == IM_INT)
         ret = DoConvolveDual((imushort*)src_image->data[i], (imushort*)dst_image->data[i], src_image->width, src_image->height, (int*)kernel1->data[0], (int*)kernel2->data[0], kernel1->width, kernel1->height, counter, (int)0);
@@ -696,6 +708,12 @@ static int DoConvolveStep(const imImage* src_image, imImage* dst_image, const im
         ret = DoConvolve((imbyte*)src_image->data[i], (imbyte*)dst_image->data[i], src_image->width, src_image->height, (int*)kernel->data[0], kernel->width, kernel->height, counter, (int)0);
       else
         ret = DoConvolve((imbyte*)src_image->data[i], (imbyte*)dst_image->data[i], src_image->width, src_image->height, (float*)kernel->data[0], kernel->width, kernel->height, counter, (float)0);
+      break;                                                                                
+    case IM_SHORT:                                                                           
+      if (kernel->data_type == IM_INT)
+        ret = DoConvolve((short*)src_image->data[i], (short*)dst_image->data[i], src_image->width, src_image->height, (int*)kernel->data[0], kernel->width, kernel->height, counter, (int)0);
+      else
+        ret = DoConvolve((short*)src_image->data[i], (short*)dst_image->data[i], src_image->width, src_image->height, (float*)kernel->data[0], kernel->width, kernel->height, counter, (float)0);
       break;                                                                                
     case IM_USHORT:                                                                           
       if (kernel->data_type == IM_INT)
@@ -1040,6 +1058,12 @@ int imProcessConvolveSep(const imImage* src_image, imImage* dst_image, const imI
       else
         ret = DoConvolveSep((imbyte*)src_image->data[i], (imbyte*)dst_image->data[i], src_image->width, src_image->height, (float*)kernel->data[0], kernel->width, kernel->height, counter, (float)0);
       break;                                                                                
+    case IM_SHORT:                                                                           
+      if (kernel->data_type == IM_INT)
+        ret = DoConvolveSep((short*)src_image->data[i], (short*)dst_image->data[i], src_image->width, src_image->height, (int*)kernel->data[0], kernel->width, kernel->height, counter, (int)0);
+      else
+        ret = DoConvolveSep((short*)src_image->data[i], (short*)dst_image->data[i], src_image->width, src_image->height, (float*)kernel->data[0], kernel->width, kernel->height, counter, (float)0);
+      break;                                                                                
     case IM_USHORT:                                                                           
       if (kernel->data_type == IM_INT)
         ret = DoConvolveSep((imushort*)src_image->data[i], (imushort*)dst_image->data[i], src_image->width, src_image->height, (int*)kernel->data[0], kernel->width, kernel->height, counter, (int)0);
@@ -1360,7 +1384,8 @@ int imProcessLapOfGaussianConvolve(const imImage* src_image, imImage* dst_image,
   imProcessRenderLapOfGaussian(kernel, stddev);
 
   int ret;
-  if (src_image->data_type == IM_BYTE || src_image->data_type == IM_USHORT)
+  if (src_image->data_type == IM_BYTE ||  // Unsigned types
+      src_image->data_type == IM_USHORT)
   {
     imImage* aux_image = imImageClone(dst_image);
     if (!aux_image)
@@ -1522,6 +1547,9 @@ static void doSharp(const imImage* src_image, imImage* dst_image, float amount, 
     {
     case IM_BYTE:
       DoSharpOp((imbyte*)src_image->data[i], (imbyte*)dst_image->data[i], count, amount, (int)threshold, gauss);
+      break;
+    case IM_SHORT:
+      DoSharpOp((short*)src_image->data[i], (short*)dst_image->data[i], count, amount, (int)threshold, gauss);
       break;
     case IM_USHORT:
       DoSharpOp((imushort*)src_image->data[i], (imushort*)dst_image->data[i], count, amount, (int)threshold, gauss);

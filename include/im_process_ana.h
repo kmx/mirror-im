@@ -60,6 +60,14 @@ void imCalcHistogram(const unsigned char* data, int count, unsigned long* histo,
  * \ingroup stats */
 void imCalcUShortHistogram(const unsigned short* data, int count, unsigned long* histo, int cumulative);
 
+/** Calculates the histogram of a IM_SHORT data. \n
+ * Histogram is always 65536 positions long. \n
+ * Zero is located at 32768 index. \n
+ * When cumulative is different from zero it calculates the cumulative histogram. \n
+ * Use \ref imCalcHistogram in Lua.
+ * \ingroup stats */
+void imCalcShortHistogram(const short* data, int count, unsigned long* histo, int cumulative);
+
 /** Calculates the gray histogram of an image. \n
  * Image must be (IM_BYTE or IM_USHORT)/(IM_RGB, IM_GRAY, IM_BINARY or IM_MAP). \n
  * If the image is IM_RGB then the histogram of the luma component is calculated. \n

@@ -61,6 +61,9 @@ int imProcessRenderCondOp(imImage* image, imRenderCondFunc render_func, const ch
     case IM_BYTE:
       ret = DoRenderCondOp((imbyte*)image->data[d], image->width, image->height, d, render_func, param, counter);
       break;                                                                                
+    case IM_SHORT:                                                                           
+      ret = DoRenderCondOp((short*)image->data[d], image->width, image->height, d, render_func, param, counter);
+      break;                                                                                
     case IM_USHORT:                                                                           
       ret = DoRenderCondOp((imushort*)image->data[d], image->width, image->height, d, render_func, param, counter);
       break;                                                                                
@@ -131,6 +134,9 @@ int imProcessRenderOp(imImage* image, imRenderFunc render_func, const char* rend
     {
     case IM_BYTE:
       ret = DoRenderOp((imbyte*)image->data[d], image->width, image->height, d, render_func, param, counter, plus);
+      break;                                                                                
+    case IM_SHORT:                                                                           
+      ret = DoRenderOp((short*)image->data[d], image->width, image->height, d, render_func, param, counter, plus);
       break;                                                                                
     case IM_USHORT:                                                                           
       ret = DoRenderOp((imushort*)image->data[d], image->width, image->height, d, render_func, param, counter, plus);

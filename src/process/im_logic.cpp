@@ -48,6 +48,9 @@ void imProcessBitwiseOp(const imImage* src_image1, const imImage* src_image2, im
   case IM_BYTE:
     DoBitwiseOp((imbyte*)src_image1->data[0], (imbyte*)src_image2->data[0], (imbyte*)dst_image->data[0], count, op);
     break;                                                                                
+  case IM_SHORT:
+    DoBitwiseOp((short*)src_image1->data[0], (short*)src_image2->data[0], (short*)dst_image->data[0], count, op);
+    break;                                                                                
   case IM_USHORT:
     DoBitwiseOp((imushort*)src_image1->data[0], (imushort*)src_image2->data[0], (imushort*)dst_image->data[0], count, op);
     break;                                                                                
@@ -86,6 +89,9 @@ void imProcessBitwiseNot(const imImage* src_image, imImage* dst_image)
   {
   case IM_BYTE:
     DoBitwiseNot((imbyte*)src_image->data[0], (imbyte*)dst_image->data[0], count);
+    break;                                                                                
+  case IM_SHORT:
+    DoBitwiseNot((short*)src_image->data[0], (short*)dst_image->data[0], count);
     break;                                                                                
   case IM_USHORT:
     DoBitwiseNot((imushort*)src_image->data[0], (imushort*)dst_image->data[0], count);

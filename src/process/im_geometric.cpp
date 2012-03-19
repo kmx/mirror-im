@@ -419,6 +419,9 @@ void imProcessRotate90(const imImage* src_image, imImage* dst_image, int dir)
     case IM_BYTE:
       Rotate90(src_image->width, src_image->height, (imbyte*)src_image->data[i],  (imbyte*)dst_image->data[i], dir);
       break;
+    case IM_SHORT:
+      Rotate90(src_image->width, src_image->height, (short*)src_image->data[i],  (short*)dst_image->data[i], dir);
+      break;
     case IM_USHORT:
       Rotate90(src_image->width, src_image->height, (imushort*)src_image->data[i],  (imushort*)dst_image->data[i], dir);
       break;
@@ -444,6 +447,9 @@ void imProcessRotate180(const imImage* src_image, imImage* dst_image)
     {
     case IM_BYTE:
       Rotate180(src_image->width, src_image->height, (imbyte*)src_image->data[i],  (imbyte*)dst_image->data[i]);
+      break;
+    case IM_SHORT:
+      Rotate180(src_image->width, src_image->height, (short*)src_image->data[i],  (short*)dst_image->data[i]);
       break;
     case IM_USHORT:
       Rotate180(src_image->width, src_image->height, (imushort*)src_image->data[i],  (imushort*)dst_image->data[i]);
@@ -475,6 +481,9 @@ int imProcessRadial(const imImage* src_image, imImage* dst_image, float k1, int 
     {
     case IM_BYTE:
       ret = Radial(src_image->width, src_image->height, (imbyte*)src_image->data[i], (imbyte*)dst_image->data[i], k1, counter, float(0), order);
+      break;
+    case IM_SHORT:
+      ret = Radial(src_image->width, src_image->height, (short*)src_image->data[i], (short*)dst_image->data[i], k1, counter, float(0), order);
       break;
     case IM_USHORT:
       ret = Radial(src_image->width, src_image->height, (imushort*)src_image->data[i], (imushort*)dst_image->data[i], k1, counter, float(0), order);
@@ -513,6 +522,9 @@ int imProcessSwirl(const imImage* src_image, imImage* dst_image, float k, int or
     {
     case IM_BYTE:
       ret = Swirl(src_image->width, src_image->height, (imbyte*)src_image->data[i], (imbyte*)dst_image->data[i], k, counter, float(0), order);
+      break;
+    case IM_SHORT:
+      ret = Swirl(src_image->width, src_image->height, (short*)src_image->data[i], (short*)dst_image->data[i], k, counter, float(0), order);
       break;
     case IM_USHORT:
       ret = Swirl(src_image->width, src_image->height, (imushort*)src_image->data[i], (imushort*)dst_image->data[i], k, counter, float(0), order);
@@ -597,6 +609,9 @@ int imProcessRotate(const imImage* src_image, imImage* dst_image, double cos0, d
       case IM_BYTE:
         ret = RotateCenter(src_image->width, src_image->height, (imbyte*)src_image->data[i], dst_image->width, dst_image->height, (imbyte*)dst_image->data[i], cos0, sin0, counter, float(0), order);
         break;
+      case IM_SHORT:
+        ret = RotateCenter(src_image->width, src_image->height, (short*)src_image->data[i], dst_image->width, dst_image->height, (short*)dst_image->data[i], cos0, sin0, counter, float(0), order);
+        break;
       case IM_USHORT:
         ret = RotateCenter(src_image->width, src_image->height, (imushort*)src_image->data[i], dst_image->width, dst_image->height, (imushort*)dst_image->data[i], cos0, sin0, counter, float(0), order);
         break;
@@ -642,6 +657,9 @@ int imProcessRotateRef(const imImage* src_image, imImage* dst_image, double cos0
       case IM_BYTE:
         ret = Rotate(src_image->width, src_image->height, (imbyte*)src_image->data[i], dst_image->width, dst_image->height, (imbyte*)dst_image->data[i], cos0, sin0, x, y, to_origin, counter, float(0), order);
         break;
+      case IM_SHORT:
+        ret = Rotate(src_image->width, src_image->height, (short*)src_image->data[i], dst_image->width, dst_image->height, (short*)dst_image->data[i], cos0, sin0, x, y, to_origin, counter, float(0), order);
+        break;
       case IM_USHORT:
         ret = Rotate(src_image->width, src_image->height, (imushort*)src_image->data[i], dst_image->width, dst_image->height, (imushort*)dst_image->data[i], cos0, sin0, x, y, to_origin, counter, float(0), order);
         break;
@@ -678,6 +696,9 @@ void imProcessMirror(const imImage* src_image, imImage* dst_image)
     case IM_BYTE:
       Mirror(src_image->width, src_image->height, (imbyte*)src_image->data[i],  (imbyte*)dst_image->data[i]);
       break;
+    case IM_SHORT:
+      Mirror(src_image->width, src_image->height, (short*)src_image->data[i],  (short*)dst_image->data[i]);
+      break;
     case IM_USHORT:
       Mirror(src_image->width, src_image->height, (imushort*)src_image->data[i],  (imushort*)dst_image->data[i]);
       break;
@@ -706,6 +727,9 @@ void imProcessFlip(const imImage* src_image, imImage* dst_image)
     case IM_BYTE:
       Flip(src_image->width, src_image->height, (imbyte*)src_image->data[i],  (imbyte*)dst_image->data[i]);
       break;
+    case IM_SHORT:
+      Flip(src_image->width, src_image->height, (short*)src_image->data[i],  (short*)dst_image->data[i]);
+      break;
     case IM_USHORT:
       Flip(src_image->width, src_image->height, (imushort*)src_image->data[i],  (imushort*)dst_image->data[i]);
       break;
@@ -733,6 +757,9 @@ void imProcessInterlaceSplit(const imImage* src_image, imImage* dst_image1, imIm
     {
     case IM_BYTE:
       InterlaceSplit(src_image->width, src_image->height, (imbyte*)src_image->data[i],  (imbyte*)dst_image1->data[i], (imbyte*)dst_image2->data[i]);
+      break;
+    case IM_SHORT:
+      InterlaceSplit(src_image->width, src_image->height, (short*)src_image->data[i],  (short*)dst_image1->data[i], (short*)dst_image2->data[i]);
       break;
     case IM_USHORT:
       InterlaceSplit(src_image->width, src_image->height, (imushort*)src_image->data[i],  (imushort*)dst_image1->data[i], (imushort*)dst_image2->data[i]);

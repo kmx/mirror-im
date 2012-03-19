@@ -119,7 +119,14 @@ static int imluaCalcHistogram (lua_State *L)
       imlua_newarrayulong(L, histo, 256, 0);
     }
     break;
-
+  case IM_SHORT:
+    {
+      unsigned long* histo = (unsigned long*)malloc(65536 * sizeof(unsigned long));
+      imCalcShortHistogram((short*)src_image->data[plane], src_image->count, histo, cumulative);
+      imlua_newarrayulong(L, histo, 65536, 0);
+      free(histo);
+    }
+    break;
   case IM_USHORT:
     {
       unsigned long* histo = (unsigned long*)malloc(65536 * sizeof(unsigned long));
@@ -128,7 +135,6 @@ static int imluaCalcHistogram (lua_State *L)
       free(histo);
     }
     break;
-
   default:
     luaL_argerror(L, 1, "data_type can be byte or ushort only");
     break;

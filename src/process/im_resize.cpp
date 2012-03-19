@@ -132,6 +132,11 @@ int imProcessReduce(const imImage* src_image, imImage* dst_image, int order)
                     dst_image->width, dst_image->height, (imbyte*)dst_image->data[i], 
                     float(0), order, counter);
       break;
+    case IM_SHORT:
+      ret = iReduce(src_image->width, src_image->height, (const short*)src_image->data[i],  
+                    dst_image->width, dst_image->height, (short*)dst_image->data[i], 
+                    float(0), order, counter);
+      break;
     case IM_USHORT:
       ret = iReduce(src_image->width, src_image->height, (const imushort*)src_image->data[i],  
                     dst_image->width, dst_image->height, (imushort*)dst_image->data[i], 
@@ -174,6 +179,11 @@ int imProcessResize(const imImage* src_image, imImage* dst_image, int order)
     case IM_BYTE:
       ret = iResize(src_image->width, src_image->height, (const imbyte*)src_image->data[i],  
                     dst_image->width, dst_image->height, (imbyte*)dst_image->data[i], 
+                    float(0), order, counter);
+      break;
+    case IM_SHORT:
+      ret = iResize(src_image->width, src_image->height, (const short*)src_image->data[i],  
+                    dst_image->width, dst_image->height, (short*)dst_image->data[i], 
                     float(0), order, counter);
       break;
     case IM_USHORT:
@@ -243,6 +253,9 @@ void imProcessReduceBy4(const imImage* src_image, imImage* dst_image)
     {
     case IM_BYTE:
       ReduceBy4(src_image->width, src_image->height, (imbyte*)src_image->data[i],  dst_image->width, dst_image->height, (imbyte*)dst_image->data[i]);
+      break;
+    case IM_SHORT:
+      ReduceBy4(src_image->width, src_image->height, (short*)src_image->data[i],  dst_image->width, dst_image->height, (short*)dst_image->data[i]);
       break;
     case IM_USHORT:
       ReduceBy4(src_image->width, src_image->height, (imushort*)src_image->data[i],  dst_image->width, dst_image->height, (imushort*)dst_image->data[i]);

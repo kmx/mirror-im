@@ -110,6 +110,20 @@ static int compare_imInt(const void *elem1, const void *elem2)
   return 0;
 }
 
+static int compare_imShort(const void *elem1, const void *elem2) 
+{
+  short* v1 = (short*)elem1;
+  short* v2 = (short*)elem2;
+
+  if (*v1 < *v2)
+    return -1;
+
+  if (*v1 > *v2)
+    return 1;
+
+  return 0;
+}
+
 static int compare_imUShort(const void *elem1, const void *elem2) 
 {
   imushort* v1 = (imushort*)elem1;
@@ -142,6 +156,13 @@ static imbyte median_op_byte(imbyte* value, int count, int center)
 {
   (void)center;
   qsort(value, count, sizeof(imbyte), compare_imByte);
+  return value[count/2];
+}
+
+static short median_op_short(short* value, int count, int center)
+{
+  (void)center;
+  qsort(value, count, sizeof(short), compare_imShort);
   return value[count/2];
 }
 
@@ -182,6 +203,10 @@ int imProcessMedianConvolve(const imImage* src_image, imImage* dst_image, int ks
       ret = DoConvolveRankFunc((imbyte*)src_image->data[i], (imbyte*)dst_image->data[i], 
                                src_image->width, src_image->height, ks, ks, median_op_byte, counter);
       break;                                                                                
+    case IM_SHORT:                                                                           
+      ret = DoConvolveRankFunc((short*)src_image->data[i], (short*)dst_image->data[i], 
+                               src_image->width, src_image->height, ks, ks, median_op_short, counter);
+      break;                                                                                
     case IM_USHORT:                                                                           
       ret = DoConvolveRankFunc((imushort*)src_image->data[i], (imushort*)dst_image->data[i], 
                                src_image->width, src_image->height, ks, ks, median_op_ushort, counter);
@@ -208,6 +233,14 @@ int imProcessMedianConvolve(const imImage* src_image, imImage* dst_image, int ks
 static imbyte range_op_byte(imbyte* value, int count, int center)
 {
   imbyte min, max;
+  (void)center;
+  imMinMax(value, count, min, max);
+  return max-min;
+}
+
+static short range_op_short(short* value, int count, int center)
+{
+  short min, max;
   (void)center;
   imMinMax(value, count, min, max);
   return max-min;
@@ -252,6 +285,10 @@ int imProcessRangeConvolve(const imImage* src_image, imImage* dst_image, int ks)
     case IM_BYTE:
       ret = DoConvolveRankFunc((imbyte*)src_image->data[i], (imbyte*)dst_image->data[i], 
                                src_image->width, src_image->height, ks, ks, range_op_byte, counter);
+      break;                                                                                
+    case IM_SHORT:                                                                           
+      ret = DoConvolveRankFunc((short*)src_image->data[i], (short*)dst_image->data[i], 
+                               src_image->width, src_image->height, ks, ks, range_op_short, counter);
       break;                                                                                
     case IM_USHORT:                                                                           
       ret = DoConvolveRankFunc((imushort*)src_image->data[i], (imushort*)dst_image->data[i], 
@@ -345,6 +382,28 @@ static imushort contrast_thres_op_ushort(imushort* value, int count, int center)
   }
 }
 
+static short contrast_thres_op_short(short* value, int count, int center)
+{
+  int c, t;
+  short v = value[center], min, max;
+
+  imMinMax(value, count, min, max);
+
+  c = max-min;
+
+  if (c < thresAux) 
+    return 0;
+  else
+  { 
+    t = ((int)max + (int)min) / 2;
+
+    if (v >= t)
+      return 1;
+    else
+      return 0;
+  }
+}
+
 static int contrast_thres_op_int(int* value, int count, int center)
 {
   int c, t;
@@ -381,6 +440,10 @@ int imProcessRangeContrastThreshold(const imImage* src_image, imImage* dst_image
     ret = DoConvolveRankFunc((imbyte*)src_image->data[0], (imbyte*)dst_image->data[0], 
                              src_image->width, src_image->height, ks, ks, contrast_thres_op_byte, counter);
     break;                                                                                
+  case IM_SHORT:                                                                           
+    ret = DoConvolveRankFunc((short*)src_image->data[0], (imbyte*)dst_image->data[0], 
+                             src_image->width, src_image->height, ks, ks, contrast_thres_op_short, counter);
+    break;                                                                                
   case IM_USHORT:                                                                           
     ret = DoConvolveRankFunc((imushort*)src_image->data[0], (imbyte*)dst_image->data[0], 
                              src_image->width, src_image->height, ks, ks, contrast_thres_op_ushort, counter);
@@ -399,6 +462,21 @@ int imProcessRangeContrastThreshold(const imImage* src_image, imImage* dst_image
 static imbyte max_thres_op_byte(imbyte* value, int count, int center)
 {
   imbyte v = value[center], min, max;
+
+  if (v < thresAux) 
+    return 0;
+
+  imMinMax(value, count, min, max);
+
+  if (v < max)
+    return 0;
+
+  return 1;
+}
+
+static short max_thres_op_short(short* value, int count, int center)
+{
+  short v = value[center], min, max;
 
   if (v < thresAux) 
     return 0;
@@ -455,6 +533,10 @@ int imProcessLocalMaxThreshold(const imImage* src_image, imImage* dst_image, int
     ret = DoConvolveRankFunc((imbyte*)src_image->data[0], (imbyte*)dst_image->data[0], 
                              src_image->width, src_image->height, ks, ks, max_thres_op_byte, counter);
     break;                                                                                
+  case IM_SHORT:                                                                           
+    ret = DoConvolveRankFunc((short*)src_image->data[0], (imbyte*)dst_image->data[0], 
+                             src_image->width, src_image->height, ks, ks, max_thres_op_short, counter);
+    break;                                                                                
   case IM_USHORT:                                                                           
     ret = DoConvolveRankFunc((imushort*)src_image->data[0], (imbyte*)dst_image->data[0], 
                              src_image->width, src_image->height, ks, ks, max_thres_op_ushort, counter);
@@ -487,6 +569,19 @@ static imushort rank_closest_op_ushort(imushort* value, int count, int center)
 {
   imushort v = value[center];
   imushort min, max;
+
+  imMinMax(value, count, min, max);
+
+  if (v - min < max - v) 
+    return min;
+  else
+    return max;
+}
+
+static short rank_closest_op_short(short* value, int count, int center)
+{
+  short v = value[center];
+  short min, max;
 
   imMinMax(value, count, min, max);
 
@@ -539,6 +634,10 @@ int imProcessRankClosestConvolve(const imImage* src_image, imImage* dst_image, i
       ret = DoConvolveRankFunc((imbyte*)src_image->data[i], (imbyte*)dst_image->data[i], 
                                src_image->width, src_image->height, ks, ks, rank_closest_op_byte, counter);
       break;                                                                                
+    case IM_SHORT:                                                                           
+      ret = DoConvolveRankFunc((short*)src_image->data[i], (short*)dst_image->data[i], 
+                               src_image->width, src_image->height, ks, ks, rank_closest_op_short, counter);
+      break;                                                                                
     case IM_USHORT:                                                                           
       ret = DoConvolveRankFunc((imushort*)src_image->data[i], (imushort*)dst_image->data[i], 
                                src_image->width, src_image->height, ks, ks, rank_closest_op_ushort, counter);
@@ -578,6 +677,14 @@ static imushort rank_max_op_ushort(imushort* value, int count, int center)
   return max;
 }
 
+static short rank_max_op_short(short* value, int count, int center)
+{
+  short min, max;
+  (void)center;
+  imMinMax(value, count, min, max);
+  return max;
+}
+
 static int rank_max_op_int(int* value, int count, int center)
 {
   int min, max;
@@ -609,6 +716,10 @@ int imProcessRankMaxConvolve(const imImage* src_image, imImage* dst_image, int k
     case IM_BYTE:
       ret = DoConvolveRankFunc((imbyte*)src_image->data[i], (imbyte*)dst_image->data[i], 
                                src_image->width, src_image->height, ks, ks, rank_max_op_byte, counter);
+      break;                                                                                
+    case IM_SHORT:                                                                           
+      ret = DoConvolveRankFunc((short*)src_image->data[i], (short*)dst_image->data[i], 
+                               src_image->width, src_image->height, ks, ks, rank_max_op_short, counter);
       break;                                                                                
     case IM_USHORT:                                                                           
       ret = DoConvolveRankFunc((imushort*)src_image->data[i], (imushort*)dst_image->data[i], 
@@ -649,6 +760,14 @@ static imushort rank_min_op_ushort(imushort* value, int count, int center)
   return min;
 }
 
+static short rank_min_op_short(short* value, int count, int center)
+{
+  short min, max;
+  (void)center;
+  imMinMax(value, count, min, max);
+  return min;
+}
+
 static int rank_min_op_int(int* value, int count, int center)
 {
   int min, max;
@@ -680,6 +799,10 @@ int imProcessRankMinConvolve(const imImage* src_image, imImage* dst_image, int k
     case IM_BYTE:
       ret = DoConvolveRankFunc((imbyte*)src_image->data[i], (imbyte*)dst_image->data[i], 
                                src_image->width, src_image->height, ks, ks, rank_min_op_byte, counter);
+      break;                                                                                
+    case IM_SHORT:                                                                           
+      ret = DoConvolveRankFunc((short*)src_image->data[i], (short*)dst_image->data[i], 
+                               src_image->width, src_image->height, ks, ks, rank_min_op_short, counter);
       break;                                                                                
     case IM_USHORT:                                                                           
       ret = DoConvolveRankFunc((imushort*)src_image->data[i], (imushort*)dst_image->data[i], 

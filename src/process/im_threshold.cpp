@@ -40,6 +40,10 @@ void imProcessSliceThreshold(const imImage* src_image, imImage* dst_image, float
     doThresholdSlice((imbyte*)src_image->data[0], (imbyte*)dst_image->data[0], 
                              src_image->count, (imbyte)start_level, (imbyte)end_level);
     break;                                                                                
+  case IM_SHORT:                                                                           
+    doThresholdSlice((short*)src_image->data[0], (imbyte*)dst_image->data[0], 
+                             src_image->count, (short)start_level, (short)end_level);
+    break;                                                                                
   case IM_USHORT:                                                                           
     doThresholdSlice((imushort*)src_image->data[0], (imbyte*)dst_image->data[0], 
                              src_image->count, (imushort)start_level, (imushort)end_level);
@@ -75,6 +79,9 @@ void imProcessThresholdByDiff(const imImage* src_image1, const imImage* src_imag
   case IM_BYTE:
     doThresholdByDiff((imbyte*)src_image1->data[0], (imbyte*)src_image2->data[0], (imbyte*)dst_image->data[0], src_image1->count);
     break;                                                                                
+  case IM_SHORT:                                                                           
+    doThresholdByDiff((short*)src_image1->data[0], (short*)src_image2->data[0], (imbyte*)dst_image->data[0], src_image1->count);
+    break;                                                                                
   case IM_USHORT:                                                                           
     doThresholdByDiff((imushort*)src_image1->data[0], (imushort*)src_image2->data[0], (imbyte*)dst_image->data[0], src_image1->count);
     break;                                                                                
@@ -107,6 +114,10 @@ void imProcessThreshold(const imImage* src_image, imImage* dst_image, float leve
   case IM_BYTE:
     doThreshold((imbyte*)src_image->data[0], (imbyte*)dst_image->data[0], 
                              src_image->count, (imbyte)level, value);
+    break;                                                                                
+  case IM_SHORT:                                                                           
+    doThreshold((short*)src_image->data[0], (imbyte*)dst_image->data[0], 
+                             src_image->count, (short)level, value);
     break;                                                                                
   case IM_USHORT:                                                                           
     doThreshold((imushort*)src_image->data[0], (imbyte*)dst_image->data[0], 
@@ -264,11 +275,20 @@ void imProcessDifusionErrThreshold(const imImage* image, imImage* NewImage, int 
 
 int imProcessPercentThreshold(const imImage* image, imImage* NewImage, float percent)
 {
-  unsigned long histo[256], cut;
+  int hcount = 256;
+  if (image->data_type == IM_USHORT || image->data_type == IM_SHORT)
+    hcount = 65536;
 
-  cut = (int)((image->count * percent)/100.);
+  unsigned long* histo = new unsigned long[hcount];
 
-  imCalcHistogram((imbyte*)image->data[0], image->count, histo, 1);
+  unsigned long cut = (unsigned long)((image->count * percent)/100.);
+
+  if (image->data_type == IM_USHORT)
+    imCalcUShortHistogram((imushort*)image->data[0], image->count, histo, 1);
+  else if (image->data_type == IM_SHORT)
+    imCalcShortHistogram((short*)image->data[0], image->count, histo, 1);
+  else
+    imCalcHistogram((imbyte*)image->data[0], image->count, histo, 1);
 
   int i;
   for (i = 0; i < 256; i++)
@@ -280,6 +300,8 @@ int imProcessPercentThreshold(const imImage* image, imImage* NewImage, float per
   int level = (i==0? 0: i==256? 254: i-1);
 
   imProcessThreshold(image, NewImage, (float)level, 1);
+
+  delete [] histo;
   return level;
 }
 

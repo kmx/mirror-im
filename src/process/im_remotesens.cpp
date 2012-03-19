@@ -41,6 +41,9 @@ void imProcessNormDiffRatio(const imImage* image1, const imImage* image2, imImag
   case IM_BYTE:
     DoNormDiffRatio((imbyte*)image1->data[0], (imbyte*)image2->data[0], (float*)dst_image->data[0], count);
     break;                                                                                
+  case IM_SHORT:                                                                           
+    DoNormDiffRatio((short*)image1->data[0], (short*)image2->data[0], (float*)dst_image->data[0], count);
+    break;                                                                                
   case IM_USHORT:                                                                           
     DoNormDiffRatio((imushort*)image1->data[0], (imushort*)image2->data[0], (float*)dst_image->data[0], count);
     break;                                                                                
@@ -168,6 +171,9 @@ void imProcessAbnormalHyperionCorrection(const imImage* src_image, imImage* dst_
   {
   case IM_BYTE:
     DoAbnormalCorrection((imbyte*)src_image->data[0], (imbyte*)dst_image->data[0], src_image->width, src_image->height, (imbyte*)abnormal->data[0], threshold_consecutive, threshold_percent);
+    break;                                                                                
+  case IM_SHORT:                                                                           
+    DoAbnormalCorrection((short*)src_image->data[0], (short*)dst_image->data[0], src_image->width, src_image->height, (imbyte*)abnormal->data[0], threshold_consecutive, threshold_percent);
     break;                                                                                
   case IM_USHORT:                                                                           
     DoAbnormalCorrection((imushort*)src_image->data[0], (imushort*)dst_image->data[0], src_image->width, src_image->height, (imbyte*)abnormal->data[0], threshold_consecutive, threshold_percent);

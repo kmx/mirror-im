@@ -20,10 +20,12 @@
 
 // Fake complex operations for real types
 static inline imbyte conj_op(const imbyte& v) {return v;}
+static inline short conj_op(const short& v) {return v;}
 static inline imushort conj_op(const imushort& v) {return v;}
 static inline int conj_op(const int& v) {return v;}
 static inline float conj_op(const float& v) {return v;}
 static inline imbyte cpxnorm_op(const imbyte& v) {return v;}
+static inline short cpxnorm_op(const short& v) {return v;}
 static inline imushort cpxnorm_op(const imushort& v) {return v;}
 static inline int cpxnorm_op(const int& v) {return v;}
 static inline float cpxnorm_op(const float& v) {return v;}
@@ -196,12 +198,28 @@ void imProcessUnArithmeticOp(const imImage* src_image, imImage* dst_image, int o
       DoUnaryOp((imbyte*)src_image->data[0], (int*)dst_image->data[0], total_count, op);
     else if (dst_image->data_type == IM_USHORT)
       DoUnaryOp((imbyte*)src_image->data[0], (imushort*)dst_image->data[0], total_count, op);
+    else if (dst_image->data_type == IM_SHORT)
+      DoUnaryOp((imbyte*)src_image->data[0], (short*)dst_image->data[0], total_count, op);
     else
       DoUnaryOpByte((imbyte*)src_image->data[0], (imbyte*)dst_image->data[0], total_count, op);
+    break;                                                                                
+  case IM_SHORT:
+    if (dst_image->data_type == IM_BYTE)
+      DoUnaryOpByte((short*)src_image->data[0], (imbyte*)dst_image->data[0], total_count, op);
+    else if (dst_image->data_type == IM_USHORT)
+      DoUnaryOp((short*)src_image->data[0], (imushort*)dst_image->data[0], total_count, op);
+    else if (dst_image->data_type == IM_INT)
+      DoUnaryOp((short*)src_image->data[0], (int*)dst_image->data[0], total_count, op);
+    else if (dst_image->data_type == IM_FLOAT)
+      DoUnaryOp((short*)src_image->data[0], (float*)dst_image->data[0], total_count, op);
+    else
+      DoUnaryOp((short*)src_image->data[0], (short*)dst_image->data[0], total_count, op);
     break;                                                                                
   case IM_USHORT:
     if (dst_image->data_type == IM_BYTE)
       DoUnaryOpByte((imushort*)src_image->data[0], (imbyte*)dst_image->data[0], total_count, op);
+    else if (dst_image->data_type == IM_SHORT)
+      DoUnaryOp((imushort*)src_image->data[0], (short*)dst_image->data[0], total_count, op);
     else if (dst_image->data_type == IM_INT)
       DoUnaryOp((imushort*)src_image->data[0], (int*)dst_image->data[0], total_count, op);
     else if (dst_image->data_type == IM_FLOAT)
@@ -212,6 +230,8 @@ void imProcessUnArithmeticOp(const imImage* src_image, imImage* dst_image, int o
   case IM_INT:                                                                           
     if (dst_image->data_type == IM_BYTE)
       DoUnaryOpByte((int*)src_image->data[0], (imbyte*)dst_image->data[0], total_count, op);
+    else if (dst_image->data_type == IM_SHORT)
+      DoUnaryOp((int*)src_image->data[0], (short*)dst_image->data[0], total_count, op);
     else if (dst_image->data_type == IM_USHORT)
       DoUnaryOp((int*)src_image->data[0], (imushort*)dst_image->data[0], total_count, op);
     else if (dst_image->data_type == IM_FLOAT)

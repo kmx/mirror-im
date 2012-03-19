@@ -55,11 +55,13 @@ void imProcessExpandHistogram(const imImage* src_image, imImage* dst_image, floa
   imCalcPercentMinMax(src_image, percent, 0, &low_level, &high_level);
 
   int hcount = 256;
-  if (src_image->data_type == IM_USHORT)
+  if (src_image->data_type == IM_USHORT || src_image->data_type == IM_SHORT)
     hcount = 65536;
 
   if (src_image->data_type == IM_USHORT)
     DoExpandHistogram((imushort*)src_image->data[0], (imushort*)dst_image->data[0], src_image->count, src_image->depth, hcount, low_level, high_level);
+  else if (src_image->data_type == IM_SHORT)
+    DoExpandHistogram((short*)src_image->data[0], (short*)dst_image->data[0], src_image->count, src_image->depth, hcount, low_level, high_level);
   else
     DoExpandHistogram((imbyte*)src_image->data[0], (imbyte*)dst_image->data[0], src_image->count, src_image->depth, hcount, low_level, high_level);
 }
@@ -91,7 +93,7 @@ static void DoEqualizeHistogram(T* src_map, T* dst_map, int size, int depth, int
 void imProcessEqualizeHistogram(const imImage* src_image, imImage* dst_image)
 {
   int hcount = 256;
-  if (src_image->data_type == IM_USHORT)
+  if (src_image->data_type == IM_USHORT || src_image->data_type == IM_SHORT)
     hcount = 65536;
 
   unsigned long* histo = new unsigned long[hcount];
@@ -99,6 +101,8 @@ void imProcessEqualizeHistogram(const imImage* src_image, imImage* dst_image)
 
   if (src_image->data_type == IM_USHORT)
     DoEqualizeHistogram((imushort*)src_image->data[0], (imushort*)dst_image->data[0], src_image->count, src_image->depth, hcount, histo);
+  else if (src_image->data_type == IM_SHORT)
+    DoEqualizeHistogram((short*)src_image->data[0], (short*)dst_image->data[0], src_image->count, src_image->depth, hcount, histo);
   else
     DoEqualizeHistogram((imbyte*)src_image->data[0], (imbyte*)dst_image->data[0], src_image->count, src_image->depth, hcount, histo);
 
