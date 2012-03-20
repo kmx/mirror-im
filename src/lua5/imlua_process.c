@@ -3646,6 +3646,8 @@ static const imlua_constant im_process_constants[] = {
   { "UN_COS", IM_UN_COS, NULL },
   { "UN_CONJ", IM_UN_CONJ, NULL },
   { "UN_CPXNORM", IM_UN_CPXNORM, NULL },
+  { "UN_POSITIVES", IM_UN_POSITIVES, NULL },
+  { "UN_NEGATIVES", IM_UN_NEGATIVES, NULL },
 
   { "BIN_ADD", IM_BIN_ADD, NULL },
   { "BIN_SUB", IM_BIN_SUB, NULL },

@@ -117,21 +117,23 @@ int imProcessMultiPointColorOp(const imImage** src_image, int src_count, imImage
  * \ingroup process */
 
 /** Unary Arithmetic Operations. \n
- * Inverse and log may lead to math exceptions.
+ * (#) Inverse and log may lead to math exceptions.
  * \ingroup arithm */
 enum imUnaryOp {
-  IM_UN_EQL,    /**< equal             =     a        */
-  IM_UN_ABS,    /**< abssolute         =    |a|       */
-  IM_UN_LESS,   /**< less              =    -a        */
-  IM_UN_INV,    /**< invert            =   1/a       (#) */
-  IM_UN_SQR,    /**< square            =     a*a      */
-  IM_UN_SQRT,   /**< square root       =     a^(1/2)  */
-  IM_UN_LOG,    /**< natural logarithm =  ln(a)      (#) */
-  IM_UN_EXP,    /**< exponential       = exp(a)       */
-  IM_UN_SIN,    /**< sine              = sin(a)       */
-  IM_UN_COS,    /**< cosine            = cos(a)       */
-  IM_UN_CONJ,   /**< complex conjugate =     ar - ai*i                   */
-  IM_UN_CPXNORM /**< complex normalization by magnitude = a / cpxmag(a)  */
+  IM_UN_EQL,     /**< equal             =     a             */
+  IM_UN_ABS,     /**< abssolute         =    |a|            */
+  IM_UN_LESS,    /**< less              =    -a             */
+  IM_UN_INV,     /**< invert            =   1/a       \t(#) */
+  IM_UN_SQR,     /**< square            =     a*a           */
+  IM_UN_SQRT,    /**< square root       =     a^(1/2)       */
+  IM_UN_LOG,     /**< natural logarithm =  ln(a)      \t(#) */
+  IM_UN_EXP,     /**< exponential       = exp(a)            */
+  IM_UN_SIN,     /**< sine              = sin(a)            */
+  IM_UN_COS,     /**< cosine            = cos(a)            */
+  IM_UN_CONJ,    /**< complex conjugate =     ar - ai*i                   */
+  IM_UN_CPXNORM, /**< complex normalization by magnitude = a / cpxmag(a)  */
+  IM_UN_POSITIVES, /**< positives       = if a<0 then a=0   */
+  IM_UN_NEGATIVES  /**< negatives       = if a>0 then a=0   */
 };
 
 /** Apply an arithmetic unary operation. \n

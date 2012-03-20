@@ -55,6 +55,18 @@ static inline imcfloat cpxnorm_op(const imcfloat& v)
   return r;
 }
 
+template <class T>
+inline T positives_op(const T& v)
+{
+  return v > 0? v: 0;
+}
+
+template <class T>
+inline T negatives_op(const T& v)
+{
+  return v > 0? 0: v;
+}
+
 template <class T1, class T2> 
 static void DoUnaryOp(T1 *map, T2 *new_map, int count, int op)
 {
@@ -121,6 +133,16 @@ static void DoUnaryOp(T1 *map, T2 *new_map, int count, int op)
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
     for (i = 0; i < count; i++)
       new_map[i] = cpxnorm_op((T2)map[i]);
+    break;
+  case IM_UN_POSITIVES:
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+    for (i = 0; i < count; i++)
+      new_map[i] = positives_op((T2)map[i]);
+    break;
+  case IM_UN_NEGATIVES:
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+    for (i = 0; i < count; i++)
+      new_map[i] = negatives_op((T2)map[i]);
     break;
   }
 }
