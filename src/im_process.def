@@ -60,7 +60,11 @@ EXPORTS
   imProcessUniformErrThreshold
   imCalcCountColors
   imCalcGrayHistogram
+  imCalcByteHistogram
   imCalcHistogram
+  imHistogramNew
+  imHistogramRelease
+  imHistogramShift
   imCalcHistogramStatistics
   imCalcHistoImageStatistics
   imCalcImageStatistics

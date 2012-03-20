@@ -364,12 +364,12 @@ static void drawLine(imImage* image, int theta, int rho)
   }
 }
 
-int imProcessHoughLines(const imImage* image, imImage *NewImage)
+int imProcessHoughLines(const imImage* src_image, imImage *dst_image)
 {
   int counter = imCounterBegin("Hough Line Transform");
-  imCounterTotal(counter, image->height, "Processing...");
+  imCounterTotal(counter, src_image->height, "Processing...");
 
-  int ret = houghLine(image, NewImage, counter);
+  int ret = houghLine(src_image, dst_image, counter);
 
   imCounterEnd(counter);
 
@@ -388,34 +388,34 @@ static void DrawPoints(imImage *image, listnode* maxima)
   }
 }
 
-static void ReplaceColor(imImage* NewImage)
+static void ReplaceColor(imImage* image)
 {
   int i;
-  imbyte* map = (imbyte*)NewImage->data[0];  // gray or red plane
+  imbyte* map = (imbyte*)image->data[0];  // gray or red plane
 
-  if (NewImage->color_space == IM_GRAY)
+  if (image->color_space == IM_GRAY)
   {
-    NewImage->color_space = IM_MAP;
-    NewImage->palette[254] = imColorEncode(255, 0, 0);
+    image->color_space = IM_MAP;
+    image->palette[254] = imColorEncode(255, 0, 0);
   }
 
-  for (i = 0; i < NewImage->count; i++)
+  for (i = 0; i < image->count; i++)
   {
     if (map[i] == 254)
       map[i] = 255;
   }
 }
 
-int imProcessHoughLinesDraw(const imImage* original_image, const imImage *hough, const imImage *hough_points, imImage *NewImage)
+int imProcessHoughLinesDraw(const imImage* src_image, const imImage *hough, const imImage *hough_points, imImage *dst_image)
 {
   int theta, line_count = 0;
 
-  if (original_image != NewImage)
-    imImageCopyData(original_image, NewImage);
+  if (src_image != dst_image)
+    imImageCopyData(src_image, dst_image);
 
   listnode* maxima = findMaxima(hough_points, &line_count, hough);
 
-  ReplaceColor(NewImage);
+  ReplaceColor(dst_image);
 
   costab = (double*)malloc(180*sizeof(double));
   sintab = (double*)malloc(180*sizeof(double));
@@ -427,7 +427,7 @@ int imProcessHoughLinesDraw(const imImage* original_image, const imImage *hough,
     sintab[theta] = sin(th);
   }
 
-  DrawPoints(NewImage, maxima);
+  DrawPoints(dst_image, maxima);
 
   free(costab); costab = NULL;
   free(sintab); sintab = NULL;

@@ -41,7 +41,7 @@ static void DoCalcHisto(T* map, int size, unsigned long* histo, int hcount, int 
   }
 }
 
-void imCalcHistogram(const imbyte* map, int size, unsigned long* histo, int cumulative)
+void imCalcByteHistogram(const imbyte* map, int size, unsigned long* histo, int cumulative)
 {
   DoCalcHisto(map, size, histo, 256, cumulative, 0);
 }
@@ -56,21 +56,28 @@ void imCalcShortHistogram(const short* map, int size, unsigned long* histo, int 
   DoCalcHisto(map, size, histo, 65536, cumulative, 32768);
 }
 
+void imCalcHistogram(const imImage* src_image, unsigned long* histo, int plane, int cumulative)
+{
+  switch (src_image->data_type)
+  {
+  case IM_BYTE:
+    imCalcByteHistogram((imbyte*)src_image->data[plane], src_image->count, histo, cumulative);
+    break;
+  case IM_SHORT:
+    imCalcShortHistogram((short*)src_image->data[plane], src_image->count, histo, cumulative);
+    break;
+  case IM_USHORT:
+    imCalcUShortHistogram((imushort*)src_image->data[plane], src_image->count, histo, cumulative);
+    break;
+  }
+}
+
 void imCalcGrayHistogram(const imImage* image, unsigned long* histo, int cumulative)
 {
-  int hcount = 256;
-  if (image->data_type == IM_USHORT || image->data_type == IM_SHORT)
-    hcount = 65536;
+  int hcount = imHistogramCount(image->data_type);
 
   if (image->color_space == IM_GRAY)
-  {
-    if (image->data_type == IM_USHORT)
-      DoCalcHisto((imushort*)image->data[0], image->count, histo, hcount, 0, 0);
-    else if (image->data_type == IM_SHORT)
-      DoCalcHisto((short*)image->data[0], image->count, histo, hcount, 0, 32768);
-    else
-      DoCalcHisto((imbyte*)image->data[0], image->count, histo, hcount, 0, 0);
-  }
+    imCalcHistogram(image, histo, 0, cumulative);
   else 
   {
     int i;
@@ -152,18 +159,10 @@ void imCalcGrayHistogram(const imImage* image, unsigned long* histo, int cumulat
 
 static unsigned long count_map(const imImage* image)
 {
-  int hcount = 256;
-  if (image->data_type == IM_USHORT || image->data_type == IM_SHORT)
-    hcount = 65536;
+  int hcount;
+  unsigned long* histo = imHistogramNew(image->data_type, &hcount);
 
-  unsigned long *histo = new unsigned long[hcount];
-
-  if (image->data_type == IM_USHORT)
-    DoCalcHisto((imushort*)image->data[0], image->count, histo, hcount, 0, 0);
-  else if (image->data_type == IM_SHORT)
-    DoCalcHisto((short*)image->data[0], image->count, histo, hcount, 0, 32768);
-  else
-    DoCalcHisto((imbyte*)image->data[0], image->count, histo, hcount, 0, 0);
+  imCalcHistogram(image, histo, 0, 0);
 
   unsigned long numcolor = 0;
 
@@ -173,7 +172,7 @@ static unsigned long count_map(const imImage* image)
       numcolor++;
   }
 
-  delete [] histo;
+  imHistogramRelease(histo);
 
   return numcolor;
 }
@@ -285,45 +284,29 @@ void imCalcImageStatistics(const imImage* image, imStats* stats)
 
 void imCalcHistogramStatistics(const imImage* image, imStats* stats)
 {
-  int hcount = 256;
-  if (image->data_type == IM_USHORT || image->data_type == IM_SHORT)
-    hcount = 65536;
-
-  unsigned long *histo = new unsigned long[hcount];
+  int hcount;
+  unsigned long* histo = imHistogramNew(image->data_type, &hcount);
 
   for (int d = 0; d < image->depth; d++)
   {
-    if (image->data_type == IM_USHORT)
-      DoCalcHisto((imushort*)image->data[0], image->count, histo, hcount, 0, 0);
-    else if (image->data_type == IM_SHORT)
-      DoCalcHisto((short*)image->data[0], image->count, histo, hcount, 0, 32768);
-    else
-      DoCalcHisto((imbyte*)image->data[0], image->count, histo, hcount, 0, 0);
+    imCalcHistogram(image, histo, d, 0);
 
     DoStats((unsigned long*)histo, hcount, &stats[d]);
   }
 
-  delete [] histo;
+  imHistogramRelease(histo);
 }
 
 void imCalcHistoImageStatistics(const imImage* image, int* median, int* mode)
 {
-  int hcount = 256;
-  if (image->data_type == IM_USHORT || image->data_type == IM_SHORT)
-    hcount = 65536;
-
-  unsigned long *histo = new unsigned long[hcount];
+  int hcount;
+  unsigned long* histo = imHistogramNew(image->data_type, &hcount);
 
   for (int d = 0; d < image->depth; d++)
   {
     int i;
 
-    if (image->data_type == IM_USHORT)
-      DoCalcHisto((imushort*)image->data[0], image->count, histo, hcount, 0, 0);
-    else if (image->data_type == IM_SHORT)
-      DoCalcHisto((short*)image->data[0], image->count, histo, hcount, 0, 32768);
-    else
-      DoCalcHisto((imbyte*)image->data[0], image->count, histo, hcount, 0, 0);
+    imCalcHistogram(image, histo, d, 0);
 
     unsigned long half = image->count/2;
     unsigned long count = histo[0];
@@ -332,6 +315,7 @@ void imCalcHistoImageStatistics(const imImage* image, int* median, int* mode)
       if (count > half)
       {
         median[d] = i-1;
+        median[d] += imHistogramShift(image->data_type);
         break;
       }
 
@@ -352,26 +336,25 @@ void imCalcHistoImageStatistics(const imImage* image, int* median, int* mode)
       {
         if (found_mode)
         {
-          mode[d] = -1;
+          mode[d] = -1;  // must be unique or it is invalid
           break;
         }
 
         mode[d] = i;
+        mode[d] += imHistogramShift(image->data_type);
         found_mode = 1;
       }
     }
   }
 
-  delete [] histo;
+  imHistogramRelease(histo);
 }
 
 void imCalcPercentMinMax(const imImage* image, float percent, int ignore_zero, int *min, int *max)
 {
-  int hcount = 256;
-  if (image->data_type == IM_USHORT || image->data_type == IM_SHORT)
-    hcount = 65536;
+  int hcount;
+  unsigned long* histo = imHistogramNew(image->data_type, &hcount);
 
-  unsigned long* histo = new unsigned long[hcount];
   imCalcGrayHistogram(image, histo, 0);
 
   unsigned long acum, cut = (unsigned long)((image->count * percent) / 100.0f);
@@ -398,7 +381,10 @@ void imCalcPercentMinMax(const imImage* image, float percent, int ignore_zero, i
     *max = hcount-1;
   }
 
-  delete [] histo;
+  *min += imHistogramShift(image->data_type);
+  *max += imHistogramShift(image->data_type);
+
+  imHistogramRelease(histo);
 }
 
 float imCalcSNR(const imImage* image, const imImage* noise_image)

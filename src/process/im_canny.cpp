@@ -28,7 +28,7 @@ static void seperable_convolution (const imImage* im, float *gau, int width, flo
 static void dxy_seperable_convolution (float** im, int nr, int nc, float *gau, int width, float **sm, int which);
 static void nonmax_suppress (float **dx, float **dy, imImage* mag);
 
-void imProcessCanny(const imImage* im, imImage* NewImage, float stddev)
+void imProcessCanny(const imImage* src_image, imImage* dst_image, float stddev)
 {
   int width = 1;
   float **smx,**smy;
@@ -48,28 +48,28 @@ void imProcessCanny(const imImage* im, imImage* NewImage, float stddev)
     dgau[i] = dGauss ((float)i, stddev);
   }
 
-  smx = f2d (im->height, im->width);
-  smy = f2d (im->height, im->width);
+  smx = f2d (src_image->height, src_image->width);
+  smy = f2d (src_image->height, src_image->width);
 
-/* Convolution of source image with a Gaussian in X and Y directions  */
-  seperable_convolution (im, gau, width, smx, smy);
+/* Convolution of source src_image with a Gaussian in X and Y directions  */
+  seperable_convolution (src_image, gau, width, smx, smy);
 
   MAG_SCALE = 0;
 
 /* Now convolve smoothed data with a derivative */
-  dx = f2d (im->height, im->width);
-  dxy_seperable_convolution (smx, im->height, im->width, dgau, width, dx, 1);
+  dx = f2d (src_image->height, src_image->width);
+  dxy_seperable_convolution (smx, src_image->height, src_image->width, dgau, width, dx, 1);
   free(smx[0]); free(smx);
 
-  dy = f2d (im->height, im->width);
-  dxy_seperable_convolution (smy, im->height, im->width, dgau, width, dy, 0);
+  dy = f2d (src_image->height, src_image->width);
+  dxy_seperable_convolution (smy, src_image->height, src_image->width, dgau, width, dy, 0);
   free(smy[0]); free(smy);
 
   if (MAG_SCALE)
     MAG_SCALE = 255.0f/(1.4142f*MAG_SCALE);
 
   /* Non-maximum suppression - edge pixels should be a local max */
-  nonmax_suppress (dx, dy, NewImage);
+  nonmax_suppress (dx, dy, dst_image);
 
   free(dx[0]); free(dx);
   free(dy[0]); free(dy);

@@ -391,13 +391,13 @@ static int DoAnalyzeFindRegionsBorder(int width, int height, imbyte* map, imusho
   return region_count;
 }
 
-int imAnalyzeFindRegions(const imImage* image, imImage* NewImage, int connect, int touch_border)
+int imAnalyzeFindRegions(const imImage* src_image, imImage* dst_image, int connect, int touch_border)
 {
-  imImageSetAttribute(NewImage, "REGION_CONNECT", IM_BYTE, 1, connect==4?"4":"8");
+  imImageSetAttribute(dst_image, "REGION_CONNECT", IM_BYTE, 1, connect==4?"4":"8");
   if (touch_border)
-    return DoAnalyzeFindRegionsBorder(image->width, image->height, (imbyte*)image->data[0], (imushort*)NewImage->data[0], connect);
+    return DoAnalyzeFindRegionsBorder(src_image->width, src_image->height, (imbyte*)src_image->data[0], (imushort*)dst_image->data[0], connect);
   else
-    return DoAnalyzeFindRegions(image->width, image->height, (imbyte*)image->data[0], (imushort*)NewImage->data[0], connect);
+    return DoAnalyzeFindRegions(src_image->width, src_image->height, (imbyte*)src_image->data[0], (imushort*)dst_image->data[0], connect);
 }
 
 void imAnalyzeMeasureArea(const imImage* image, int* data_area, int region_count)
@@ -1234,22 +1234,22 @@ void imAnalyzeMeasurePerimArea(const imImage* image, float* area_data)
   }
 }
 
-void imProcessRemoveByArea(const imImage* image, imImage* NewImage, int connect, int start_size, int end_size, int inside)
+void imProcessRemoveByArea(const imImage* src_image, imImage* dst_image, int connect, int start_size, int end_size, int inside)
 {
-  imImage *region_image = imImageCreate(image->width, image->height, IM_GRAY, IM_USHORT);
+  imImage *region_image = imImageCreate(src_image->width, src_image->height, IM_GRAY, IM_USHORT);
   if (!region_image)
     return;
 
-  int region_count = imAnalyzeFindRegions(image, region_image, connect, 1); 
+  int region_count = imAnalyzeFindRegions(src_image, region_image, connect, 1); 
   if (!region_count)
   {
-    imImageClear(NewImage);
+    imImageClear(dst_image);
     imImageDestroy(region_image);
     return;
   }
 
   if (end_size == 0)
-    end_size = image->width*image->height;
+    end_size = src_image->width*src_image->height;
 
   int outside;
   if (inside)
@@ -1269,10 +1269,10 @@ void imProcessRemoveByArea(const imImage* image, imImage* NewImage, int connect,
   imAnalyzeMeasureArea(region_image, area_data, region_count);
 
   imushort* region_data = (imushort*)region_image->data[0];
-  imbyte* img_data = (imbyte*)NewImage->data[0];
+  imbyte* img_data = (imbyte*)dst_image->data[0];
 
-#pragma omp parallel for if (IM_OMP_MINCOUNT(image->count))
-  for (int i = 0; i < image->count; i++)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(src_image->count))
+  for (int i = 0; i < src_image->count; i++)
   {
     if (region_data[i])
     {
@@ -1290,28 +1290,28 @@ void imProcessRemoveByArea(const imImage* image, imImage* NewImage, int connect,
   imImageDestroy(region_image);
 }
 
-void imProcessFillHoles(const imImage* image, imImage* NewImage, int connect)
+void imProcessFillHoles(const imImage* src_image, imImage* dst_image, int connect)
 {
-  // finding regions in the inverted image will isolate only the holes.
-  imProcessNegative(image, NewImage);
+  // finding regions in the inverted src_image will isolate only the holes.
+  imProcessNegative(src_image, dst_image);
 
-  imImage *region_image = imImageCreate(image->width, image->height, IM_GRAY, IM_USHORT);
+  imImage *region_image = imImageCreate(src_image->width, src_image->height, IM_GRAY, IM_USHORT);
   if (!region_image)
     return;
 
-  int holes_count = imAnalyzeFindRegions(NewImage, region_image, connect, 0);
+  int holes_count = imAnalyzeFindRegions(dst_image, region_image, connect, 0);
   if (!holes_count)
   {
-    imImageCopy(image, NewImage);
+    imImageCopy(src_image, dst_image);
     imImageDestroy(region_image);
     return;
   }
 
   imushort* region_data = (imushort*)region_image->data[0];
-  imbyte* dst_data = (imbyte*)NewImage->data[0];
+  imbyte* dst_data = (imbyte*)dst_image->data[0];
 
-#pragma omp parallel for if (IM_OMP_MINCOUNT(image->count))
-  for (int i = 0; i < image->count; i++)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(src_image->count))
+  for (int i = 0; i < src_image->count; i++)
   {
     if (region_data[i])
       dst_data[i] = 1;

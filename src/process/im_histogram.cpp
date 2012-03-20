@@ -17,6 +17,33 @@
 #include <memory.h>
 
 
+unsigned long* imHistogramNew(int data_type, int *hcount)
+{
+  *hcount = imHistogramCount(data_type);
+  return (unsigned long*)calloc(*hcount, sizeof(unsigned long));
+}
+
+void imHistogramRelease(unsigned long* histo)
+{
+  free(histo);
+}
+
+int imHistogramShift(int data_type)
+{
+  if (data_type == IM_SHORT)
+    return -32768;
+  else
+    return 0;
+}
+
+int imHistogramCount(int data_type)
+{
+  if (data_type == IM_USHORT || data_type == IM_SHORT)
+    return 65536;
+  else
+    return 256;
+}
+
 template <class T>
 static void DoExpandHistogram(T* src_map, T* dst_map, int size, int depth, int hcount, int low_level, int high_level)
 {
@@ -54,9 +81,7 @@ void imProcessExpandHistogram(const imImage* src_image, imImage* dst_image, floa
   int low_level, high_level;
   imCalcPercentMinMax(src_image, percent, 0, &low_level, &high_level);
 
-  int hcount = 256;
-  if (src_image->data_type == IM_USHORT || src_image->data_type == IM_SHORT)
-    hcount = 65536;
+  int hcount = imHistogramCount(src_image->data_type);
 
   if (src_image->data_type == IM_USHORT)
     DoExpandHistogram((imushort*)src_image->data[0], (imushort*)dst_image->data[0], src_image->count, src_image->depth, hcount, low_level, high_level);
@@ -92,12 +117,10 @@ static void DoEqualizeHistogram(T* src_map, T* dst_map, int size, int depth, int
 
 void imProcessEqualizeHistogram(const imImage* src_image, imImage* dst_image)
 {
-  int hcount = 256;
-  if (src_image->data_type == IM_USHORT || src_image->data_type == IM_SHORT)
-    hcount = 65536;
+  int hcount;
+  unsigned long* histo = imHistogramNew(src_image->data_type, &hcount);
 
-  unsigned long* histo = new unsigned long[hcount];
-  imCalcGrayHistogram(src_image, histo, 1);
+  imCalcHistogram(src_image, histo, 0, 1); // cumulative
 
   if (src_image->data_type == IM_USHORT)
     DoEqualizeHistogram((imushort*)src_image->data[0], (imushort*)dst_image->data[0], src_image->count, src_image->depth, hcount, histo);
@@ -106,5 +129,5 @@ void imProcessEqualizeHistogram(const imImage* src_image, imImage* dst_image)
   else
     DoEqualizeHistogram((imbyte*)src_image->data[0], (imbyte*)dst_image->data[0], src_image->count, src_image->depth, hcount, histo);
 
-  delete [] histo;
+  imHistogramRelease(histo);
 }

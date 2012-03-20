@@ -294,13 +294,13 @@ void imProcessSplitComplex(const imImage* image, imImage* NewImage1, imImage* Ne
   }
 }
                   
-void imProcessMergeComplex(const imImage* image1, const imImage* image2, imImage* NewImage, int polar)
+void imProcessMergeComplex(const imImage* src_image1, const imImage* src_image2, imImage* dst_image, int polar)
 {
-  int total_count = image1->count*image1->depth;
+  int total_count = src_image1->count*src_image1->depth;
 
-  imcfloat* map = (imcfloat*)NewImage->data[0];
-  float* map1 = (float*)image1->data[0];
-  float* map2 = (float*)image2->data[0];
+  imcfloat* map = (imcfloat*)dst_image->data[0];
+  float* map1 = (float*)src_image1->data[0];
+  float* map2 = (float*)src_image2->data[0];
 
 #pragma omp parallel for if (IM_OMP_MINCOUNT(total_count))
   for (int i = 0; i < total_count; i++)

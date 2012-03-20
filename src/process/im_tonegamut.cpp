@@ -396,12 +396,12 @@ float imProcessCalcAutoGamma(const imImage* image)
   return (float)(log((double)((mean-min)/(max-min)))/log(0.5));
 }
 
-void imProcessUnNormalize(const imImage* image, imImage* NewImage)
+void imProcessUnNormalize(const imImage* src_image, imImage* dst_image)
 {
-  int count = image->count*image->depth;
+  int count = src_image->count*src_image->depth;
 
-  float* map = (float*)image->data[0];
-  imbyte* new_map = (imbyte*)NewImage->data[0];
+  float* map = (float*)src_image->data[0];
+  imbyte* new_map = (imbyte*)dst_image->data[0];
 
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
   for (int i = 0; i < count; i++)
@@ -430,23 +430,23 @@ static void DoDirectConv(T* map, imbyte* new_map, int count)
   }
 }
 
-void imProcessDirectConv(const imImage* image, imImage* NewImage)
+void imProcessDirectConv(const imImage* src_image, imImage* dst_image)
 {
-  int count = image->count*image->depth;
+  int count = src_image->count*src_image->depth;
 
-  switch(image->data_type)
+  switch(src_image->data_type)
   {
   case IM_SHORT:                                                                           
-    DoDirectConv((short*)image->data[0], (imbyte*)NewImage->data[0], count);
+    DoDirectConv((short*)src_image->data[0], (imbyte*)dst_image->data[0], count);
     break;                                                                                
   case IM_USHORT:                                                                           
-    DoDirectConv((imushort*)image->data[0], (imbyte*)NewImage->data[0], count);
+    DoDirectConv((imushort*)src_image->data[0], (imbyte*)dst_image->data[0], count);
     break;                                                                                
   case IM_INT:                                                                           
-    DoDirectConv((int*)image->data[0], (imbyte*)NewImage->data[0], count);
+    DoDirectConv((int*)src_image->data[0], (imbyte*)dst_image->data[0], count);
     break;                                                                                
   case IM_FLOAT:                                                                           
-    DoDirectConv((float*)image->data[0], (imbyte*)NewImage->data[0], count);
+    DoDirectConv((float*)src_image->data[0], (imbyte*)dst_image->data[0], count);
     break;                                                                                
   }
 }

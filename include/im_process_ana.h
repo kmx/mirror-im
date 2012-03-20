@@ -43,31 +43,6 @@ float imCalcSNR(const imImage* src_image, const imImage* noise_image);
  * \ingroup stats */
 unsigned long imCalcCountColors(const imImage* image);
 
-/** Calculates the histogram of a IM_BYTE data. \n
- * Histogram is always 256 positions long. \n
- * When cumulative is different from zero it calculates the cumulative histogram.
- *
- * \verbatim im.CalcHistogram(image: imImage, plane: number, cumulative: boolean) -> histo: table of numbers [in Lua 5] \endverbatim
- * Where plane is the depth plane to calculate the histogram. \n
- * The returned table is zero indexed. image can be IM_BYTE, IM_SHORT or IM_USHORT.
- * \ingroup stats */
-void imCalcHistogram(const unsigned char* data, int count, unsigned long* histo, int cumulative);
-
-/** Calculates the histogram of a IM_USHORT data. \n
- * Histogram is always 65536 positions long. \n
- * When cumulative is different from zero it calculates the cumulative histogram. \n
- * Use \ref imCalcHistogram in Lua.
- * \ingroup stats */
-void imCalcUShortHistogram(const unsigned short* data, int count, unsigned long* histo, int cumulative);
-
-/** Calculates the histogram of a IM_SHORT data. \n
- * Histogram is always 65536 positions long. \n
- * Zero is located at 32768 index. \n
- * When cumulative is different from zero it calculates the cumulative histogram. \n
- * Use \ref imCalcHistogram in Lua.
- * \ingroup stats */
-void imCalcShortHistogram(const short* data, int count, unsigned long* histo, int cumulative);
-
 /** Calculates the gray histogram of an image. \n
  * Image must be (IM_BYTE, IM_SHORT or IM_USHORT)/(IM_RGB, IM_GRAY, IM_BINARY or IM_MAP). \n
  * If the image is IM_RGB then the histogram of the luma component is calculated. \n
@@ -77,6 +52,60 @@ void imCalcShortHistogram(const short* data, int count, unsigned long* histo, in
  * \verbatim im.CalcGrayHistogram(image: imImage, cumulative: boolean) -> histo: table of numbers [in Lua 5] \endverbatim
  * \ingroup stats */
 void imCalcGrayHistogram(const imImage* image, unsigned long* histo, int cumulative);
+
+/** Calculates the histogram of an image plane. \n
+ * Image can be IM_BYTE, IM_SHORT or IM_USHORT. \n
+ * Histogram is always 256 or 65536 positions long. \n
+ * Where plane is the depth plane to calculate the histogram. \n
+ * When cumulative is different from zero it calculates the cumulative histogram.
+ *
+ * \verbatim im.CalcHistogram(image: imImage, plane: number, cumulative: boolean) -> histo: table of numbers [in Lua 5] \endverbatim
+ * The returned table is zero indexed.
+ * \ingroup stats */
+void imCalcHistogram(const imImage* image, unsigned long* histo, int plane, int cumulative);
+
+/** Calculates the histogram of a IM_BYTE data. \n
+ * Histogram is always 256 positions long. \n
+ * When cumulative is different from zero it calculates the cumulative histogram.
+ * Not available in Lua.
+ * \ingroup stats */
+void imCalcByteHistogram(const unsigned char* data, int count, unsigned long* histo, int cumulative);
+
+/** Calculates the histogram of a IM_USHORT data. \n
+ * Histogram is always 65536 positions long. \n
+ * When cumulative is different from zero it calculates the cumulative histogram. \n
+ * Not available in Lua.
+ * \ingroup stats */
+void imCalcUShortHistogram(const unsigned short* data, int count, unsigned long* histo, int cumulative);
+
+/** Calculates the histogram of a IM_SHORT data. \n
+ * Histogram is always 65536 positions long. \n
+ * Zero is located at 32768 index. \n
+ * When cumulative is different from zero it calculates the cumulative histogram. \n
+ * Not available in Lua.
+ * \ingroup stats */
+void imCalcShortHistogram(const short* data, int count, unsigned long* histo, int cumulative);
+
+/** Alocates an histogram data based on the image data type. \n
+ * Not available in Lua.
+ * \ingroup stats */
+unsigned long* imHistogramNew(int data_type, int *hcount);
+
+/** Releases the histogram data. \n
+ * Not available in Lua.
+ * \ingroup stats */
+void imHistogramRelease(unsigned long* histo);
+
+/** Short data type stores the histogram values of negative indices starting at 0.
+ * So the real level is obtained by shifting the zero based index. \n
+ * Not available in Lua.
+ * \ingroup stats */
+int imHistogramShift(int data_type);
+
+/** Returns the histogram size based on the image data type. \n
+ * Not available in Lua.
+ * \ingroup stats */
+int imHistogramCount(int data_type);
 
 
 /** \brief Numerical Statistics Structure

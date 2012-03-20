@@ -816,13 +816,13 @@ int imProcessAutoCovariance(const imImage* image, const imImage* mean_image, imI
   return ret;
 }
 
-void imProcessMultiplyConj(const imImage* image1, const imImage* image2, imImage* NewImage)
+void imProcessMultiplyConj(const imImage* src_image1, const imImage* src_image2, imImage* dst_image)
 {
-  int total_count = image1->count*image1->depth;
+  int total_count = src_image1->count*src_image1->depth;
 
-  imcfloat* map = (imcfloat*)NewImage->data[0];
-  imcfloat* map1 = (imcfloat*)image1->data[0];
-  imcfloat* map2 = (imcfloat*)image2->data[0];
+  imcfloat* map = (imcfloat*)dst_image->data[0];
+  imcfloat* map1 = (imcfloat*)src_image1->data[0];
+  imcfloat* map2 = (imcfloat*)src_image2->data[0];
 
 #pragma omp parallel for if (IM_OMP_MINCOUNT(total_count))
   for (int i = 0; i < total_count; i++)

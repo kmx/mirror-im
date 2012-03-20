@@ -236,10 +236,10 @@ static int thresUniErr(unsigned char* band, int width, int height)
   return t;
 }
 
-int imProcessUniformErrThreshold(const imImage* image, imImage* NewImage)
+int imProcessUniformErrThreshold(const imImage* src_image, imImage* dst_image)
 {
-  int level = thresUniErr((imbyte*)image->data[0], image->width, image->height);
-  imProcessThreshold(image, NewImage, (float)level, 1);
+  int level = thresUniErr((imbyte*)src_image->data[0], src_image->width, src_image->height);
+  imProcessThreshold(src_image, dst_image, (float)level, 1);
   return level;
 }
 
@@ -264,65 +264,63 @@ static void do_dither_error(imbyte* data1, imbyte* data2, int size, int t, int v
   }
 }
 
-void imProcessDifusionErrThreshold(const imImage* image, imImage* NewImage, int level)
+void imProcessDifusionErrThreshold(const imImage* src_image, imImage* dst_image, int level)
 {
-  int value = image->depth > 1? 255: 1;
-  for (int i = 0; i < image->depth; i++)
+  int value = src_image->depth > 1? 255: 1;
+  for (int i = 0; i < src_image->depth; i++)
   {
-    do_dither_error((imbyte*)image->data[i], (imbyte*)NewImage->data[i], image->count, level, value);
+    do_dither_error((imbyte*)src_image->data[i], (imbyte*)dst_image->data[i], src_image->count, level, value);
   }
 }
 
-int imProcessPercentThreshold(const imImage* image, imImage* NewImage, float percent)
+int imProcessPercentThreshold(const imImage* src_image, imImage* dst_image, float percent)
 {
-  int hcount = 256;
-  if (image->data_type == IM_USHORT || image->data_type == IM_SHORT)
-    hcount = 65536;
+  int hcount;
+  unsigned long* histo = imHistogramNew(src_image->data_type, &hcount);
 
-  unsigned long* histo = new unsigned long[hcount];
+  unsigned long cut = (unsigned long)((src_image->count * percent)/100.);
 
-  unsigned long cut = (unsigned long)((image->count * percent)/100.);
-
-  if (image->data_type == IM_USHORT)
-    imCalcUShortHistogram((imushort*)image->data[0], image->count, histo, 1);
-  else if (image->data_type == IM_SHORT)
-    imCalcShortHistogram((short*)image->data[0], image->count, histo, 1);
-  else
-    imCalcHistogram((imbyte*)image->data[0], image->count, histo, 1);
+  imCalcHistogram(src_image, histo, 0, 1); // cumulative
 
   int i;
-  for (i = 0; i < 256; i++)
+  for (i = 0; i < hcount; i++)
   {
     if (histo[i] > cut)
       break;
   }
 
-  int level = (i==0? 0: i==256? 254: i-1);
+  int level = (i==0? 0: i==hcount? hcount-1: i-1);
+  level += imHistogramShift(src_image->data_type);
 
-  imProcessThreshold(image, NewImage, (float)level, 1);
+  imProcessThreshold(src_image, dst_image, (float)level, 1);
 
-  delete [] histo;
+  imHistogramRelease(histo);
   return level;
 }
 
-static int MaximizeDiscriminantFunction(double * p)
+static int MaximizeDiscriminantFunction(double* p, int count)
 {
   int k;
 
-  double mi_255 = 0;
-  for (k=0; k<256; k++) 
-    mi_255 += k*p[k];
+  double mi_max = 0;
+  for (k=0; k<count; k++) 
+    mi_max += k*p[k];
 
   int index = 0;
   double max = 0;
   double mi_k = 0;
   double w_k = 0;
   double value;
-  for (k=0; k<256; k++) 
+  for (k=0; k<count; k++) 
   {
     mi_k += k*p[k];
     w_k += p[k];
-    value = ((w_k == 0) || (w_k == 1))? -1 : ((mi_255*w_k - mi_k)*(mi_255*w_k - mi_k))/(w_k*(1-w_k));
+
+    if (w_k == 0 || w_k == 1)
+      value = -1;
+    else
+      value = ((mi_max*w_k - mi_k)*(mi_max*w_k - mi_k))/(w_k*(1-w_k));
+
     if (value >= max) 
     {
       index = k;
@@ -333,66 +331,76 @@ static int MaximizeDiscriminantFunction(double * p)
   return index;
 }
 
-static unsigned char Otsu(const imImage *image)
+int imProcessOtsuThreshold(const imImage* src_image, imImage* dst_image)
 {
-  unsigned long histo[256];
-  imCalcHistogram((imbyte*)image->data[0], image->count, histo, 0);
+  int hcount;
+  unsigned long* histo = imHistogramNew(src_image->data_type, &hcount);
 
-  double totalPixels = image->count;
-  double p[256];
-  for (int i=0; i<256; i++) 
-    p[i] = histo[i]/totalPixels;
+  imCalcHistogram(src_image, histo, 0, 0);
 
-  return (unsigned char)MaximizeDiscriminantFunction(p);
-}
+  double totalPixels = src_image->count;
+  double* p = new double [hcount];
 
-int imProcessOtsuThreshold(const imImage* image, imImage* NewImage)
-{
-  int level = Otsu(image);
-  imProcessThreshold(image, NewImage, (float)level, 1);
+  for (int i=0; i<hcount; i++) 
+    p[i] = (double)histo[i]/totalPixels;
+
+  int level = MaximizeDiscriminantFunction(p, hcount);
+  level += imHistogramShift(src_image->data_type);
+
+  imProcessThreshold(src_image, dst_image, (float)level, 1);
+
+  imHistogramRelease(histo);
+  delete [] p;
+
   return level;
 }
 
-float imProcessMinMaxThreshold(const imImage* image, imImage* NewImage)
+float imProcessMinMaxThreshold(const imImage* src_image, imImage* dst_image)
 {
   imStats stats;
-  imCalcImageStatistics(image, &stats);
+  imCalcImageStatistics(src_image, &stats);
   float level = (stats.max - stats.min)/2.0f;
-  imProcessThreshold(image, NewImage, level, 1);
+  imProcessThreshold(src_image, dst_image, level, 1);
   return level;
 }
 
 void imProcessHysteresisThresEstimate(const imImage* image, int *low_thres, int *high_thres)
 {
-  unsigned long hist[256];
-  imCalcHistogram((imbyte*)image->data[0], image->count, hist, 0);
+  int hcount;
+  unsigned long* histo = imHistogramNew(image->data_type, &hcount);
+
+  imCalcHistogram(image, histo, 0, 0);
 
   /* The high threshold should be > 80 or 90% of the pixels */
   unsigned long cut = (int)(0.1*image->count);
 
-  int k = 255;
-  unsigned long count = hist[255];
-  while (count < cut)
+  int k = hcount-1;
+  unsigned long count = histo[hcount-1];
+  while (count < cut && k > 0)
   {
     k--;
-    count += hist[k];
+    count += histo[k];
   }
   *high_thres = k;
 
   k=0;
-  while (hist[k]==0) k++;
+  while (histo[k]==0 && k < hcount) 
+    k++;
 
   *low_thres = (int)((*high_thres + k)/2.0) + k;
+
+  *high_thres += imHistogramShift(image->data_type);
+  *low_thres += imHistogramShift(image->data_type);
+
+  imHistogramRelease(histo);
 }
 
-void imProcessHysteresisThreshold(const imImage* image, imImage* NewImage, int low_thres, int high_thres)
+template <class T> 
+static void doHysteresisThreshold(T *src_map, imbyte *dst_map, int width, int height, T low_thres, T high_thres)
 {
-  imbyte *src_map = (imbyte*)image->data[0];
-  imbyte *dst_map = (imbyte*)NewImage->data[0];
-  int size = image->count;
-
-#pragma omp parallel for if (IM_OMP_MINCOUNT(size))
-  for (int i = 0; i < size; i++)
+  int count = width * height;
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+  for (int i = 0; i < count; i++)
   {
     if (src_map[i] > high_thres)
       dst_map[i] = 1;
@@ -408,19 +416,19 @@ void imProcessHysteresisThreshold(const imImage* image, imImage* NewImage, int l
   {
     changed = 0;
 
-#pragma omp parallel for if (IM_OMP_MINHEIGHT(image->height))
-    for (int j=1; j<image->height-1; j++) 
+#pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
+    for (int j=1; j<height-1; j++) 
     {
-      for (int i=1; i<image->width-1; i++)
+      for (int i=1; i<width-1; i++)
       {
-        int offset = i+j*image->width;
+        int offset = i+j*width;
         if (dst_map[offset] == 2)
         {
           // if there is an edge neighbor mark this as edge too
           if (dst_map[offset+1] == 1 || dst_map[offset-1] == 1 ||
-              dst_map[offset+image->width] == 1 || dst_map[offset-image->width] == 1 ||
-              dst_map[offset+image->width-1] == 1 || dst_map[offset+image->width+1] == 1 ||
-              dst_map[offset-image->width-1] == 1 || dst_map[offset-image->width+1] == 1)
+              dst_map[offset+width] == 1 || dst_map[offset-width] == 1 ||
+              dst_map[offset+width-1] == 1 || dst_map[offset+width+1] == 1 ||
+              dst_map[offset-width-1] == 1 || dst_map[offset-width+1] == 1)
           {
             dst_map[offset] = 1;
             changed = 1;
@@ -431,28 +439,61 @@ void imProcessHysteresisThreshold(const imImage* image, imImage* NewImage, int l
   }
 
   // Clear the remaining "2"s
-#pragma omp parallel for if (IM_OMP_MINCOUNT(size))
-  for (int i = 0; i < size; i++)
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+  for (int i = 0; i < count; i++)
   {
     if (dst_map[i] == 2)
       dst_map[i] = 0;
   }
 }
 
+void imProcessHysteresisThreshold(const imImage* src_image, imImage* dst_image, int low_thres, int high_thres)
+{
+  switch(src_image->data_type)
+  {
+  case IM_BYTE:
+    doHysteresisThreshold((imbyte*)src_image->data[0], (imbyte*)dst_image->data[0], 
+                             src_image->width, src_image->height, (imbyte)low_thres, (imbyte)high_thres);
+    break;                                                                                
+  case IM_SHORT:                                                                           
+    doHysteresisThreshold((short*)src_image->data[0], (imbyte*)dst_image->data[0], 
+                             src_image->width, src_image->height, (short)low_thres, (short)high_thres);
+    break;                                                                                
+  case IM_USHORT:                                                                           
+    doHysteresisThreshold((imushort*)src_image->data[0], (imbyte*)dst_image->data[0], 
+                             src_image->width, src_image->height, (imushort)low_thres, (imushort)high_thres);
+    break;                                                                                
+  case IM_INT:                                                                           
+    doHysteresisThreshold((int*)src_image->data[0], (imbyte*)dst_image->data[0], 
+                             src_image->width, src_image->height, (int)low_thres, (int)high_thres);
+    break;                                                                                
+  case IM_FLOAT:
+    doHysteresisThreshold((float*)src_image->data[0], (imbyte*)dst_image->data[0], 
+                             src_image->width, src_image->height, (float)low_thres, (float)high_thres);
+    break;                                                                                
+  }
+}
+
 void imProcessLocalMaxThresEstimate(const imImage* image, int *thres)
 {
-  unsigned long hist[256];
-  imCalcHistogram((imbyte*)image->data[0], image->count, hist, 0);
+  int hcount;
+  unsigned long* histo = imHistogramNew(image->data_type, &hcount);
+
+  imCalcHistogram(image, histo, 0, 0);
 
   int high_count = 0;
-  int index = 255;
+  int index = hcount-1;
   while (high_count < 10 && index > 0)
   {
-    if (hist[index] != 0)
+    if (histo[index] != 0)
       high_count++;
 
     index--;
   }
+
   *thres = index+1;
+  *thres += imHistogramShift(image->data_type);
+
+  imHistogramRelease(histo);
 }
 

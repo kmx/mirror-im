@@ -725,7 +725,7 @@ void imProcessThresholdByDiff(const imImage* src_image1, const imImage* src_imag
  * Hysteresis thersholding of edge pixels. Starting at pixels with a
  * value greater than the HIGH threshold, trace a connected sequence
  * of pixels that have a value greater than the LOW threhsold. \n
- * Supports only IM_BYTE images.
+ * IM_CFLOAT is not supported. Can be done in-place for IM_BYTE source. \n
  * Note: could not find the original source code author name.
  *
  * \verbatim im.ProcessHysteresisThreshold(src_image: imImage, dst_image: imImage, low_thres: number, high_thres: number) [in Lua 5] \endverbatim
@@ -734,7 +734,7 @@ void imProcessThresholdByDiff(const imImage* src_image1, const imImage* src_imag
 void imProcessHysteresisThreshold(const imImage* src_image, imImage* dst_image, int low_thres, int high_thres);
 
 /** Estimates hysteresis low and high threshold levels. \n
- * Supports only IM_BYTE images.
+ * Image data type can be IM_BYTE, IM_SHORT or IM_USHORT. \n
  * Usefull for \ref imProcessHysteresisThreshold.
  *
  * \verbatim im.ProcessHysteresisThresEstimate(image: imImage) -> low_level: number, high_level: number [in Lua 5] \endverbatim
@@ -773,7 +773,8 @@ void imProcessDifusionErrThreshold(const imImage* src_image, imImage* dst_image,
 
 /** Calculates the threshold level for manual threshold using a percentage of pixels
  * that should stay bellow the threshold. \n
- * Image can be IM_BYTE, IM_SHORT or IM_USHORT.
+ * Image data type can be IM_BYTE, IM_SHORT or IM_USHORT. \n
+ * Source color space must be IM_GRAY, and destiny color space must be IM_BINARY.
  * Returns the used level.
  *
  * \verbatim im.ProcessPercentThreshold(src_image: imImage, dst_image: imImage, percent: number) -> level: number [in Lua 5] \endverbatim
@@ -782,8 +783,9 @@ void imProcessDifusionErrThreshold(const imImage* src_image, imImage* dst_image,
 int imProcessPercentThreshold(const imImage* src_image, imImage* dst_image, float percent);
 
 /** Calculates the threshold level for manual threshold using the Otsu approach. \n
+ * Image can be IM_BYTE, IM_SHORT or IM_USHORT. \n
+ * Source color space must be IM_GRAY, and destiny color space must be IM_BINARY.
  * Returns the used level. \n
- * Supports only IM_BYTE images.
  * Original implementation by Flavio Szenberg.
  *
  * \verbatim im.ProcessOtsuThreshold(src_image: imImage, dst_image: imImage) -> level: number [in Lua 5] \endverbatim
@@ -801,7 +803,8 @@ int imProcessOtsuThreshold(const imImage* src_image, imImage* dst_image);
  * \ingroup threshold */
 float imProcessMinMaxThreshold(const imImage* src_image, imImage* dst_image);
 
-/** Estimates Local Max threshold level for IM_BYTE images.
+/** Estimates Local Max threshold level for images.
+ * Image can be IM_BYTE, IM_SHORT or IM_USHORT. \n
  *
  * \verbatim im.ProcessLocalMaxThresEstimate(image: imImage) -> level: number [in Lua 5] \endverbatim
  * \ingroup threshold */

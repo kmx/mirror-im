@@ -117,40 +117,20 @@ static int imluaCalcCountColors (lua_State *L)
 \*****************************************************************************/
 static int imluaCalcHistogram (lua_State *L)
 {
+  int hcount;
+  unsigned long *histo;
   imImage* src_image = imlua_checkimage(L, 1);
   int plane = luaL_checkint(L, 2);
   int cumulative = lua_toboolean(L, 3);
 
-  switch (src_image->data_type)
-  {
-  case IM_BYTE:
-    {
-      unsigned long histo[256];
-      imCalcHistogram((imbyte*)src_image->data[plane], src_image->count, histo, cumulative);
-      imlua_newarrayulong(L, histo, 256, 0);
-    }
-    break;
-  case IM_SHORT:
-    {
-      unsigned long* histo = (unsigned long*)malloc(65536 * sizeof(unsigned long));
-      imCalcShortHistogram((short*)src_image->data[plane], src_image->count, histo, cumulative);
-      imlua_newarrayulong(L, histo, 65536, 0);
-      free(histo);
-    }
-    break;
-  case IM_USHORT:
-    {
-      unsigned long* histo = (unsigned long*)malloc(65536 * sizeof(unsigned long));
-      imCalcUShortHistogram((imushort*)src_image->data[plane], src_image->count, histo, cumulative);
-      imlua_newarrayulong(L, histo, 65536, 0);
-      free(histo);
-    }
-    break;
-  default:
-    luaL_argerror(L, 1, "data_type can be byte, short or ushort only");
-    break;
-  }
+  imlua_checkhistogramtype(L, 1, src_image);
 
+  histo = imHistogramNew(src_image->data_type, &hcount);
+
+  imCalcHistogram(src_image, histo, plane, cumulative);
+
+  imlua_newarrayulong(L, histo, hcount, 0);
+  imHistogramRelease(histo);
   return 1;
 }
 
@@ -169,16 +149,12 @@ static int imluaCalcGrayHistogram (lua_State *L)
   if (src_image->color_space >= IM_CMYK)
     luaL_argerror(L, 1, "color space can be RGB, Gray, Binary or Map only");
 
-  hcount = 256;
-  if (src_image->data_type == IM_USHORT || src_image->data_type == IM_SHORT)
-    hcount = 65536;
-
-  histo = malloc(sizeof(unsigned long) * hcount);
+  histo = imHistogramNew(src_image->data_type, &hcount);
 
   imCalcGrayHistogram(src_image, histo, cumulative);
   imlua_newarrayulong(L, histo, hcount, 0);
 
-  free(histo);
+  imHistogramRelease(histo);
 
   return 1;
 }
@@ -3208,7 +3184,8 @@ static int imluaProcessHysteresisThreshold (lua_State *L)
   int low_thres = luaL_checkint(L, 3);
   int high_thres = luaL_checkint(L, 4);
 
-  imlua_checktype(L, 1, src_image, IM_GRAY, IM_BYTE);
+  imlua_checkcolorspace(L, 1, src_image, IM_GRAY);
+  imlua_checknotcfloat(L, 1, src_image);
   imlua_checkcolorspace(L, 2, dst_image, IM_BINARY);
   imlua_matchsize(L, src_image, dst_image);
 
@@ -3277,7 +3254,7 @@ static int imluaProcessPercentThreshold (lua_State *L)
   imImage *dst_image = imlua_checkimage(L, 2);
   float percent = (float) luaL_checknumber(L, 3);
 
-  imlua_checktype(L, 1, src_image, IM_GRAY, IM_BYTE);
+  imlua_checkhistogramtype(L, 1, src_image);
   imlua_checkcolorspace(L, 2, dst_image, IM_BINARY);
   imlua_matchsize(L, src_image, dst_image);
 
@@ -3293,7 +3270,7 @@ static int imluaProcessOtsuThreshold (lua_State *L)
   imImage *src_image = imlua_checkimage(L, 1);
   imImage *dst_image = imlua_checkimage(L, 2);
 
-  imlua_checktype(L, 1, src_image, IM_GRAY, IM_BYTE);
+  imlua_checkhistogramtype(L, 1, src_image);
   imlua_checkcolorspace(L, 2, dst_image, IM_BINARY);
   imlua_matchsize(L, src_image, dst_image);
 
@@ -3326,7 +3303,7 @@ static int imluaProcessLocalMaxThresEstimate (lua_State *L)
   int thres;
   imImage *image = imlua_checkimage(L, 1);
 
-  imlua_checkdatatype(L, 1, image, IM_BYTE);
+  imlua_checkhistogramtype(L, 1, image);
 
   imProcessLocalMaxThresEstimate(image, &thres);
 
@@ -3443,7 +3420,6 @@ static const luaL_Reg improcess_lib[] = {
   {"CalcSNR", imluaCalcSNR},
   {"CalcCountColors", imluaCalcCountColors},
   {"CalcHistogram", imluaCalcHistogram},
-  /*{"CalcUShortHistogram", imluaCalcUShortHistogram}, done by imluaCalcHistogram */
   {"CalcGrayHistogram", imluaCalcGrayHistogram},
   {"CalcImageStatistics", imluaCalcImageStatistics},
   {"CalcHistogramStatistics", imluaCalcHistogramStatistics},
