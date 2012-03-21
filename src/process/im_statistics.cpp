@@ -352,6 +352,7 @@ void imCalcHistoImageStatistics(const imImage* image, int* median, int* mode)
 
 void imCalcPercentMinMax(const imImage* image, float percent, int ignore_zero, int *min, int *max)
 {
+  int zero = -imHistogramShift(image->data_type);
   int hcount;
   unsigned long* histo = imHistogramNew(image->data_type, &hcount);
 
@@ -360,11 +361,23 @@ void imCalcPercentMinMax(const imImage* image, float percent, int ignore_zero, i
   unsigned long acum, cut = (unsigned long)((image->count * percent) / 100.0f);
 
   acum = 0;
-  for ((*min = ignore_zero? 1: 0); *min < hcount; (*min)++)
+  for (*min = 0; *min < hcount; (*min)++)
   {  
-    acum += histo[*min];
-    if (acum > cut)
-      break;
+    if (ignore_zero)
+    {
+      if (*min != zero)
+      {
+        acum += histo[*min];
+        if (acum > cut)
+          break;
+      }
+    }
+    else
+    {
+      acum += histo[*min];
+      if (acum > cut)
+        break;
+    }
   }
 
   acum = 0;

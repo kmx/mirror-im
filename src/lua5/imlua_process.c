@@ -159,27 +159,47 @@ static int imluaCalcGrayHistogram (lua_State *L)
   return 1;
 }
 
+static void imlua_pushStats(lua_State *L, imStats* stats, int depth)
+{
+  if (depth == 1)
+  {
+    lua_newtable(L);
+    lua_pushstring(L, "max");      lua_pushnumber(L, stats->max);      lua_rawset(L, -3);
+    lua_pushstring(L, "min");      lua_pushnumber(L, stats->min);      lua_rawset(L, -3);
+    lua_pushstring(L, "positive"); lua_pushnumber(L, stats->positive); lua_rawset(L, -3);
+    lua_pushstring(L, "negative"); lua_pushnumber(L, stats->negative); lua_rawset(L, -3);
+    lua_pushstring(L, "zeros");    lua_pushnumber(L, stats->zeros);    lua_rawset(L, -3);
+    lua_pushstring(L, "mean");     lua_pushnumber(L, stats->mean);     lua_rawset(L, -3);
+    lua_pushstring(L, "stddev");   lua_pushnumber(L, stats->stddev);   lua_rawset(L, -3);
+  }
+  else
+  {
+    int d;
+
+    lua_newtable(L);
+
+    for (d = 0; d < depth; d++)
+    {
+      imlua_pushStats(L, &stats[d], 1);
+      lua_rawseti(L, -2, d);
+    }
+  }
+}
+
 /*****************************************************************************\
  im.CalcImageStatistics(src_image)
 \*****************************************************************************/
 static int imluaCalcImageStatistics (lua_State *L)
 {
-  imStats stats;
+  imStats stats[4];
   imImage *image = imlua_checkimage(L, 1);
 
   if (image->data_type == IM_CFLOAT)
     luaL_argerror(L, 1, "data type can NOT be of type cfloat");
 
-  imCalcImageStatistics(image, &stats);
+  imCalcImageStatistics(image, stats);
 
-  lua_newtable(L);
-  lua_pushstring(L, "max");      lua_pushnumber(L, stats.max);      lua_settable(L, -3);
-  lua_pushstring(L, "min");      lua_pushnumber(L, stats.min);      lua_settable(L, -3);
-  lua_pushstring(L, "positive"); lua_pushnumber(L, stats.positive); lua_settable(L, -3);
-  lua_pushstring(L, "negative"); lua_pushnumber(L, stats.negative); lua_settable(L, -3);
-  lua_pushstring(L, "zeros");    lua_pushnumber(L, stats.zeros);    lua_settable(L, -3);
-  lua_pushstring(L, "mean");     lua_pushnumber(L, stats.mean);     lua_settable(L, -3);
-  lua_pushstring(L, "stddev");   lua_pushnumber(L, stats.stddev);   lua_settable(L, -3);
+  imlua_pushStats(L, stats, image->depth);
   return 1;
 }
 
@@ -188,21 +208,14 @@ static int imluaCalcImageStatistics (lua_State *L)
 \*****************************************************************************/
 static int imluaCalcHistogramStatistics (lua_State *L)
 {
-  imStats stats;
+  imStats stats[4];
   imImage *image = imlua_checkimage(L, 1);
 
   imlua_checkhistogramtype(L, 1, image);
 
-  imCalcHistogramStatistics(image, &stats);
+  imCalcHistogramStatistics(image, stats);
 
-  lua_newtable(L);
-  lua_pushstring(L, "max");      lua_pushnumber(L, stats.max);      lua_settable(L, -3);
-  lua_pushstring(L, "min");      lua_pushnumber(L, stats.min);      lua_settable(L, -3);
-  lua_pushstring(L, "positive"); lua_pushnumber(L, stats.positive); lua_settable(L, -3);
-  lua_pushstring(L, "negative"); lua_pushnumber(L, stats.negative); lua_settable(L, -3);
-  lua_pushstring(L, "zeros");    lua_pushnumber(L, stats.zeros);    lua_settable(L, -3);
-  lua_pushstring(L, "mean");     lua_pushnumber(L, stats.mean);     lua_settable(L, -3);
-  lua_pushstring(L, "stddev");   lua_pushnumber(L, stats.stddev);   lua_settable(L, -3);
+  imlua_pushStats(L, stats, image->depth);
   return 1;
 }
 

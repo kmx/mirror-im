@@ -127,6 +127,8 @@ typedef struct _imStats
  *
  * \verbatim im.CalcImageStatistics(image: imImage) -> stats: table [in Lua 5] \endverbatim
  * Table contains the following fields: max, min, positive, negative, zeros, mean, stddev. 
+ * If image depth > 1 then table contains several tables with the previous fields, one for each plane,
+ * starting at 0.
  * The same as the \ref imStats structure.
  * \ingroup stats */
 void imCalcImageStatistics(const imImage* image, imStats* stats);

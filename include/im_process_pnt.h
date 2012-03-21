@@ -642,7 +642,7 @@ enum imToneGamut {
  * Supports all data types except IM_CFLOAT. \n
  * The linear operation do a special convertion when min > 0 and max < 1, it forces min=0 and max=1. \n
  * IM_BYTE images have min=0 and max=255 always. \n
- * Can be done in-place. When there is no extra params, can use NULL.
+ * Can be done in-place. When there is no extra parameters, params can use NULL.
  *
  * \verbatim im.ProcessToneGamut(src_image: imImage, dst_image: imImage, op: number, params: table of number) [in Lua 5] \endverbatim
  * \verbatim im.ProcessToneGamutNew(src_image: imImage, op: number, params: table of number) -> new_image: imImage [in Lua 5] \endverbatim
