@@ -90,19 +90,19 @@ static void DoSplitHSIByte(imbyte** data, float* hue, float* saturation, float* 
   }
 }
 
-void imProcessSplitHSI(const imImage* image, imImage* image1, imImage* image2, imImage* image3)
+void imProcessSplitHSI(const imImage* src_image, imImage* dst_image1, imImage* dst_image2, imImage* dst_image3)
 {
-  switch(image->data_type)
+  switch(src_image->data_type)
   {
   case IM_BYTE:
-    DoSplitHSIByte((imbyte**)image->data, (float*)image1->data[0], (float*)image2->data[0], (float*)image3->data[0], image->count);
+    DoSplitHSIByte((imbyte**)src_image->data, (float*)dst_image1->data[0], (float*)dst_image2->data[0], (float*)dst_image3->data[0], src_image->count);
     break;                                                                                                                                    
   case IM_FLOAT:                                                                                                                               
-    DoSplitHSIFloat((float**)image->data, (float*)image1->data[0], (float*)image2->data[0], (float*)image3->data[0], image->count);
+    DoSplitHSIFloat((float**)src_image->data, (float*)dst_image1->data[0], (float*)dst_image2->data[0], (float*)dst_image3->data[0], src_image->count);
     break;                                                                                
   }
 
-  imImageSetPalette(image1, imPaletteHues(), 256);
+  imImageSetPalette(dst_image1, imPaletteHues(), 256);
 }
 
 static void DoMergeHSIFloat(float** data, float* hue, float* saturation, float* intensity, int count)
@@ -131,15 +131,15 @@ static void DoMergeHSIByte(imbyte** data, float* hue, float* saturation, float* 
   }
 }
 
-void imProcessMergeHSI(const imImage* image1, const imImage* image2, const imImage* image3, imImage* image)
+void imProcessMergeHSI(const imImage* src_image1, const imImage* src_image2, const imImage* src_image3, imImage* dst_image)
 {
-  switch(image->data_type)
+  switch(dst_image->data_type)
   {
   case IM_BYTE:
-    DoMergeHSIByte((imbyte**)image->data, (float*)image1->data[0], (float*)image2->data[0], (float*)image3->data[0], image->count);
+    DoMergeHSIByte((imbyte**)dst_image->data, (float*)src_image1->data[0], (float*)src_image2->data[0], (float*)src_image3->data[0], dst_image->count);
     break;                                                                                                                                    
   case IM_FLOAT:                                                                                                                               
-    DoMergeHSIFloat((float**)image->data, (float*)image1->data[0], (float*)image2->data[0], (float*)image3->data[0], image->count);
+    DoMergeHSIFloat((float**)dst_image->data, (float*)src_image1->data[0], (float*)src_image2->data[0], (float*)src_image3->data[0], dst_image->count);
     break;                                                                                
   }
 }

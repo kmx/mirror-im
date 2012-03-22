@@ -779,31 +779,31 @@ static int doAutoCov(int width, int height, DT *src_map, DT *mean_map, float *ds
   return processing;
 }
 
-int imProcessAutoCovariance(const imImage* image, const imImage* mean_image, imImage* dst_image)
+int imProcessAutoCovariance(const imImage* src_image, const imImage* mean_image, imImage* dst_image)
 {
   int ret = 0;
 
   int counter = imProcessCounterBegin("Auto Convariance");
-  imCounterTotal(counter, image->depth*image->height, "Processing...");
+  imCounterTotal(counter, src_image->depth*src_image->height, "Processing...");
 
-  for (int i = 0; i < image->depth; i++)
+  for (int i = 0; i < src_image->depth; i++)
   {
-    switch(image->data_type)
+    switch(src_image->data_type)
     {
     case IM_BYTE:
-      ret = doAutoCov(image->width, image->height, (imbyte*)image->data[i], (imbyte*)mean_image->data[i], (float*)dst_image->data[i], counter);
+      ret = doAutoCov(src_image->width, src_image->height, (imbyte*)src_image->data[i], (imbyte*)mean_image->data[i], (float*)dst_image->data[i], counter);
       break;
     case IM_SHORT:
-      ret = doAutoCov(image->width, image->height, (short*)image->data[i], (short*)mean_image->data[i], (float*)dst_image->data[i], counter);
+      ret = doAutoCov(src_image->width, src_image->height, (short*)src_image->data[i], (short*)mean_image->data[i], (float*)dst_image->data[i], counter);
       break;
     case IM_USHORT:
-      ret = doAutoCov(image->width, image->height, (imushort*)image->data[i], (imushort*)mean_image->data[i], (float*)dst_image->data[i], counter);
+      ret = doAutoCov(src_image->width, src_image->height, (imushort*)src_image->data[i], (imushort*)mean_image->data[i], (float*)dst_image->data[i], counter);
       break;
     case IM_INT:
-      ret = doAutoCov(image->width, image->height, (int*)image->data[i], (int*)mean_image->data[i], (float*)dst_image->data[i], counter);
+      ret = doAutoCov(src_image->width, src_image->height, (int*)src_image->data[i], (int*)mean_image->data[i], (float*)dst_image->data[i], counter);
       break;
     case IM_FLOAT:
-      ret = doAutoCov(image->width, image->height, (float*)image->data[i], (float*)mean_image->data[i], (float*)dst_image->data[i], counter);
+      ret = doAutoCov(src_image->width, src_image->height, (float*)src_image->data[i], (float*)mean_image->data[i], (float*)dst_image->data[i], counter);
       break;
     }
 

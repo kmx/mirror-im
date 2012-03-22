@@ -270,13 +270,13 @@ void imProcessUnArithmeticOp(const imImage* src_image, imImage* dst_image, int o
   }
 }
 
-void imProcessSplitComplex(const imImage* image, imImage* NewImage1, imImage* NewImage2, int polar)
+void imProcessSplitComplex(const imImage* src_image, imImage* dst_image1, imImage* dst_image2, int polar)
 {
-  int total_count = image->count*image->depth;
+  int total_count = src_image->count*src_image->depth;
 
-  imcfloat* map = (imcfloat*)image->data[0];
-  float* map1 = (float*)NewImage1->data[0];
-  float* map2 = (float*)NewImage2->data[0];
+  imcfloat* map = (imcfloat*)src_image->data[0];
+  float* map1 = (float*)dst_image1->data[0];
+  float* map2 = (float*)dst_image2->data[0];
 
 #pragma omp parallel for if (IM_OMP_MINCOUNT(total_count))
   for (int i = 0; i < total_count; i++)

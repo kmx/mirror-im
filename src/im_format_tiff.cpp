@@ -1192,6 +1192,7 @@ int imFileFormatTIFF::WriteImageInfo()
   static uint16 datatype2format[] =
   {
     SAMPLEFORMAT_UINT,    
+    SAMPLEFORMAT_INT,     
     SAMPLEFORMAT_UINT,  
     SAMPLEFORMAT_INT,     
     SAMPLEFORMAT_IEEEFP,  

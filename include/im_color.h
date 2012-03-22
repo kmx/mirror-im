@@ -128,7 +128,7 @@ inline T imColorQuantize(const float& value, const T& min, const T& max)
   if (value >= 1) return max;
   if (value <= 0) return min;
   float range = (float)max - (float)min + 1.0f;
-  return (T)imRound(value*range + (float)min);
+  return (T)imRound(value*range - 0.5f) + min;
 }                               
 
 /** Reconstruct min-max values into 0-1. \n

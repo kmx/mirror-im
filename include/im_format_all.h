@@ -436,7 +436,7 @@ void imFormatRegisterPCX(void);
  * \section Features
  *
 \verbatim
-    Supports 8 bits per component only. Data type is always Byte.
+    Data Types: Byte
     Color Spaces: Gray, RGB and MAP (Binary saved as Gray)
     Compressions:
       NONE - no compression [default]
@@ -538,7 +538,7 @@ void imFormatRegisterICO(void);
  * \section Features
  *
 \verbatim
-    Data Types: Byte, Int
+    Data Types: Int, Float
     Color Spaces: Gray
     Compressions:
       NONE - no compression [default]
