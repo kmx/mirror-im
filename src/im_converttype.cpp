@@ -145,7 +145,9 @@ template <class SRCT, class DSTT>
 IM_STATIC int iPromoteIntDirect(int count, const SRCT *src_map, DSTT *dst_map)
 {
   // direct small integer to big integer, no need for scale
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
   for (int i = 0; i < count; i++)
   {
     dst_map[i] = (DSTT)(src_map[i]);
@@ -161,7 +163,9 @@ IM_STATIC int iDemoteIntDirect(int count, const SRCT *src_map, DSTT *dst_map, in
   DSTT dst_type_min, dst_type_max;
   iDataTypeIntMinMax(dst_type_min, dst_type_max, abssolute);
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
   for (int i = 0; i < count; i++)
   {
     SRCT value;
@@ -200,7 +204,9 @@ IM_STATIC int iPromoteInt(int count, const SRCT *src_map, DSTT *dst_map, int abs
     }
   }
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
   for (int i = 0; i < count; i++)
   {
     SRCT value;
@@ -253,10 +259,14 @@ IM_STATIC int iDemoteInt(int count, const SRCT *src_map, DSTT *dst_map, int abss
 
   IM_INT_PROCESSING;
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
   for (int i = 0; i < count; i++)
   {
+#ifdef _OPENMP
     #pragma omp flush (processing)
+#endif
     IM_BEGIN_PROCESSING;
 
     SRCT value;
@@ -278,7 +288,9 @@ IM_STATIC int iDemoteInt(int count, const SRCT *src_map, DSTT *dst_map, int abss
     }
 
     IM_COUNT_PROCESSING;
+#ifdef _OPENMP
     #pragma omp flush (processing)
+#endif
     IM_END_PROCESSING;
   }
 
@@ -326,10 +338,14 @@ IM_STATIC int iPromoteReal(int count, const SRCT *src_map, float *dst_map, float
 
   IM_INT_PROCESSING;
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
   for (int i = 0; i < count; i++)
   {
+#ifdef _OPENMP
     #pragma omp flush (processing)
+#endif
     IM_BEGIN_PROCESSING;
 
     float fvalue;
@@ -348,7 +364,9 @@ IM_STATIC int iPromoteReal(int count, const SRCT *src_map, float *dst_map, float
       dst_map[i] = iGammaFunc(factor, dst_type_min, gamma, fvalue);
 
     IM_COUNT_PROCESSING;
+#ifdef _OPENMP
     #pragma omp flush (processing)
+#endif
     IM_END_PROCESSING;
   }
 
@@ -386,10 +404,14 @@ IM_STATIC int iDemoteReal(int count, const float *src_map, DSTT *dst_map, float 
 
   IM_INT_PROCESSING;
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
   for (int i = 0; i < count; i++)
   {
+#ifdef _OPENMP
     #pragma omp flush (processing)
+#endif
     IM_BEGIN_PROCESSING;
 
     float value;
@@ -417,7 +439,9 @@ IM_STATIC int iDemoteReal(int count, const float *src_map, DSTT *dst_map, float 
     }
 
     IM_COUNT_PROCESSING;
+#ifdef _OPENMP
     #pragma omp flush (processing)
+#endif
     IM_END_PROCESSING;
   }
 
@@ -440,7 +464,9 @@ static int iDemoteCpxReal(int count, const imcfloat* src_map, float *dst_map, in
   case IM_CPX_PHASE: CpxCnv = cpxphase; break;
   }
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
   for (int i = 0; i < count; i++)
   {
     dst_map[i] = CpxCnv(src_map[i]);
@@ -472,7 +498,9 @@ IM_STATIC int iDemoteCpxInt(int count, const imcfloat* src_map, DSTT *dst_map, i
 template <class SRCT> 
 IM_STATIC int iPromoteCpxDirect(int count, const SRCT *src_map, imcfloat *dst_map)
 {
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
   for (int i = 0; i < count; i++)
   {
     dst_map[i].real = (float)(src_map[i]);

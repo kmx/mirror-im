@@ -27,42 +27,58 @@ static void DoBinaryOp(T1 *map1, T2 *map2, T3 *map, int count, int op)
   switch(op)
   {
   case IM_BIN_ADD:
-#pragma omp parallel for if (IM_OMP_MINCOUNT(count)) 
+#ifdef _OPENMP
+#pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif 
     for (i = 0; i < count; i++)
       map[i] = add_op((T3)map1[i], (T3)map2[i]);
     break;
   case IM_BIN_SUB:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = sub_op((T3)map1[i], (T3)map2[i]);
     break;
   case IM_BIN_MUL:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = mul_op((T3)map1[i], (T3)map2[i]);
     break;
   case IM_BIN_DIV:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = div_op((T3)map1[i], (T3)map2[i]);
     break;
   case IM_BIN_DIFF:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = diff_op((T3)map1[i], (T3)map2[i]);
     break;
   case IM_BIN_MIN:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = min_op((T3)map1[i], (T3)map2[i]);
     break;
   case IM_BIN_MAX:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = max_op((T3)map1[i], (T3)map2[i]);
     break;
   case IM_BIN_POW:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = pow_op((T3)map1[i], (T3)map2[i]);
     break;
@@ -76,42 +92,58 @@ static void DoBinaryOpByte(imbyte *map1, imbyte *map2, imbyte *map, int count, i
   switch(op)
   {
   case IM_BIN_ADD:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(add_op((int)map1[i], (int)map2[i]));
     break;
   case IM_BIN_SUB:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(sub_op((int)map1[i], (int)map2[i]));
     break;
   case IM_BIN_MUL:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(mul_op((int)map1[i], (int)map2[i]));
     break;
   case IM_BIN_DIV:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(div_op((int)map1[i], (int)map2[i]));
     break;
   case IM_BIN_DIFF:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(diff_op((int)map1[i], (int)map2[i]));
     break;
   case IM_BIN_MIN:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(min_op((int)map1[i], (int)map2[i]));
     break;
   case IM_BIN_MAX:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(max_op((int)map1[i], (int)map2[i]));
     break;
   case IM_BIN_POW:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(pow_op((int)map1[i], (int)map2[i]));
     break;
@@ -125,42 +157,58 @@ static void DoBinaryOpCpxReal(imcfloat *map1, float *map2, imcfloat *map, int co
   switch(op)
   {
   case IM_BIN_ADD:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = add_op(map1[i], map2[i]);
     break;
   case IM_BIN_SUB:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = sub_op(map1[i], map2[i]);
     break;
   case IM_BIN_MUL:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = mul_op(map1[i], map2[i]);
     break;
   case IM_BIN_DIV:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = div_op(map1[i], (imcfloat)map2[i]);
     break;
   case IM_BIN_DIFF:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = diff_op(map1[i], map2[i]);
     break;
   case IM_BIN_MIN:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = min_op(map1[i], map2[i]);
     break;
   case IM_BIN_MAX:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = max_op(map1[i], map2[i]);
     break;
   case IM_BIN_POW:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = pow_op(map1[i], map2[i]);
     break;
@@ -232,7 +280,9 @@ static inline T blend_op(const T& v1, const T& v2, const float& alpha)
 template <class T> 
 static void DoBlendConst(T *map1, T *map2, T *map, int count, float alpha)
 {
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
   for (int i = 0; i < count; i++)
     map[i] = blend_op(map1[i], map2[i], alpha);
 }
@@ -267,7 +317,9 @@ void imProcessBlendConst(const imImage* src_image1, const imImage* src_image2, i
 template <class T, class TA> 
 static void DoBlend(T *map1, T *map2, TA *alpha, T *map, int count, float type_max)
 {
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
   for (int i = 0; i < count; i++)
     map[i] = blend_op(map1[i], map2[i], ((float)alpha[i])/type_max);
 }
@@ -386,7 +438,9 @@ static inline T compose_alpha_op(const T& alpha1, const T& alpha2, const TA& max
 template <class T, class TA> 
 static void DoCompose(T *map1, T *map2, T *alpha1, T *alpha2, T *map, int count, TA max)
 {
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
   for (int i = 0; i < count; i++)
     map[i] = compose_op(map1[i], map2[i], alpha1[i], alpha2[i], max);
 }
@@ -394,7 +448,9 @@ static void DoCompose(T *map1, T *map2, T *alpha1, T *alpha2, T *map, int count,
 template <class T, class TA> 
 static void DoComposeAlpha(T *alpha1, T *alpha2, T *dst_alpha, int count, TA max)
 {
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
   for (int i = 0; i < count; i++)
     dst_alpha[i] = compose_alpha_op(alpha1[i], alpha2[i], max);
 }
@@ -458,42 +514,58 @@ static void DoBinaryConstOpCpxReal(imcfloat *map1, float value, imcfloat *map, i
   switch(op)
   {
   case IM_BIN_ADD:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = add_op(map1[i], value);
     break;
   case IM_BIN_SUB:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = sub_op(map1[i], value);
     break;
   case IM_BIN_MUL:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = mul_op(map1[i], value);
     break;
   case IM_BIN_DIV:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = div_op(map1[i], (imcfloat)value);
     break;
   case IM_BIN_DIFF:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = diff_op(map1[i], value);
     break;
   case IM_BIN_MIN:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = min_op(map1[i], value);
     break;
   case IM_BIN_MAX:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = max_op(map1[i], value);
     break;
   case IM_BIN_POW:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = pow_op(map1[i], value);
     break;
@@ -508,42 +580,58 @@ static void DoBinaryConstOp(T1 *map1, T2 value, T3 *map, int count, int op)
   switch(op)
   {
   case IM_BIN_ADD:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = (T3)add_op((T2)map1[i], value);
     break;
   case IM_BIN_SUB:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = (T3)sub_op((T2)map1[i], value);
     break;
   case IM_BIN_MUL:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = (T3)mul_op((T2)map1[i], value);
     break;
   case IM_BIN_DIV:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = (T3)div_op((T2)map1[i], value);
     break;
   case IM_BIN_DIFF:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = (T3)diff_op((T2)map1[i], value);
     break;
   case IM_BIN_MIN:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = (T3)min_op((T2)map1[i], value);
     break;
   case IM_BIN_MAX:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = (T3)max_op((T2)map1[i], value);
     break;
   case IM_BIN_POW:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = (T3)pow_op((T2)map1[i], value);
     break;
@@ -558,42 +646,58 @@ static void DoBinaryConstOpByte(T1 *map1, int value, imbyte *map, int count, int
   switch(op)
   {
   case IM_BIN_ADD:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(add_op((int)map1[i], value));
     break;
   case IM_BIN_SUB:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(sub_op((int)map1[i], value));
     break;
   case IM_BIN_MUL:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(mul_op((int)map1[i], value));
     break;
   case IM_BIN_DIV:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(div_op((int)map1[i], value));
     break;
   case IM_BIN_DIFF:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(diff_op((int)map1[i], value));
     break;
   case IM_BIN_MIN:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(min_op((int)map1[i], value));
     break;
   case IM_BIN_MAX:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(max_op((int)map1[i], value));
     break;
   case IM_BIN_POW:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       map[i] = (imbyte)crop_byte(pow_op((int)map1[i], value));
     break;
@@ -759,10 +863,14 @@ static int doAutoCov(int width, int height, DT *src_map, DT *mean_map, float *ds
   int count = width*height;
   IM_INT_PROCESSING;
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
+#endif
   for (int y = 0; y < height; y++)
   {
-    #pragma omp flush (processing)
+#ifdef _OPENMP
+#pragma omp flush (processing)
+#endif
     IM_BEGIN_PROCESSING;
 
     int line_offset = y*width;
@@ -772,7 +880,9 @@ static int doAutoCov(int width, int height, DT *src_map, DT *mean_map, float *ds
     }
 
     IM_COUNT_PROCESSING;
-    #pragma omp flush (processing)
+#ifdef _OPENMP
+#pragma omp flush (processing)
+#endif
     IM_END_PROCESSING;
   }
 
@@ -824,7 +934,9 @@ void imProcessMultiplyConj(const imImage* src_image1, const imImage* src_image2,
   imcfloat* map1 = (imcfloat*)src_image1->data[0];
   imcfloat* map2 = (imcfloat*)src_image2->data[0];
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(total_count))
+#endif
   for (int i = 0; i < total_count; i++)
   {
     imcfloat tmp; // this will allow an in-place operation

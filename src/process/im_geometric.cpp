@@ -53,10 +53,14 @@ static int Swirl(int width, int height, DT *src_map, DT *dst_map,
 
   IM_INT_PROCESSING;
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
+#endif
   for (int y = 0; y < height; y++)
   {
-    #pragma omp flush (processing)
+#ifdef _OPENMP
+#pragma omp flush (processing)
+#endif
     IM_BEGIN_PROCESSING;
 
     int line_offset = y*width;
@@ -79,7 +83,9 @@ static int Swirl(int width, int height, DT *src_map, DT *dst_map,
     }
 
     IM_COUNT_PROCESSING;
-    #pragma omp flush (processing)
+#ifdef _OPENMP
+#pragma omp flush (processing)
+#endif
     IM_END_PROCESSING;
   }
 
@@ -108,10 +114,14 @@ static int Radial(int width, int height, DT *src_map, DT *dst_map,
          
   IM_INT_PROCESSING;
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
+#endif
   for (int y = 0; y < height; y++)
   {
-    #pragma omp flush (processing)
+#ifdef _OPENMP
+#pragma omp flush (processing)
+#endif
     IM_BEGIN_PROCESSING;
 
     int line_offset = y*width;
@@ -134,7 +144,9 @@ static int Radial(int width, int height, DT *src_map, DT *dst_map,
     }
 
     IM_COUNT_PROCESSING;
-    #pragma omp flush (processing)
+#ifdef _OPENMP
+#pragma omp flush (processing)
+#endif
     IM_END_PROCESSING;
   }
 
@@ -168,10 +180,14 @@ static int RotateCenter(int src_width, int src_height, DT *src_map,
 
   IM_INT_PROCESSING;
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(dst_height))
+#endif
   for (int y = 0; y < dst_height; y++)
   {
-    #pragma omp flush (processing)
+#ifdef _OPENMP
+#pragma omp flush (processing)
+#endif
     IM_BEGIN_PROCESSING;
 
     int line_offset = y*dst_width;
@@ -194,7 +210,9 @@ static int RotateCenter(int src_width, int src_height, DT *src_map,
     }
 
     IM_COUNT_PROCESSING;
-    #pragma omp flush (processing)
+#ifdef _OPENMP
+#pragma omp flush (processing)
+#endif
     IM_END_PROCESSING;
   }
 
@@ -219,10 +237,14 @@ static int Rotate(int src_width, int src_height, DT *src_map,
 
   IM_INT_PROCESSING;
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(dst_height))
+#endif
   for (int y = 0; y < dst_height; y++)
   {
-    #pragma omp flush (processing)
+#ifdef _OPENMP
+#pragma omp flush (processing)
+#endif
     IM_BEGIN_PROCESSING;
 
     int line_offset = y*dst_width;
@@ -245,7 +267,9 @@ static int Rotate(int src_width, int src_height, DT *src_map,
     }
 
     IM_COUNT_PROCESSING;
-    #pragma omp flush (processing)
+#ifdef _OPENMP
+#pragma omp flush (processing)
+#endif
     IM_END_PROCESSING;
   }
 
@@ -263,7 +287,9 @@ static void Rotate90(int src_width,
                    DT *dst_map, 
                    int dir)
 {
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(src_height))
+#endif
   for(int y = 0; y < src_height; y++)
   {
     int yd, xd;
@@ -297,7 +323,9 @@ static void Rotate180(int width,
                    DT *src_map, 
                    DT *dst_map)
 {
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
+#endif
   for(int y = 0; y < height; y++)
   {
     int yd = height-1 - y;
@@ -323,7 +351,9 @@ static void Mirror(int width,
   {
     int half_width = width/2;
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
+#endif
     for(int y = 0 ; y < height; y++)
     {
       int line_offset = y*width;
@@ -340,7 +370,9 @@ static void Mirror(int width,
   }
   else
   {
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
+#endif
     for(int y = 0 ; y < height; y++)
     {
       int line_offset = y*width;
@@ -378,7 +410,9 @@ static void Flip(int width,
   }
   else
   {
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
+#endif
     for(int y = 0 ; y < height; y++)
     {
       int yd = height-1 - y;
@@ -394,7 +428,9 @@ static void InterlaceSplit(int width,
                    DT *dst_map1,
                    DT *dst_map2)
 {
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
+#endif
   for(int y = 0; y < height; y++)
   {
     int yd = y/2;

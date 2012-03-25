@@ -22,7 +22,9 @@
 template <class T> 
 static void doThresholdSlice(T *src_map, imbyte *dst_map, int count, T start_level, T end_level)
 {
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
   for (int i = 0; i < count; i++)
   {
     if (src_map[i] < start_level || src_map[i] > end_level)
@@ -62,7 +64,9 @@ void imProcessSliceThreshold(const imImage* src_image, imImage* dst_image, float
 template <class T> 
 static void doThresholdByDiff(T *src_map1, T *src_map2, imbyte *dst_map, int count)
 {
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
   for (int i = 0; i < count; i++)
   {
     if (src_map1[i] <= src_map2[i])
@@ -97,7 +101,9 @@ void imProcessThresholdByDiff(const imImage* src_image1, const imImage* src_imag
 template <class T> 
 static void doThreshold(T *src_map, imbyte *dst_map, int count, T level, int value)
 {
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
   for (int i = 0; i < count; i++)
   {
     if (src_map[i] <= level)
@@ -399,7 +405,9 @@ template <class T>
 static void doHysteresisThreshold(T *src_map, imbyte *dst_map, int width, int height, T low_thres, T high_thres)
 {
   int count = width * height;
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
   for (int i = 0; i < count; i++)
   {
     if (src_map[i] > high_thres)
@@ -416,7 +424,9 @@ static void doHysteresisThreshold(T *src_map, imbyte *dst_map, int width, int he
   {
     changed = 0;
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
+#endif
     for (int j=1; j<height-1; j++) 
     {
       for (int i=1; i<width-1; i++)
@@ -439,7 +449,9 @@ static void doHysteresisThreshold(T *src_map, imbyte *dst_map, int width, int he
   }
 
   // Clear the remaining "2"s
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
   for (int i = 0; i < count; i++)
   {
     if (dst_map[i] == 2)

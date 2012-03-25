@@ -34,10 +34,14 @@ static int DoConvolveRankFunc(T *map, DT* new_map, int width, int height, int kw
 
   IM_INT_PROCESSING;
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
+#endif
   for(int j = 0; j < height; j++)
   {
-    #pragma omp flush (processing)
+#ifdef _OPENMP
+#pragma omp flush (processing)
+#endif
     IM_BEGIN_PROCESSING;
 
     int new_offset = j * width;
@@ -74,7 +78,9 @@ static int DoConvolveRankFunc(T *map, DT* new_map, int width, int height, int kw
     }    
 
     IM_COUNT_PROCESSING;
-    #pragma omp flush (processing)
+#ifdef _OPENMP
+#pragma omp flush (processing)
+#endif
     IM_END_PROCESSING;
   }
 

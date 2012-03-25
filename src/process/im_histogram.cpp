@@ -69,7 +69,9 @@ static void DoExpandHistogram(T* src_map, T* dst_map, int size, int depth, int h
   }
 
   int total_count = size*depth;
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(total_count))
+#endif
   for (i = 0; i < total_count; i++)
     dst_map[i] = re_map[src_map[i]];
 
@@ -108,7 +110,9 @@ static void DoEqualizeHistogram(T* src_map, T* dst_map, int size, int depth, int
   }
 
   int total_count = size*depth;
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(total_count))
+#endif
   for (i = 0; i < total_count; i++)
     dst_map[i] = re_map[src_map[i]];
 

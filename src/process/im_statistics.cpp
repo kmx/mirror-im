@@ -25,11 +25,15 @@ static void DoCalcHisto(T* map, int size, unsigned long* histo, int hcount, int 
 {
   memset(histo, 0, hcount * sizeof(unsigned long));
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(size))
+#endif
   for (int i = 0; i < size; i++)
   {
     int index = map[i] + shift;
-    #pragma omp atomic
+#ifdef _OPENMP
+#pragma omp atomic
+#endif
     histo[index]++;
   }
 
@@ -94,11 +98,15 @@ void imCalcGrayHistogram(const imImage* image, unsigned long* histo, int cumulat
         gray_map[i] = imColorRGB2Luma(r, g, b);
       }
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(image->count))
+#endif
       for (i = 0; i < image->count; i++)
       {
         int index = gray_map[map[i]];
-        #pragma omp atomic
+#ifdef _OPENMP
+#pragma omp atomic
+#endif
         histo[index]++;
       }
     }
@@ -110,11 +118,15 @@ void imCalcGrayHistogram(const imImage* image, unsigned long* histo, int cumulat
         imushort* g = (imushort*)image->data[1];
         imushort* b = (imushort*)image->data[2];
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(image->count))
+#endif
         for (i = 0; i < image->count; i++)
         {
           imushort index = imColorRGB2Luma(*r++, *g++, *b++);
-          #pragma omp atomic
+#ifdef _OPENMP
+#pragma omp atomic
+#endif
           histo[index]++;
         }
       }
@@ -124,11 +136,15 @@ void imCalcGrayHistogram(const imImage* image, unsigned long* histo, int cumulat
         short* g = (short*)image->data[1];
         short* b = (short*)image->data[2];
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(image->count))
+#endif
         for (i = 0; i < image->count; i++)
         {
           int index = imColorRGB2Luma(*r++, *g++, *b++) + 32768;
-          #pragma omp atomic
+#ifdef _OPENMP
+#pragma omp atomic
+#endif
           histo[index]++;
         }
       }
@@ -138,11 +154,15 @@ void imCalcGrayHistogram(const imImage* image, unsigned long* histo, int cumulat
         imbyte* g = (imbyte*)image->data[1];
         imbyte* b = (imbyte*)image->data[2];
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(image->count))
+#endif
         for (i = 0; i < image->count; i++)
         {
           imbyte index = imColorRGB2Luma(*r++, *g++, *b++);
-          #pragma omp atomic
+#ifdef _OPENMP
+#pragma omp atomic
+#endif
           histo[index]++;
         }
       }
@@ -227,8 +247,10 @@ static void DoStats(T* data, int count, imStats* stats)
   T min, max;
   imMinMax(data, count, min, max);
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count)) \
                          reduction (+:positive, negative, zeros, mean, stddev) 
+#endif
   for (int i = 0; i < count; i++)
   {
     if (data[i] > 0)
@@ -429,7 +451,9 @@ static double DoRMSOp(T *map1, T *map2, int count)
 {
   double rmserror = 0;
 
+#ifdef _OPENMP
 #pragma omp parallel for reduction(+:rmserror) if (IM_OMP_MINCOUNT(count))
+#endif
   for (int i = 0; i < count; i++)
   {
     double diff = double(map1[i] - map2[i]);

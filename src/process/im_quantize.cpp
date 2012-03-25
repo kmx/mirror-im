@@ -26,7 +26,9 @@ void imProcessQuantizeRGBUniform(const imImage* src_image, imImage* dst_image, i
 
   imImageSetPalette(dst_image, imPaletteUniform(), 256);
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(src_image->height))
+#endif
   for (int y = 0; y < src_image->height; y++)
   {
     int line_offset = y*src_image->width;
@@ -62,7 +64,9 @@ void imProcessQuantizeGrayUniform(const imImage* src_image, imImage* dst_image, 
   }
 
   int total_count = src_image->count*src_image->depth;
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(total_count))
+#endif
   for (i = 0; i < total_count; i++)
     dst_map[i] = re_map[src_map[i]];
 }

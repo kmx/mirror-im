@@ -406,13 +406,17 @@ void imAnalyzeMeasureArea(const imImage* image, int* data_area, int region_count
 
   memset(data_area, 0, region_count*sizeof(int));
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(image->count))
+#endif
   for (int i = 0; i < image->count; i++)
   {
     if (img_data[i])
     {
       int index = img_data[i] - 1;
-      #pragma omp atomic
+#ifdef _OPENMP
+#pragma omp atomic
+#endif
       data_area[index]++;
     }
   }
@@ -433,7 +437,9 @@ void imAnalyzeMeasureCentroid(const imImage* image, const int* data_area, int re
   if (data_cx) memset(data_cx, 0, region_count*sizeof(float));
   if (data_cy) memset(data_cy, 0, region_count*sizeof(float));
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(image->height))
+#endif
   for (int y = 0; y < image->height; y++) 
   {
     int offset = y*image->width;
@@ -446,12 +452,16 @@ void imAnalyzeMeasureCentroid(const imImage* image, const int* data_area, int re
         int ri = region_index-1;
         if (data_cx) 
         {
-          #pragma omp atomic
+#ifdef _OPENMP
+#pragma omp atomic
+#endif
           data_cx[ri] += (float)x;
         }
         if (data_cy) 
         {
-          #pragma omp atomic
+#ifdef _OPENMP
+#pragma omp atomic
+#endif
           data_cy[ri] += (float)y;
         }
       }
@@ -482,7 +492,9 @@ static void iCalcMoment(double* cm, int px, int py, const imImage* image, const 
 
   memset(cm, 0, region_count*sizeof(double));
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(image->height))
+#endif
   for (int y = 0; y < image->height; y++) 
   {
     int offset = y*image->width;
@@ -497,19 +509,25 @@ static void iCalcMoment(double* cm, int px, int py, const imImage* image, const 
         if (px == 0)
         {
           double inc = ipow(y-cy[ri],py);
-          #pragma omp atomic
+#ifdef _OPENMP
+#pragma omp atomic
+#endif
           cm[ri] += inc;
         }
         else if (py == 0)
         {
           double inc = ipow(x-cx[ri],px);
-          #pragma omp atomic
+#ifdef _OPENMP
+#pragma omp atomic
+#endif
           cm[ri] += inc;
         }
         else
         {
           double inc = ipow(x-cx[ri],px)*ipow(y-cy[ri],py);
-          #pragma omp atomic
+#ifdef _OPENMP
+#pragma omp atomic
+#endif
           cm[ri] += inc;
         }
       }
@@ -623,7 +641,9 @@ void imAnalyzeMeasurePrincipalAxis(const imImage* image, const int* data_area, c
   float *slope1 = major_slope; // Use major_slope as a storage place, 
   float *slope2 = minor_slope; // and create an alias to make code clear.
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(region_count))
+#endif
   for (int i = 0; i < region_count; i++) 
   {
     if (cm11[i] == 0)
@@ -736,7 +756,9 @@ void imAnalyzeMeasurePrincipalAxis(const imImage* image, const int* data_area, c
     }
   }
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(region_count))
+#endif
   for (int i = 0; i < region_count; i++) 
   {
     float AB1 = (float)sqrt(A1[i]*A1[i] + 1);
@@ -790,7 +812,9 @@ void imAnalyzeMeasureHoles(const imImage* image, int connect, int* count_data, i
   imushort* img_data = (imushort*)image->data[0];
 
   // finds the holes in the inverted image
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(image->count))
+#endif
   for (i = 0; i < image->count; i++)
   {
     if (img_data[i])
@@ -874,7 +898,9 @@ void imAnalyzeMeasureHoles(const imImage* image, int connect, int* count_data, i
 template<class T>
 static void DoPerimeterLine(T* map, T* new_map, int width, int height)
 {
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
+#endif
   for (int y = 0; y < height; y++) 
   {
     int offset = y*width;
@@ -1020,7 +1046,9 @@ void imAnalyzeMeasurePerimeter(const imImage* image, float* perim_data, int regi
   int width = image->width;
   int height = image->height;
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
+#endif
   for (int y = 0; y < height; y++) 
   {
     int offset = y*image->width;
@@ -1055,7 +1083,9 @@ void imAnalyzeMeasurePerimeter(const imImage* image, float* perim_data, int regi
         {
           int index = map[offset+x] - 1;
           float inc = vt[templ[T]];
-          #pragma omp atomic
+#ifdef _OPENMP
+#pragma omp atomic
+#endif
           perim_data[index] += inc;
         }
       }
@@ -1200,7 +1230,9 @@ void imAnalyzeMeasurePerimArea(const imImage* image, float* area_data)
   int width = image->width;
   int height = image->height;
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
+#endif
   for (int y = 0; y < height; y++) 
   {
     int offset_up = (y+1)*width;
@@ -1226,7 +1258,9 @@ void imAnalyzeMeasurePerimArea(const imImage* image, float* area_data)
         {
           int index = v-1;
           float inc = vt[templ[T]];
-          #pragma omp atomic
+#ifdef _OPENMP
+#pragma omp atomic
+#endif
           area_data[index] += inc;
         }
       }
@@ -1271,7 +1305,9 @@ void imProcessRemoveByArea(const imImage* src_image, imImage* dst_image, int con
   imushort* region_data = (imushort*)region_image->data[0];
   imbyte* img_data = (imbyte*)dst_image->data[0];
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(src_image->count))
+#endif
   for (int i = 0; i < src_image->count; i++)
   {
     if (region_data[i])
@@ -1310,7 +1346,9 @@ void imProcessFillHoles(const imImage* src_image, imImage* dst_image, int connec
   imushort* region_data = (imushort*)region_image->data[0];
   imbyte* dst_data = (imbyte*)dst_image->data[0];
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(src_image->count))
+#endif
   for (int i = 0; i < src_image->count; i++)
   {
     if (region_data[i])

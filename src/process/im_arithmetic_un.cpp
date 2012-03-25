@@ -75,72 +75,100 @@ static void DoUnaryOp(T1 *map, T2 *new_map, int count, int op)
   switch(op)
   {
   case IM_UN_ABS:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       new_map[i] = abs_op((T2)map[i]);
     break;
   case IM_UN_INV:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       new_map[i] = inv_op((T2)map[i]);
     break;
   case IM_UN_EQL:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       new_map[i] = (T2)map[i];
     break;
   case IM_UN_LESS:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       new_map[i] = less_op((T2)map[i]);
     break;
   case IM_UN_SQR:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       new_map[i] = sqr_op((T2)map[i]);
     break;
   case IM_UN_SQRT:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       new_map[i] = sqrt_op((T2)map[i]);
     break;
   case IM_UN_LOG:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       new_map[i] = log_op((T2)map[i]);
     break;
   case IM_UN_SIN:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       new_map[i] = sin_op((T2)map[i]);
     break;
   case IM_UN_COS:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       new_map[i] = cos_op((T2)map[i]);
     break;
   case IM_UN_EXP:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       new_map[i] = exp_op((T2)map[i]);
     break;
   case IM_UN_CONJ:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       new_map[i] = conj_op((T2)map[i]);
     break;
   case IM_UN_CPXNORM:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       new_map[i] = cpxnorm_op((T2)map[i]);
     break;
   case IM_UN_POSITIVES:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       new_map[i] = positives_op((T2)map[i]);
     break;
   case IM_UN_NEGATIVES:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       new_map[i] = negatives_op((T2)map[i]);
     break;
@@ -155,52 +183,72 @@ static void DoUnaryOpByte(T1 *map, imbyte *new_map, int count, int op)
   switch(op)
   {
   case IM_UN_ABS:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       new_map[i] = (imbyte)crop_byte(abs_op((int)map[i]));
     break;
   case IM_UN_INV:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       new_map[i] = (imbyte)crop_byte(inv_op((int)map[i]));   /* will always be 0 */
     break;
   case IM_UN_EQL:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       new_map[i] = (imbyte)crop_byte((int)map[i]);
     break;
   case IM_UN_LESS:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       new_map[i] = (imbyte)crop_byte(less_op((int)map[i]));
     break;
   case IM_UN_SQR:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       new_map[i] = (imbyte)crop_byte(sqr_op((int)map[i]));
     break;
   case IM_UN_SQRT:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       new_map[i] = (imbyte)crop_byte(sqrt_op((int)map[i]));
     break;
   case IM_UN_LOG:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       new_map[i] = (imbyte)crop_byte(log_op((int)map[i]));
     break;
   case IM_UN_SIN:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       new_map[i] = (imbyte)crop_byte(sin_op((int)map[i]));
     break;
   case IM_UN_COS:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       new_map[i] = (imbyte)crop_byte(cos_op((int)map[i]));
     break;
   case IM_UN_EXP:
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
     for (i = 0; i < count; i++)
       new_map[i] = (imbyte)crop_byte(exp_op((int)map[i]));
     break;
@@ -278,7 +326,9 @@ void imProcessSplitComplex(const imImage* src_image, imImage* dst_image1, imImag
   float* map1 = (float*)dst_image1->data[0];
   float* map2 = (float*)dst_image2->data[0];
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(total_count))
+#endif
   for (int i = 0; i < total_count; i++)
   {
     if (polar)
@@ -302,7 +352,9 @@ void imProcessMergeComplex(const imImage* src_image1, const imImage* src_image2,
   float* map1 = (float*)src_image1->data[0];
   float* map2 = (float*)src_image2->data[0];
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(total_count))
+#endif
   for (int i = 0; i < total_count; i++)
   {
     if (polar)

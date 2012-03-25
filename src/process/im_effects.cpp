@@ -60,7 +60,9 @@ void imProcessPixelate(const imImage* src_image, imImage* dst_image, int box_siz
     imbyte *dst_map=(imbyte*)dst_image->data[i];
     int vbox_size = box_size;
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(vbox))
+#endif
     for (int bv = 0; bv < vbox; bv++)
     {
       int bv_pos = bv*box_size;

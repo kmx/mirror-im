@@ -246,7 +246,9 @@ void imProcessDistanceTransform(const imImage* src_image, imImage* dst_image)
 
   float max_dist = (float)sqrt(double(width*width + height*height));
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(src_image->count))
+#endif
   for (int i = 0; i < src_image->count; i++)
   {
     // if pixel is background, then distance is zero.
@@ -255,7 +257,9 @@ void imProcessDistanceTransform(const imImage* src_image, imImage* dst_image)
   }
 
   /* down->top, left->right */
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
+#endif
   for (int y = 0; y < height; y++) 
   {
     int offset = y * width;
@@ -283,7 +287,9 @@ void imProcessDistanceTransform(const imImage* src_image, imImage* dst_image)
   }
 
   /* top->down, right->left */
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
+#endif
   for (int y = height-1; y >= 0; y--) 
   {
     int offset = y * width + width-1;
@@ -465,7 +471,9 @@ void imProcessRegionalMaximum(const imImage* src_image, imImage* dst_image)
   float* src_data = (float*)src_image->data[0];
   imbyte* dst_data = (imbyte*)dst_image->data[0];
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
+#endif
   for (int y = 1; y < height-1; y++) 
   {
     int offset = y * width + 1;
@@ -484,7 +492,9 @@ void imProcessRegionalMaximum(const imImage* src_image, imImage* dst_image)
   }
 
   // remove false maximum
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
+#endif
   for (int y = 2; y < height-2; y++) 
   {
     int offset = y * width + 2;
@@ -506,7 +516,9 @@ void imProcessRegionalMaximum(const imImage* src_image, imImage* dst_image)
   }
 
   // update destiny with remaining maximum
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(src_image->count))
+#endif
   for (int i = 0; i < src_image->count; i++) 
   {
     if (dst_data[i] == 2)

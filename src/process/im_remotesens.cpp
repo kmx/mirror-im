@@ -19,7 +19,9 @@
 template <class T> 
 static void DoNormDiffRatio(T *map1, T *map2, float *new_map, int count)
 {
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
+#endif
   for (int i = 0; i < count; i++)
   {
     float num   = (float)(map1[i] - map2[i]);
@@ -60,7 +62,9 @@ template <class T>
 static void DoAbnormalCorrection(T *map, T *new_map, int width, int height, imbyte* abnormal, int threshold_consecutive, int threshold_percent)
 {
   // Mark candidates for abnormal pixels
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
+#endif
   for (int y = 0; y < height; y++)
   {
     int line_offset = y*width;
@@ -80,7 +84,9 @@ static void DoAbnormalCorrection(T *map, T *new_map, int width, int height, imby
   threshold_percent = (height*threshold_percent)/100;
 
   // Select the abnormal pixels according to their distribution
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(width))
+#endif
   for (int x = 1; x < width-1; x++)
   {
     int col_count = 0;
@@ -144,7 +150,9 @@ static void DoAbnormalCorrection(T *map, T *new_map, int width, int height, imby
   }
 
   // Correct the abnormal pixels 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
+#endif
   for (int y = 0; y < height; y++)
   {
     int line_offset = y*width;

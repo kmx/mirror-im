@@ -128,7 +128,9 @@ static void seperable_convolution (const imImage* im, float *gau, int width, flo
   int nr = im->height;
   int nc = im->width;
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(nr))
+#endif
   for (int i=0; i<nr; i++)
   {
     for (int j=0; j<nc; j++)
@@ -155,7 +157,9 @@ static void seperable_convolution (const imImage* im, float *gau, int width, flo
 
 static void dxy_seperable_convolution (float** im, int nr, int nc,  float *gau, int width, float **sm, int which)
 {
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(nr))
+#endif
   for (int i=0; i<nr; i++)
   {
     for (int j=0; j<nc; j++)
@@ -194,7 +198,9 @@ static void nonmax_suppress (float **dx, float **dy, imImage* mag)
 {
   unsigned char* mag_data = (unsigned char*)mag->data[0];
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(mag->height))
+#endif
   for (int i=1; i<mag->height-1; i++)
   {
     for (int j=1; j<mag->width-1; j++)

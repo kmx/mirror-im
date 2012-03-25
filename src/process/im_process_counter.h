@@ -44,7 +44,8 @@ int  imCounterInc_OMP(int counter);
 
 #else
 
-#pragma warning( disable : 4068 )
+/*
+#pragma warning (disable : 4068) */ /* disable unknown pragma warnings */
 
 #define IM_BEGIN_PROCESSING   
 #define IM_COUNT_PROCESSING   if (!imCounterInc(counter)) { processing = 0; break; }

@@ -24,10 +24,14 @@ static int DoRenderCondOp(T *map, int width, int height, int d, imRenderCondFunc
 {
   IM_INT_PROCESSING;
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
+#endif
   for(int y = 0; y < height; y++)
   {
-    #pragma omp flush (processing)
+#ifdef _OPENMP
+#pragma omp flush (processing)
+#endif
     IM_BEGIN_PROCESSING;
 
     int offset = y * width;
@@ -40,7 +44,9 @@ static int DoRenderCondOp(T *map, int width, int height, int d, imRenderCondFunc
     }
   
     IM_COUNT_PROCESSING;
-    #pragma omp flush (processing)
+#ifdef _OPENMP
+#pragma omp flush (processing)
+#endif
     IM_END_PROCESSING;
   }
 
@@ -89,10 +95,14 @@ static int DoRenderOp(T *map, int width, int height, int d, imRenderFunc render_
 {
   IM_INT_PROCESSING;
 
+#ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINHEIGHT(height))
+#endif
   for(int y = 0; y < height; y++)
   {
-    #pragma omp flush (processing)
+#ifdef _OPENMP
+#pragma omp flush (processing)
+#endif
     IM_BEGIN_PROCESSING;
 
     int offset = y * width;
@@ -114,7 +124,9 @@ static int DoRenderOp(T *map, int width, int height, int d, imRenderFunc render_
     }
   
     IM_COUNT_PROCESSING;
-    #pragma omp flush (processing)
+#ifdef _OPENMP
+#pragma omp flush (processing)
+#endif
     IM_END_PROCESSING;
   }
 
