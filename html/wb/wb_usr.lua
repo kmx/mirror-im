@@ -242,6 +242,7 @@ wb_usr.tree =
           folder=
           {
             { link= "doxygen/group__render.html", name= {en= "Synthetic Image Render" } },
+            { link= "doxygen/group__procconvert.html", name= {en= "Image Conversion" } },
             { link= "",                        name= {en= "" } },
             { link= "doxygen/group__resize.html", name= {en= "Image Resize" } },
             { link= "doxygen/group__geom.html", name= {en= "Geometric Operations" } },
