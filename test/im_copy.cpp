@@ -53,8 +53,8 @@ int main(int argc, char* argv[])
     return 0;
   }
 
-//  imFormatRegisterAVI();
-//  imFormatRegisterWMV();
+  imFormatRegisterAVI();
+  imFormatRegisterWMV();
 
   void* data = NULL;
   imFile* ifile = NULL;

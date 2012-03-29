@@ -39,7 +39,7 @@ extern "C" {
       NONE     - no compression [default]
       RLE      - Microsoft RLE (8bpp only)
       CINEPACK - Cinepak Codec by Radius
-      MSVC     - Microsoft Video 1 (old)
+      MSVC     - Microsoft Video 1 (old)  (8bpp and 16bpp only)
       M261     - Microsoft H.261 Video Codec
       M263     - Microsoft H.263 Video Codec
       I420     - Intel 4:2:0 Video Codec (same as M263)

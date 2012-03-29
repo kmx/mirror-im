@@ -65,7 +65,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="im.lib im_avi.lib zlib1.lib vfw32.lib"
+				AdditionalDependencies="im.lib im_avi.lib zlib1.lib vfw32.lib im_wmv.lib wmvcore.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="D:\LNG\WMFSDK9\lib;../lib"

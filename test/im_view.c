@@ -15,6 +15,9 @@
 #include <cdiup.h>
 #include <im.h>
 #include <im_image.h>
+#include <im_format_jp2.h>
+#include <im_format_avi.h>
+#include <im_format_wmv.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -147,6 +150,10 @@ static Ihandle* CreateDialog(void)
 int main(int argc, char* argv[])
 {
   Ihandle* dlg;
+
+//  imFormatRegisterJP2();
+  imFormatRegisterAVI();
+//  imFormatRegisterWMV();   
 
   IupOpen(&argc, &argv);
 
