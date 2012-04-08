@@ -166,7 +166,7 @@ void imFormatRegisterTIFF(void);
       Other APPx markers are ignored.
       No thumbnail support.
       RGB images are automatically converted to YCbCr when saved.
-      Also YcbCr are converted to RGB when loaded. Use AutoYCbCr=0 to disable this behavior.
+      Also YcbCr are automatically converted to RGB when loaded. Use AutoYCbCr=0 to disable this behavior.
 \endverbatim
  * \ingroup format */
 void imFormatRegisterJPEG(void);
