@@ -30,7 +30,6 @@ extern "C" {
 #include "exif-data.h"
 #include "exif-entry.h"
 #include "exif-utils.h"
-extern "C" const char *exif_tag_get_name_index (unsigned int i, ExifTag *tag);
 #endif
 
 /* libjpeg error handlers */
@@ -232,9 +231,12 @@ void imFileFormatJPEG::iReadExifAttrib(unsigned char* data, int data_length, imA
 
 	ExifByteOrder byte_order = exif_data_get_byte_order(exif);
 
-  for (int i = 0; i < 3; i += 2)  // Only scan for IFD_0 (0) and IFD_EXIF (2)
+  for (int ifd = 0; ifd < EXIF_IFD_COUNT; ifd++)
   {
-    ExifContent *content = exif->ifd[i];
+    if (ifd == EXIF_IFD_1 || ifd == EXIF_IFD_INTEROPERABILITY) // Skip thumbnail and interoperability
+      continue;
+
+    ExifContent *content = exif->ifd[ifd];
 
     if (content && content->count) 
     {
@@ -243,7 +245,7 @@ void imFileFormatJPEG::iReadExifAttrib(unsigned char* data, int data_length, imA
         ExifEntry *entry = content->entries[j];
         int type = 0;
 
-        const char* name = exif_tag_get_name(entry->tag);
+        const char* name = exif_tag_get_name_in_ifd(entry->tag, (ExifIfd)ifd);
         if (!name)
           continue;
 
@@ -389,6 +391,122 @@ static void iGetRational(float fvalue, int *num, int *den, int sign)
 	*num = sign * imRound(fvalue);
 }
 
+static int iExifWriteTag(ExifData* exif, int index, const char* name, int data_type, int attrib_count, const void* attrib_data)
+{
+  int c;
+  (void)data_type;
+  (void)index;
+
+  ExifTag tag = exif_tag_from_name(name);
+  if (tag == 0)
+    return 1;
+
+  ExifEntry *entry = exif_entry_new();
+  ExifByteOrder byte_order = exif_data_get_byte_order(exif);
+
+  ExifContent *content;
+  if (name[0] == 'G' && name[1] == 'P' && name[2] == 'S')
+    content = exif->ifd[EXIF_IFD_GPS];      // GPS tags
+  else if (tag > EXIF_TAG_COPYRIGHT)
+    content = exif->ifd[EXIF_IFD_EXIF];     // EXIF tags
+  else
+    content = exif->ifd[EXIF_IFD_0];        // TIFF tags 
+
+  exif_content_add_entry(content, entry);
+
+  exif_entry_initialize(entry, tag);
+
+  if (!entry->format)  // unsupported tag
+    return 1;
+
+  int format_size = exif_format_get_size(entry->format);
+
+  if (tag == EXIF_TAG_RESOLUTION_UNIT)
+  {
+    int res_unit;
+    if (imStrEqual((char*)attrib_data, "DPI"))
+      res_unit = 2;
+    else
+      res_unit = 3;
+
+    exif_set_short (entry->data, byte_order, (imushort)res_unit);
+
+    return 1;
+  }
+
+  if (entry->components == 0)
+  {
+    entry->components = attrib_count;
+    if (entry->data) free(entry->data);
+    entry->size = format_size * entry->components;
+    entry->data = (imbyte*)malloc(entry->size);
+  }
+
+  switch (entry->format) 
+  {
+  case EXIF_FORMAT_UNDEFINED:
+  case EXIF_FORMAT_ASCII:
+  case EXIF_FORMAT_BYTE:
+    {
+      imbyte *bvalue = (imbyte*)attrib_data;
+      for (c = 0; c < (int)entry->components; c++) 
+        entry->data[c] = bvalue[c];
+    }
+    break;
+  case EXIF_FORMAT_SHORT:
+    {
+      imushort *usvalue = (imushort*)attrib_data;
+      for (c = 0; c < (int)entry->components; c++) 
+        exif_set_short(entry->data + format_size * c, byte_order, usvalue[c]);
+    }
+    break;
+  case EXIF_FORMAT_LONG:
+    {
+      int *ivalue = (int*)attrib_data;
+      for (c = 0; c < (int)entry->components; c++) 
+        exif_set_long(entry->data + format_size * c, byte_order, (unsigned int)ivalue[c]);
+    }
+    break;
+  case EXIF_FORMAT_SLONG:
+    {
+      int *ivalue = (int*)attrib_data;
+      for (c = 0; c < (int)entry->components; c++) 
+        exif_set_slong(entry->data + format_size * c, byte_order, (int)ivalue[c]);
+    }
+    break;
+  case EXIF_FORMAT_RATIONAL:
+    {
+      ExifRational v_rat;
+      int num, den;
+      float *fvalue = (float*)attrib_data;
+      for (c = 0; c < (int)entry->components; c++) 
+      {
+        iGetRational(fvalue[c], &num, &den, 1);
+        v_rat.numerator = num;
+        v_rat.denominator = den;
+        exif_set_rational(entry->data + format_size * c, byte_order, v_rat);
+      }
+    }
+    break;
+  case EXIF_FORMAT_SRATIONAL:
+    {
+      ExifSRational v_srat;
+      int num, den;
+      float *fvalue = (float*)attrib_data;
+      for (c = 0; c < (int)entry->components; c++) 
+      {
+        iGetRational(fvalue[c], &num, &den, 1);
+        v_srat.numerator = num;
+        v_srat.denominator = den;
+        exif_set_srational(entry->data + format_size * c, byte_order, v_srat);
+      }
+    }
+    break;
+  }
+
+  return 1;
+}
+
 void imFileFormatJPEG::iWriteExifAttrib(imAttribTable* attrib_table)
 {
   ExifData* exif = exif_data_new();
@@ -401,126 +519,7 @@ void imFileFormatJPEG::iWriteExifAttrib(imAttribTable* attrib_table)
     
   exif_data_set_byte_order(exif, byte_order);
 
-  int c, i = 0;
-  while(i>=0)
-  {
-    ExifTag tag;
-    const char * name = exif_tag_get_name_index(i, &tag);
-    if (!name)
-      break;
-
-    ExifEntry *entry;
-    int attrib_count;
-    const void* attrib_data = attrib_table->Get(name, NULL, &attrib_count); 
-    if (attrib_data)
-    {
-      entry = exif_entry_new();
-
-      ExifContent *content;
-      if (tag > EXIF_TAG_COPYRIGHT)
-        content = exif->ifd[2];     // IFD_EXIF (2) contains EXIF tags
-      else
-        content = exif->ifd[0];     // IFD_0    (0) contains TIFF tags 
-
-      exif_content_add_entry(content, entry);
-
-      exif_entry_initialize(entry, tag);
-
-      if (!entry->format)  // unsupported tag
-      {
-        i++;
-        continue;
-      }
-
-      int format_size = exif_format_get_size(entry->format);
-
-      if (tag == EXIF_TAG_RESOLUTION_UNIT)
-      {
-        int res_unit;
-        if (imStrEqual((char*)attrib_data, "DPI"))
-          res_unit = 2;
-        else
-          res_unit = 3;
-
-        exif_set_short (entry->data, byte_order, (imushort)res_unit);
-
-        i++;
-        continue;
-      }
-
-      if (entry->components == 0)
-      {
-		    entry->components = attrib_count;
-        if (entry->data) free(entry->data);
-        entry->size = format_size * entry->components;
-        entry->data = (imbyte*)malloc(entry->size);
-      }
-
-      switch (entry->format) 
-      {
-      case EXIF_FORMAT_UNDEFINED:
-      case EXIF_FORMAT_ASCII:
-      case EXIF_FORMAT_BYTE:
-        {
-          imbyte *bvalue = (imbyte*)attrib_data;
-          for (c = 0; c < (int)entry->components; c++) 
-            entry->data[c] = bvalue[c];
-        }
-        break;
-      case EXIF_FORMAT_SHORT:
-        {
-          imushort *usvalue = (imushort*)attrib_data;
-          for (c = 0; c < (int)entry->components; c++) 
-            exif_set_short(entry->data + format_size * c, byte_order, usvalue[c]);
-        }
-        break;
-      case EXIF_FORMAT_LONG:
-        {
-          int *ivalue = (int*)attrib_data;
-          for (c = 0; c < (int)entry->components; c++) 
-            exif_set_long(entry->data + format_size * c, byte_order, (unsigned int)ivalue[c]);
-        }
-        break;
-      case EXIF_FORMAT_SLONG:
-        {
-          int *ivalue = (int*)attrib_data;
-          for (c = 0; c < (int)entry->components; c++) 
-            exif_set_slong(entry->data + format_size * c, byte_order, (int)ivalue[c]);
-        }
-        break;
-      case EXIF_FORMAT_RATIONAL:
-        {
-	        ExifRational v_rat;
-          int num, den;
-          float *fvalue = (float*)attrib_data;
-          for (c = 0; c < (int)entry->components; c++) 
-          {
-            iGetRational(fvalue[c], &num, &den, 1);
-            v_rat.numerator = num;
-            v_rat.denominator = den;
-            exif_set_rational(entry->data + format_size * c, byte_order, v_rat);
-          }
-        }
-        break;
-      case EXIF_FORMAT_SRATIONAL:
-        {
-	        ExifSRational v_srat;
-          int num, den;
-          float *fvalue = (float*)attrib_data;
-          for (c = 0; c < (int)entry->components; c++) 
-          {
-            iGetRational(fvalue[c], &num, &den, 1);
-            v_srat.numerator = num;
-            v_srat.denominator = den;
-            exif_set_srational(entry->data + format_size * c, byte_order, v_srat);
-          }
-        }
-        break;
-      }
-    }
-
-    i++;
-  }
+  attrib_table->ForEach(exif, (imAttribTableCallback)iExifWriteTag);
 
   imbyte* data = NULL;
   unsigned int data_size = 0;

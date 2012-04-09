@@ -159,7 +159,6 @@ void imFormatRegisterTIFF(void);
 
     Changes to libEXIF:
       new files config.h and _stdint.h
-      changed "exif-tag.c" to add new function
       changed "exif-entry.c" to improve exif_entry_initialize
 
     Comments:

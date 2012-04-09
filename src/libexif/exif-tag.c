@@ -854,13 +854,3 @@ exif_tag_get_support_level_in_ifd (ExifTag tag, ExifIfd ifd, ExifDataType t)
 	return EXIF_SUPPORT_LEVEL_NOT_RECORDED;
 }
 
-const char *
-exif_tag_get_name_index (unsigned int i, ExifTag *tag)
-{
-	if (!ExifTagTable[i].name)
-		return NULL;
-
-	*tag = ExifTagTable[i].tag;
-
-	return (ExifTagTable[i].name);
-}
