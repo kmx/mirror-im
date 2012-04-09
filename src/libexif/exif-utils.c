@@ -14,8 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA  02110-1301  USA.
  */
 
 #include <config.h>
@@ -213,10 +213,12 @@ exif_set_srational (unsigned char *buf, ExifByteOrder order,
 	exif_set_slong (buf + 4, order, value.denominator);
 }
 
+/*! This function converts rather UCS-2LE than UTF-16 to UTF-8.
+ * It should really be replaced by iconv().
+ */
 void
 exif_convert_utf16_to_utf8 (char *out, const unsigned short *in, int maxlen)
 {
-	/* This function converts rather UCS2 than UTF16 to UTF8 */
 	if (maxlen <= 0) {
 		return;
 	}

@@ -14,8 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA  02110-1301  USA.
  */
 
 #ifndef __MNOTE_OLYMPUS_TAG_H__
@@ -42,7 +42,7 @@ enum _MnoteOlympusTag {
 	MNOTE_NIKON_TAG_UNKNOWN_0X000D          = 0x000d,
 	MNOTE_NIKON_TAG_EXPOSUREDIFF            = 0x000e,
 	MNOTE_NIKON_TAG_ISOSELECTION            = 0x000f,
-	MNOTE_NIKON_TAG_PREVIEWIMAGE            = 0x0011,
+	MNOTE_NIKON_TAG_PREVIEWIMAGE_IFD_POINTER= 0x0011,
 	MNOTE_NIKON_TAG_FLASHEXPCOMPENSATION    = 0x0012,
 	MNOTE_NIKON_TAG_ISO2                    = 0x0013,
 	MNOTE_NIKON_TAG_IMAGEBOUNDARY           = 0x0016,
@@ -115,7 +115,7 @@ enum _MnoteOlympusTag {
 	MNOTE_OLYMPUS_TAG_ONETOUCHWB		= 0x0302,
 	MNOTE_OLYMPUS_TAG_WHITEBALANCEBRACKET	= 0x0303,
 	MNOTE_OLYMPUS_TAG_WHITEBALANCEBIAS	= 0x0304,
-	MNOTE_OLYMPUS_TAG_UNKNOWN_5		= 0x0f00,
+	MNOTE_OLYMPUS_TAG_DATADUMP		= 0x0f00,
 	MNOTE_OLYMPUS_TAG_UNKNOWN_4		= 0x0f04,
 	MNOTE_OLYMPUS_TAG_SHUTTERSPEED		= 0x1000,
 	MNOTE_OLYMPUS_TAG_ISOVALUE		= 0x1001,
@@ -163,16 +163,23 @@ enum _MnoteOlympusTag {
 	MNOTE_OLYMPUS_TAG_LIGHTVALUECENTER	= 0x103d,
 	MNOTE_OLYMPUS_TAG_LIGHTVALUEPERIPHERY	= 0x103e,
 
+	/* Epson */
+	MNOTE_EPSON_TAG_IMAGE_WIDTH		= 0x020b,
+	MNOTE_EPSON_TAG_IMAGE_HEIGHT		= 0x020c,
+	MNOTE_EPSON_TAG_SOFTWARE		= 0x020d,
+
 	/* Sanyo */
 	MNOTE_SANYO_TAG_SEQUENTIALSHOT		= 0x020e,
 	MNOTE_SANYO_TAG_WIDERANGE		= 0x020f,
 	MNOTE_SANYO_TAG_COLORADJUSTMENTMODE	= 0x0210,
+	MNOTE_SANYO_TAG_FOCUSMODE		= 0x0212,
 	MNOTE_SANYO_TAG_QUICKSHOT		= 0x0213,
 	MNOTE_SANYO_TAG_SELFTIMER		= 0x0214,
 	MNOTE_SANYO_TAG_VOICEMEMO		= 0x0216,
 	MNOTE_SANYO_TAG_RECORDSHUTTERRELEASE	= 0x0217,
 	MNOTE_SANYO_TAG_FLICKERREDUCE		= 0x0218,
 	MNOTE_SANYO_TAG_OPTICALZOOM		= 0x0219,
+	MNOTE_SANYO_TAG_CCDSENSITIVITY		= 0x021a,
 	MNOTE_SANYO_TAG_DIGITALZOOM		= 0x021b,
 	MNOTE_SANYO_TAG_LIGHTSOURCESPECIAL	= 0x021d,
 	MNOTE_SANYO_TAG_RESAVED			= 0x021e,
@@ -186,9 +193,33 @@ typedef enum _MnoteOlympusTag MnoteOlympusTag;
 #define MNOTE_OLYMPUS_TAG_UNKNOWN_1	MNOTE_OLYMPUS_TAG_BWMODE
 #define MNOTE_OLYMPUS_TAG_UNKNOWN_2	MNOTE_OLYMPUS_TAG_FOCALPLANEDIAGONAL
 #define MNOTE_OLYMPUS_TAG_UNKNOWN_3	MNOTE_OLYMPUS_TAG_LENSDISTORTION
+#define MNOTE_OLYMPUS_TAG_UNKNOWN_5	MNOTE_OLYMPUS_TAG_DATADUMP
+#define MNOTE_NIKON_TAG_PREVIEWIMAGE	MNOTE_NIKON_TAG_PREVIEWIMAGE_IFD_POINTER
 
+/*! Return a textual name of the given tag within the Olympus-style MakerNote.
+ * The name is a short, unique, non-localized text string containing only
+ * US-ASCII alphanumeric characters.
+ *
+ * \param[in] tag Olympus-style MakerNote tag
+ * \return textual name of the tag, or NULL if the tag is unknown
+ */
 const char *mnote_olympus_tag_get_name        (MnoteOlympusTag tag);
+
+/*! Return a textual title of the given tag within the Olympus-style MakerNote.
+ * The title is a short, localized description of the tag.
+ *
+ * \param[in] tag Olympus-style MakerNote tag
+ * \return textual title of the tag, or NULL if the tag is unknown
+ */
 const char *mnote_olympus_tag_get_title       (MnoteOlympusTag tag);
+
+/*! Return a verbose textual description of the given tag within the
+ * Olympus-style MakerNote.
+ * The description is a verbose, localized description of the tag.
+ *
+ * \param[in] tag EXIF tag
+ * \return textual description of the tag, or NULL if the tag is unknown
+ */
 const char *mnote_olympus_tag_get_description (MnoteOlympusTag tag);
 
 #ifdef __cplusplus

@@ -14,8 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA  02110-1301  USA.
  */
 
 #ifndef __EXIF_MNOTE_DATA_PENTAX_H__
@@ -25,9 +25,10 @@
 #include <libexif/exif-mnote-data.h>
 #include <libexif/exif-mnote-data-priv.h>
 #include <libexif/pentax/mnote-pentax-entry.h>
+#include <libexif/exif-data.h>
 #include <libexif/exif-mem.h>
 
-enum PentaxVersion {pentaxV1 = 1, pentaxV2 = 2, pentaxV3 = 4, casioV2 = 4 };
+enum PentaxVersion {pentaxV1 = 1, pentaxV2 = 2, pentaxV3 = 3, casioV2 = 4 };
 
 typedef struct _ExifMnoteDataPentax ExifMnoteDataPentax;
 
@@ -42,6 +43,16 @@ struct _ExifMnoteDataPentax {
 
 	enum PentaxVersion version;
 };
+
+/*! Detect if MakerNote is recognized as one handled by the Pentax module.
+ * 
+ * \param[in] ed image #ExifData to identify as as a Pentax type
+ * \param[in] e #ExifEntry for EXIF_TAG_MAKER_NOTE, from within ed but
+ *   duplicated here for convenience
+ * \return 0 if not recognized, nonzero if recognized. The specific nonzero 
+ *   value returned may identify a subtype unique within this module.
+ */
+int exif_mnote_data_pentax_identify (const ExifData *ed, const ExifEntry *e);
 
 ExifMnoteData *exif_mnote_data_pentax_new (ExifMem *);
 

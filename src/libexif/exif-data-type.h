@@ -14,8 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA  02110-1301  USA.
  */
 
 #ifndef __EXIF_DATA_TYPE_H__
@@ -25,12 +25,18 @@
 extern "C" {
 #endif /* __cplusplus */
 
+/*! Represents the type of image data to which the EXIF data applies.
+ * The EXIF tags have different constraints depending on the type of
+ * image data.
+ */
 typedef enum {
 	EXIF_DATA_TYPE_UNCOMPRESSED_CHUNKY = 0,
 	EXIF_DATA_TYPE_UNCOMPRESSED_PLANAR,
 	EXIF_DATA_TYPE_UNCOMPRESSED_YCC,
 	EXIF_DATA_TYPE_COMPRESSED,
-	EXIF_DATA_TYPE_COUNT
+	EXIF_DATA_TYPE_COUNT,
+
+	EXIF_DATA_TYPE_UNKNOWN = EXIF_DATA_TYPE_COUNT
 } ExifDataType;
 
 #ifdef __cplusplus

@@ -14,8 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA  02110-1301  USA.
  */
 
 #ifndef __EXIF_MNOTE_DATA_CANON_H__
@@ -42,6 +42,16 @@ struct _ExifMnoteDataCanon {
 
 	ExifDataOption options;
 };
+
+/*! Detect if MakerNote is recognized as one handled by the Canon module.
+ * 
+ * \param[in] ed image #ExifData to identify as as a Canon type
+ * \param[in] e #ExifEntry for EXIF_TAG_MAKER_NOTE, from within ed but
+ *   duplicated here for convenience
+ * \return 0 if not recognized, nonzero if recognized. The specific nonzero 
+ *   value returned may identify a subtype unique within this module.
+ */
+int exif_mnote_data_canon_identify (const ExifData *ed, const ExifEntry *e);
 
 ExifMnoteData *exif_mnote_data_canon_new (ExifMem *mem, ExifDataOption o);
 

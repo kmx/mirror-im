@@ -15,8 +15,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA  02110-1301  USA.
  */
 
 #include "config.h"
@@ -85,8 +85,8 @@ static const struct canon_entry_table_t {
   { 3,  2, N_("On")},
   { 3,  3, N_("Red-eye reduction")},
   { 3,  4, N_("Slow synchro")},
-  { 3,  5, N_("Auto + Red-eye reduction")},
-  { 3,  6, N_("On + Red-eye reduction")},
+  { 3,  5, N_("Auto, red-eye reduction")},
+  { 3,  6, N_("On, red-eye reduction")},
   { 3, 16, N_("External flash")},
   { 4,  0, N_("Single")},
   { 4,  1, N_("Continuous")},
@@ -210,7 +210,7 @@ static const struct canon_entry_table_t {
   {21,  11, N_("Canon EF 35mm f/2")},
   {21,  13, N_("Canon EF 15mm f/2.8")},
   {21,  21, N_("Canon EF 80-200mm f/2.8L")},
-  {21,  22, N_("Tokina AT-X280AF PRO 28-80mm F2.8 ASPHERICAL")},
+  {21,  22, N_("Tokina AT-X280AF PRO 28-80mm F2.8 Aspherical")},
   {21,  26, N_("Cosina 100mm f/3.5 Macro AF")},
   {21,  28, N_("Tamron AF Aspherical 28-200mm f/3.8-5.6")},
   {21,  29, N_("Canon EF 50mm f/1.8 MkII")},
@@ -296,7 +296,7 @@ static const struct canon_entry_table_t {
   {32, 0, N_("Normal AE")},
   {32, 1, N_("Exposure compensation")},
   {32, 2, N_("AE lock")},
-  {32, 3, N_("AE lock + Exposure compensation")},
+  {32, 3, N_("AE lock + exposure compensation")},
   {32, 4, N_("No AE")},
   {33, 0, N_("Off")},
   {33, 1, N_("On")},
@@ -349,10 +349,10 @@ entries_settings_2 [] = {
   { 13,  0x3000, N_("None (MF)")},
   { 13,  0x3001, N_("Right")},
   { 13,  0x3002, N_("Center")},
-  { 13,  0x3003, N_("Center + Right")},
+  { 13,  0x3003, N_("Center-right")},
   { 13,  0x3004, N_("Left")},
-  { 13,  0x3005, N_("Left + Right")},
-  { 13,  0x3006, N_("Left + Center")},
+  { 13,  0x3005, N_("Left-right")},
+  { 13,  0x3006, N_("Left-center")},
   { 13,  0x3007, N_("All")},
   { 15,  0, N_("Off")},
   { 15,  1, N_("On (shot 1)")},
@@ -404,13 +404,13 @@ color_information [] = {
   {7,  4, N_("Fluorescent")},
   {7,  5, N_("Flash")},
   {7,  6, N_("Custom")},
-  {7,  7, N_("Black & White")},
+  {7,  7, N_("Black & white")},
   {7,  8, N_("Shade")},
-  {7,  9, N_("Manual Temperature (Kelvin)")},
-  {7, 10, N_("PC Set1")},
-  {7, 11, N_("PC Set2")},
-  {7, 12, N_("PC Set3")},
-  {7, 14, N_("Daylight Fluorescent")},
+  {7,  9, N_("Manual temperature (Kelvin)")},
+  {7, 10, N_("PC set 1")},
+  {7, 11, N_("PC set 2")},
+  {7, 12, N_("PC set 3")},
+  {7, 14, N_("Daylight fluorescent")},
   {7, 15, N_("Custom 1")},
   {7, 16, N_("Custom 2")},
   {7, 17, N_("Underwater")},
@@ -419,9 +419,9 @@ color_information [] = {
   {9, 0x02, N_("Set 1")},
   {9, 0x03, N_("Set 2")},
   {9, 0x04, N_("Set 3")},
-  {9, 0x21, N_("User Def. 1")},
-  {9, 0x22, N_("User Def. 2")},
-  {9, 0x23, N_("User Def. 3")},
+  {9, 0x21, N_("User def. 1")},
+  {9, 0x22, N_("User def. 2")},
+  {9, 0x23, N_("User def. 3")},
   {9, 0x41, N_("External 1")},
   {9, 0x42, N_("External 2")},
   {9, 0x43, N_("External 3")},
@@ -486,9 +486,9 @@ canon_search_table_bitfield (const struct canon_entry_table_t table[],
 		for (i = j; table[i].name && (table[i].subtag == t); i++) {
 			bit = table[i].value;
 			if ((vs >> bit) & 1) {
-				strncat(val, table[i].name, maxlen - strlen (val));
+				strncat(val, _(table[i].name), maxlen - strlen (val));
 				if (bit != lastbit) 
-					strncat (val, N_(", "), maxlen - strlen (val));
+					strncat (val, _(", "), maxlen - strlen (val));
 			}
 		}
 	} else {
@@ -579,7 +579,7 @@ mnote_canon_entry_get_value (const MnoteCanonEntry *entry, unsigned int t, char 
 		case 15:
 			if (((vs & 0xC000) == 0x4000) && (vs != 0x7FFF)) {
 				/* Canon S3 IS - directly specified value */
-				snprintf (val, maxlen, _("%i"), vs & ~0x4000);
+				snprintf (val, maxlen, "%i", vs & ~0x4000);
 			} else {
 				/* Standard Canon - index into lookup table */
 				canon_search_table_value (entries_settings_1, t, vs, val, maxlen);
@@ -642,7 +642,7 @@ mnote_canon_entry_get_value (const MnoteCanonEntry *entry, unsigned int t, char 
 		case 5:
 		case 14:
 		case 16:
-			snprintf (val, maxlen, _("%.2f EV"), vs / 32.0);
+			snprintf (val, maxlen, _("%.2f EV"), (ExifSShort)vs / 32.0);
 			break;
 		case 3:
 		case 20:
@@ -652,9 +652,9 @@ mnote_canon_entry_get_value (const MnoteCanonEntry *entry, unsigned int t, char 
 		case 21:
 			d = apex_value_to_shutter_speed ((ExifSShort)vs / 32.0);
 			if (d < 1)
-				snprintf (val, maxlen, _("1/%d"),(int)(1.0 / d));
+				snprintf (val, maxlen, _("1/%i"),(int)(1.0 / d));
 			else
-				snprintf (val, maxlen, _("%d"), (int) d);
+				snprintf (val, maxlen, "%i", (int) d);
 			break;
 		case 8:
 			snprintf (val, maxlen, "%u", vs);

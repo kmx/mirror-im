@@ -399,7 +399,10 @@ static int iExifWriteTag(ExifData* exif, int index, const char* name, int data_t
 
   ExifTag tag = exif_tag_from_name(name);
   if (tag == 0)
-    return 1;
+  {
+    if (!imStrEqual(name, "GPSVersionID"))  // EXIF_TAG_GPS_VERSION_ID==0
+      return 1;
+  }
 
   ExifEntry *entry = exif_entry_new();
   ExifByteOrder byte_order = exif_data_get_byte_order(exif);

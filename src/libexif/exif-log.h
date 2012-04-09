@@ -1,6 +1,7 @@
 /*! \file exif-log.h
- *  \brief log message infrastructure
- *
+ *  \brief Log message infrastructure
+ */
+/*
  * Copyright (c) 2004 Lutz Mueller <lutz@users.sourceforge.net>
  *
  * This library is free software; you can redistribute it and/or
@@ -15,8 +16,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA  02110-1301  USA.
  */
 
 #ifndef __EXIF_LOG_H__
@@ -29,12 +30,25 @@ extern "C" {
 #include <libexif/exif-mem.h>
 #include <stdarg.h>
 
+/*! State maintained by the logging interface */
 typedef struct _ExifLog        ExifLog;
 
+/*! Create a new logging instance.
+ * \see exif_log_free
+ *
+ * \return new instance of #ExifLog
+ */
 ExifLog *exif_log_new     (void);
 ExifLog *exif_log_new_mem (ExifMem *);
 void     exif_log_ref     (ExifLog *log);
 void     exif_log_unref   (ExifLog *log);
+
+/*! Delete instance of #ExifLog.
+ * \see exif_log_new
+ *
+ * \param[in] log #ExifLog
+ * \return new instance of #ExifLog
+ */
 void     exif_log_free    (ExifLog *log);
 
 typedef enum {
@@ -43,15 +57,32 @@ typedef enum {
 	EXIF_LOG_CODE_NO_MEMORY,
 	EXIF_LOG_CODE_CORRUPT_DATA
 } ExifLogCode;
-const char *exif_log_code_get_title   (ExifLogCode); /* Title for dialog   */
-const char *exif_log_code_get_message (ExifLogCode); /* Message for dialog */
 
-/** Log callback function prototype.
+/*! Return a textual description of the given class of error log.
+ *
+ * \param[in] code logging message class
+ * \return textual description of the log class
+ */
+const char *exif_log_code_get_title   (ExifLogCode code);
+
+/*! Return a verbose description of the given class of error log.
+ *
+ * \param[in] code logging message class
+ * \return verbose description of the log class
+ */
+const char *exif_log_code_get_message (ExifLogCode code);
+
+/*! Log callback function prototype.
  */
 typedef void (* ExifLogFunc) (ExifLog *log, ExifLogCode, const char *domain,
 			      const char *format, va_list args, void *data);
 
-/** Register log callback function.
+/*! Register log callback function.
+ * Calls to the log callback function are purely for diagnostic purposes.
+ *
+ * \param[in] log logging state variable
+ * \param[in] func callback function to set
+ * \param[in] data data to pass into callback function
  */
 void     exif_log_set_func (ExifLog *log, ExifLogFunc func, void *data);
 

@@ -14,8 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA  02110-1301  USA.
  */
 
 #ifndef __EXIF_MNOTE_DATA_PRIV_H__
@@ -29,10 +29,13 @@ extern "C" {
 #include <libexif/exif-byte-order.h>
 #include <libexif/exif-log.h>
 
+/*! \internal */
 typedef struct _ExifMnoteDataMethods ExifMnoteDataMethods;
+
+/*! \internal */
 struct _ExifMnoteDataMethods {
 
-	/* Live cycle */
+	/* Life cycle */
 	void (* free) (ExifMnoteData *);
 
 	/* Modification */
@@ -50,8 +53,10 @@ struct _ExifMnoteDataMethods {
 	char * (* get_value)             (ExifMnoteData *, unsigned int, char *val, unsigned int maxlen);
 };
 
+/*! \internal */
 typedef struct _ExifMnoteDataPriv ExifMnoteDataPriv;
 
+/*! \internal */
 struct _ExifMnoteData 
 {
 	ExifMnoteDataPriv *priv;
@@ -65,8 +70,13 @@ struct _ExifMnoteData
 	ExifMem *mem;
 };
 
+/*! \internal */
 void exif_mnote_data_construct      (ExifMnoteData *, ExifMem *mem);
+
+/*! \internal */
 void exif_mnote_data_set_byte_order (ExifMnoteData *, ExifByteOrder);
+
+/*! \internal */
 void exif_mnote_data_set_offset     (ExifMnoteData *, unsigned int);
 
 #ifdef __cplusplus

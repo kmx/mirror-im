@@ -14,8 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA  02110-1301  USA.
  */
 
 #include <config.h>
@@ -63,12 +63,15 @@ typedef enum {
 	EL_DATA_FORMAT_FUJI_RAW
 } ExifLoaderDataFormat;
 
+/*! \internal */
 struct _ExifLoader {
 	ExifLoaderState state;
 	ExifLoaderDataFormat data_format;
 
-	/* Small buffer used for detection of format */
+	/*! Small buffer used for detection of format */
 	unsigned char b[12];
+
+	/*! Number of bytes in the small buffer \c b */
 	unsigned char b_len;
 
 	unsigned int size;
@@ -81,6 +84,7 @@ struct _ExifLoader {
 	ExifMem *mem;
 };
 
+/*! Magic number for EXIF header */
 static const unsigned char ExifHeader[] = {0x45, 0x78, 0x69, 0x66, 0x00, 0x00};
 
 static void *
@@ -98,9 +102,6 @@ exif_loader_alloc (ExifLoader *l, unsigned int i)
 	EXIF_LOG_NO_MEMORY (l->log, "ExifLog", i);
 	return NULL;
 }
-
-#undef  MIN
-#define MIN(a, b)  (((a) < (b)) ? (a) : (b))
 
 void
 exif_loader_write_file (ExifLoader *l, const char *path)
@@ -177,6 +178,8 @@ exif_loader_write (ExifLoader *eld, unsigned char *buf, unsigned int len)
 			break;
 		}
 		break;
+
+	case EL_READ:
 	default:
 		break;
 	}
@@ -398,6 +401,26 @@ exif_loader_get_data (ExifLoader *loader)
 	exif_data_load_data (ed, loader->buf, loader->bytes_read);
 
 	return ed;
+}
+
+void
+exif_loader_get_buf (ExifLoader *loader, const unsigned char **buf,
+						  unsigned int *buf_size)
+{
+	const unsigned char* b = NULL;
+	unsigned int s = 0;
+
+	if (!loader || (loader->data_format == EL_DATA_FORMAT_UNKNOWN)) {
+		exif_log (loader->log, EXIF_LOG_CODE_DEBUG, "ExifLoader",
+			  "Loader format unknown");
+	} else {
+		b = loader->buf;
+		s = loader->bytes_read;
+	}
+	if (buf)
+		*buf = b;
+	if (buf_size)
+		*buf_size = s;
 }
 
 void

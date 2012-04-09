@@ -125,9 +125,9 @@ void imFormatRegisterTIFF(void);
  * Copyright (C) 1994-2011, Thomas G. Lane, Guido Vollbeding  \n
  *   from the Independent JPEG Group.
  * \par
- * Access to the EXIF attributes uses libEXIF version 0.6.17. \n
+ * Access to the EXIF attributes uses libEXIF version 0.6.20. \n
  * http://sourceforge.net/projects/libexif                    \n
- * Copyright (C) 2001-2003, Lutz Müller
+ * Copyright (C) 2001-2010, Lutz Müller
  *
  * \section Features
  *

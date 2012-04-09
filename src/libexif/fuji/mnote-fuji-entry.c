@@ -14,8 +14,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA  02110-1301  USA.
  */
 
 #include <stdlib.h>
@@ -73,8 +73,8 @@ static const struct {
     { {0, N_("Auto")},
       {0x100, N_("Daylight")},
       {0x200, N_("Cloudy")},
-      {0x300, N_("Daylight-color fluorescent")},
-      {0x301, N_("DayWhite-color fluorescent")},
+      {0x300, N_("Daylight fluorescent")},
+      {0x301, N_("Day white fluorescent")},
       {0x302, N_("White fluorescent")},
       {0x400, N_("Incandescent")},
       {0x500, N_("Flash")},
