@@ -1345,7 +1345,7 @@ exif_entry_initialize (ExifEntry *e, ExifTag tag)
 			e->data + 5 * exif_format_get_size (e->format), o, r);
 		break;
 
-	/* EXIF_FORMAT_ASCII, 13 components */
+	/* ASCII, 13 components */
 	case EXIF_TAG_RELATED_SOUND_FILE:
 		e->components = 13;
 		e->format = EXIF_FORMAT_ASCII;
@@ -1353,6 +1353,7 @@ exif_entry_initialize (ExifEntry *e, ExifTag tag)
 		e->data = exif_entry_alloc (e, e->size);
 		break;
 
+	/* ASCII, 33 components */
 	case EXIF_TAG_IMAGE_UNIQUE_ID:
 		e->components = 33;
 		e->format = EXIF_FORMAT_ASCII;
