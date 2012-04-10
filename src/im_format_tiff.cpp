@@ -164,13 +164,38 @@ static uint16 iTIFFCompCalc(const char* compression, int color_mode, int data_ty
   return Compression;
 }
 
+static int iTIFFGetDataType(TIFFDataType field_type)
+{
+  switch(field_type)
+  {
+  case TIFF_UNDEFINED:
+  case TIFF_ASCII: 
+  case TIFF_BYTE:
+  case TIFF_SBYTE:
+    return IM_BYTE;
+  case TIFF_SSHORT:
+    return IM_SHORT;
+  case TIFF_SHORT:
+    return IM_USHORT;
+  case TIFF_LONG:
+  case TIFF_SLONG:
+    return IM_INT;
+  case TIFF_RATIONAL:
+  case TIFF_SRATIONAL:
+  case TIFF_FLOAT:
+  case TIFF_DOUBLE:
+    return IM_FLOAT;
+  }
+
+  return -1;
+}
+
 static int iTIFFWriteTag(TIFF* tiff, int index, const char* name, int data_type, int count, const void* data)
 {
   const TIFFField *fld = TIFFFieldWithName(tiff, name);
-  (void)data_type;
-  (void)index;
   if (fld)
   {
+    /* ignored tags */
     if (fld->field_tag == TIFFTAG_EXIFIFD ||         /* offset */
         fld->field_tag == TIFFTAG_GPSIFD ||          
         fld->field_tag == TIFFTAG_INTEROPERABILITYIFD ||   
@@ -182,6 +207,10 @@ static int iTIFFWriteTag(TIFF* tiff, int index, const char* name, int data_type,
 	      fld->field_tag == TIFFTAG_XRESOLUTION ||
 	      fld->field_tag == TIFFTAG_YRESOLUTION ||
         fld->field_tag == TIFFTAG_INKNAMES)
+      return 1;
+
+    /* test if tag type is the same as the attribute type */
+    if (iTIFFGetDataType(fld->field_type) != data_type)
       return 1;
 
     if (fld->field_passcount)
@@ -230,43 +259,39 @@ static int iTIFFWriteTag(TIFF* tiff, int index, const char* name, int data_type,
         TIFFSetField(tiff, fld->field_tag, data);
       else
       {
-        switch(fld->field_type)
+        switch(data_type)
         {
-        case TIFF_UNDEFINED:
-        case TIFF_ASCII:
-        case TIFF_BYTE:
-        case TIFF_SBYTE:
+        case IM_BYTE:
           {
             imbyte* byte_data = (imbyte*)data;
             TIFFSetField(tiff, fld->field_tag, *byte_data);
           }
           break;
-        case TIFF_SHORT:
-        case TIFF_SSHORT:
+        case IM_SHORT:
+          {
+            short* short_data = (short*)data;
+            TIFFSetField(tiff, fld->field_tag, *short_data);
+          }
+          break;
+        case IM_USHORT:
           {
             imushort* short_data = (imushort*)data;
             TIFFSetField(tiff, fld->field_tag, *short_data);
           }
           break;
-        case TIFF_LONG:
-        case TIFF_SLONG:
+        case IM_INT:
           {
             int* long_data = (int*)data;
             TIFFSetField(tiff, fld->field_tag, *long_data);
           }
           break;
-        case TIFF_RATIONAL:
-        case TIFF_SRATIONAL:
-        case TIFF_FLOAT:
+        case IM_FLOAT:
           {
             float* float_data = (float*)data;
-            TIFFSetField(tiff, fld->field_tag, *float_data);
-          }
-          break;
-        case TIFF_DOUBLE:
-          {
-            float* float_data = (float*)data;
-            TIFFSetField(tiff, fld->field_tag, (double)*float_data);
+            if (fld->field_type==TIFF_DOUBLE)
+              TIFFSetField(tiff, fld->field_tag, (double)*float_data);
+            else
+              TIFFSetField(tiff, fld->field_tag, *float_data);
           }
           break;
         default:
@@ -276,6 +301,7 @@ static int iTIFFWriteTag(TIFF* tiff, int index, const char* name, int data_type,
     } 
   }
 
+  (void)index;
   return 1;
 }
 
@@ -320,12 +346,17 @@ static void iTIFFReadCustomTags(TIFF* tiff, imAttribTable* attrib_table)
           fld->field_tag == TIFFTAG_DEFAULTCROPSIZE ||
           fld->field_tag == TIFFTAG_DEFAULTCROPORIGIN)
       {
-        /* libTIFF bug. When reading custom tags there is an incorrect interpretation of the tag
+        //TODO re-check this
+        /* libTIFF issue. When reading custom tags there is an incorrect interpretation of the tag
         that leads to return always type=RATIONAL for these tags. */
         continue;
       }
 
-    int data_type = -1, data_count = -1;
+    int data_type = iTIFFGetDataType(fld->field_type);
+    if (data_type == -1)
+          continue;
+
+    int data_count = -1;
     void* data = NULL;
 
     if (fld->field_passcount)
@@ -345,30 +376,9 @@ static void iTIFFReadCustomTags(TIFF* tiff, imAttribTable* attrib_table)
         data_count = value_count;
       }
 
-      switch(fld->field_type)
+      if (data && data_count > 0)
       {
-      case TIFF_UNDEFINED:
-      case TIFF_ASCII: 
-      case TIFF_BYTE:
-      case TIFF_SBYTE:
-        data_type = IM_BYTE;
-        break;
-      case TIFF_SSHORT:
-        data_type = IM_SHORT;
-        break;
-      case TIFF_SHORT:
-        data_type = IM_USHORT;
-        break;
-      case TIFF_LONG:
-      case TIFF_SLONG:
-        data_type = IM_INT;
-        break;
-      case TIFF_RATIONAL:
-      case TIFF_SRATIONAL:
-      case TIFF_FLOAT:
-        data_type = IM_FLOAT;
-        break;
-      case TIFF_DOUBLE:
+        if (fld->field_type == TIFF_DOUBLE)
         {
           double* double_data = (double*)data;
           float* float_data = new float [data_count];
@@ -377,13 +387,9 @@ static void iTIFFReadCustomTags(TIFF* tiff, imAttribTable* attrib_table)
           attrib_table->Set(fld->field_name, IM_FLOAT, data_count, float_data);
           delete [] float_data;
         }
-        continue;
-      default:
-        continue;
+        else 
+          attrib_table->Set(fld->field_name, data_type, data_count, data);
       }
-
-      if (data && data_count > 0)
-        attrib_table->Set(fld->field_name, data_type, data_count, data);
     } 
     else
     {
@@ -398,34 +404,6 @@ static void iTIFFReadCustomTags(TIFF* tiff, imAttribTable* attrib_table)
         uint16 ushort_value[2];
         if (TIFFGetField(tiff, fld->field_tag, &ushort_value[0], &ushort_value[1]))
           attrib_table->Set(fld->field_name, IM_USHORT, 2, ushort_value);
-        continue;
-      }
-
-      switch(fld->field_type)
-      {
-      case TIFF_UNDEFINED:
-      case TIFF_BYTE:
-      case TIFF_SBYTE:
-      case TIFF_ASCII:
-        data_type = IM_BYTE;
-        break;
-      case TIFF_SSHORT:
-        data_type = IM_SHORT;
-        break;
-      case TIFF_SHORT:
-        data_type = IM_USHORT;
-        break;
-      case TIFF_LONG:
-      case TIFF_SLONG:
-        data_type = IM_INT;
-        break;
-      case TIFF_RATIONAL:
-      case TIFF_SRATIONAL:
-      case TIFF_FLOAT:
-      case TIFF_DOUBLE:
-        data_type = IM_FLOAT;
-        break;
-      default:
         continue;
       }
 

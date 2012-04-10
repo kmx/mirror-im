@@ -1499,14 +1499,6 @@ exif_entry_initialize (ExifEntry *e, ExifTag tag)
 			o, 1);
 		break;
 
-	/* SHORT, any component, no default */
-	case EXIF_TAG_SUBJECT_AREA:
-		e->components = 0;
-		e->format = EXIF_FORMAT_SHORT;
-		e->size = 0;
-		e->data = 0;
-		break;
-
 	/* SRATIONAL, 1 component, no default */
 	case EXIF_TAG_EXPOSURE_BIAS_VALUE:
 	case EXIF_TAG_BRIGHTNESS_VALUE:
@@ -1588,22 +1580,6 @@ exif_entry_initialize (ExifEntry *e, ExifTag tag)
 			e->data + 5 * exif_format_get_size (e->format), o, r);
 		break;
 
-	/* ASCII, 13 components */
-	case EXIF_TAG_RELATED_SOUND_FILE:
-		e->components = 13;
-		e->format = EXIF_FORMAT_ASCII;
-		e->size = exif_format_get_size (e->format) * e->components;
-		e->data = exif_entry_alloc (e, e->size);
-		break;
-
-	/* ASCII, 33 components */
-	case EXIF_TAG_IMAGE_UNIQUE_ID:
-		e->components = 33;
-		e->format = EXIF_FORMAT_ASCII;
-		e->size = exif_format_get_size (e->format) * e->components;
-		e->data = exif_entry_alloc (e, e->size);
-		break;
-
 	/* ASCII, 20 components */
 	case EXIF_TAG_DATE_TIME:
 	case EXIF_TAG_DATE_TIME_ORIGINAL:
@@ -1633,21 +1609,38 @@ exif_entry_initialize (ExifEntry *e, ExifTag tag)
 		break;
 	}
 
-	/* ASCII, any components, no default */
-	case EXIF_TAG_SPECTRAL_SENSITIVITY:
+	/* ASCII, no default */
 	case EXIF_TAG_SUB_SEC_TIME:
 	case EXIF_TAG_SUB_SEC_TIME_ORIGINAL:
 	case EXIF_TAG_SUB_SEC_TIME_DIGITIZED:
+		e->components = 0;
+		e->format = EXIF_FORMAT_ASCII;
+		e->size = 0;
+		e->data = NULL;
+		break;
+
+	/* ASCII, default "[None]" */
 	case EXIF_TAG_IMAGE_DESCRIPTION:
 	case EXIF_TAG_MAKE:
 	case EXIF_TAG_MODEL:
 	case EXIF_TAG_SOFTWARE:
 	case EXIF_TAG_ARTIST:
-	case EXIF_TAG_COPYRIGHT:
-		e->components = 0;
+		e->components = strlen (_("[None]")) + 1;
 		e->format = EXIF_FORMAT_ASCII;
-		e->size = 0;
-		e->data = NULL;
+		e->size = exif_format_get_size (e->format) * e->components;
+		e->data = exif_entry_alloc (e, e->size);
+		if (!e->data) break;
+		strncpy ((char *)e->data, _("[None]"), e->size);
+		break;
+	/* ASCII, default "[None]\0[None]\0" */
+	case EXIF_TAG_COPYRIGHT:
+		e->components = (strlen (_("[None]")) + 1) * 2;
+		e->format = EXIF_FORMAT_ASCII;
+		e->size = exif_format_get_size (e->format) * e->components;
+		e->data = exif_entry_alloc (e, e->size);
+		if (!e->data) break;
+		strcpy (((char *)e->data) + 0, _("[None]"));
+		strcpy (((char *)e->data) + strlen (_("[None]")) + 1, _("[None]"));
 		break;
 
 	/* UNDEFINED, 1 component, default 1 */
@@ -1705,10 +1698,6 @@ exif_entry_initialize (ExifEntry *e, ExifTag tag)
 
 	/* UNDEFINED, no components, no default */
 	/* Use this if the tag is otherwise unsupported */
-	case EXIF_TAG_OECF:											 
-	case EXIF_TAG_SPATIAL_FREQUENCY_RESPONSE:
-	case EXIF_TAG_NEW_CFA_PATTERN:					 
-	case EXIF_TAG_DEVICE_SETTING_DESCRIPTION:
 	case EXIF_TAG_MAKER_NOTE:
 	case EXIF_TAG_USER_COMMENT:
 	default:
@@ -1719,37 +1708,3 @@ exif_entry_initialize (ExifEntry *e, ExifTag tag)
 		break;
 	}
 }
-
-/*
-#define EXIF_TAG_GPS_VERSION_ID        0x0000
-#define EXIF_TAG_GPS_LATITUDE_REF      0x0001 // INTEROPERABILITY_INDEX
-#define EXIF_TAG_GPS_LATITUDE          0x0002 // INTEROPERABILITY_VERSION
-#define EXIF_TAG_GPS_LONGITUDE_REF     0x0003
-#define EXIF_TAG_GPS_LONGITUDE         0x0004
-#define EXIF_TAG_GPS_ALTITUDE_REF      0x0005
-#define EXIF_TAG_GPS_ALTITUDE          0x0006
-#define EXIF_TAG_GPS_TIME_STAMP        0x0007
-#define EXIF_TAG_GPS_SATELLITES        0x0008
-#define EXIF_TAG_GPS_STATUS            0x0009
-#define EXIF_TAG_GPS_MEASURE_MODE      0x000a
-#define EXIF_TAG_GPS_DOP               0x000b
-#define EXIF_TAG_GPS_SPEED_REF         0x000c
-#define EXIF_TAG_GPS_SPEED             0x000d
-#define EXIF_TAG_GPS_TRACK_REF         0x000e
-#define EXIF_TAG_GPS_TRACK             0x000f
-#define EXIF_TAG_GPS_IMG_DIRECTION_REF 0x0010
-#define EXIF_TAG_GPS_IMG_DIRECTION     0x0011
-#define EXIF_TAG_GPS_MAP_DATUM         0x0012
-#define EXIF_TAG_GPS_DEST_LATITUDE_REF 0x0013
-#define EXIF_TAG_GPS_DEST_LATITUDE     0x0014
-#define EXIF_TAG_GPS_DEST_LONGITUDE_REF 0x0015
-#define EXIF_TAG_GPS_DEST_LONGITUDE     0x0016
-#define EXIF_TAG_GPS_DEST_BEARING_REF   0x0017
-#define EXIF_TAG_GPS_DEST_BEARING       0x0018
-#define EXIF_TAG_GPS_DEST_DISTANCE_REF  0x0019
-#define EXIF_TAG_GPS_DEST_DISTANCE      0x001a
-#define EXIF_TAG_GPS_PROCESSING_METHOD  0x001b
-#define EXIF_TAG_GPS_AREA_INFORMATION   0x001c
-#define EXIF_TAG_GPS_DATE_STAMP         0x001d
-#define EXIF_TAG_GPS_DIFFERENTIAL       0x001e
-*/

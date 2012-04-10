@@ -32,6 +32,196 @@ extern "C" {
 #include "exif-utils.h"
 #endif
 
+
+static int iExifGetGPSTagInfo(int tag, ExifFormat* format, unsigned long *components)
+{
+  struct _ExifTagInfo{
+    ExifFormat format;
+    unsigned long components;
+  } taginfo[] = {
+  /* EXIF_TAG_GPS_VERSION_ID */ {EXIF_FORMAT_BYTE, 4},
+  /* EXIF_TAG_GPS_LATITUDE_REF */ {EXIF_FORMAT_ASCII, 2},
+  /* EXIF_TAG_GPS_LATITUDE */ {EXIF_FORMAT_RATIONAL, 3},
+  /* EXIF_TAG_GPS_LONGITUDE_REF */ {EXIF_FORMAT_ASCII, 2},
+  /* EXIF_TAG_GPS_LONGITUDE */ {EXIF_FORMAT_RATIONAL, 3},
+  /* EXIF_TAG_GPS_ALTITUDE_REF */ {EXIF_FORMAT_BYTE, 1},
+  /* EXIF_TAG_GPS_ALTITUDE */ {EXIF_FORMAT_RATIONAL, 1},
+  /* EXIF_TAG_GPS_TIME_STAMP */ {EXIF_FORMAT_RATIONAL, 3},
+  /* EXIF_TAG_GPS_SATELLITES */ {EXIF_FORMAT_ASCII, 0},
+  /* EXIF_TAG_GPS_STATUS */ {EXIF_FORMAT_ASCII, 2},
+  /* EXIF_TAG_GPS_MEASURE_MODE */ {EXIF_FORMAT_ASCII, 2},
+  /* EXIF_TAG_GPS_DOP */ {EXIF_FORMAT_RATIONAL, 1},
+  /* EXIF_TAG_GPS_SPEED_REF */ {EXIF_FORMAT_ASCII, 2},
+  /* EXIF_TAG_GPS_SPEED */ {EXIF_FORMAT_RATIONAL, 1},
+  /* EXIF_TAG_GPS_TRACK_REF */ {EXIF_FORMAT_ASCII, 2},
+  /* EXIF_TAG_GPS_TRACK */ {EXIF_FORMAT_RATIONAL, 1},
+  /* EXIF_TAG_GPS_IMG_DIRECTION_REF */ {EXIF_FORMAT_ASCII, 2},
+  /* EXIF_TAG_GPS_IMG_DIRECTION */ {EXIF_FORMAT_RATIONAL, 1},
+  /* EXIF_TAG_GPS_MAP_DATUM */ {EXIF_FORMAT_ASCII, 0},
+  /* EXIF_TAG_GPS_DEST_LATITUDE_REF */ {EXIF_FORMAT_ASCII, 2},
+  /* EXIF_TAG_GPS_DEST_LATITUDE */ {EXIF_FORMAT_RATIONAL, 3},
+  /* EXIF_TAG_GPS_DEST_LONGITUDE_REF */ {EXIF_FORMAT_ASCII, 2},
+  /* EXIF_TAG_GPS_DEST_LONGITUDE */ {EXIF_FORMAT_RATIONAL, 3},
+  /* EXIF_TAG_GPS_DEST_BEARING_REF */ {EXIF_FORMAT_ASCII, 2},
+  /* EXIF_TAG_GPS_DEST_BEARING */ {EXIF_FORMAT_RATIONAL, 1},
+  /* EXIF_TAG_GPS_DEST_DISTANCE_REF */ {EXIF_FORMAT_ASCII, 2},
+  /* EXIF_TAG_GPS_DEST_DISTANCE */ {EXIF_FORMAT_RATIONAL, 1},
+  /* EXIF_TAG_GPS_PROCESSING_METHOD */ {EXIF_FORMAT_UNDEFINED, 0},
+  /* EXIF_TAG_GPS_AREA_INFORMATION */ {EXIF_FORMAT_UNDEFINED, 0},
+  /* EXIF_TAG_GPS_DATE_STAMP */ {EXIF_FORMAT_ASCII, 11},
+  /* EXIF_TAG_GPS_DIFFERENTIAL */ {EXIF_FORMAT_SHORT, 1}};
+
+  if (tag < 0 || tag > EXIF_TAG_GPS_DIFFERENTIAL)
+    return 0;
+
+  *format = taginfo[tag].format;
+  *components = taginfo[tag].components;
+  return 1;
+}
+
+static int iExifGetTagInfo(ExifTag tag, ExifFormat* format, unsigned long *components)
+{
+  switch (tag) 
+  {
+  case EXIF_TAG_PIXEL_X_DIMENSION:
+  case EXIF_TAG_PIXEL_Y_DIMENSION:
+  case EXIF_TAG_EXIF_IFD_POINTER:
+  case EXIF_TAG_GPS_INFO_IFD_POINTER:
+  case EXIF_TAG_INTEROPERABILITY_IFD_POINTER:
+  case EXIF_TAG_JPEG_INTERCHANGE_FORMAT_LENGTH:
+  case EXIF_TAG_JPEG_INTERCHANGE_FORMAT:
+    *components = 1;
+    *format = EXIF_FORMAT_LONG;
+    break;
+  case EXIF_TAG_SUBJECT_LOCATION:
+  case EXIF_TAG_SENSING_METHOD:
+  case EXIF_TAG_PHOTOMETRIC_INTERPRETATION:
+  case EXIF_TAG_COMPRESSION:
+  case EXIF_TAG_EXPOSURE_MODE:
+  case EXIF_TAG_WHITE_BALANCE:
+  case EXIF_TAG_FOCAL_LENGTH_IN_35MM_FILM:
+  case EXIF_TAG_GAIN_CONTROL:
+  case EXIF_TAG_SUBJECT_DISTANCE_RANGE:
+  case EXIF_TAG_FLASH:
+  case EXIF_TAG_ISO_SPEED_RATINGS:
+  case EXIF_TAG_IMAGE_WIDTH:
+  case EXIF_TAG_IMAGE_LENGTH:
+  case EXIF_TAG_EXPOSURE_PROGRAM:
+  case EXIF_TAG_LIGHT_SOURCE:
+  case EXIF_TAG_METERING_MODE:
+  case EXIF_TAG_CUSTOM_RENDERED:
+  case EXIF_TAG_SCENE_CAPTURE_TYPE:
+  case EXIF_TAG_CONTRAST:
+  case EXIF_TAG_SATURATION:
+  case EXIF_TAG_SHARPNESS:
+  case EXIF_TAG_ORIENTATION:
+  case EXIF_TAG_PLANAR_CONFIGURATION:
+  case EXIF_TAG_YCBCR_POSITIONING:
+  case EXIF_TAG_RESOLUTION_UNIT:
+  case EXIF_TAG_FOCAL_PLANE_RESOLUTION_UNIT:
+  case EXIF_TAG_SAMPLES_PER_PIXEL:
+  case EXIF_TAG_COLOR_SPACE:
+    *components = 1;
+    *format = EXIF_FORMAT_SHORT;
+    break;
+  case EXIF_TAG_BITS_PER_SAMPLE:
+    *components = 3;
+    *format = EXIF_FORMAT_SHORT;
+    break;
+  case EXIF_TAG_YCBCR_SUB_SAMPLING:
+    *components = 2;
+    *format = EXIF_FORMAT_SHORT;
+    break;
+  case EXIF_TAG_SUBJECT_AREA:
+    *components = 0;
+    *format = EXIF_FORMAT_SHORT;
+    break;
+  case EXIF_TAG_EXPOSURE_BIAS_VALUE:
+  case EXIF_TAG_BRIGHTNESS_VALUE:
+  case EXIF_TAG_SHUTTER_SPEED_VALUE:
+    *components = 1;
+    *format = EXIF_FORMAT_SRATIONAL;
+    break;
+  case EXIF_TAG_EXPOSURE_TIME:
+  case EXIF_TAG_FOCAL_PLANE_X_RESOLUTION:
+  case EXIF_TAG_FOCAL_PLANE_Y_RESOLUTION:
+  case EXIF_TAG_EXPOSURE_INDEX:
+  case EXIF_TAG_FLASH_ENERGY:
+  case EXIF_TAG_FNUMBER:
+  case EXIF_TAG_FOCAL_LENGTH:
+  case EXIF_TAG_SUBJECT_DISTANCE:
+  case EXIF_TAG_MAX_APERTURE_VALUE:
+  case EXIF_TAG_APERTURE_VALUE:
+  case EXIF_TAG_COMPRESSED_BITS_PER_PIXEL:
+  case EXIF_TAG_PRIMARY_CHROMATICITIES:
+  case EXIF_TAG_DIGITAL_ZOOM_RATIO:
+  case EXIF_TAG_X_RESOLUTION:
+  case EXIF_TAG_Y_RESOLUTION:
+    *components = 1;
+    *format = EXIF_FORMAT_RATIONAL;
+    break;
+  case EXIF_TAG_WHITE_POINT:
+    *components = 2;
+    *format = EXIF_FORMAT_RATIONAL;
+    break;
+  case EXIF_TAG_REFERENCE_BLACK_WHITE:
+    *components = 6;
+    *format = EXIF_FORMAT_RATIONAL;
+    break;
+  case EXIF_TAG_RELATED_SOUND_FILE:
+    *components = 13;
+    *format = EXIF_FORMAT_ASCII;
+    break;
+  case EXIF_TAG_IMAGE_UNIQUE_ID:
+    *components = 33;
+    *format = EXIF_FORMAT_ASCII;
+    break;
+  case EXIF_TAG_DATE_TIME:
+  case EXIF_TAG_DATE_TIME_ORIGINAL:
+  case EXIF_TAG_DATE_TIME_DIGITIZED:
+    *components = 20;
+    *format = EXIF_FORMAT_ASCII;
+    break;
+  case EXIF_TAG_SPECTRAL_SENSITIVITY:
+  case EXIF_TAG_SUB_SEC_TIME:
+  case EXIF_TAG_SUB_SEC_TIME_ORIGINAL:
+  case EXIF_TAG_SUB_SEC_TIME_DIGITIZED:
+  case EXIF_TAG_IMAGE_DESCRIPTION:
+  case EXIF_TAG_MAKE:
+  case EXIF_TAG_MODEL:
+  case EXIF_TAG_SOFTWARE:
+  case EXIF_TAG_ARTIST:
+  case EXIF_TAG_COPYRIGHT:
+    *components = 0;
+    *format = EXIF_FORMAT_ASCII;
+    break;
+  case EXIF_TAG_FILE_SOURCE:
+  case EXIF_TAG_SCENE_TYPE:
+    *components = 1;
+    *format = EXIF_FORMAT_UNDEFINED;
+    break;
+  case EXIF_TAG_FLASH_PIX_VERSION:
+  case EXIF_TAG_EXIF_VERSION:
+  case EXIF_TAG_COMPONENTS_CONFIGURATION:
+    *components = 4;
+    *format = EXIF_FORMAT_UNDEFINED;
+    break;
+  case EXIF_TAG_OECF:                       
+  case EXIF_TAG_SPATIAL_FREQUENCY_RESPONSE:
+  case EXIF_TAG_NEW_CFA_PATTERN:           
+  case EXIF_TAG_DEVICE_SETTING_DESCRIPTION:
+  case EXIF_TAG_MAKER_NOTE:
+  case EXIF_TAG_USER_COMMENT:
+    *components = 0;
+    *format = EXIF_FORMAT_UNDEFINED;
+    break;
+  default:
+    return 0;
+  }
+
+  return 1;
+}
+
 /* libjpeg error handlers */
 
 struct JPEGerror_mgr 
@@ -229,7 +419,7 @@ void imFileFormatJPEG::iReadExifAttrib(unsigned char* data, int data_length, imA
   void* value = NULL;
   int c, value_size = 0;
 
-	ExifByteOrder byte_order = exif_data_get_byte_order(exif);
+  ExifByteOrder byte_order = exif_data_get_byte_order(exif);
 
   for (int ifd = 0; ifd < EXIF_IFD_COUNT; ifd++)
   {
@@ -240,7 +430,7 @@ void imFileFormatJPEG::iReadExifAttrib(unsigned char* data, int data_length, imA
 
     if (content && content->count) 
     {
-	    for (int j = 0; j < (int)content->count; j++) 
+      for (int j = 0; j < (int)content->count; j++) 
       {
         ExifEntry *entry = content->entries[j];
         int type = 0;
@@ -316,7 +506,7 @@ void imFileFormatJPEG::iReadExifAttrib(unsigned char* data, int data_length, imA
           break;
         case EXIF_FORMAT_RATIONAL:
           {
-	          ExifRational v_rat;
+            ExifRational v_rat;
             type = IM_FLOAT;
             float *fvalue = (float*)value;
             for (c = 0; c < (int)entry->components; c++) 
@@ -328,7 +518,7 @@ void imFileFormatJPEG::iReadExifAttrib(unsigned char* data, int data_length, imA
           break;
         case EXIF_FORMAT_SRATIONAL:
           {
-	          ExifSRational v_srat;
+            ExifSRational v_srat;
             type = IM_FLOAT;
             float *fvalue = (float*)value;
             for (c = 0; c < (int)entry->components; c++) 
@@ -370,32 +560,56 @@ static void iGetRational(float fvalue, int *num, int *den, int sign)
     return;
   }
 
-	if (fvalue < 0) 
+  if (fvalue < 0) 
   {
-		if (sign == 1)
-			fvalue = 0;
-		else
-			fvalue = -fvalue;
-	}
+    if (sign == 1)
+      fvalue = 0;
+    else
+      fvalue = -fvalue;
+  }
 
-	*den = 1;
-	if (fvalue > 0) 
+  *den = 1;
+  if (fvalue > 0) 
   {
-		while (fvalue < 1L<<(31-3) && *den < 1L<<(31-3))
+    while (fvalue < 1L<<(31-3) && *den < 1L<<(31-3))
     {
-			fvalue *= 1<<3;
+      fvalue *= 1<<3;
       *den *= 1<<3;
     }
-	}
+  }
 
-	*num = sign * imRound(fvalue);
+  *num = sign * imRound(fvalue);
+}
+
+static int iExifGetDataType(ExifFormat format)
+{
+  switch(format)
+  {
+  case EXIF_FORMAT_UNDEFINED:
+  case EXIF_FORMAT_ASCII: 
+  case EXIF_FORMAT_BYTE:
+  case EXIF_FORMAT_SBYTE:
+    return IM_BYTE;
+  case EXIF_FORMAT_SSHORT:
+    return IM_SHORT;
+  case EXIF_FORMAT_SHORT:
+    return IM_USHORT;
+  case EXIF_FORMAT_LONG:
+  case EXIF_FORMAT_SLONG:
+    return IM_INT;
+  case EXIF_FORMAT_RATIONAL:
+  case EXIF_FORMAT_SRATIONAL:
+  case EXIF_FORMAT_FLOAT:
+  case EXIF_FORMAT_DOUBLE:
+    return IM_FLOAT;
+  }
+
+  return -1;
 }
 
 static int iExifWriteTag(ExifData* exif, int index, const char* name, int data_type, int attrib_count, const void* attrib_data)
 {
   int c;
-  (void)data_type;
-  (void)index;
 
   ExifTag tag = exif_tag_from_name(name);
   if (tag == 0)
@@ -409,20 +623,46 @@ static int iExifWriteTag(ExifData* exif, int index, const char* name, int data_t
 
   ExifContent *content;
   if (name[0] == 'G' && name[1] == 'P' && name[2] == 'S')
+  {
     content = exif->ifd[EXIF_IFD_GPS];      // GPS tags
-  else if (tag > EXIF_TAG_COPYRIGHT)
-    content = exif->ifd[EXIF_IFD_EXIF];     // EXIF tags
-  else
-    content = exif->ifd[EXIF_IFD_0];        // TIFF tags 
 
-  exif_content_add_entry(content, entry);
+    if (!iExifGetGPSTagInfo((int)tag, &(entry->format), &(entry->components)))
+    {
+      exif_entry_free(entry);
+      return 1;
+    }
 
-  exif_entry_initialize(entry, tag);
+  }
+  else 
+  {
+    if (tag > EXIF_TAG_COPYRIGHT)
+      content = exif->ifd[EXIF_IFD_EXIF];     // EXIF tags
+    else
+      content = exif->ifd[EXIF_IFD_0];        // TIFF tags 
 
-  if (!entry->format)  // unsupported tag
+    if (!iExifGetTagInfo(tag, &(entry->format), &(entry->components)))
+    {
+      exif_entry_free(entry);
+      return 1;
+    }
+  }
+
+  /* test if tag type is the same as the attribute type */
+  if (iExifGetDataType(entry->format) != data_type)
+  {
+    exif_entry_free(entry);
     return 1;
+  }
 
   int format_size = exif_format_get_size(entry->format);
+  if (entry->components == 0)
+    entry->components = attrib_count;
+
+  entry->tag = tag;
+  entry->size = format_size * entry->components;
+  entry->data = (imbyte*)malloc(entry->size);
+
+  exif_content_add_entry(content, entry);
 
   if (tag == EXIF_TAG_RESOLUTION_UNIT)
   {
@@ -435,14 +675,6 @@ static int iExifWriteTag(ExifData* exif, int index, const char* name, int data_t
     exif_set_short (entry->data, byte_order, (imushort)res_unit);
 
     return 1;
-  }
-
-  if (entry->components == 0)
-  {
-    entry->components = attrib_count;
-    if (entry->data) free(entry->data);
-    entry->size = format_size * entry->components;
-    entry->data = (imbyte*)malloc(entry->size);
   }
 
   switch (entry->format) 
@@ -461,6 +693,13 @@ static int iExifWriteTag(ExifData* exif, int index, const char* name, int data_t
       imushort *usvalue = (imushort*)attrib_data;
       for (c = 0; c < (int)entry->components; c++) 
         exif_set_short(entry->data + format_size * c, byte_order, usvalue[c]);
+    }
+    break;
+  case EXIF_FORMAT_SSHORT:
+    {
+      short *svalue = (short*)attrib_data;
+      for (c = 0; c < (int)entry->components; c++) 
+        exif_set_sshort(entry->data + format_size * c, byte_order, svalue[c]);
     }
     break;
   case EXIF_FORMAT_LONG:
@@ -507,6 +746,11 @@ static int iExifWriteTag(ExifData* exif, int index, const char* name, int data_t
     break;
   }
 
+  /* no need to release the entry here,
+     it will be handled internally 
+     because we added the entry to the ExifContent */
+
+  (void)index;
   return 1;
 }
 
@@ -516,9 +760,9 @@ void imFileFormatJPEG::iWriteExifAttrib(imAttribTable* attrib_table)
 
   ExifByteOrder byte_order;
   if (imBinCPUByteOrder() == IM_LITTLEENDIAN)
-	  byte_order = EXIF_BYTE_ORDER_INTEL;
-	else
-		byte_order = EXIF_BYTE_ORDER_MOTOROLA;
+    byte_order = EXIF_BYTE_ORDER_INTEL;
+  else
+    byte_order = EXIF_BYTE_ORDER_MOTOROLA;
     
   exif_data_set_byte_order(exif, byte_order);
 

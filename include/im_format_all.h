@@ -159,7 +159,7 @@ void imFormatRegisterTIFF(void);
 
     Changes to libEXIF:
       new files config.h and _stdint.h
-      changed "exif-entry.c" to improve exif_entry_initialize
+      small fixes in exif-entry.c, exif-loader.c, exif-tag.c, mnote-fuji-tag.h and mnote-olympus-tag.h
 
     Comments:
       Other APPx markers are ignored.
