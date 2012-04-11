@@ -81,6 +81,39 @@ static int iExifGetGPSTagInfo(int tag, ExifFormat* format, unsigned long *compon
 
 static int iExifGetTagInfo(ExifTag tag, ExifFormat* format, unsigned long *components)
 {
+  /* Unused
+  EXIF_TAG_INTEROPERABILITY_INDEX
+  EXIF_TAG_INTEROPERABILITY_VERSION
+  EXIF_TAG_NEW_SUBFILE_TYPE  
+  EXIF_TAG_FILL_ORDER       
+  EXIF_TAG_STRIP_OFFSETS     
+  EXIF_TAG_ROWS_PER_STRIP   
+  EXIF_TAG_STRIP_BYTE_COUNTS
+  EXIF_TAG_TRANSFER_FUNCTION
+  EXIF_TAG_SUB_IFDS      
+  EXIF_TAG_TRANSFER_RANGE
+  EXIF_TAG_JPEG_PROC    
+  EXIF_TAG_YCBCR_COEFFICIENTS
+  EXIF_TAG_XML_PACKET    
+  EXIF_TAG_RELATED_IMAGE_FILE_FORMAT  
+  EXIF_TAG_RELATED_IMAGE_WIDTH    
+  EXIF_TAG_RELATED_IMAGE_LENGTH    
+  EXIF_TAG_CFA_REPEAT_PATTERN_DIM  
+  EXIF_TAG_CFA_PATTERN      
+  EXIF_TAG_BATTERY_LEVEL    
+  EXIF_TAG_IPTC_NAA      
+  EXIF_TAG_IMAGE_RESOURCES    
+  EXIF_TAG_TIME_ZONE_OFFSET    
+  EXIF_TAG_TIFF_EP_STANDARD_ID  
+  EXIF_TAG_XP_TITLE    
+  EXIF_TAG_XP_COMMENT  
+  EXIF_TAG_XP_AUTHOR
+  EXIF_TAG_XP_KEYWORDS
+  EXIF_TAG_XP_SUBJECT    
+  EXIF_TAG_GAMMA        
+  EXIF_TAG_PRINT_IMAGE_MATCHING    
+  EXIF_TAG_PADDING      
+*/
   switch (tag) 
   {
   case EXIF_TAG_PIXEL_X_DIMENSION:
@@ -647,13 +680,6 @@ static int iExifWriteTag(ExifData* exif, int index, const char* name, int data_t
     }
   }
 
-  /* test if tag type is the same as the attribute type */
-  if (iExifGetDataType(entry->format) != data_type)
-  {
-    exif_entry_free(entry);
-    return 1;
-  }
-
   int format_size = exif_format_get_size(entry->format);
   if (entry->components == 0)
     entry->components = attrib_count;
@@ -661,8 +687,6 @@ static int iExifWriteTag(ExifData* exif, int index, const char* name, int data_t
   entry->tag = tag;
   entry->size = format_size * entry->components;
   entry->data = (imbyte*)malloc(entry->size);
-
-  exif_content_add_entry(content, entry);
 
   if (tag == EXIF_TAG_RESOLUTION_UNIT)
   {
@@ -672,10 +696,19 @@ static int iExifWriteTag(ExifData* exif, int index, const char* name, int data_t
     else
       res_unit = 3;
 
-    exif_set_short (entry->data, byte_order, (imushort)res_unit);
-
+    exif_content_add_entry(content, entry);
+    exif_set_short(entry->data, byte_order, (imushort)res_unit);
     return 1;
   }
+
+  /* test if tag type is the same as the attribute type */
+  if (iExifGetDataType(entry->format) != data_type)
+  {
+    exif_entry_free(entry);
+    return 1;
+  }
+
+  exif_content_add_entry(content, entry);
 
   switch (entry->format) 
   {
