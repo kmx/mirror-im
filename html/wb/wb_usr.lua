@@ -66,6 +66,7 @@ wb_usr.tree =
         { name= {en= "C x C++ Usage"}, link= "guide.html#cpp" },
         { link= "", name= {en= "" } },
         { name= {en= "Building in Linux"}, link= "building.html" },
+        { name= {en= "Building in Windows"}, link= "buildwin.html" },
         { name= {en= "Samples"}, link= "samples.html" },
         { name= {en= "Lua Binding"}, link= "imlua.html" }
       }
