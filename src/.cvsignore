@@ -1,5 +1,6 @@
 im_capture.wlib
 so_locations
+*.cdep
 *.dep
 *.wdep
 *.loh
