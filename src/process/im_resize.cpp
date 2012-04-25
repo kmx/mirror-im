@@ -316,7 +316,7 @@ void imProcessInsert(const imImage* src_image, const imImage* rgn_image, imImage
   int dst_size2 = src_image->line_size - (rgn_image->line_size + dst_size1);
   int dst_offset2 = dst_size1+rgn_image->line_size;
   int ymax = ymin+rgn_image->height-1;
-  int rgn_line_size = rgn_image->line_size;
+  int rgn_size, rgn_line_size = rgn_image->line_size;
   int src_line_size = src_image->line_size;
   int dst_line_size = dst_image->line_size;
   int src_depth = src_image->has_alpha? src_image->depth+1: src_image->depth;
@@ -324,9 +324,11 @@ void imProcessInsert(const imImage* src_image, const imImage* rgn_image, imImage
   if (dst_size2 < 0)
   {
     dst_size2 = 0;
-    rgn_line_size = src_line_size - dst_size1;
+    rgn_size = src_line_size - dst_size1;
     dst_offset2 = dst_size1 + rgn_line_size;
   }
+  else
+    rgn_size = rgn_line_size;
 
   if (ymax > src_image->height-1)
     ymax = src_image->height-1;
@@ -344,18 +346,25 @@ void imProcessInsert(const imImage* src_image, const imImage* rgn_image, imImage
     {
       if (y < ymin || y > ymax)
       {
-        memcpy(dst_map + y*dst_line_size, src_map + y*src_line_size, src_line_size);
+        if (dst_map != src_map)  // avoid in-place processing
+          memcpy(dst_map + y*dst_line_size, src_map + y*src_line_size, src_line_size);
       }
       else
       {
         if (dst_size1)
-          memcpy(dst_map + y*dst_line_size, src_map + y*src_line_size, dst_size1);
+        {
+          if (dst_map != src_map)  // avoid in-place processing
+            memcpy(dst_map + y*dst_line_size, src_map + y*src_line_size, dst_size1);
+        }
 
-        memcpy(dst_map + y*dst_line_size + dst_size1, rgn_map + y*rgn_line_size, rgn_line_size);
+        memcpy(dst_map + y*dst_line_size + dst_size1, rgn_map + (y-ymin)*rgn_line_size, rgn_size);
 
         if (dst_size2)
-          memcpy(dst_map + y*dst_line_size + dst_offset2, 
-                 src_map + y*src_line_size + dst_offset2, dst_size2);
+        {
+          if (dst_map != src_map)  // avoid in-place processing
+            memcpy(dst_map + y*dst_line_size + dst_offset2, 
+                   src_map + y*src_line_size + dst_offset2, dst_size2);
+        }
       }
     }
   }
