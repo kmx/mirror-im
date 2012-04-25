@@ -4,7 +4,6 @@ require"cdluaim"
 require"iuplua"
 require"iupluacd"
 
-iup.key_open()
 
 function View_Image(image, title)
   ret = false

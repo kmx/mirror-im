@@ -4,39 +4,16 @@ require"cdluaim"
 require"iuplua"
 require"iupluacd"
 
-function PrintError(func, err)
-  local msg = {}
-  msg[im.ERR_OPEN] = "Error Opening File."
-  msg[im.ERR_MEM] = "Insuficient memory."
-  msg[im.ERR_ACCESS] = "Error Accessing File."
-  msg[im.ERR_DATA] = "Image type not Suported."
-  msg[im.ERR_FORMAT] = "Invalid Format."
-  msg[im.ERR_COMPRESS] = "Invalid or unsupported compression."
-  
-  if msg[err] then
-    print(func..": "..msg[err])
-  else
-    print("Unknown Error.")
-  end
-end
 
 function LoadImage(file_name)
-  local image
-  local ifile, err = im.FileOpen(file_name)
-  if not ifile then
-      PrintError("open", err)
-      return
-  end
-  
   -- load the first image in the file.
   -- force the image to be converted to a bitmap
-  image, err = ifile:LoadBitmap()
+  local image, err = im.FileImageLoadBitmap(file_name)
+  
   if not image then
-    PrintError("load", err)
-    return
+    error(im.ErrorStr(err))
   end
-    
-  ifile:Close()
+ 
   return image
 end
 
