@@ -1296,6 +1296,7 @@ int imProcessBarlettConvolve(const imImage* src_image, imImage* dst_image, int k
 
   imImageSetAttribute(kernel, "Description", IM_BYTE, -1, (void*)"Barlett");
 
+  /* fill only the first line and the first column */
   int* kernel_data = (int*)kernel->data[0];
   int half = kernel_size / 2;
   for (int i = 0; i < kernel_size; i++)
@@ -1551,24 +1552,7 @@ static void DoSharpOp(T1 *src_map, T1 *dst_map, int count, float amount, T2 thre
 {
   T1 min, max;
 
-  int size_of = sizeof(imbyte);
-  if (sizeof(T1) == size_of)
-  {
-    min = 0;
-    max = 255;
-  }
-  else
-  {
-    imMinMax(src_map, count, min, max);
-
-    if (min == max)
-    {
-      max = min + 1;
-
-      if (min != 0)
-        min = min - 1;
-    }
-  }
+  imMinMaxType(src_map, count, min, max);
 
 #ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))

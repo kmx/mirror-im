@@ -115,24 +115,7 @@ static void DoNormalizedUnaryOp(T *map, T *new_map, int count, int op, float *ar
   int i;
   T min, max, range;
 
-  int size_of = sizeof(imbyte);
-  if (sizeof(T) == size_of)
-  {
-    min = 0;
-    max = 255;
-  }
-  else
-  {
-    imMinMax(map, count, min, max);
-
-    if (min == max)
-    {
-      max = min + 1;
-
-      if (min != 0)
-        min = min - 1;
-    }
-  }
+  imMinMaxType(map, count, min, max);
 
   range = max-min;
   
@@ -291,28 +274,14 @@ template <class T>
 static void DoShiftHSI(T **map, T **new_map, int count, float h_shift, float s_shift, float i_shift)
 {
   float min, max, range;
-  T* tmap = map[0];
+  T tmin, tmax;
   int tcount = count*3;
 
-  // Compute min-max as float
-  min = (float)tmap[0];
-  max = min;
-  for (int i = 1; i < tcount; i++)
-  {
-    float value = (float)tmap[i];
-    if (value > max)
-      max = value;
-    else if (value < min)
-      min = value;
-  }
+  imMinMaxType(map[0], tcount, tmin, tmax);
 
-  if (min == max)
-  {
-    max = min + 1;
+  min = (float)tmin;
+  max = (float)tmax;
 
-    if (min != 0)
-      min = min - 1;
-  }
   range = max-min;
 
 #ifdef _OPENMP

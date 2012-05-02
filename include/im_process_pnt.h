@@ -640,7 +640,7 @@ enum imToneGamut {
 
 /** Apply a gamut operation with arguments. \n
  * Supports all data types except IM_CFLOAT. \n
- * The linear operation do a special convertion when min > 0 and max < 1, it forces min=0 and max=1. \n
+ * The linear operation do a special conversion when min > 0 and max < 1, it forces min=0 and max=1. \n
  * IM_BYTE images have min=0 and max=255 always. \n
  * Can be done in-place. When there is no extra parameters, params can use NULL.
  *

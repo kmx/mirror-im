@@ -381,4 +381,31 @@ inline void imMinMax(const T *map, int count, T& min, T& max, int abssolute = 0)
   }
 }
 
+/** Calculates minimum and maximum values considering the datatype.
+ * \ingroup math */
+template <class T> 
+inline void imMinMaxType(const T *map, int count, T& min, T& max, int abssolute = 0)
+{
+  int size_of = sizeof(imbyte);
+  if (sizeof(T) == size_of)
+  {
+    /* for imbyte is always the maximum interval */
+    min = 0;
+    max = 255;
+  }
+  else
+  {
+    imMinMax(map, count, min, max, abssolute);
+
+    /* if equal define a minimum interval */
+    if (min == max)
+    {
+      max = min + 1;
+
+      if (min != 0)
+        min = min - 1;
+    }
+  }
+}
+
 #endif

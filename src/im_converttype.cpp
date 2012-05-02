@@ -42,7 +42,7 @@
 
 /* if gamma is applied then factor contains two conversions
    one for applying gamma,
-   and other for normal destiny conversion to dst_type_min-dst_type_max range.
+   and other for conversion to dst_type_min-dst_type_max range.
    because gamma(0) = 0
      For EXP: gamma(x) = (e^(g*x))-1       
      For LOG: gamma(x) = log((g*x)+1)      
@@ -144,7 +144,7 @@ inline void iDataTypeRealMinMax(float& min, float& max, int abssolute, T tmp)
 template <class SRCT, class DSTT> 
 IM_STATIC int iPromoteIntDirect(int count, const SRCT *src_map, DSTT *dst_map)
 {
-  // direct small integer to big integer, no need for scale
+  // small integer to big integer, no need for scale
 #ifdef _OPENMP
 #pragma omp parallel for if (IM_OMP_MINCOUNT(count))
 #endif
@@ -159,7 +159,7 @@ IM_STATIC int iPromoteIntDirect(int count, const SRCT *src_map, DSTT *dst_map)
 template <class SRCT, class DSTT> 
 IM_STATIC int iDemoteIntDirect(int count, const SRCT *src_map, DSTT *dst_map, int abssolute)
 {
-  // direct big integer to small integer, need to crop
+  // big integer to small integer, need to crop
   DSTT dst_type_min, dst_type_max;
   iDataTypeIntMinMax(dst_type_min, dst_type_max, abssolute);
 
@@ -190,7 +190,8 @@ IM_STATIC int iDemoteIntDirect(int count, const SRCT *src_map, DSTT *dst_map, in
 template <class SRCT, class DSTT> 
 IM_STATIC int iPromoteInt(int count, const SRCT *src_map, DSTT *dst_map, int abssolute)
 {
-  // normal small integer to big integer, need to shift if necessary
+  // small integer to big integer, need to shift if necessary
+  // also includes ushort <-> short conversion
 
   // If SRC can has negative values, but DST can't then must shift
   SRCT shift = 0;
@@ -225,34 +226,19 @@ IM_STATIC int iPromoteInt(int count, const SRCT *src_map, DSTT *dst_map, int abs
 template <class SRCT, class DSTT> 
 IM_STATIC int iDemoteInt(int count, const SRCT *src_map, DSTT *dst_map, int abssolute, int cast_mode, int counter)
 {
-  // normal big integer to small integer, need to scale
+  // big integer to small integer, need to scale down
   SRCT min, max;
   DSTT dst_type_min, dst_type_max;
 
   if (cast_mode == IM_CAST_MINMAX)  // search for min-max
-  {
-    imMinMax(src_map, count, min, max, abssolute);
-
-    if (min == max)
-    {
-      max = min + 1;
-
-      if (min != 0)
-        min = min - 1;
-    }
-    if (min >= 0 && max <= 255)
-    {
-      min = 0;
-      max = 255;
-    }
-  }
+    imMinMaxType(src_map, count, min, max, abssolute);
   else  // use data type limits for min-max
     iDataTypeIntMinMax(min, max, abssolute);
 
   iDataTypeIntMinMax(dst_type_min, dst_type_max, abssolute);
 
   int direct = 0; // must scale SRC to fit DST
-  if (min > dst_type_min && max < dst_type_max)
+  if (min >= dst_type_min && max <= dst_type_max)
     direct = 1; // no need for conversion
 
   float factor = ((float)dst_type_max - (float)dst_type_min + 1.0f) / ((float)max - (float)min + 1.0f);
@@ -309,23 +295,8 @@ IM_STATIC int iPromoteReal(int count, const SRCT *src_map, float *dst_map, float
   float dst_type_min, dst_type_max;
 
   if (cast_mode == IM_CAST_MINMAX) // search for min-max
-  {
-    imMinMax(src_map, count, min, max, abssolute);
-
-    if (min == max)
-    {
-      max = min + 1;
-
-      if (min != 0)
-        min = min - 1;
-    }
-    if (min >= 0 && max <= 255)
-    {
-      min = 0;
-      max = 255;
-    }
-  }
-  else // use data type limits for min-max
+    imMinMaxType(src_map, count, min, max, abssolute);
+  else  // use data type limits for min-max
     iDataTypeIntMinMax(min, max, abssolute);
 
   iDataTypeRealMinMax(dst_type_min, dst_type_max, abssolute, *src_map);
@@ -381,17 +352,7 @@ IM_STATIC int iDemoteReal(int count, const float *src_map, DSTT *dst_map, float 
   DSTT dst_type_min, dst_type_max;
 
   if (cast_mode == IM_CAST_MINMAX)  // search for min-max
-  {
-    imMinMax(src_map, count, min, max, abssolute);
-
-    if (min == max)
-    {
-      max = min + 1;
-
-      if (min != 0)
-        min = min - 1;
-    }
-  }
+    imMinMaxType(src_map, count, min, max, abssolute);
   else  // use data type limits for min-max
     iDataTypeRealMinMax(min, max, abssolute, *dst_map);
 
