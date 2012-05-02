@@ -1552,6 +1552,7 @@ static void DoSharpOp(T1 *src_map, T1 *dst_map, int count, float amount, T2 thre
 {
   T1 min, max;
 
+  // min,max values used only for cropping
   imMinMaxType(src_map, count, min, max);
 
 #ifdef _OPENMP
@@ -1570,7 +1571,7 @@ static void DoSharpOp(T1 *src_map, T1 *dst_map, int count, float amount, T2 thre
       diff = 0;
 
     T2 value = (T2)(src_map[i] + amount*diff);
-    if (value < min)
+    if (value < min) // keep current min,max range
       value = min;
     else if (value > max)
       value = max;
