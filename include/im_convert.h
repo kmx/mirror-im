@@ -47,13 +47,14 @@ enum imGammaFactor
   IM_GAMMA_EXPHEAVY = 7
 };
 
-/** Predefined Cast Modes
+/** Predefined Cast Modes \n
+ * See also \ref color Color Manipulation, Color Component Intervals section.
  * \ingroup convert */
 enum imCastMode
 {
-  IM_CAST_MINMAX, /**< scan for min and max values */
-  IM_CAST_FIXED,  /**< use predefied min-max values, see \ref color Color Manipulation. */
-  IM_CAST_DIRECT  /**< direct type cast the value. Only byte and ushort will be cropped. */
+  IM_CAST_MINMAX, /**< scan for min and max values.  */
+  IM_CAST_FIXED,  /**< use predefied min-max values. */
+  IM_CAST_DIRECT  /**< direct type cast the value.   */
 };
 
 /** Changes the image data type, using a complex2real conversion, 
