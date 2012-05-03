@@ -3663,6 +3663,7 @@ static const imlua_constant im_process_constants[] = {
   { "GAMUT_EXPAND", IM_GAMUT_EXPAND, NULL },
   { "GAMUT_CROP", IM_GAMUT_CROP, NULL },
   { "GAMUT_BRIGHTCONT", IM_GAMUT_BRIGHTCONT, NULL },
+  { "GAMUT_MINMAX", IM_GAMUT_MINMAX, NULL },
 
   { NULL, -1, NULL },
 };

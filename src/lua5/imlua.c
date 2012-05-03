@@ -196,6 +196,7 @@ static const imlua_constant im_constants[] = {
   { "CAST_MINMAX", IM_CAST_MINMAX, NULL },
   { "CAST_FIXED", IM_CAST_FIXED, NULL },
   { "CAST_DIRECT", IM_CAST_DIRECT, NULL },
+  { "CAST_USER", IM_CAST_USER, NULL },
 
   { "_AUTHOR",  0, IM_AUTHOR },
   { "_COPYRIGHT",  0, IM_COPYRIGHT },

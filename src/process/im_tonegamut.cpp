@@ -115,7 +115,14 @@ static void DoNormalizedUnaryOp(T *map, T *new_map, int count, int op, float *ar
   int i;
   T min, max, range;
 
-  imMinMaxType(map, count, min, max);
+  if (op & IM_GAMUT_MINMAX)
+  {
+    min = (T)args[0];
+    max = (T)args[1];
+    args += 2;
+  }
+  else
+    imMinMaxType(map, count, min, max);
 
   range = max-min;
   

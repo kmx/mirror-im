@@ -638,10 +638,18 @@ enum imToneGamut {
                                         change brightness and contrast simultaneously. */
 };
 
+/** Tone Gamut Flags.
+ * Combine with imToneGamut values with bitwise or (|).
+ * \ingroup tonegamut */
+enum imToneGamutFlags {
+  IM_GAMUT_MINMAX = 0x0100 /**<  min and max are given in params (params[0]=min, params[1]=max), all other parameters shift 2 positions.  */
+};
+
 /** Apply a gamut operation with arguments. \n
  * Supports all data types except IM_CFLOAT. \n
- * The linear operation do a special conversion when min > 0 and max < 1, it forces min=0 and max=1. \n
+ * For IM_GAMUT_NORMALIZE when min > 0 and max < 1, it forces min=0 and max=1. \n
  * IM_BYTE images have min=0 and max=255 always. \n
+ * To control min and max values use the IM_GAMUT_MINMAX flag.
  * Can be done in-place. When there is no extra parameters, params can use NULL.
  *
  * \verbatim im.ProcessToneGamut(src_image: imImage, dst_image: imImage, op: number, params: table of number) [in Lua 5] \endverbatim

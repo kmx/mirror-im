@@ -54,12 +54,13 @@ enum imCastMode
 {
   IM_CAST_MINMAX, /**< scan for min and max values.  */
   IM_CAST_FIXED,  /**< use predefied min-max values. */
-  IM_CAST_DIRECT  /**< direct type cast the value.   */
+  IM_CAST_DIRECT, /**< direct type cast the value.   */
+  IM_CAST_USER    /**< user attributes called "UserMin" and "UserMax", both float values. */
 };
 
 /** Changes the image data type, using a complex2real conversion, 
  * a gamma factor, and an abssolute mode (modulus). \n
- * When demoting the data type the function will scan for min/max values or use fixed values (cast_mode)
+ * When demoting the data type the function will scan source for min/max values or use fixed values (cast_mode)
  * to scale the result according to the destiny range. \n
  * Except complex to real that will use only the complex2real conversion. \n
  * Images must be of the same size and color mode. \n
