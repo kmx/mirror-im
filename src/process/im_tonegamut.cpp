@@ -126,7 +126,7 @@ static void DoNormalizedUnaryOp(T *map, T *new_map, int count, int op, float *ar
 
   range = max-min;
   
-  switch(op)
+  switch(op & 0x00FF)
   {
   case IM_GAMUT_NORMALIZE:
     {
