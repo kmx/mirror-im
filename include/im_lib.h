@@ -31,9 +31,9 @@ extern "C" {
  */
 #define IM_AUTHOR "Antonio Scuri"
 #define IM_COPYRIGHT "Copyright (C) 1994-2012 Tecgraf, PUC-Rio."
-#define IM_VERSION "3.7"      /* bug fixes are reported only by imVersion functions */
-#define IM_VERSION_NUMBER 307000
-#define IM_VERSION_DATE "2012/01/02"  /* does not include bug fix releases */
+#define IM_VERSION "3.8"      /* bug fixes are reported only by imVersion functions */
+#define IM_VERSION_NUMBER 308000
+#define IM_VERSION_DATE "2012/05/15"  /* does not include bug fix releases */
 #define IM_DESCRIPTION "Image Representation, Storage, Capture and Processing"
 #define IM_NAME "IM - An Imaging Toolkit"
 /** @} */
