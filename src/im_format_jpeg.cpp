@@ -714,6 +714,7 @@ static int iExifWriteTag(ExifData* exif, int index, const char* name, int data_t
   {
   case EXIF_FORMAT_UNDEFINED:
   case EXIF_FORMAT_ASCII:
+  case EXIF_FORMAT_SBYTE:
   case EXIF_FORMAT_BYTE:
     {
       imbyte *bvalue = (imbyte*)attrib_data;
@@ -776,6 +777,9 @@ static int iExifWriteTag(ExifData* exif, int index, const char* name, int data_t
         exif_set_srational(entry->data + format_size * c, byte_order, v_srat);
       }
     }
+    break;
+  case EXIF_FORMAT_FLOAT:  // missing from libEXIF
+  case EXIF_FORMAT_DOUBLE:
     break;
   }
 
