@@ -632,7 +632,7 @@ unsigned long imBinFilePrintf(imBinFile* bfile, char *format, ...)
   va_list arglist;
   va_start(arglist, format);
   char buffer[4096];
-  int size = vsprintf(buffer, format, arglist);
+  int size = vsnprintf(buffer, 4096, format, arglist);
   return imBinFileWrite(bfile, buffer, size, 1);
 }
 
