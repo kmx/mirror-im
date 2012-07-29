@@ -25,19 +25,7 @@ function serialize (o, indent)
 end
 
 function PrintError(error)
-  local msg = {}
-  msg[im.ERR_OPEN] = "Error Opening File."
-  msg[im.ERR_MEM] = "Insuficient memory."
-  msg[im.ERR_ACCESS] = "Error Accessing File."
-  msg[im.ERR_DATA] = "Image type not Suported."
-  msg[im.ERR_FORMAT] = "Invalid Format."
-  msg[im.ERR_COMPRESS] = "Invalid or unsupported compression."
-
-  if msg[error] then
-    print(msg[error])
-  else
-    print("Unknown Error.")
-  end
+  print(im.ErrorStr(error))
 end
 
 function FindZero(data)
@@ -119,7 +107,7 @@ function PrintImageInfo(file_name)
   for i = 1, image_count do
     local error, width, height, color_mode, data_type = ifile:ReadImageInfo(i-1)
     if width == nil then
-      PrintError(height)
+      PrintError(error)
       ifile:Close()
       return nil
     end

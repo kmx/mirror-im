@@ -3,17 +3,6 @@
 require"imlua"
 require"imlua_process"
 
-err_msg = {
-  "No error.",
-  "Error while opening the file.",
-  "Error while accessing the file.",
-  "Invalid or unrecognized file format.",
-  "Invalid or unsupported data.",
-  "Invalid or unsupported compression.",
-  "Insuficient memory",
-  "Interrupted by the counter",
-}
-
 x1 = arg[1]
 x2 = arg[2]
 y1 = arg[3]
@@ -35,7 +24,7 @@ function ProcessImageFile(file_name)
   image, err = im.FileImageLoad(file_name);
 
   if (err and err ~= im.ERR_NONE) then
-    error(err_msg[err+1])
+    error(im.ErrorStr(err))
   end
 
   new_image = im.ProcessCropNew(image, x1, x2, y1, y2)

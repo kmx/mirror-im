@@ -3,17 +3,6 @@
 require"imlua"
 require"imlua_process"
 
-err_msg = {
-  "No error.",
-  "Error while opening the file.",
-  "Error while accessing the file.",
-  "Invalid or unrecognized file format.",
-  "Invalid or unsupported data.",
-  "Invalid or unsupported compression.",
-  "Insuficient memory",
-  "Interrupted by the counter",
-}
-
 filename1 = arg[1]
 if (not filename1) then
   print("Must have the file name as parameter.")
@@ -32,7 +21,7 @@ function ProcessImageFile(file_name)
   image, err = im.FileImageLoad(file_name);
 
   if (err and err ~= im.ERR_NONE) then
-    error(err_msg[err+1])
+    error(im.ErrorStr(err))
   end
   
   local w = image:Width()

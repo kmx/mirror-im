@@ -9,17 +9,6 @@
 require"imlua"
 require"imlua_process"
 
-err_msg = {
-  "No error.",
-  "Error while opening the file.",
-  "Error while accessing the file.",
-  "Invalid or unrecognized file format.",
-  "Invalid or unsupported data.",
-  "Invalid or unsupported compression.",
-  "Insufficient memory",
-  "Interrupted by the counter",
-}
-
 colorspace_str = {
   "RGB", 
   "MAP",   
@@ -51,7 +40,7 @@ function ProcessImageFile(file_name, num_step)
   image, err = im.FileImageLoad(file_name);
 
   if (err and err ~= im.ERR_NONE) then
-    error(err_msg[err+1])
+    error(im.ErrorStr(err))
   end
     
   if (image:ColorSpace() ~= im.BINARY) then
