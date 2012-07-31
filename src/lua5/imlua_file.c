@@ -258,14 +258,14 @@ static int imluaFileSetAttribute (lua_State *L)
 
   if (!lua_isnil(L, 4))
   {
-    if (lua_isstring(L, 4) && data_type != IM_BYTE)
-      luaL_argerror(L, 4, "if value is a string, then data type must be byte");
-    else
+    if (!lua_isstring(L, 4))
     {
       luaL_checktype(L, 4, LUA_TTABLE);
       count = imlua_getn(L, 4);
-      data = malloc(imDataTypeSize(data_type) * count);
-    }
+      data = malloc(imDataTypeSize(data_type) * count); 
+    } 
+    else if (data_type != IM_BYTE) 
+      luaL_argerror(L, 4, "if value is string, then data type must be byte"); 
 
     switch (data_type)
     {
