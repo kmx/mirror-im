@@ -1,6 +1,6 @@
 /* IM 3 sample that shows an image.
 
-  Needs "im.lib", "iup.lib", "cd.lib" and "cdiup.lib".
+  Needs "im.lib", "iup.lib", "cd.lib" and "iupcd.lib".
 
   Usage: im_view <file_name>
 
