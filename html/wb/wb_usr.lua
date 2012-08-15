@@ -7,7 +7,8 @@ wb_usr = {
   langs = {"en"},
   copyright_name = "Tecgraf/PUC-Rio",
   file_title = "im",          
-  start_open = "1"
+  start_open = "1",
+  google_id = "002391225506879547725:WMX-1524393754",
 } 
 
 wb_usr.messages = {
