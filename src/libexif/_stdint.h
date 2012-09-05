@@ -4,7 +4,9 @@
 
 #ifndef __int8_t_defined
 #define __int8_t_defined
+#ifndef __sun__
 typedef signed char int8_t;
+#endif
 typedef short int16_t;
 typedef int int32_t;
 #endif
