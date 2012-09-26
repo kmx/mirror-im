@@ -11,8 +11,10 @@
 
 #include <im.h>
 #include <im_util.h>
+#ifdef WIN32
 #include <im_format_avi.h>
 #include <im_format_wmv.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -53,8 +55,10 @@ int main(int argc, char* argv[])
     return 0;
   }
 
+#ifdef WIN32
   imFormatRegisterAVI();
   imFormatRegisterWMV();
+#endif
 
   void* data = NULL;
   imFile* ifile = NULL;
