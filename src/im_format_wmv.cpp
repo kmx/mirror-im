@@ -644,18 +644,18 @@ int imFileFormatWMV::Open(const char* file_name)
 
   WMT_ATTR_DATATYPE attrib_type;
   WORD attrib_length;
-  WORD StreamNumber = 0;
+  WORD AnyStreamNumber = 0;
 
   seekable = 0;
   attrib_length = 4;
   attrib_type = WMT_TYPE_BOOL;
-  hr = HeaderInfo->GetAttributeByName(&StreamNumber, g_wszWMSeekable, 
+  hr = HeaderInfo->GetAttributeByName(&AnyStreamNumber, g_wszWMSeekable, 
                                       &attrib_type, (BYTE*)&seekable, &attrib_length);
 
   QWORD num_frame = 0;
   attrib_length = 8;
   attrib_type = WMT_TYPE_QWORD;
-  hr = HeaderInfo->GetAttributeByName(&stream_number, g_wszWMNumberOfFrames, 
+  hr = HeaderInfo->GetAttributeByName(&this->stream_number, g_wszWMNumberOfFrames, 
                                       &attrib_type, (BYTE*)&num_frame, &attrib_length);
 
   if (num_frame == 0)
@@ -663,10 +663,11 @@ int imFileFormatWMV::Open(const char* file_name)
     QWORD duration = 0;
     attrib_length = 8;
     attrib_type = WMT_TYPE_QWORD;
-    hr = HeaderInfo->GetAttributeByName(&StreamNumber, g_wszWMDuration, 
+    hr = HeaderInfo->GetAttributeByName(&AnyStreamNumber, g_wszWMDuration, 
                                         &attrib_type, (BYTE*)&duration, &attrib_length);
 
-    num_frame = (int)(((double)(unsigned int)duration * (double)fps) / 10000000.0);
+    duration = duration / (QWORD)10000000;  /* 100-nanosecond units */
+    num_frame = (int)((double)(unsigned int)duration * (double)fps);
   }
 
   this->image_count = (int)num_frame;
@@ -674,8 +675,8 @@ int imFileFormatWMV::Open(const char* file_name)
   SetOutputProps();
 
   WMT_STREAM_SELECTION wmtSS = WMT_ON;
-  hr = Reader->SetStreamsSelected(1, &stream_number, &wmtSS);
-  hr = Reader->SetReadStreamSamples(stream_number, FALSE);
+  hr = Reader->SetStreamsSelected(1, &this->stream_number, &wmtSS);
+  hr = Reader->SetReadStreamSamples(this->stream_number, FALSE);
 
   this->bmiHeader = NULL;
   this->current_frame = 0;
@@ -743,9 +744,9 @@ void* imFileFormatWMV::Handle(int index)
 
 void imFileFormatWMV::iReadAttrib(imAttribTable* attrib_table)
 {
-  WORD StreamNumber = 0;
+  WORD AnyStreamNumber = 0;
   WORD attrib_list_count = 0;
-  HeaderInfo->GetAttributeCount(StreamNumber, &attrib_list_count);
+  HeaderInfo->GetAttributeCount(AnyStreamNumber, &attrib_list_count);
 
   WCHAR* attrib_name = NULL;
   int name_max_size = 0;
@@ -763,7 +764,7 @@ void imFileFormatWMV::iReadAttrib(imAttribTable* attrib_table)
     attrib_name_count = 0;
     attrib_length = 0;
 
-    hr = HeaderInfo->GetAttributeByIndex(i, &StreamNumber, NULL, &attrib_name_count, 
+    hr = HeaderInfo->GetAttributeByIndex(i, &AnyStreamNumber, NULL, &attrib_name_count, 
                                             &attrib_type, NULL, &attrib_length);
 
     if (FAILED(hr))
@@ -785,7 +786,7 @@ void imFileFormatWMV::iReadAttrib(imAttribTable* attrib_table)
       data_max_size = attrib_length;
     }
 
-    HeaderInfo->GetAttributeByIndex(i, &StreamNumber, attrib_name, &attrib_name_count, 
+    HeaderInfo->GetAttributeByIndex(i, &AnyStreamNumber, attrib_name, &attrib_name_count, 
                                        &attrib_type, attrib_data, &attrib_length);
 
     WideCharToMultiByte(CP_ACP, 0, attrib_name, attrib_name_count, name, attrib_name_count, NULL, NULL);
@@ -852,7 +853,7 @@ void imFileFormatWMV::iReadAttrib(imAttribTable* attrib_table)
 static int iAttribSet(void* user_data, int index, const char* name, int data_type, int data_count, const void* data)
 {
   (void)index;
-  WORD StreamNumber = 0;
+  WORD AnyStreamNumber = 0;
   IWMHeaderInfo* HeaderInfo = (IWMHeaderInfo*)user_data;
 
   WCHAR wName[50];
@@ -915,12 +916,12 @@ static int iAttribSet(void* user_data, int index, const char* name, int data_typ
 
   if (Value)
   {
-    HeaderInfo->SetAttribute(StreamNumber, wName, Type, 
+    HeaderInfo->SetAttribute(AnyStreamNumber, wName, Type, 
                                            Value, ValueSize);
     free(Value);
   }
   else
-    HeaderInfo->SetAttribute(StreamNumber, wName, Type, 
+    HeaderInfo->SetAttribute(AnyStreamNumber, wName, Type, 
                                            (BYTE*)data, ValueSize);
   return 1;
 }
@@ -952,11 +953,11 @@ void imFileFormatWMV::CalcFPS()
 
   DWORD frame_rate = 0;
   attrib_length = 4;
-  HeaderInfo->GetAttributeByName(&stream_number, g_wszWMVideoFrameRate,   // V9 Only
+  HeaderInfo->GetAttributeByName(&this->stream_number, g_wszWMVideoFrameRate,   // V9 Only
                                  &attrib_type, (BYTE*)&frame_rate, &attrib_length);
 
   fps = (float)frame_rate;
-  if (frame_rate == 0)
+  if (frame_rate == 0)  // can be 0 if not V9
   {
     if (AvgTimePerFrame == 0)
     {
@@ -982,7 +983,7 @@ void imFileFormatWMV::CalcFPS()
 void imFileFormatWMV::SetOutputProps()
 {
   DWORD output_number;
-  Reader->GetOutputNumberForStream(stream_number, &output_number);
+  Reader->GetOutputNumberForStream(this->stream_number, &output_number);
 
   DWORD format_count;
   Reader->GetOutputFormatCount(output_number, &format_count);
@@ -1157,14 +1158,14 @@ int imFileFormatWMV::ReadImageInfo(int index)
 {
   if (this->seekable && this->current_frame != index)
   {
-    HRESULT hr = Reader->SetRangeByFrame(stream_number, index, 0);
-    this->current_frame = index;
-
+    HRESULT hr = Reader->SetRangeByFrame(this->stream_number, index, 0);
     if (hr == NS_E_INVALID_REQUEST)
     {
-      QWORD start_time = (QWORD)(index * (10000000.0f / fps));
+      QWORD start_time = (QWORD)((double)index * (10000000.0 / (double)fps));
       hr = Reader->SetRange(start_time, 0);
     }
+
+    this->current_frame = index;
 
     if (hr != S_OK)
       return IM_ERR_ACCESS;
@@ -1514,7 +1515,7 @@ int imFileFormatWMV::ReadImageData(void* data)
     DWORD dwOutputNum = 0;
     HRESULT hr;
 
-    hr = Reader->GetNextSample(stream_number, &pSample, &cnsSampleTime,
+    hr = Reader->GetNextSample(this->stream_number, &pSample, &cnsSampleTime,
                                               &cnsDuration, &dwFlags,
                                               &dwOutputNum, &wStreamNum);
 
@@ -1599,7 +1600,7 @@ int imFileFormatWMV::WriteImageData(void* data)
       return IM_ERR_COUNTER;
   }
 
-  QWORD VideoTime = (QWORD)(this->image_count * (10000000.0f / fps));
+  QWORD VideoTime = (QWORD)((double)(this->image_count) * (10000000.0 / (double)fps));
 
   HRESULT hr = Writer->WriteSample(input_number,
                                    VideoTime,
