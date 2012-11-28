@@ -33,6 +33,7 @@ extern "C" {
 #endif
 
 
+#ifdef USE_EXIF
 static int iExifGetGPSTagInfo(int tag, ExifFormat* format, unsigned long *components)
 {
   struct _ExifTagInfo{
@@ -254,6 +255,7 @@ static int iExifGetTagInfo(ExifTag tag, ExifFormat* format, unsigned long *compo
 
   return 1;
 }
+#endif
 
 /* libjpeg error handlers */
 

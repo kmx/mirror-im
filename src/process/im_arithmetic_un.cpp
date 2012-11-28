@@ -58,13 +58,13 @@ static inline imcfloat cpxnorm_op(const imcfloat& v)
 template <class T>
 inline T positives_op(const T& v)
 {
-  return v > 0? v: 0;
+  return v > (T)0? v: (T)0;
 }
 
 template <class T>
 inline T negatives_op(const T& v)
 {
-  return v > 0? 0: v;
+  return v > (T)0? (T)0: v;
 }
 
 template <class T1, class T2> 
