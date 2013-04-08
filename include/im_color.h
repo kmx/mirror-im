@@ -88,7 +88,7 @@ inline float imColorZeroShift(int data_type)
   return zero[data_type];
 }
 
-/** Returns the maximum value for pre-defined color conversion porpouses. \n
+/** Returns the maximum value for pre-defined color conversion purposes. \n
  * See \ref cci.
  * \ingroup color */
 inline int imColorMax(int data_type)
@@ -102,7 +102,7 @@ inline int imColorMax(int data_type)
   return max[data_type];
 }
 
-/** Returns the minimum value for pre-defined color conversion porpouses. \n
+/** Returns the minimum value for pre-defined color conversion purposes. \n
  * See \ref cci.
  * \ingroup color */
 inline int imColorMin(int data_type)

@@ -63,22 +63,24 @@ enum imCastMode
  * When demoting the data type the function will scan source for min/max values or use fixed values (cast_mode)
  * to scale the result according to the destiny range. \n
  * Except complex to real that will use only the complex2real conversion. \n
- * Images must be of the same size and color mode. \n
- * Returns IM_ERR_NONE, IM_ERR_DATA or IM_ERR_COUNTER, see also \ref imErrorCodes.
- * See also \ref imComplex2Real, \ref imGammaFactor and \ref imCastMode.
+ * Images must be of the same size and color mode. If data type is the same nothing is done. \n
+ * Returns IM_ERR_NONE, IM_ERR_DATA or IM_ERR_COUNTER, see also \ref imErrorCodes. \n
+ * See also \ref imDataType, \ref datatypeutl, \ref imComplex2Real, \ref imGammaFactor and \ref imCastMode.
  *
  * \verbatim im.ConvertDataType(src_image: imImage, dst_image: imImage, cpx2real: number, gamma: number, abssolute: boolean, cast_mode: number) -> error: number [in Lua 5] \endverbatim
  * \verbatim im.ConvertDataTypeNew(image: imImage, data_type: number, cpx2real: number, gamma: number, abssolute: boolean, cast_mode: number) -> error: number, new_image: imImage  [in Lua 5] \endverbatim
  * \ingroup convert */
 int imConvertDataType(const imImage* src_image, imImage* dst_image, int cpx2real, float gamma, int abssolute, int cast_mode);
 
-/** Converts one color space to another. Images must be of the same size and data type. \n
+/** Converts one color space to another. \n
+ * Images must be of the same size and data type. If color mode is the same nothing is done. \n
  * CMYK can be converted to RGB only, and it is a very simple conversion. \n
  * All colors can be converted to Binary, the non zero gray values are converted to 1. \n
  * RGB to Map uses the median cut implementation from the free IJG JPEG software, copyright Thomas G. Lane. \n
  * Alpha channel is considered and Transparency* attributes are converted to alpha channel. \n
- * All other color space conversions assume sRGB and CIE definitions. \n
- * Returns IM_ERR_NONE, IM_ERR_DATA or IM_ERR_COUNTER, see also \ref imErrorCodes.
+ * All other color space conversions assume sRGB and CIE definitions, see \ref color. \n
+ * Returns IM_ERR_NONE, IM_ERR_DATA or IM_ERR_COUNTER, see also \ref imErrorCodes. \n
+ * See also \ref imColorSpace, \ref imColorModeConfig and \ref colormodeutl. 
  *
  * \verbatim im.ConvertColorSpace(src_image: imImage, dst_image: imImage) -> error: number [in Lua 5] \endverbatim
  * \verbatim im.ConvertColorSpaceNew(image: imImage, color_space: number, has_alpha: boolean) -> error: number, new_image: imImage [in Lua 5] \endverbatim
@@ -88,7 +90,7 @@ int imConvertColorSpace(const imImage* src_image, imImage* dst_image);
 /** Converts the image to its bitmap equivalent, 
  * uses \ref imConvertColorSpace and \ref imConvertDataType. \n
  * Returns IM_ERR_NONE, IM_ERR_DATA or IM_ERR_COUNTER, see also \ref imErrorCodes.
- * See also \ref imComplex2Real, \ref imGammaFactor and \ref imCastMode. \n
+ * See also \ref imImageIsBitmap, \ref imComplex2Real, \ref imGammaFactor and \ref imCastMode. \n
  * The function im.ConvertToBitmapNew uses the default conversion result from \ref imColorModeToBitmap if color_space is nil.
  *
  * \verbatim im.ConvertToBitmap(src_image: imImage, dst_image: imImage, cpx2real: number, gamma: number, abssolute: boolean, cast_mode: number) -> error: number [in Lua 5] \endverbatim
