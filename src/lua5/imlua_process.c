@@ -2242,8 +2242,9 @@ static int imluaProcessQuantizeGrayUniform (lua_State *L)
   int grays = luaL_checkint(L, 3);
 
   imlua_checktype(L, 1, src_image, IM_GRAY, IM_BYTE);
-  imlua_checktype(L, 2, dst_image, IM_GRAY, IM_BYTE);
-  imlua_match(L, src_image, dst_image);
+  if (dst_image->color_space!=IM_MAP)
+    imlua_checktype(L, 2, dst_image, IM_GRAY, IM_BYTE);
+  imlua_matchsize(L, src_image, dst_image);
 
   imProcessQuantizeGrayUniform(src_image, dst_image, grays);
   return 0;
