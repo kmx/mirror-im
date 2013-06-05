@@ -18,10 +18,17 @@
 
 #define BMP_ID              0x4d42  /* BMP "magic" number           */
 
+#define BMP_COREHEADER 0
+#define BMP_INFOHEADER 1
+#define BMP_V4HEADER   2
+#define BMP_V5HEADER   3
+
 #define BMP_COMPRESS_RGB        0L      /* No compression               */
 #define BMP_COMPRESS_RLE8       1L      /* 8 bits per pixel compression */
 #define BMP_COMPRESS_RLE4       2L      /* 4 bits per pixel compression */
 #define BMP_BITFIELDS           3L      /* no compression, palette is mask for 16 and 32 bits images */
+#define BMP_COMPRESS_JPEG       4L      /* embedded JPEG */
+#define BMP_COMPRESS_PNG        5L      /* embedded PNG */
 
 /* State-machine definitions */
 #define BMP_READING 0         /* General READING mode */
@@ -32,6 +39,8 @@
 
 #define BMP_LSN(value)  (unsigned char)((value) & 0x0f)      /* Least-significant nibble */
 #define BMP_MSN(value)  (unsigned char)(((value) & 0xf0) >> 4)  /* Most-significant nibble  */
+
+#define BMP_CALIBRATED_RGB      0x00000000L
 
 
 /*  File Header Structure.
@@ -288,7 +297,7 @@ class imFileFormatBMP: public imFileFormatBase
   unsigned short bpp;         /* number of bits per pixel */
   unsigned int offset,        /* image data offset, used only when reading */
                comp_type;     /* bmp compression information */
-  int is_os2,                 /* indicates an os2 1.x BMP */
+  int bmp_header,             /* indicates the bmp header type */
       line_raw_size;              // raw line size
   unsigned int rmask, gmask, bmask, 
                 roff, goff, boff; /* pixel bit mask control when reading 16 and 32 bpp images */
@@ -370,9 +379,13 @@ int imFileFormatBMP::Open(const char* file_name)
   imBinFileRead(handle, &dword, 1, 4);
 
   if (dword == 40)
-    this->is_os2 = 0;
+    this->bmp_header = BMP_INFOHEADER;
   else if (dword == 12)
-    this->is_os2 = 1;
+    this->bmp_header = BMP_COREHEADER;
+  else if (dword == 108)
+    this->bmp_header = BMP_V4HEADER;
+  else if (dword == 124)
+    this->bmp_header = BMP_V5HEADER;
   else
   {
     imBinFileClose(handle);
@@ -382,7 +395,7 @@ int imFileFormatBMP::Open(const char* file_name)
   this->image_count = 1;
 
   /* reads the compression information */
-  if (this->is_os2)
+  if (this->bmp_header == BMP_COREHEADER)
   {
     this->comp_type = BMP_COMPRESS_RGB;
     strcpy(this->compression, "NONE");
@@ -395,13 +408,19 @@ int imFileFormatBMP::Open(const char* file_name)
 
     switch (this->comp_type)
     {
+    case BMP_BITFIELDS:
     case BMP_COMPRESS_RGB:
       strcpy(this->compression, "NONE");
       break;
     case BMP_COMPRESS_RLE8:
       strcpy(this->compression, "RLE");
       break;
-    case BMP_COMPRESS_RLE4:
+    case BMP_COMPRESS_RLE4:  /* not supported */
+      strcpy(this->compression, "RLE4");
+    case BMP_COMPRESS_JPEG:  /* not supported */
+      strcpy(this->compression, "JPEG");
+    case BMP_COMPRESS_PNG:  /* not supported */
+      strcpy(this->compression, "PNG");
     default:
       imBinFileClose(handle);
       return IM_ERR_COMPRESS;
@@ -447,7 +466,7 @@ int imFileFormatBMP::ReadImageInfo(int index)
 
   this->file_data_type = IM_BYTE;
 
-  if (this->is_os2)
+  if (this->bmp_header==BMP_COREHEADER)
   {
     short word;
 
@@ -515,7 +534,7 @@ int imFileFormatBMP::ReadImageInfo(int index)
   this->line_raw_size = imFileLineSizeAligned(this->width, this->bpp, 4);
   this->line_buffer_extra = 4; // room enough for padding
 
-  if (this->is_os2)
+  if (this->bmp_header==BMP_COREHEADER)
   {
     if (this->bpp < 24)
       return ReadPalette();
@@ -592,6 +611,12 @@ int imFileFormatBMP::ReadImageInfo(int index)
       this->bmask = Mask = PalMask[2];
       while (!(Mask & 0x01) && (Mask != 0))
         {Mask >>= 1; this->boff++;}
+
+      if (this->bmp_header==BMP_V4HEADER||this->bmp_header==BMP_V5HEADER)
+      {
+        /* jump 4 bytes (alpha masks) */
+        imBinFileSeekOffset(handle, 4);
+      }
     }
     else
     {
@@ -617,6 +642,35 @@ int imFileFormatBMP::ReadImageInfo(int index)
         this->bmask = 0x000000FF;
         this->boff = 0;
       }
+
+      if (this->bmp_header==BMP_V4HEADER||this->bmp_header==BMP_V5HEADER)
+      {
+        /* jump 16 bytes (masks, including alpha) */
+        imBinFileSeekOffset(handle, 16);
+      }
+    }
+  }
+  else
+  {
+    if (this->bmp_header==BMP_V4HEADER||this->bmp_header==BMP_V5HEADER)
+    {
+      /* jump 16 bytes (masks, including alpha) */
+      imBinFileSeekOffset(handle, 16);
+    }
+  }
+
+  if (this->bmp_header==BMP_V4HEADER||this->bmp_header==BMP_V5HEADER)
+  {
+    /* reads the color space */
+    imBinFileRead(handle, &dword, 1, 4);
+
+    /* jump 36+12 bytes (endpoints and gamma) */
+    imBinFileSeekOffset(handle, 48);
+
+    if (this->bmp_header==BMP_V5HEADER)
+    {
+      /* jump 16 bytes (intent, profile offset and size, reserved) */
+      imBinFileSeekOffset(handle, 16);
     }
   }
 
@@ -747,7 +801,7 @@ int imFileFormatBMP::WriteImageInfo()
 int imFileFormatBMP::ReadPalette()
 {
   int nc;
-  if (this->is_os2)
+  if (this->bmp_header==BMP_COREHEADER)
     nc = 3;
   else
     nc = 4;
@@ -863,16 +917,16 @@ int imFileFormatBMP::ReadImageData(void* data)
   for (int row = 0; row < this->height; row++)
   {
     /* read and decompress the data */
-    if (this->comp_type == BMP_COMPRESS_RGB)
+    if (this->comp_type == BMP_COMPRESS_RLE8)
     {
-      imBinFileRead(handle, this->line_buffer, this->line_raw_size, 1);
-
-      if (imBinFileError(handle))
+      if (iBMPDecodeScanLine(handle, (imbyte*)this->line_buffer, this->width) == IM_ERR_ACCESS)
         return IM_ERR_ACCESS;     
     }
     else
     {
-      if (iBMPDecodeScanLine(handle, (imbyte*)this->line_buffer, this->width) == IM_ERR_ACCESS)
+      imBinFileRead(handle, this->line_buffer, this->line_raw_size, 1);
+
+      if (imBinFileError(handle))
         return IM_ERR_ACCESS;     
     }
 
@@ -903,14 +957,14 @@ int imFileFormatBMP::WriteImageData(void* data)
     if (this->bpp > 8)
       FixRGBOrder();
 
-    if (this->comp_type == BMP_COMPRESS_RGB)
-    {
-      imBinFileWrite(handle, this->line_buffer, this->line_raw_size, 1);
-    }
-    else
+    if (this->comp_type == BMP_COMPRESS_RLE8)
     {
       int compressed_size = iBMPEncodeScanLine(compressed_buffer, (imbyte*)this->line_buffer, this->width);
       imBinFileWrite(handle, compressed_buffer, compressed_size, 1);
+    }
+    else
+    {
+      imBinFileWrite(handle, this->line_buffer, this->line_raw_size, 1);
     }
 
     if (imBinFileError(handle))
