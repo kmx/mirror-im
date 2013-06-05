@@ -296,7 +296,8 @@ void imProcessMultiplyConj(const imImage* src_image1, const imImage* src_image2,
 void imProcessQuantizeRGBUniform(const imImage* src_image, imImage* dst_image, int do_dither);
 
 /** Quantizes a gray scale image in less that 256 grays using uniform quantization. \n
- * Both images must be IM_BYTE/IM_GRAY. Can be done in-place. 
+ * Both images should be IM_BYTE/IM_GRAY, the destiny can be IM_MAP. Can be done in-place. \n
+ * The result is in the 0-255 range, except when destiny is IM_MAP that is in the 0-(grays-1) range.
  *
  * \verbatim im.ProcessQuantizeGrayUniform(src_image: imImage, dst_image: imImage, grays: number) [in Lua 5] \endverbatim
  * \verbatim im.ProcessQuantizeGrayUniformNew(src_image: imImage, grays: number) -> new_image: imImage [in Lua 5] \endverbatim

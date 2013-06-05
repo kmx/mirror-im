@@ -59,7 +59,8 @@ void imProcessQuantizeGrayUniform(const imImage* src_image, imImage* dst_image, 
   for (i = 0; i < 256; i++)  // for all src values
   {             
     int value = imResampleInt(i, factor);     // from 0-255 to 0-(grays-1)  => this will discart information
-    value = imResampleInt(value, factor256);  // from 0-(grays-1) back to 0-255
+    if (dst_image->color_space != IM_MAP)
+      value = imResampleInt(value, factor256);  // from 0-(grays-1) back to 0-255
     re_map[i] = (imbyte)IM_BYTECROP(value);
   }
 
