@@ -23,7 +23,11 @@ static const char* iRAWCompTable[2] =
 class imFileFormatRAW: public imFileFormatBase
 {
   imBinFile* handle;
-  int padding;
+
+  int padding; 
+
+  int rgb16;
+  void iRawFixRGB16();
 
   int iRawUpdateParam(int index);
 
@@ -120,13 +124,11 @@ static int iCalcPad(int padding, int line_size)
   if (padding == 1)
     return 0;
 
-  {
-    int rest = line_size % padding;
-    if (rest == 0)
-      return 0;
+  int rest = line_size % padding;
+  if (rest == 0)
+    return 0;
 
-    return padding - rest;
-  }
+  return padding - rest;
 }
 
 int imFileFormatRAW::iRawUpdateParam(int index)
@@ -176,6 +178,20 @@ int imFileFormatRAW::iRawUpdateParam(int index)
     this->padding = iCalcPad(*pad, line_size);
   }
 
+  if (this->file_data_type==IM_BYTE && 
+      imColorModeSpace(this->file_color_mode)==IM_RGB &&
+      imColorModeIsPacked(this->file_color_mode))
+  {
+    char* s_rgb16 = (char*)attrib_table->Get("RGB16");
+    if (s_rgb16)
+    {
+      if (imStrEqual(s_rgb16, "555"))
+        this->rgb16 = 1;
+      else if (imStrEqual(s_rgb16, "565"))
+        this->rgb16 = 2;
+    }
+  }
+
   return IM_ERR_NONE;
 }
 
@@ -200,6 +216,49 @@ static int iFileDataTypeSize(int file_data_type, int switch_type)
   return type_size;
 }
 
+void imFileFormatRAW::iRawFixRGB16()
+{
+  int x;
+  unsigned int rmask, gmask, bmask, 
+                roff, goff, boff;
+
+  if (this->rgb16==2)  // 565
+  {
+    rmask = 0xF800;
+    roff = 11;
+    gmask = 0x07E0;
+    goff = 5;
+    bmask = 0x001F;
+    boff = 0;
+  }
+  else  // 555
+  {
+    rmask = 0x7C00;
+    roff = 10;
+    gmask = 0x03E0;
+    goff = 5;
+    bmask = 0x001F;
+    boff = 0;
+  }
+
+  /* inverts the WORD values if not same order */
+  if (imBinCPUByteOrder() != imBinFileByteOrder(this->handle, -1))
+    imBinSwapBytes2(this->line_buffer, this->width);
+
+  imushort* word_data = (imushort*)this->line_buffer;
+  imbyte* byte_data = (imbyte*)this->line_buffer;
+
+  // from end to start
+  for (x = this->width-1; x >= 0; x--)
+  {
+    imushort word_value = word_data[x];
+    int c = x*3;
+    byte_data[c]   = (imbyte)((((rmask & word_value) >> roff) * 255) / (rmask >> roff));
+    byte_data[c+1] = (imbyte)((((gmask & word_value) >> goff) * 255) / (gmask >> goff));
+    byte_data[c+2] = (imbyte)((((bmask & word_value) >> boff) * 255) / (bmask >> boff));
+  }
+}
+
 int imFileFormatRAW::ReadImageData(void* data)
 {
   int count = imFileLineBufferCount(this);
@@ -212,6 +271,9 @@ int imFileFormatRAW::ReadImageData(void* data)
     type_size /= 2;
     line_count *= 2;
   }
+
+  if (this->rgb16)
+    line_count = this->width * 2;  /* RGB packed in 2 bytes */
 
   int ascii;
   if (imStrEqual(this->compression, "ASCII"))
@@ -259,6 +321,9 @@ int imFileFormatRAW::ReadImageData(void* data)
 
       if (imBinFileError(this->handle))
         return IM_ERR_ACCESS;
+
+      if (this->rgb16)
+        iRawFixRGB16();
     }
 
     imFileLineBufferRead(this, data, row, plane);

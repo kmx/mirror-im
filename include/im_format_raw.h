@@ -40,6 +40,9 @@ extern "C" {
  * If the compression is ASCII the data is stored in textual format, instead of binary. 
  * In this case SwitchType and ByteOrder are ignored, and Padding should be 0.
  * \par
+ * When reading, if data type is BYTE, color space is RGB and data is packed, then the attribute "RGB16" is consulted. 
+ * It can has values "555" or "565" indicating a packed 16 bits RGB pixel is stored with the given bit distribution for R, G and B.
+ * \par
  * See \ref im_raw.h
  * 
  * \section Features

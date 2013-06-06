@@ -187,7 +187,9 @@ public:
   int InitByteOrder(int ByteOrder)
   {
     int old_byte_order = this->FileByteOrder;
-    SetByteOrder(ByteOrder);
+    if (ByteOrder == IM_LITTLEENDIAN ||
+        ByteOrder == IM_BIGENDIAN)
+      SetByteOrder(ByteOrder);
     return old_byte_order;
   }
 
