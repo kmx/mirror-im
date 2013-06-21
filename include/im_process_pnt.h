@@ -19,7 +19,8 @@ extern "C" {
  * \ingroup process */
 
 
-/** Custom unary point funtion.
+/** Custom unary point funtion. \n
+ * Data will be set only if the returned value is non zero.
  * \verbatim func(src_value: number, params1, param2, ..., x: number, y: number, d: number) -> dst_value: number  [in Lua 5] \endverbatim
  * In Lua, the params table is unpacked.
  * And the returned value contains only the destiny values to update, or nil (also no return value) to leave destiny intact.
@@ -30,7 +31,7 @@ typedef int (*imUnaryPointOpFunc)(float src_value, float *dst_value, float* para
  * One pixel from the source affects the same pixel on destiny. \n
  * Can be done in-place, images must match size and depth. 
  * Data type can be different, but IM_CFLOAT is not supported. \n
- * op_name is used only by the counter and can be NULL. Data will be set only if cond is true. 
+ * op_name is used only by the counter and can be NULL.  
  * Returns zero if the counter aborted.
  *
  * \verbatim im.ProcessUnaryPointOp(src_image: imImage, dst_image: imImage, func: function, params: table, [op_name: string]) -> counter: boolean [in Lua 5] \endverbatim
@@ -40,7 +41,8 @@ typedef int (*imUnaryPointOpFunc)(float src_value, float *dst_value, float* para
  * \ingroup point */
 int imProcessUnaryPointOp(const imImage* src_image, imImage* dst_image, imUnaryPointOpFunc func, float* params, void* userdata, const char* op_name);
 
-/** Custom unary point color funtion.
+/** Custom unary point color funtion. \n
+ * Data will be set only if the returned value is non zero.
  * \verbatim func(src_value_plane0: number, src_value_plane1: number, ... , params1, param2, ..., x: number, y: number) -> dst_value_plane0: number, dst_value_plane1: number, ...  [in Lua 5] \endverbatim
  * In Lua, the params table is unpacked.
  * Also each color plane is passed as a separe value, instead of inside an array.
@@ -52,7 +54,7 @@ typedef int (*imUnaryPointColorOpFunc)(const float* src_value, float *dst_value,
  * One pixel from the source affects the same pixel on destiny. \n
  * Can be done in-place, images must match size, depth can be different.
  * Data type can be different, but IM_CFLOAT is not supported. \n
- * op_name is used only by the counter and can be NULL. Data will be set only if cond is true. 
+ * op_name is used only by the counter and can be NULL.
  * Returns zero if the counter aborted.
  *
  * \verbatim im.ProcessUnaryPointColorOp(src_image: imImage, dst_image: imImage, func: function, params: table, [op_name: string]) -> counter: boolean [in Lua 5] \endverbatim
@@ -62,7 +64,8 @@ typedef int (*imUnaryPointColorOpFunc)(const float* src_value, float *dst_value,
  * \ingroup point */
 int imProcessUnaryPointColorOp(const imImage* src_image, imImage* dst_image, imUnaryPointColorOpFunc func, float* params, void* userdata, const char* op_name);
 
-/** Custom multiple point funtion.
+/** Custom multiple point funtion. \n
+ * Data will be set only if the returned value is non zero.
  * \verbatim func(src_value1: number, src_value2: number, ... , params1, param2, ..., x: number, y: number, d: number) -> dst_value: number  [in Lua 5] \endverbatim
  * In Lua, the source images data and the params table are unpacked.
  * And the returned value contains only the destiny values to update, or nil (also no return value) to leave destiny intact.
@@ -74,7 +77,7 @@ typedef int (*imMultiPointOpFunc)(const float* src_value, float *dst_value, floa
  * All source images must match in size, depth and data type.
  * Can be done in-place, source and destiny must match size and depth.
  * Data type can be different between sources and destiny, but IM_CFLOAT is not supported. \n
- * op_name is used only by the counter and can be NULL. Data will be set only if cond is true. 
+ * op_name is used only by the counter and can be NULL.
  * Returns zero if the counter aborted.
  *
  * \verbatim im.ProcessMultiPointOp(src_image: table of imImage, dst_image: imImage, func: function, params: table, [op_name: string]) -> counter: boolean [in Lua 5] \endverbatim
@@ -84,7 +87,8 @@ typedef int (*imMultiPointOpFunc)(const float* src_value, float *dst_value, floa
  * \ingroup point */
 int imProcessMultiPointOp(const imImage** src_image, int src_count, imImage* dst_image, imMultiPointOpFunc func, float* params, void* userdata, const char* op_name);
 
-/** Custom multiple point color funtion.
+/** Custom multiple point color funtion. \n
+ * Data will be set only if the returned value is non zero.
  * \verbatim func(src_value1_plane0: number, src_value1_plane1: number, ..., src_value2_plane0: number, src_value2_plane1: number, ... , params1, param2, ..., x: number, y: number) -> dst_value_plane0: number, dst_value_plane1: number, ...  [in Lua 5] \endverbatim
  * In Lua, the source images data and the params table are unpacked.
  * Also each color plane is passed as a separe value, instead of inside an array.
@@ -97,7 +101,7 @@ typedef int (*imMultiPointColorOpFunc)(float* src_value, float* dst_value, float
  * All source images must match in size, depth and data type.
  * Can be done in-place, source and destiny must match size, depth can be different.
  * Data type can be different between sources and destiny, but IM_CFLOAT is not supported. \n
- * op_name is used only by the counter and can be NULL. Data will be set only if cond is true. 
+ * op_name is used only by the counter and can be NULL. 
  * Returns zero if the counter aborted.
  *
  * \verbatim im.ProcessMultiPointColorOp(src_image: table of imImage, dst_image: imImage, func: function, params: table, [op_name: string]) -> counter: boolean [in Lua 5] \endverbatim
