@@ -306,7 +306,11 @@
 #undef TIFF_INT64_FORMAT
 
 /* Signed 64-bit type */
+#if defined(_MSC_VER) && (_MSC_VER < 1300)
+#define TIFF_INT64_T __int64                  /* necessary for old MSVC 6.0 */
+#else
 #define TIFF_INT64_T long long int            /* IMLIB */
+#endif
 
 /* Signed 8-bit type */
 #define TIFF_INT8_T char                      /* IMLIB */
@@ -336,7 +340,11 @@
 #define TIFF_UINT64_FORMAT  "%llu"            /* IMLIB */
 
 /* Unsigned 64-bit type */
+#if defined(_MSC_VER) && (_MSC_VER < 1300)
+#define TIFF_UINT64_T unsigned __int64        /* necessary for old MSVC 6.0 */
+#else
 #define TIFF_UINT64_T unsigned long long int  /* IMLIB */
+#endif
 
 /* Unsigned 8-bit type */
 #define TIFF_UINT8_T unsigned char            /* IMLIB */

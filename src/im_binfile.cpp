@@ -15,6 +15,11 @@
 #include "im_binfile.h"
 
 
+#if defined(_MSC_VER) && (_MSC_VER < 1500)
+#define vsnprintf(b,c,f,a) _vsnprintf(b,c,f,a)
+#endif
+
+
 /**************************************************
                 imBinMemoryFile
 ***************************************************/

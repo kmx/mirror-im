@@ -42,7 +42,6 @@
       <PrecompiledHeader>
       </PrecompiledHeader>
       <ObjectFileName>$(IntDir)</ObjectFileName>
-      
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>OldStyle</DebugInformationFormat>
       <CompileAs>Default</CompileAs>
