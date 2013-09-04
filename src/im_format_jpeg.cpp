@@ -296,7 +296,7 @@ class imFileFormatJPEG: public imFileFormatBase
   JPEGerror_mgr jerr;
 
   imBinFile* handle;
-  int fix_adobe;
+  int fix_adobe_cmyk;
 
 #ifdef USE_EXIF
   void iReadExifAttrib(unsigned char* data, int data_length, imAttribTable* attrib_table);
@@ -825,7 +825,7 @@ void imFileFormatJPEG::iWriteExifAttrib(imAttribTable* attrib_table)
 int imFileFormatJPEG::ReadImageInfo(int index)
 {
   (void)index;
-  this->fix_adobe = 0;
+  this->fix_adobe_cmyk = 0;
 
   if (setjmp(this->jerr.setjmp_buffer)) 
     return IM_ERR_ACCESS;
@@ -855,11 +855,14 @@ int imFileFormatJPEG::ReadImageInfo(int index)
     break;
   case JCS_CMYK:
     this->file_color_mode = IM_CMYK;
+    if (this->dinfo.saw_Adobe_marker)
+      this->fix_adobe_cmyk = 1;
     break;
   case JCS_YCCK:
-    this->file_color_mode = IM_CMYK; // this is the only supported conversion in libjpeg
-    this->dinfo.out_color_space = JCS_CMYK;
-    this->fix_adobe = 1;
+    this->file_color_mode = IM_CMYK; 
+    this->dinfo.out_color_space = JCS_CMYK;  // this is the only supported conversion in libjpeg
+    if (this->dinfo.saw_Adobe_marker)
+      this->fix_adobe_cmyk = 1;
     break;
   default: /* JCS_UNKNOWN */
     return IM_ERR_DATA;
@@ -1024,7 +1027,7 @@ int imFileFormatJPEG::WriteImageInfo()
   return IM_ERR_NONE;
 }
 
-static void iFixAdobe(unsigned char* line_buffer, int width)
+static void iFixAdobeCMYK(unsigned char* line_buffer, int width)
 {
   width *= 4;
   for (int i = 0; i < width; i++)
@@ -1047,8 +1050,8 @@ int imFileFormatJPEG::ReadImageData(void* data)
     if (jpeg_read_scanlines(&this->dinfo, (JSAMPARRAY)&this->line_buffer, 1) == 0)
       return IM_ERR_ACCESS;
 
-    if (this->fix_adobe)
-      iFixAdobe((unsigned char*)this->line_buffer, this->width);
+    if (this->fix_adobe_cmyk)
+      iFixAdobeCMYK((unsigned char*)this->line_buffer, this->width);
 
     imFileLineBufferRead(this, data, row, plane);
 
