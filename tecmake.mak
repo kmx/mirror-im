@@ -6,7 +6,7 @@
 
 #---------------------------------#
 # Tecmake Version
-VERSION = 4.7
+VERSION = 4.8
 
 
 #---------------------------------#
@@ -509,6 +509,11 @@ else
   endif
 endif
 
+ifeq "$(TEC_SYSNAME)" "Haiku"
+  STDFLAGS += -Wno-multichar
+  LIBS += be textencoding tracker
+endif
+
 ifneq ($(findstring Linux, $(TEC_UNAME)), )
   UNIX_LINUX = Yes
   ifdef BUILD_64
@@ -856,20 +861,22 @@ endif
 ifdef USE_IUP
   IUP_SUFFIX ?=
   ifdef USE_IUP3
-    ifdef GTK_DEFAULT
-      ifdef USE_MOTIF
-        IUP_SUFFIX := mot
-      else
-        ifndef NO_OVERRIDE
-          override USE_GTK = Yes
+    ifndef USE_HAIKU
+      ifdef GTK_DEFAULT
+        ifdef USE_MOTIF
+          IUP_SUFFIX := mot
+        else
+          ifndef NO_OVERRIDE
+            override USE_GTK = Yes
+          endif
         endif
-      endif
-    else
-      ifdef USE_GTK
-        IUP_SUFFIX := gtk
       else
-        ifndef NO_OVERRIDE
-          override USE_MOTIF = Yes
+        ifdef USE_GTK
+          IUP_SUFFIX := gtk
+        else
+          ifndef NO_OVERRIDE
+            override USE_MOTIF = Yes
+          endif
         endif
       endif
     endif
@@ -961,6 +968,11 @@ ifdef USE_CD
       LIBS += pangocairo-1.0 cairo
     endif
     
+    ifdef USE_HAIKU
+	    LINK_FREETYPE = Yes
+	    LIBS += fontconfig xml2
+	  endif
+
     LIBS += cd$(CD_SUFFIX)
     LDIR += $(CD_LIB)
     
