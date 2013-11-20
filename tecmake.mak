@@ -26,6 +26,9 @@ ifndef TEC_UNAME
   TEC_SYSARCH:=$(shell uname -m)
 
   # Fixes
+  ifeq ($(TEC_SYSNAME), Haiku)
+    TEC_SYSARCH:=$(shell uname -p)
+  endif
   ifeq ($(TEC_SYSNAME), SunOS)
     TEC_SYSARCH:=$(shell uname -p)
   endif
@@ -325,6 +328,7 @@ ifneq ($(PROJNAME), $(TARGETNAME))
 endif
 
 ifdef DBG
+  OPT:=
   STDFLAGS += $(DEBUGFLAGS)
   STDDEFS += -DDEBUG
 else
@@ -1180,7 +1184,9 @@ ifdef USE_X11
   STDINCS += $(X11_INC)
 endif
 
-LIBS += m
+ifneq "$(TEC_SYSNAME)" "Haiku"
+  LIBS += m
+endif
 
 ifneq ($(findstring cygw, $(TEC_UNAME)), )
   WIN_OTHER := Yes
