@@ -48,6 +48,20 @@ ifneq ($(findstring dll10, $(TEC_UNAME)), )
   INCLUDES += $(WINSDK)/include
 endif
 
+ifneq ($(findstring vc11, $(TEC_UNAME)), )
+  INCLUDES += $(WINSDK)/include
+endif
+ifneq ($(findstring dll11, $(TEC_UNAME)), )
+  INCLUDES += $(WINSDK)/include
+endif
+
+ifneq ($(findstring vc12, $(TEC_UNAME)), )
+  INCLUDES += $(WINSDK)/include
+endif
+ifneq ($(findstring dll12, $(TEC_UNAME)), )
+  INCLUDES += $(WINSDK)/include
+endif
+
 ifneq ($(findstring Win, $(TEC_SYSNAME)), )
   INCLUDES += $(DXSDK)/include
   SRC = im_capture_dx.cpp
