@@ -528,7 +528,7 @@ int imFileFormatBMP::ReadImageInfo(int index)
   if (this->bpp == 32)
     this->file_color_mode |= IM_ALPHA;
 
-  if (dword < 0)
+  if ((int)dword < 0)
     this->file_color_mode |= IM_TOPDOWN;
 
   this->line_raw_size = imFileLineSizeAligned(this->width, this->bpp, 4);
