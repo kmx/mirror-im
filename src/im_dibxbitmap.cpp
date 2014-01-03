@@ -178,3 +178,46 @@ imDib* imDibFromImage(const imImage* image)
 
   return dib;
 }
+
+
+/********************************************************************************/
+
+#include "im_binfile.h"
+
+imImage* imImageLoadFromResource(HMODULE module, LPCTSTR name, int index, int *error)
+{
+  *error = IM_ERR_OPEN;
+
+  if (!module)
+    module = GetModuleHandle(NULL);
+
+  HRSRC mrc = FindResource(module, name, RT_RCDATA); // The type must be RCDATA even for a bitmap resource.
+  if (!mrc)
+    return NULL;
+
+  HGLOBAL imhandle = LoadResource(module, mrc);
+  if (!imhandle)
+    return NULL;
+
+  DWORD size = SizeofResource(module, mrc);
+  void* buffer = LockResource(imhandle);
+  if (!size || !buffer)
+    return NULL;
+
+  int old_mode = imBinFileSetCurrentModule(IM_MEMFILE);
+  imBinMemoryFileName MemFileName;
+  MemFileName.buffer = (unsigned char*)buffer;
+  MemFileName.size = (int)size; //The size MUST be set.
+  MemFileName.reallocate = 0; //Since we are loading an image we dont need to reallocate. The size is fixed.
+  imFile *ifile = imFileOpen((const char*)&MemFileName, error);
+  if (!ifile)
+  {
+    imBinFileSetCurrentModule(old_mode);
+    return NULL;
+  }
+
+  imImage *myimage = imFileLoadImage(ifile, index, error);
+  imBinFileSetCurrentModule(old_mode);
+
+  return myimage;
+}

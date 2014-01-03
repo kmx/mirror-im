@@ -186,6 +186,14 @@ imImage* imDibToImage(const imDib* dib);
  * \ingroup dib */
 imDib* imDibFromImage(const imImage* image);
 
+/** Creates a imImage from a RCDATA in the executable/dll resources. \n
+ * module can be NULL, it will use GetModuleHandle(NULL). \n
+ * name is the name of the resource. If using IDs, then can be obtained from MAKEINTRESOURCE(id). \n
+ * index is the image index in the file, 0 will return the first image.
+ * \ingroup dib */
+imImage* imImageLoadFromResource(HMODULE module, LPCTSTR name, int index, int *error);
+
+
 #endif
 
 #if defined(__cplusplus)
