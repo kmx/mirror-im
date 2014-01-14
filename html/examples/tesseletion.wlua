@@ -41,14 +41,17 @@ end
 function clip(val,mini,maxi)
  return math.max(mini,math.min(val,maxi))
 end
+
 function linearmap(v,s,e,ds,de)
  return ((de-ds)*(v-s)/(e-s)) + ds
 end
+
 function imResize(im1,w,h)
  local im2 = im.ImageCreateBased(im1,w,h)
  im.ProcessResize(im1,im2,3)
  return im2
 end
+
 function MaskTriang(img,size)
  local im2 = img:Clone()
  im2:AddAlpha()
@@ -59,11 +62,10 @@ function MaskTriang(img,size)
  imcv:Kill()
  return im2
 end
-function Teselate(img,size)
+
+function Tesselate(img,size)
  local im2 = im.ImageCreateBased(img,size*2,size*2)
  local imcv = im2:cdCreateCanvas()
- --local ident = imcv:GetTransform()
- --print("imcv:GetTransformation",imcv.GetTransform,ident)
  img:cdCanvasPutImageRect(imcv, 0, 0, 0, 0, 0, 0, 0, 0)
 
  imcv:TransformTranslate(1.5*size, size*0.5*math.sqrt(3))
@@ -82,7 +84,8 @@ function Teselate(img,size)
  img:Destroy()
  return im2
 end
-function EndTeselate(img,size)
+
+function EndTesselate(img,size)
  local im2 = im.ImageCreateBased(img,size*2,size*2)
  local imcv = im2:cdCreateCanvas()
 
@@ -114,10 +117,10 @@ function cnv:action()
  local imm = imResize(image,size,size)
  local im2 = MaskTriang(imm,size)
  while size < width do
-  im2 = Teselate(im2,size)
+  im2 = Tesselate(im2,size)
   size = size * 2
  end
- im2 = EndTeselate(im2,size)
+ im2 = EndTesselate(im2,size)
  im2:cdCanvasPutImageRect(self.canvas, 0, 0, 0, 0, 0, 0, 0, 0)
 
  imm:Destroy()
