@@ -316,7 +316,8 @@ void imProcessQuantizeGrayUniform(const imImage* src_image, imImage* dst_image, 
  * \ingroup process */
 
 /** Performs an histogram expansion based on a percentage of the number of pixels. \n
- * Percentage defines an amount of pixels to include at the lowest level and at the highest level.
+ * Percentage is used to obtain the amount of pixels of the lowest level and the highest level, relative to the total of pixels.
+ * The histogram is used an each level is summed while the result is less than the obtained amount from 0 (for the lowest level) and from the last level (for the highest).
  * If it is zero, then only empty counts of the histogram will be considered. \n
  * Images must be (IM_BYTE, IM_SHORT or IM_USHORT)/(IM_RGB or IM_GRAY). Can be done in-place. \n
  * To expand the gammut without using the histogram, by just specifing the lowest and highest levels
