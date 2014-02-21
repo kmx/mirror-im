@@ -1800,18 +1800,21 @@ static int imluaProcessMultiPointOp(lua_State *L)
   {
     free(src_image_list);
     imlua_errorcfloat(L, 1);
+    return 0;
   }
 
   if (!imImageMatchSize(src_image_list[0], dst_image))
   {
     free(src_image_list);
     imlua_errormatchsize(L);  
+    return 0;
   }
 
   if (src_image_list[0]->depth != dst_image->depth)
   {
     free(src_image_list);
     luaL_error(L, "source and destiny images must have the same depth");
+    return 0;
   }
 
   params[0] = (float)src_count;
@@ -1881,12 +1884,14 @@ static int imluaProcessMultiPointColorOp(lua_State *L)
   {
     free(src_image_list);
     imlua_errorcfloat(L, 1);
+    return 0;
   }
 
   if (!imImageMatchSize(src_image_list[0], dst_image))
   {
     free(src_image_list);
     imlua_errormatchsize(L);  
+    return 0;
   }
 
   src_depth = src_image_list[0]->has_alpha? src_image_list[0]->depth+1: src_image_list[0]->depth;
@@ -2143,6 +2148,7 @@ static int imluaProcessMultipleMean (lua_State *L)
   {
     free(src_image_list);
     imlua_errormatch(L);
+    return 0;
   }
 
   imProcessMultipleMean((const imImage**)src_image_list, src_image_count, dst_image);
@@ -2169,6 +2175,7 @@ static int imluaProcessMultipleStdDev (lua_State *L)
   {
     free(src_image_list);
     imlua_errormatch(L);
+    return 0;
   }
 
   imProcessMultipleStdDev((const imImage**)src_image_list, src_image_count, mean_image, dst_image);
@@ -2380,6 +2387,7 @@ static int imluaProcessSplitComponents (lua_State *L)
   {
     free(dst_image_list);
     luaL_error(L, "number of destiny images must match the depth of the source image");
+    return 0;
   }
 
   for (i = 0; i < src_depth; i++)
@@ -2388,6 +2396,7 @@ static int imluaProcessSplitComponents (lua_State *L)
     {
       free(dst_image_list);
       imlua_argerrorcolorspace(L, 2, IM_GRAY);
+      return 0;
     }
   }
 
@@ -2395,6 +2404,7 @@ static int imluaProcessSplitComponents (lua_State *L)
   {
     free(dst_image_list);
     imlua_errormatchdatatype(L);
+    return 0;
   }
 
   imProcessSplitComponents(src_image, dst_image_list);
@@ -2421,6 +2431,7 @@ static int imluaProcessMergeComponents (lua_State *L)
   {
     free(src_image_list);
     luaL_error(L, "number of source images must match the depth of the destination image");
+    return 0;
   }
 
   for (i = 0; i < dst_depth; i++)
@@ -2429,6 +2440,7 @@ static int imluaProcessMergeComponents (lua_State *L)
     {
       free(src_image_list);
       imlua_argerrorcolorspace(L, 2, IM_GRAY);
+      return 0;
     }
   }
 
@@ -2436,6 +2448,7 @@ static int imluaProcessMergeComponents (lua_State *L)
   {
     free(src_image_list);
     imlua_errormatchdatatype(L);
+    return 0;
   }
 
   imProcessMergeComponents((const imImage**)src_image_list, dst_image);
@@ -2479,6 +2492,7 @@ static int imluaProcessReplaceColor (lua_State *L)
   {
     free(src_color);
     luaL_argerror(L, 3, "the colors must have the same number of components of the images");
+    return 0;
   }
 
   dst_color = imlua_toarrayfloat(L, 4, &dst_count, 1);
@@ -2487,6 +2501,7 @@ static int imluaProcessReplaceColor (lua_State *L)
     free(src_color);
     free(dst_color);
     luaL_argerror(L, 4, "the colors must have the same number of components of the images");
+    return 0;
   }
 
   imProcessReplaceColor(src_image, dst_image, src_color, dst_color);
@@ -2514,6 +2529,7 @@ static int imluaProcessSetAlphaColor(lua_State *L)
   {
     free(src_color);
     luaL_argerror(L, 3, "the color must have the same number of components of the source image");
+    return 0;
   }
 
   imProcessSetAlphaColor(src_image, dst_image, src_color, dst_alpha);
@@ -2775,6 +2791,7 @@ static int imluaProcessRenderConstant (lua_State *L)
   {
     free(value);
     luaL_argerror(L, 2, "invalid number of planes");
+    return 0;
   }
 
   lua_pushboolean(L, imProcessRenderConstant(image, value));
