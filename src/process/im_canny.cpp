@@ -91,7 +91,10 @@ static float ** f2d (int nr, int nc)
 
   y = (float *)calloc ( nr*nc, sizeof (float) );
   if (!y)
+  {
+    free(x);
     return NULL;
+  }
 
   for (i=0; i<nr; i++)
   {  

@@ -1040,7 +1040,8 @@ int imFileFormatWMV::SetInputProps()
     return 0;
 
   DWORD cbVideoInfo = sizeof(WMVIDEOINFOHEADER) - sizeof(BITMAPINFOHEADER) + this->BitmapInfoSize;
-  WMVIDEOINFOHEADER* pVideoInfo = (WMVIDEOINFOHEADER*)new BYTE[cbVideoInfo];
+  BYTE* pByteData = new BYTE[cbVideoInfo];
+  WMVIDEOINFOHEADER* pVideoInfo = (WMVIDEOINFOHEADER*)pByteData;
 
   pVideoInfo->rcSource.left = 0;
   pVideoInfo->rcSource.top = 0;
@@ -1080,7 +1081,7 @@ int imFileFormatWMV::SetInputProps()
 
   HRESULT hr = Writer->SetInputProps(input_number, Props);
   Props->Release();
-  free(pVideoInfo);
+  delete[] pByteData;
 
   if (FAILED(hr))
     return 0;
