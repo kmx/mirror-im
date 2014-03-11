@@ -28,13 +28,20 @@
 
 <h2>History of Changes</h2>
 <h3 dir="ltr">
-    CVS (20/Feb/2014)</h3>
+    CVS (11/Mar/2014)</h3>
 <ul dir="ltr">
 <font SIZE="3">
 	<li dir="ltr">
 <font SIZE="3">
 	<span class="hist_new">New:</span>&nbsp; function </font><strong>
 	imImageLoadFromResource</strong> only in Windows.</li>
+	<li dir="ltr">
+	<font SIZE="3">
+		<span class="hist_changed">Changed:</span> 
+	TIFF format when saving IM_BINARY images in one of the CCITT are now saved 
+	as WhiteIsZero (image data is inverted before saving as well). This was 
+	necessary because some applications were ignoring the 
+	PhotometricInterpretation tag in favor of the CCITT compression.</font></li>
 	<li dir="ltr">
 		<span style="color: #008000">
 		<span

@@ -641,6 +641,7 @@ class imFileFormatTIFF: public imFileFormatBase
   int tile_buf_count, tile_width, tile_height, start_row, tile_line_size, tile_line_raw_size;
 
   int ReadTileline(void* line_buffer, int row, int plane);
+  void InvertBits(void* line_buffer, int size);
 
 public:
   imFileFormatTIFF(const imFormat* _iformat): imFileFormatBase(_iformat) {}
@@ -1120,23 +1121,33 @@ int imFileFormatTIFF::WriteImageInfo()
   if (Compression == COMPRESSION_JPEG && Photometric == PHOTOMETRIC_RGB)
     Photometric = PHOTOMETRIC_YCBCR;
 
+  /* The “normal” PhotometricInterpretation for bilevel CCITT compressed data is WhiteIsZero.
+     Although TIFF readers should process PhotometricInterpretation in BlackIsZero as well,
+     some applications assume WhiteIsZero. So if these compressions are used switch to WhiteIsZero. */
+  if (imColorModeSpace(this->file_color_mode)==IM_BINARY && 
+      (Compression >= COMPRESSION_CCITTRLE && Compression <= COMPRESSION_CCITT_T6))
+    Photometric = PHOTOMETRIC_MINISWHITE;
+
   imAttribTable* attrib_table = AttribTable();
 
-  uint16* photometric = (uint16*)attrib_table->Get("Photometric");
-  if (photometric)
+  uint16* photometric_attrib = (uint16*)attrib_table->Get("Photometric");
+  if (photometric_attrib)
   {
-    if (*photometric == PHOTOMETRIC_MASK && Photometric == PHOTOMETRIC_MINISBLACK)
+    if (*photometric_attrib == PHOTOMETRIC_MASK && Photometric == PHOTOMETRIC_MINISBLACK)
       Photometric = PHOTOMETRIC_MASK;
-    else if (*photometric == PHOTOMETRIC_MINISWHITE && Photometric == PHOTOMETRIC_MINISBLACK)
+    else if (*photometric_attrib == PHOTOMETRIC_MINISWHITE && Photometric == PHOTOMETRIC_MINISBLACK)
       Photometric = PHOTOMETRIC_MINISWHITE;
-    else if (*photometric == PHOTOMETRIC_ICCLAB && Photometric == PHOTOMETRIC_CIELAB)
+    else if (*photometric_attrib == PHOTOMETRIC_ICCLAB && Photometric == PHOTOMETRIC_CIELAB)
       Photometric = PHOTOMETRIC_ICCLAB;
-    else if (*photometric == PHOTOMETRIC_ITULAB && Photometric == PHOTOMETRIC_CIELAB)
+    else if (*photometric_attrib == PHOTOMETRIC_ITULAB && Photometric == PHOTOMETRIC_CIELAB)
       Photometric = PHOTOMETRIC_ITULAB;
   }
 
   if (Photometric == PHOTOMETRIC_CIELAB)
     this->lab_fix = 1;
+
+  if (Photometric == PHOTOMETRIC_MINISWHITE)
+    this->invert = 1;
 
   TIFFSetField(this->tiff, TIFFTAG_PHOTOMETRIC, Photometric);
 
@@ -1418,6 +1429,16 @@ static void iTIFFReadRGBA(TIFF* tif, int w, int h, imbyte* data)
 }
 #endif
 
+static void iTIFFInvertBits(void* line_buffer, int size)
+{
+  unsigned char* buf = (unsigned char*)line_buffer;
+  for (int b = 0; b < size; b++)
+  {
+    *buf = ~(*buf);
+    buf++;
+  }
+}
+
 int imFileFormatTIFF::ReadImageData(void* data)
 {
   int count = imFileLineBufferCount(this);
@@ -1474,14 +1495,7 @@ int imFileFormatTIFF::ReadImageData(void* data)
     }
 
     if (this->invert && this->file_data_type == IM_BYTE)
-    {
-      unsigned char* buf = (unsigned char*)this->line_buffer;
-      for (int b = 0; b < this->line_buffer_size; b++)
-      {
-        *buf = ~(*buf);
-        buf++;
-      }
-    }
+      iTIFFInvertBits(this->line_buffer, this->line_buffer_size);
 
     if (this->cpx_int)
     {
@@ -1517,6 +1531,9 @@ int imFileFormatTIFF::WriteImageData(void* data)
   for (int i = 0; i < count; i++)
   {
     imFileLineBufferWrite(this, data, row, plane);
+
+    if (this->invert && this->file_data_type == IM_BYTE)
+      iTIFFInvertBits(this->line_buffer, this->line_buffer_size);
 
     if (this->lab_fix)
       iTIFFLabFix(this->line_buffer, this->width, this->file_data_type, 1);
