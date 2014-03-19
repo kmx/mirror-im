@@ -392,7 +392,7 @@
 /* Define to `__inline__' or `__inline' if that's what the C compiler
    calls it, or to nothing if 'inline' is not supported under any name.  */
 #ifndef __cplusplus
-#define inline         /* IMLIB */
+#define INLINE         /* IMLIB - used only in tif_fax3.c */
 #endif
 
 /* Define to `long int' if <sys/types.h> does not define. */
